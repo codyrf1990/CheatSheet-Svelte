@@ -708,11 +708,32 @@ Data migration was completed as part of Phase 4 since the feature components req
   - Changed panel-head to `justify-content: flex-end` (only shows +/- controls)
   - Removed unused `.panel-title` CSS
 
+- [x] **PWA Configuration with @vite-pwa/sveltekit** (2026-01-15)
+  - Files: `vite.config.ts`, `src/routes/+layout.svelte`, `src/app.d.ts`, `src/vite-env.d.ts`
+  - Added SvelteKitPWA plugin with manifest configuration
+  - Generated PWA icons (192x192, 512x512) from favicon
+  - Service worker with workbox precaching (22 entries, ~1.5MB)
+  - Auto-update registration type
+  - Added `virtual:pwa-info` type declarations
+  - Dark theme colors (#0a0a0f) match app design
+
+- [x] **Sales Tax Guide Modal** (2026-01-15)
+  - Files: `src/lib/components/ui/SalesTaxModal.svelte`
+  - Content sections: Required states (14), Exempt states (5), Exception states, International
+  - Color-coded tags: green (required), blue (exempt), yellow (exception)
+  - Responsive grid layout for state tags
+
+- [x] **Current Products Modal** (2026-01-15)
+  - Files: `src/lib/components/ui/CurrentProductsModal.svelte`
+  - 5 tabbed sections: Overview, Milling, Other Modules, Training, Post Processors
+  - Data tables for packages, SKUs, pricing
+  - Module lists with descriptions
+  - Training credits, discounts, tier pricing
+  - Post processor SKUs with derivative codes
+  - Scrollable content with custom scrollbar styling
+
 ### Remaining / Needs Improvement
 
-- [ ] PWA configuration with @vite-pwa/sveltekit
-- [ ] Sales Tax Guide modal implementation
-- [ ] Current Products modal implementation
 - [ ] Further responsive testing at various viewports
 - [ ] Accessibility audit
 - [ ] Final polish and testing

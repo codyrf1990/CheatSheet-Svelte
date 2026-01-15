@@ -2,6 +2,7 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import type { Snippet } from 'svelte';
+	import { pwaInfo } from 'virtual:pwa-info';
 	import { ToastContainer } from '$components/ui';
 	import { LoginScreen } from '$components/layout';
 	import { syncStore } from '$stores/sync.svelte';
@@ -19,11 +20,13 @@
 	});
 
 	const isLoggedIn = $derived(syncStore.isLoggedIn);
+	const webManifestLink = $derived(pwaInfo ? pwaInfo.webManifest.linkTag : '');
 </script>
 
 <svelte:head>
 	<title>SolidCAM CheatSheet</title>
 	<link rel="icon" href="/favicon.png" />
+	{@html webManifestLink}
 </svelte:head>
 
 <!-- Video Background (no overlay) -->

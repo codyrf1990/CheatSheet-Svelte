@@ -4,6 +4,7 @@
 	import { PackageTable } from '$components/packages';
 	import { MaintenancePanel } from '$components/panels';
 	import { Calculator } from '$components/calculator';
+	import { SalesTaxModal, CurrentProductsModal } from '$components/ui';
 	import { toastStore } from '$stores/toast.svelte';
 	import { syncStore } from '$stores/sync.svelte';
 	import { companiesStore } from '$stores/companies.svelte';
@@ -32,6 +33,10 @@
 	// CF Tools dropdown state
 	let showCFTools = $state(false);
 	let cfToolsPosition = $state({ top: 0, left: 0 });
+
+	// Modal states
+	let showSalesTaxModal = $state(false);
+	let showProductsModal = $state(false);
 
 	// CF Tools links array (matching Machine Research)
 	const cfToolsLinks = [
@@ -73,14 +78,12 @@
 
 	function handleSalesTax() {
 		closeOperations();
-		toastStore.info('Opening Sales Tax Guide...');
-		// TODO: Open Sales Tax Modal
+		showSalesTaxModal = true;
 	}
 
 	function handleCurrentProducts() {
 		closeOperations();
-		toastStore.info('Opening Current Products...');
-		// TODO: Open Current Products Modal
+		showProductsModal = true;
 	}
 
 	// Close dropdowns when clicking outside
@@ -186,6 +189,10 @@
 		{/each}
 	</div>
 {/if}
+
+<!-- Modals -->
+<SalesTaxModal open={showSalesTaxModal} onclose={() => (showSalesTaxModal = false)} />
+<CurrentProductsModal open={showProductsModal} onclose={() => (showProductsModal = false)} />
 
 <style>
 	.page-layout {
