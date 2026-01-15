@@ -191,26 +191,28 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
-		padding: clamp(0.8rem, 2.6vw, 1.8rem);
-		max-width: 1200px;
+		padding: clamp(0.5rem, 2vw, 1.25rem);
+		max-width: 1600px;
 		margin: 0 auto;
 	}
 
 	.content-area {
 		display: grid;
-		grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.95fr);
-		gap: clamp(0.8rem, 2vw, 1.4rem);
-		margin-top: clamp(0.8rem, 2vw, 1.4rem);
+		grid-template-columns: minmax(0, 1fr) minmax(180px, 340px);
+		gap: clamp(0.4rem, 1vw, 0.75rem);
+		margin-top: clamp(0.4rem, 1vw, 0.5rem);
 	}
 
 	.main-content {
 		min-width: 0;
+		overflow-x: auto;
 	}
 
 	.sidebar {
 		display: flex;
 		flex-direction: column;
-		gap: 0.6rem;
+		gap: 0.4rem;
+		min-width: 0;
 	}
 
 	/* Dropdown menus - positioned absolutely on page */
@@ -286,31 +288,53 @@
 		opacity: 1;
 	}
 
-	/* Responsive: Stack on smaller screens */
-	@media (max-width: 1024px) {
+	/* Keep two-column layout at all widths - just compress the sidebar */
+	@media (max-width: 900px) {
 		.content-area {
-			grid-template-columns: 1fr;
+			grid-template-columns: minmax(0, 1fr) minmax(160px, 280px);
+			gap: 0.35rem;
 		}
 
 		.sidebar {
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-			gap: 1rem;
+			gap: 0.35rem;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.content-area {
+			grid-template-columns: minmax(0, 1fr) minmax(140px, 240px);
+			gap: 0.3rem;
+		}
+
+		.sidebar {
+			gap: 0.3rem;
 		}
 	}
 
 	@media (max-width: 640px) {
 		.page-layout {
-			padding: 0.75rem;
+			padding: 0.4rem;
 		}
 
 		.content-area {
-			gap: 1rem;
-			margin-top: 1rem;
+			grid-template-columns: minmax(0, 1fr) minmax(120px, 200px);
+			gap: 0.25rem;
+			margin-top: 0.3rem;
 		}
 
 		.sidebar {
-			grid-template-columns: 1fr;
+			gap: 0.25rem;
+		}
+	}
+
+	@media (max-width: 500px) {
+		.page-layout {
+			padding: 0.25rem;
+		}
+
+		.content-area {
+			grid-template-columns: minmax(0, 1fr) minmax(100px, 160px);
+			gap: 0.2rem;
 		}
 	}
 

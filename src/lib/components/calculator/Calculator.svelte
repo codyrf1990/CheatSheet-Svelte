@@ -472,36 +472,36 @@
 	.panel-head {
 		display: flex;
 		align-items: center;
-		padding: 0.4rem 0.6rem;
+		padding: 0.3rem 0.5rem;
 		background: rgba(255, 255, 255, 0.03);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 	}
 
 	.panel-title {
 		margin: 0;
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		font-weight: 600;
 		color: rgba(255, 255, 255, 0.9);
 	}
 
 	.calculator-shell {
-		padding: 0.5rem;
+		padding: 0.375rem;
 	}
 
 	.calculator {
 		display: flex;
 		flex-direction: column;
-		gap: 0.35rem;
+		gap: 0.25rem;
 	}
 
 	.calculator-display {
 		width: 100%;
-		padding: 0.5rem 0.75rem;
+		padding: 0.375rem 0.5rem;
 		background: rgba(0, 0, 0, 0.4);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 6px;
 		font-family: 'JetBrains Mono', monospace;
-		font-size: 1.25rem;
+		font-size: 1.125rem;
 		font-weight: 600;
 		color: var(--color-solidcam-gold, #d4af37);
 		text-align: right;
@@ -517,16 +517,16 @@
 	.calculator-buttons {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
-		gap: 0.35rem;
+		gap: 0.25rem;
 	}
 
 	.calc-btn {
-		padding: 0.65rem;
+		padding: 0.5rem;
 		background: rgba(255, 255, 255, 0.08);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 6px;
 		font-family: inherit;
-		font-size: 0.9rem;
+		font-size: 0.85rem;
 		font-weight: 500;
 		color: rgba(255, 255, 255, 0.9);
 		cursor: pointer;
@@ -576,13 +576,13 @@
 	.calculator-quick-row {
 		display: grid;
 		grid-template-columns: repeat(6, 1fr);
-		gap: 0.25rem;
-		margin-top: 0.25rem;
+		gap: 0.1875rem;
+		margin-top: 0.1875rem;
 	}
 
 	.calc-btn.quick-percent {
-		padding: 0.35rem;
-		font-size: 0.75rem;
+		padding: 0.25rem;
+		font-size: 0.7rem;
 		background: rgba(212, 175, 55, 0.1);
 		border-color: rgba(212, 175, 55, 0.15);
 		color: rgba(212, 175, 55, 0.9);
@@ -590,5 +590,106 @@
 
 	.calc-btn.quick-percent:hover {
 		background: rgba(212, 175, 55, 0.2);
+	}
+
+	/* Narrow viewport compaction */
+	@media (max-width: 768px) {
+		.panel-head {
+			padding: 0.2rem 0.35rem;
+		}
+
+		.panel-title {
+			font-size: 0.7rem;
+		}
+
+		.calculator-shell {
+			padding: 0.25rem;
+		}
+
+		.calculator {
+			gap: 0.2rem;
+		}
+
+		.calculator-display {
+			padding: 0.25rem 0.35rem;
+			font-size: 0.9rem;
+		}
+
+		.calculator-buttons {
+			gap: 0.2rem;
+		}
+
+		.calc-btn {
+			padding: 0.35rem;
+			font-size: 0.7rem;
+		}
+
+		.calculator-quick-row {
+			gap: 0.125rem;
+			margin-top: 0.125rem;
+		}
+
+		.calc-btn.quick-percent {
+			padding: 0.15rem;
+			font-size: 0.55rem;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.panel-head {
+			padding: 0.15rem 0.25rem;
+		}
+
+		.panel-title {
+			font-size: 0.6rem;
+		}
+
+		.calculator-shell {
+			padding: 0.15rem;
+		}
+
+		.calculator {
+			gap: 0.15rem;
+		}
+
+		.calculator-display {
+			padding: 0.2rem 0.25rem;
+			font-size: 0.75rem;
+		}
+
+		.calculator-buttons {
+			gap: 0.15rem;
+		}
+
+		.calc-btn {
+			padding: 0.25rem;
+			font-size: 0.6rem;
+		}
+
+		.calculator-quick-row {
+			gap: 0.1rem;
+		}
+
+		.calc-btn.quick-percent {
+			padding: 0.1rem;
+			font-size: 0.5rem;
+		}
+	}
+
+	@media (max-width: 500px) {
+		.calculator-display {
+			padding: 0.15rem 0.2rem;
+			font-size: 0.65rem;
+		}
+
+		.calc-btn {
+			padding: 0.2rem;
+			font-size: 0.5rem;
+		}
+
+		.calc-btn.quick-percent {
+			padding: 0.075rem;
+			font-size: 0.45rem;
+		}
 	}
 </style>

@@ -80,7 +80,7 @@
 	}
 
 	.pkg-cell {
-		padding: 0.48rem 0.75rem;
+		padding: 0.35rem 0.5rem;
 		vertical-align: top;
 		min-width: 160px;
 	}
@@ -115,7 +115,7 @@
 	}
 
 	.maint-cell {
-		padding: 0.48rem 0.75rem;
+		padding: 0.35rem 0.5rem;
 		vertical-align: top;
 		min-width: 120px;
 	}
@@ -133,7 +133,7 @@
 	}
 
 	.bits-cell {
-		padding: 0.48rem 0.75rem;
+		padding: 0.35rem 0.5rem;
 		vertical-align: top;
 	}
 
@@ -143,7 +143,7 @@
 
 	.bits-layout {
 		display: flex;
-		gap: 0.75rem;
+		gap: 0.5rem;
 		flex: 1;
 	}
 
@@ -154,7 +154,7 @@
 	.group-column {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: 0.1875rem;
 		min-width: 180px;
 	}
 
@@ -194,18 +194,48 @@
 	@media (max-width: 680px) {
 		.maint-cell {
 			min-width: 3.5rem;
+			padding: 0.35rem 0.15rem;
 		}
 
 		.maint-code {
-			font-size: 0.6875rem;
+			font-size: 0.625rem;
+		}
+
+		.bits-cell {
+			padding: 0.35rem 0.25rem;
 		}
 
 		.group-column {
-			min-width: 120px;
+			min-width: 100px;
 		}
 
 		.bits-layout {
-			gap: 0.5rem;
+			gap: 0.35rem;
+		}
+	}
+
+	/* Extreme narrow */
+	@media (max-width: 500px) {
+		.maint-cell {
+			min-width: 2.75rem;
+			padding: 0.25rem 0.1rem;
+		}
+
+		.maint-code {
+			font-size: 0.55rem;
+		}
+
+		.bits-cell {
+			padding: 0.25rem 0.15rem;
+		}
+
+		.group-column {
+			min-width: 80px;
+		}
+
+		.bits-layout {
+			gap: 0.25rem;
+			flex-direction: column;
 		}
 	}
 </style>

@@ -551,6 +551,121 @@ Data migration was completed as part of Phase 4 since the feature components req
   - Initial commit: 72 files, 17,510 insertions
   - Branch: main
 
+- [x] **Vertical Compactness & Wider View Support** (2026-01-15)
+  - Reference: `/home/cody/Projects/machine-db-project/machine-research-ui`
+  - Target viewports: 1920x1080 and 2560x1440
+
+  **Layout Container (+page.svelte):**
+  - max-width: 1200px → 1600px (centered container)
+  - padding: clamp(0.8rem, 2.6vw, 1.8rem) → clamp(0.5rem, 2vw, 1.25rem)
+  - content gap: clamp(0.8rem, 2vw, 1.4rem) → clamp(0.6rem, 1.5vw, 1rem)
+  - sidebar gap: 0.6rem → 0.5rem
+
+  **Header.svelte:**
+  - card-content gap: clamp(0.8rem, 2.5vw, 1.5rem) → clamp(0.5rem, 2vw, 1rem)
+  - card-content padding: clamp(0.4rem, 1vw, 0.65rem) → clamp(0.25rem, 0.75vw, 0.5rem)
+  - header-content gap: 0.4rem → 0.25rem
+  - nav-row gap: 0.35rem → 0.25rem
+  - nav-link padding: 0.3rem 0.65rem → 0.2rem 0.5rem
+
+  **CompanyPageBar.svelte:**
+  - gap: 0.75rem → 0.5rem
+  - padding: 0.4rem 0.875rem → 0.3rem 0.625rem
+  - margin-bottom: 1rem → 0.5rem (biggest vertical gain)
+  - company-trigger padding: 0.5rem 0.875rem → 0.35rem 0.625rem
+  - page-tab padding: 0.35rem 0.75rem → 0.25rem 0.5rem
+
+  **PackageTable.svelte:**
+  - th padding: 0.56rem 0.6rem → 0.4rem 0.5rem
+  - th font-size: 0.8rem → 0.75rem
+
+  **PackageRow.svelte:**
+  - cell padding: 0.48rem 0.75rem → 0.35rem 0.5rem
+  - bits-layout gap: 0.75rem → 0.5rem
+  - group-column gap: 0.25rem → 0.1875rem
+
+  **MasterBit.svelte:**
+  - master-header padding: 0.5rem 0.75rem → 0.35rem 0.5rem
+  - expand-toggle size: 24px → 20px
+  - sub-bits padding: 0.25rem 0 → 0.125rem 0
+
+  **LooseBit.svelte & SubBit.svelte:**
+  - padding: 0.25rem 0.5rem → 0.1875rem 0.375rem
+  - bit-label gap: 0.5rem → 0.375rem
+  - font-size: 0.8125rem → 0.75rem
+
+  **Panel.svelte:**
+  - panel-head padding: 0.4rem 0.6rem → 0.3rem 0.5rem
+  - panel-body padding: 0.35rem 0.5rem → 0.25rem 0.375rem
+  - panel-control-btn size: 32px → 26px
+
+  **EditablePanel.svelte:**
+  - panel-items gap: 0.176rem → 0.125rem
+
+  **PanelItem.svelte:**
+  - padding: 0.192rem 0.32rem → 0.125rem 0.25rem
+  - item-text font-size: 0.7rem → 0.675rem
+  - item-remove-btn size: 22px → 18px
+
+  **Calculator.svelte:**
+  - panel-head padding: 0.4rem 0.6rem → 0.3rem 0.5rem
+  - calculator-shell padding: 0.5rem → 0.375rem
+  - calculator gap: 0.35rem → 0.25rem
+  - calc-btn padding: 0.65rem → 0.5rem
+
+- [x] **Narrow Viewport Layout Fixes - Match Original CheatSheet** (2026-01-15)
+  - Goal: Keep packages + sidebar side-by-side at all viewport widths (like original)
+
+  **+page.svelte - Layout:**
+  - Two-column layout at ALL widths (removed 1024px stacking breakpoint)
+  - Grid columns: `minmax(0, 1fr) minmax(180px, 340px)` (default)
+  - 900px: sidebar shrinks to `minmax(160px, 280px)`
+  - 768px: sidebar `minmax(140px, 240px)`
+  - 640px: sidebar `minmax(120px, 200px)`
+  - 500px: sidebar `minmax(100px, 160px)`
+  - Main content gets `overflow-x: auto` for table scrolling
+
+  **Header.svelte:**
+  - Kept 3-column grid at all widths (logo, content, user)
+  - Removed the 768px breakpoint that switched to single column
+  - 900px: Nav labels hidden (icon-only), 0.65rem font
+  - 768px: 0.6rem font, tighter padding
+  - 680px: 0.55rem font, ultra-compact
+  - Nav external icons hidden at 680px
+
+  **CompanyPageBar.svelte:**
+  - Progressive compaction at 900px, 768px, 640px, 500px
+  - Company name max-width: 140px → 100px → 70px → 50px
+  - Font sizes: 0.75rem → 0.65rem → 0.55rem → 0.5rem
+  - No wrapping (removed flex-wrap)
+
+  **PackageTable.svelte & PackageRow.svelte:**
+  - Package column hidden at 768px (already implemented)
+  - Maintenance column: 4.5rem @ 768px → 3.5rem @ 680px → 2.75rem @ 500px
+  - Font sizes scale down to 0.55rem at 500px
+
+  **Panel.svelte:**
+  - Progressive compaction: 768px → 640px → 500px
+  - Control buttons: 26px → 22px → 18px → 16px
+  - Title font: 0.875rem → 0.75rem → 0.65rem → 0.55rem
+
+  **PanelItem.svelte:**
+  - Scaling: 0.675rem → 0.6rem → 0.55rem → 0.5rem
+  - Remove buttons: 18px → 16px → 14px → 12px
+
+  **EditablePanel.svelte:**
+  - Single column grid at 640px and below
+
+  **MasterBit.svelte, LooseBit.svelte, SubBit.svelte:**
+  - Progressive compaction for all bit components
+  - Font sizes down to 0.5rem at 500px
+  - Tight padding at narrow widths
+
+  **Calculator.svelte:**
+  - Progressive compaction: 768px → 640px → 500px
+  - Button padding: 0.5rem → 0.35rem → 0.25rem → 0.2rem
+  - Font sizes: 0.85rem → 0.7rem → 0.6rem → 0.5rem
+
 ### Remaining / Needs Improvement
 
 - [ ] PWA configuration with @vite-pwa/sveltekit

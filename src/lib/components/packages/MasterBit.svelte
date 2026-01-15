@@ -143,15 +143,15 @@
 	.master-header {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.75rem;
+		gap: 0.375rem;
+		padding: 0.35rem 0.5rem;
 		background: rgba(255, 255, 255, 0.03);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 	}
 
 	.master-label {
 		flex: 1;
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		font-weight: 600;
 		color: var(--color-solidcam-gold, #d4af37);
 		cursor: pointer;
@@ -166,8 +166,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 24px;
-		height: 24px;
+		width: 20px;
+		height: 20px;
 		padding: 0;
 		background: transparent;
 		border: none;
@@ -183,8 +183,8 @@
 	}
 
 	.expand-icon {
-		width: 16px;
-		height: 16px;
+		width: 14px;
+		height: 14px;
 		transition: transform 200ms ease;
 	}
 
@@ -195,6 +195,74 @@
 	.sub-bits {
 		list-style: none;
 		margin: 0;
-		padding: 0.25rem 0;
+		padding: 0.125rem 0;
+	}
+
+	/* Narrow viewport compaction */
+	@media (max-width: 768px) {
+		.master-header {
+			padding: 0.25rem 0.35rem;
+			gap: 0.25rem;
+		}
+
+		.master-label {
+			font-size: 0.7rem;
+		}
+
+		.expand-toggle {
+			width: 16px;
+			height: 16px;
+		}
+
+		.expand-icon {
+			width: 12px;
+			height: 12px;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.master-header {
+			padding: 0.2rem 0.25rem;
+			gap: 0.2rem;
+		}
+
+		.master-label {
+			font-size: 0.6rem;
+		}
+
+		.expand-toggle {
+			width: 14px;
+			height: 14px;
+		}
+
+		.expand-icon {
+			width: 10px;
+			height: 10px;
+		}
+
+		.sub-bits {
+			padding: 0.075rem 0;
+		}
+	}
+
+	@media (max-width: 500px) {
+		.master-header {
+			padding: 0.15rem 0.2rem;
+			gap: 0.15rem;
+		}
+
+		.master-label {
+			font-size: 0.5rem;
+		}
+
+		.expand-toggle {
+			width: 12px;
+			height: 12px;
+		}
+
+		.expand-icon {
+			width: 8px;
+			height: 8px;
+		}
 	}
 </style>

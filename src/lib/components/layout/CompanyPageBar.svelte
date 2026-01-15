@@ -352,8 +352,8 @@
 		position: relative;
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		padding: 0.4rem 0.875rem;
+		gap: 0.5rem;
+		padding: 0.3rem 0.625rem;
 		background: linear-gradient(
 			145deg,
 			rgba(24, 24, 30, 0.85) 0%,
@@ -361,7 +361,7 @@
 		);
 		border: 1px solid rgba(255, 255, 255, 0.06);
 		border-radius: 12px;
-		margin-bottom: 1rem;
+		margin-bottom: 0.5rem;
 		backdrop-filter: blur(8px);
 		box-shadow:
 			0 4px 16px rgba(0, 0, 0, 0.2),
@@ -403,13 +403,13 @@
 	.company-trigger {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.875rem;
+		gap: 0.375rem;
+		padding: 0.35rem 0.625rem;
 		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 10px;
 		color: #f5f5f5;
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -609,7 +609,7 @@
 	/* Divider */
 	.divider {
 		width: 1px;
-		height: 24px;
+		height: 20px;
 		background: linear-gradient(
 			180deg,
 			transparent 0%,
@@ -640,12 +640,12 @@
 	}
 
 	.page-tab {
-		padding: 0.35rem 0.75rem;
+		padding: 0.25rem 0.5rem;
 		background: transparent;
 		border: 1px solid transparent;
 		border-radius: 8px;
 		color: rgba(255, 255, 255, 0.6);
-		font-size: 0.8125rem;
+		font-size: 0.75rem;
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -667,8 +667,8 @@
 
 	.page-tab.add-tab {
 		color: rgba(255, 255, 255, 0.4);
-		font-size: 1rem;
-		padding: 0.4rem 0.625rem;
+		font-size: 0.875rem;
+		padding: 0.25rem 0.5rem;
 	}
 
 	.page-tab.add-tab:hover {
@@ -763,23 +763,122 @@
 		outline-offset: 2px;
 	}
 
-	/* Responsive */
-	@media (max-width: 640px) {
+	/* Responsive - compact but don't wrap */
+	@media (max-width: 900px) {
 		.company-page-bar {
-			flex-wrap: wrap;
+			gap: 0.35rem;
+			padding: 0.25rem 0.5rem;
+		}
+
+		.company-trigger {
+			padding: 0.25rem 0.5rem;
+			font-size: 0.75rem;
 		}
 
 		.company-name {
-			max-width: 120px;
+			max-width: 140px;
 		}
 
-		.page-tabs {
-			width: 100%;
-			margin-top: 0.5rem;
+		.page-tab {
+			padding: 0.2rem 0.4rem;
+			font-size: 0.7rem;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.company-page-bar {
+			gap: 0.25rem;
+			padding: 0.2rem 0.35rem;
+		}
+
+		.company-trigger {
+			padding: 0.2rem 0.35rem;
+			font-size: 0.65rem;
+			gap: 0.25rem;
+		}
+
+		.company-name {
+			max-width: 100px;
+		}
+
+		.chevron {
+			width: 12px;
+			height: 12px;
+		}
+
+		.page-tab {
+			padding: 0.15rem 0.3rem;
+			font-size: 0.6rem;
+			border-radius: 6px;
 		}
 
 		.divider {
-			display: none;
+			height: 14px;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.company-page-bar {
+			gap: 0.2rem;
+			padding: 0.15rem 0.25rem;
+			margin-bottom: 0.35rem;
+		}
+
+		.company-trigger {
+			padding: 0.15rem 0.25rem;
+			font-size: 0.55rem;
+			border-radius: 6px;
+		}
+
+		.company-name {
+			max-width: 70px;
+		}
+
+		.chevron {
+			width: 10px;
+			height: 10px;
+		}
+
+		.status-dot {
+			font-size: 0.5rem;
+		}
+
+		.page-tab {
+			padding: 0.1rem 0.2rem;
+			font-size: 0.5rem;
+			border-radius: 4px;
+		}
+
+		.page-tab.add-tab {
+			font-size: 0.65rem;
+			padding: 0.1rem 0.3rem;
+		}
+
+		.divider {
+			height: 12px;
+		}
+	}
+
+	@media (max-width: 500px) {
+		.company-page-bar {
+			gap: 0.15rem;
+			padding: 0.1rem 0.15rem;
+			margin-bottom: 0.25rem;
+			border-radius: 8px;
+		}
+
+		.company-trigger {
+			padding: 0.1rem 0.2rem;
+			font-size: 0.5rem;
+		}
+
+		.company-name {
+			max-width: 50px;
+		}
+
+		.page-tab {
+			padding: 0.075rem 0.15rem;
+			font-size: 0.45rem;
 		}
 	}
 

@@ -192,9 +192,9 @@
 	:global(.header > .card-content) {
 		display: grid;
 		grid-template-columns: auto minmax(0, 1fr) auto;
-		gap: clamp(0.8rem, 2.5vw, 1.5rem);
+		gap: clamp(0.5rem, 2vw, 1rem);
 		align-items: center;
-		padding: clamp(0.4rem, 1vw, 0.65rem);
+		padding: clamp(0.25rem, 0.75vw, 0.5rem);
 	}
 
 	/* Subtle animated border glow - very slow */
@@ -230,7 +230,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.4rem;
+		gap: 0.25rem;
 	}
 
 	.title-container {
@@ -273,7 +273,7 @@
 	.nav-row {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.35rem;
+		gap: 0.25rem;
 		align-items: center;
 		justify-content: center;
 	}
@@ -281,8 +281,8 @@
 	.nav-link {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.35rem;
-		padding: 0.3rem 0.65rem;
+		gap: 0.25rem;
+		padding: 0.2rem 0.5rem;
 		font-size: 0.75rem;
 		font-weight: 500;
 		border-radius: 8px;
@@ -440,65 +440,104 @@
 		outline-offset: 2px;
 	}
 
-	@media (max-width: 768px) {
+	/* Compact header at medium widths - keep 3-column grid */
+	@media (max-width: 900px) {
 		:global(.header > .card-content) {
-			grid-template-columns: 1fr;
-			gap: 0.75rem;
-		}
-
-		.header-logo {
-			justify-content: center;
-		}
-
-		.header-user {
-			justify-content: center;
-			border-top: 1px solid rgba(255, 255, 255, 0.06);
-			padding-top: 0.75rem;
-			margin-top: 0.35rem;
-		}
-
-		.header-title {
-			font-size: 1.1rem;
-		}
-
-		.nav-link {
-			font-size: 0.7rem;
-			padding: 0.35rem 0.65rem;
-		}
-
-		.nav-icon svg {
-			width: 12px;
-			height: 12px;
-		}
-	}
-
-	/* Ultra-compact for split-screen */
-	@media (max-width: 680px) {
-		:global(.header > .card-content) {
-			gap: clamp(0.4rem, 1.5vw, 0.8rem);
-			padding: clamp(0.25rem, 0.8vw, 0.4rem);
+			gap: 0.4rem;
+			padding: 0.25rem 0.35rem;
 		}
 
 		.header-title {
 			font-size: 0.95rem;
 		}
 
-		.header-content {
-			gap: 0.25rem;
-		}
-
 		.nav-link {
 			font-size: 0.65rem;
-			padding: 0.25rem 0.5rem;
+			padding: 0.15rem 0.35rem;
+		}
+
+		.nav-icon svg {
+			width: 11px;
+			height: 11px;
+		}
+
+		.nav-label {
+			display: none;
+		}
+	}
+
+	/* Ultra-compact at narrow - still keep 3-column grid */
+	@media (max-width: 768px) {
+		:global(.header > .card-content) {
+			gap: 0.3rem;
+			padding: 0.2rem 0.25rem;
+		}
+
+		.header-title {
+			font-size: 0.85rem;
 		}
 
 		.nav-row {
-			gap: 0.25rem;
+			gap: 0.15rem;
+		}
+
+		.nav-link {
+			font-size: 0.6rem;
+			padding: 0.125rem 0.25rem;
+			border-radius: 6px;
 		}
 
 		.nav-icon svg {
 			width: 10px;
 			height: 10px;
+		}
+
+		.dropdown-arrow {
+			width: 10px;
+			height: 10px;
+		}
+	}
+
+	/* Ultra-compact for split-screen */
+	@media (max-width: 680px) {
+		:global(.header > .card-content) {
+			gap: 0.2rem;
+			padding: 0.15rem 0.2rem;
+		}
+
+		.header-title {
+			font-size: 0.75rem;
+		}
+
+		.header-content {
+			gap: 0.15rem;
+		}
+
+		.header-nav {
+			gap: 0.2rem;
+		}
+
+		.nav-link {
+			font-size: 0.55rem;
+			padding: 0.1rem 0.2rem;
+		}
+
+		.nav-row {
+			gap: 0.1rem;
+		}
+
+		.nav-icon {
+			width: 12px;
+			height: 12px;
+		}
+
+		.nav-icon svg {
+			width: 9px;
+			height: 9px;
+		}
+
+		.nav-external {
+			display: none;
 		}
 	}
 

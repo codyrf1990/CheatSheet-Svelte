@@ -101,7 +101,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0.4rem 0.6rem;
+		padding: 0.3rem 0.5rem;
 		background: rgba(255, 255, 255, 0.03);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 	}
@@ -109,7 +109,7 @@
 	.panel-title-btn {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.375rem;
 		padding: 0;
 		background: transparent;
 		border: none;
@@ -143,14 +143,14 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 32px;
-		height: 32px;
+		width: 26px;
+		height: 26px;
 		padding: 0;
 		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 6px;
 		color: rgba(255, 255, 255, 0.7);
-		font-size: 1.25rem;
+		font-size: 1.1rem;
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 150ms ease;
@@ -168,34 +168,119 @@
 	}
 
 	.panel-body {
-		padding: 0.35rem 0.5rem;
+		padding: 0.25rem 0.375rem;
 	}
 
 	/* Double reduction for maintenance panels (-20% of -20%) */
 	.panel[data-panel="maintenance-combined"] .panel-head,
 	.panel[data-panel="maintenance-skus"] .panel-head,
 	.panel[data-panel="solidworks-maintenance"] .panel-head {
-		padding: 0.32rem 0.48rem;
-		gap: 0.256rem;
+		padding: 0.24rem 0.4rem;
+		gap: 0.2rem;
 	}
 
 	.panel[data-panel="maintenance-combined"] .panel-title,
 	.panel[data-panel="maintenance-skus"] .panel-title,
 	.panel[data-panel="solidworks-maintenance"] .panel-title {
-		font-size: 0.75rem;
+		font-size: 0.7rem;
 	}
 
 	.panel[data-panel="maintenance-combined"] .panel-body,
 	.panel[data-panel="maintenance-skus"] .panel-body,
 	.panel[data-panel="solidworks-maintenance"] .panel-body {
-		padding: 0.28rem 0.4rem;
+		padding: 0.2rem 0.3rem;
 	}
 
 	.panel[data-panel="maintenance-combined"] .panel-control-btn,
 	.panel[data-panel="maintenance-skus"] .panel-control-btn,
 	.panel[data-panel="solidworks-maintenance"] .panel-control-btn {
-		width: 24px;
-		height: 24px;
-		font-size: 1rem;
+		width: 22px;
+		height: 22px;
+		font-size: 0.9rem;
+	}
+
+	/* Narrow viewport compaction */
+	@media (max-width: 768px) {
+		.panel-head {
+			padding: 0.2rem 0.35rem;
+		}
+
+		.panel-title {
+			font-size: 0.75rem;
+		}
+
+		.panel-body {
+			padding: 0.15rem 0.25rem;
+		}
+
+		.panel-control-btn {
+			width: 22px;
+			height: 22px;
+			font-size: 0.9rem;
+		}
+
+		.collapse-icon {
+			width: 14px;
+			height: 14px;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.panel-head {
+			padding: 0.15rem 0.25rem;
+		}
+
+		.panel-title {
+			font-size: 0.65rem;
+		}
+
+		.panel-body {
+			padding: 0.1rem 0.15rem;
+		}
+
+		.panel-control-btn {
+			width: 18px;
+			height: 18px;
+			font-size: 0.75rem;
+			border-radius: 4px;
+		}
+
+		.collapse-icon {
+			width: 12px;
+			height: 12px;
+		}
+
+		.panel-title-btn {
+			gap: 0.2rem;
+		}
+
+		.panel-controls {
+			gap: 0.15rem;
+		}
+	}
+
+	@media (max-width: 500px) {
+		.panel-head {
+			padding: 0.1rem 0.2rem;
+		}
+
+		.panel-title {
+			font-size: 0.55rem;
+		}
+
+		.panel-body {
+			padding: 0.075rem 0.1rem;
+		}
+
+		.panel-control-btn {
+			width: 16px;
+			height: 16px;
+			font-size: 0.65rem;
+		}
+
+		.collapse-icon {
+			width: 10px;
+			height: 10px;
+		}
 	}
 </style>

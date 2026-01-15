@@ -72,8 +72,8 @@
 	.panel-item {
 		display: flex;
 		align-items: center;
-		padding: 0.192rem 0.32rem;
-		gap: 0.28rem;
+		padding: 0.125rem 0.25rem;
+		gap: 0.1875rem;
 		border-radius: 999px;
 		transition: background-color 150ms ease;
 	}
@@ -97,18 +97,18 @@
 	.panel-item-main {
 		display: flex;
 		align-items: center;
-		gap: 0.28rem;
+		gap: 0.1875rem;
 		flex: 1;
 		min-width: 0;
 	}
 
 	.item-text {
-		padding: 0.12rem 0.3rem;
+		padding: 0.0625rem 0.25rem;
 		background: transparent;
 		border: 1px solid rgba(255, 255, 255, 0.12);
 		border-radius: 999px;
 		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.7rem;
+		font-size: 0.675rem;
 		color: rgba(255, 255, 255, 0.9);
 		cursor: pointer;
 		transition: all 150ms ease;
@@ -126,14 +126,14 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 22px;
-		height: 22px;
+		width: 18px;
+		height: 18px;
 		padding: 0;
 		background: transparent;
 		border: none;
 		border-radius: 4px;
 		color: rgba(255, 255, 255, 0.4);
-		font-size: 1.125rem;
+		font-size: 1rem;
 		cursor: pointer;
 		transition: all 150ms ease;
 		flex-shrink: 0;
@@ -142,5 +142,59 @@
 	.item-remove-btn:hover {
 		background: rgba(200, 16, 46, 0.3);
 		color: #ff4444;
+	}
+
+	/* Narrow viewport compaction */
+	@media (max-width: 768px) {
+		.panel-item {
+			padding: 0.1rem 0.2rem;
+			gap: 0.125rem;
+		}
+
+		.item-text {
+			font-size: 0.6rem;
+			padding: 0.05rem 0.2rem;
+		}
+
+		.item-remove-btn {
+			width: 16px;
+			height: 16px;
+			font-size: 0.875rem;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.panel-item {
+			padding: 0.075rem 0.15rem;
+			gap: 0.1rem;
+		}
+
+		.item-text {
+			font-size: 0.55rem;
+			padding: 0.04rem 0.15rem;
+		}
+
+		.item-remove-btn {
+			width: 14px;
+			height: 14px;
+			font-size: 0.75rem;
+		}
+	}
+
+	@media (max-width: 500px) {
+		.panel-item {
+			padding: 0.05rem 0.1rem;
+		}
+
+		.item-text {
+			font-size: 0.5rem;
+			padding: 0.03rem 0.1rem;
+		}
+
+		.item-remove-btn {
+			width: 12px;
+			height: 12px;
+			font-size: 0.65rem;
+		}
 	}
 </style>

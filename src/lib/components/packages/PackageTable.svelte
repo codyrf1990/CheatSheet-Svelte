@@ -60,9 +60,9 @@
 	}
 
 	th {
-		padding: 0.56rem 0.6rem;
+		padding: 0.4rem 0.5rem;
 		text-align: left;
-		font-size: 0.8rem;
+		font-size: 0.75rem;
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.12em;
@@ -107,9 +107,23 @@
 		}
 
 		th {
-			padding: 0.3rem 0.2rem;
-			font-size: 0.7rem;
-			letter-spacing: 0.08em;
+			padding: 0.3rem 0.15rem;
+			font-size: 0.65rem;
+			letter-spacing: 0.06em;
+		}
+	}
+
+	/* Extreme narrow */
+	@media (max-width: 500px) {
+		.col-maint {
+			width: 2.75rem;
+			min-width: 2.75rem;
+		}
+
+		th {
+			padding: 0.2rem 0.1rem;
+			font-size: 0.55rem;
+			letter-spacing: 0.04em;
 		}
 	}
 </style>
