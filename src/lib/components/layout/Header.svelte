@@ -188,8 +188,8 @@
 		overflow: hidden;
 	}
 
-	/* The card-content wrapper inside SmokedGlassCard needs the grid */
-	:global(.header > .card-content) {
+	/* Apply grid directly to .header (SmokedGlassCard renders children directly) */
+	:global(.header) {
 		display: grid;
 		grid-template-columns: auto minmax(0, 1fr) auto;
 		gap: clamp(0.5rem, 2vw, 1rem);
@@ -442,7 +442,7 @@
 
 	/* Compact header at medium widths - keep 3-column grid */
 	@media (max-width: 900px) {
-		:global(.header > .card-content) {
+		:global(.header) {
 			gap: 0.4rem;
 			padding: 0.25rem 0.35rem;
 		}
@@ -468,7 +468,7 @@
 
 	/* Ultra-compact at narrow - still keep 3-column grid */
 	@media (max-width: 768px) {
-		:global(.header > .card-content) {
+		:global(.header) {
 			gap: 0.3rem;
 			padding: 0.2rem 0.25rem;
 		}
@@ -500,7 +500,7 @@
 
 	/* Ultra-compact for split-screen */
 	@media (max-width: 680px) {
-		:global(.header > .card-content) {
+		:global(.header) {
 			gap: 0.2rem;
 			padding: 0.15rem 0.2rem;
 		}

@@ -10,7 +10,7 @@
 	let { username, status, onLogout }: Props = $props();
 </script>
 
-<div class="header-user">
+<div class="user-container">
 	<div class="user-avatar">
 		<div class="avatar-ring"></div>
 		<div class="avatar-inner">
@@ -38,26 +38,24 @@
 </div>
 
 <style>
-	.header-user {
+	.user-container {
 		display: flex;
 		align-items: center;
-		gap: 0.875rem;
-		padding: 0.625rem 1rem;
-		background: rgba(255, 255, 255, 0.03);
-		border-radius: 12px;
-		border: 1px solid rgba(255, 255, 255, 0.06);
+		gap: 0.5rem;
+		padding: 0.375rem 0.625rem;
+		border-radius: 10px;
 		transition: all 200ms ease;
 	}
 
-	.header-user:hover {
+	.user-container:hover {
 		background: rgba(255, 255, 255, 0.05);
-		border-color: rgba(255, 255, 255, 0.1);
 	}
 
 	.user-avatar {
 		position: relative;
-		width: 40px;
-		height: 40px;
+		width: 32px;
+		height: 32px;
+		flex-shrink: 0;
 	}
 
 	.avatar-ring {
@@ -86,22 +84,23 @@
 	}
 
 	.avatar-inner svg {
-		width: 22px;
-		height: 22px;
+		width: 18px;
+		height: 18px;
 	}
 
 	.user-details {
 		display: flex;
 		flex-direction: column;
-		gap: 0.125rem;
+		gap: 0;
+		overflow: hidden;
 	}
 
 	.user-name {
-		font-size: 0.9rem;
+		font-size: 0.8rem;
 		font-weight: 600;
 		color: #f5f5f5;
-		line-height: 1.2;
-		max-width: 120px;
+		line-height: 1.3;
+		max-width: 100px;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -110,19 +109,27 @@
 	.change-link {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.3rem;
-		font-size: 0.7rem;
+		gap: 0.25rem;
+		font-size: 0.65rem;
 		color: rgba(255, 255, 255, 0.4);
 		background: none;
 		border: none;
 		cursor: pointer;
 		padding: 0;
 		transition: all 150ms ease;
+		max-height: 0;
+		opacity: 0;
+		overflow: hidden;
+	}
+
+	.user-container:hover .change-link {
+		max-height: 1.5rem;
+		opacity: 1;
 	}
 
 	.change-link svg {
-		width: 12px;
-		height: 12px;
+		width: 10px;
+		height: 10px;
 	}
 
 	.change-link:hover {
@@ -130,12 +137,13 @@
 	}
 
 	.sync-indicator {
-		margin-left: auto;
+		margin-left: 0.25rem;
+		flex-shrink: 0;
 	}
 
 	.sync-spinner {
-		width: 16px;
-		height: 16px;
+		width: 14px;
+		height: 14px;
 		border: 2px solid rgba(212, 175, 55, 0.2);
 		border-top-color: #d4af37;
 		border-radius: 50%;
