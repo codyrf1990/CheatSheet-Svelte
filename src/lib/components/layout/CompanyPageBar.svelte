@@ -361,7 +361,6 @@
 		);
 		border: 1px solid rgba(255, 255, 255, 0.06);
 		border-radius: 12px;
-		margin-bottom: 0.5rem;
 		backdrop-filter: blur(8px);
 		box-shadow:
 			0 4px 16px rgba(0, 0, 0, 0.2),
@@ -821,7 +820,6 @@
 		.company-page-bar {
 			gap: 0.2rem;
 			padding: 0.15rem 0.25rem;
-			margin-bottom: 0.35rem;
 		}
 
 		.company-trigger {
@@ -863,7 +861,6 @@
 		.company-page-bar {
 			gap: 0.15rem;
 			padding: 0.1rem 0.15rem;
-			margin-bottom: 0.25rem;
 			border-radius: 8px;
 		}
 

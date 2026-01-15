@@ -191,6 +191,7 @@
 	.page-layout {
 		display: flex;
 		flex-direction: column;
+		gap: var(--spacing-section);
 		min-height: 100vh;
 		padding: clamp(0.25rem, 1vw, 0.75rem);
 		max-width: 1050px;
@@ -202,7 +203,6 @@
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) minmax(180px, 320px);
 		gap: clamp(0.2rem, 0.6vw, 0.5rem);
-		margin-top: clamp(0.2rem, 0.5vw, 0.3rem);
 		min-height: 0;
 	}
 
@@ -326,7 +326,6 @@
 		.content-area {
 			grid-template-columns: minmax(0, 1fr) minmax(120px, 200px);
 			gap: 0.1rem;
-			margin-top: 0.15rem;
 		}
 
 		.sidebar {

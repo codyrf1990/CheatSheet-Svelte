@@ -192,9 +192,9 @@
 	:global(.header) {
 		display: grid;
 		grid-template-columns: auto minmax(0, 1fr) auto;
-		gap: clamp(0.5rem, 2vw, 1rem);
+		gap: clamp(0.4rem, 1.5vw, 0.75rem);
 		align-items: center;
-		padding: clamp(0.25rem, 0.75vw, 0.5rem);
+		padding: clamp(0.2rem, 0.5vw, 0.4rem);
 	}
 
 	/* Subtle animated border glow - very slow */
@@ -249,7 +249,7 @@
 	}
 
 	.header-title {
-		font-size: 1.15rem;
+		font-size: 1rem;
 		font-weight: 700;
 		color: #f5f5f5;
 		margin: 0;
@@ -266,14 +266,14 @@
 	.header-nav {
 		display: flex;
 		flex-direction: column;
-		gap: 0.35rem;
+		gap: 0.25rem;
 		align-items: center;
 	}
 
 	.nav-row {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.25rem;
+		gap: 0.2rem;
 		align-items: center;
 		justify-content: center;
 	}
@@ -281,11 +281,11 @@
 	.nav-link {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
-		padding: 0.2rem 0.5rem;
-		font-size: 0.75rem;
+		gap: 0.2rem;
+		padding: 0.15rem 0.4rem;
+		font-size: 0.7rem;
 		font-weight: 500;
-		border-radius: 8px;
+		border-radius: 6px;
 		text-decoration: none;
 		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 		border: 1px solid transparent;
@@ -311,14 +311,14 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 16px;
-		height: 16px;
+		width: 14px;
+		height: 14px;
 		flex-shrink: 0;
 	}
 
 	.nav-icon svg {
-		width: 14px;
-		height: 14px;
+		width: 12px;
+		height: 12px;
 	}
 
 	.nav-label {
@@ -417,12 +417,12 @@
 	.cf-tools-btn {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.4rem;
+		gap: 0.3rem;
 	}
 
 	.dropdown-arrow {
-		width: 14px;
-		height: 14px;
+		width: 12px;
+		height: 12px;
 		transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
 		opacity: 0.6;
 	}

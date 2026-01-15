@@ -55,6 +55,9 @@
 	--radius-lg: 14px;
 	--radius-xl: 18px;
 
+	/* Layout Spacing */
+	--spacing-section: clamp(0.35rem, 0.8vw, 0.5rem);
+
 	/* Transitions - simplified for snappier feel */
 	--ease-fast: 150ms ease;
 	--ease-smooth: 250ms ease;

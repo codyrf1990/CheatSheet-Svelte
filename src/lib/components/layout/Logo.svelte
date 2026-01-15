@@ -18,12 +18,12 @@
 
 <style>
 	.logo-container {
-		width: clamp(180px, 22vw, 280px);
+		width: clamp(150px, 18vw, 240px);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: clamp(0.4rem, 1.2vw, 0.7rem);
-		border-radius: 16px;
+		padding: clamp(0.3rem, 0.8vw, 0.5rem);
+		border-radius: 14px;
 		position: relative;
 	}
 
