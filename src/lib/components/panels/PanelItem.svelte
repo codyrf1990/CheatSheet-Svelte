@@ -103,12 +103,12 @@
 	}
 
 	.item-text {
-		padding: 0.04rem 0.15rem;
+		padding: 0.1rem 0.2rem;
 		background: transparent;
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 3px;
 		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.5rem;
+		font-size: 0.6rem;
 		color: rgba(255, 255, 255, 0.9);
 		cursor: pointer;
 		transition: all 150ms ease;

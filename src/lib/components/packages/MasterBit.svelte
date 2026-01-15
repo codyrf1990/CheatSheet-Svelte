@@ -138,6 +138,8 @@
 		border-radius: 4px;
 		background: rgba(0, 0, 0, 0.25);
 		overflow: hidden;
+		width: 100%;
+		min-width: 0;
 	}
 
 	.master-header {
@@ -196,14 +198,14 @@
 		transform: rotate(-90deg);
 	}
 
-	/* 3-column grid for sub-bits - key to compactness */
+	/* 2-column grid for sub-bits - balanced readability */
 	.sub-bits {
 		list-style: none;
 		margin: 0;
-		padding: 0.1rem;
+		padding: 0.15rem;
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 0.15rem;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.2rem;
 	}
 
 	/* Narrow viewport compaction */

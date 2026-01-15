@@ -114,13 +114,11 @@
 	}
 
 	.bit-text {
-		font-size: 0.55rem;
+		font-size: 0.6rem;
 		color: rgba(255, 255, 255, 0.85);
 		cursor: pointer;
 		transition: color 150ms ease;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		word-break: break-word;
 	}
 
 	.bit-text:hover {

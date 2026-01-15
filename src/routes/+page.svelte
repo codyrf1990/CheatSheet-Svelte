@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Header, CompanyPageBar } from '$components/layout';
 	import { PackageTable } from '$components/packages';
-	import { EditablePanel } from '$components/panels';
+	import { MaintenancePanel } from '$components/panels';
 	import { Calculator } from '$components/calculator';
 	import { toastStore } from '$stores/toast.svelte';
 	import { syncStore } from '$stores/sync.svelte';
@@ -123,9 +123,10 @@
 
 		<!-- Sidebar (Panels + Calculator) -->
 		<aside class="sidebar">
-			{#each panels as panel (panel.id)}
-				<EditablePanel {panel} showCheckboxes />
-			{/each}
+			<MaintenancePanel
+				maintenancePanel={panels.find((p) => p.id === 'maintenance-skus')!}
+				solidworksPanel={panels.find((p) => p.id === 'solidworks-maintenance')!}
+			/>
 			<Calculator />
 		</aside>
 	</div>
@@ -205,7 +206,6 @@
 
 	.main-content {
 		min-width: 0;
-		overflow-x: auto;
 	}
 
 	.sidebar {

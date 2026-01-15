@@ -14,11 +14,8 @@
 	// Local state
 	let removeMode = $state(false);
 
-	// Get items from store, fallback to panel defaults if not initialized
-	let items = $derived(() => {
-		const storeItems = panelsStore.getItems(panel.id);
-		return storeItems.length > 0 ? storeItems : panel.items;
-	});
+	// Always show panel's base items - store tracks checked/removed state separately
+	let items = $derived(() => panel.items);
 
 	// Drag and drop state
 	let draggedIndex = $state<number | null>(null);

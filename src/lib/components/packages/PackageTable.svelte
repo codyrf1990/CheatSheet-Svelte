@@ -33,9 +33,11 @@
 	.package-table-container {
 		display: flex;
 		flex-direction: column;
+		width: 100%;
 	}
 
 	.main-table {
+		width: 100%;
 		/* Smoked glass styling */
 		background: linear-gradient(135deg, rgba(28, 28, 28, 0.94) 0%, rgba(12, 12, 12, 0.92) 100%);
 		backdrop-filter: blur(8px);
@@ -52,6 +54,7 @@
 	table {
 		width: 100%;
 		border-collapse: collapse;
+		table-layout: auto;
 	}
 
 	thead {
@@ -70,27 +73,21 @@
 	}
 
 	.col-package {
-		width: 200px;
+		width: auto;
 	}
 
 	.col-maint {
-		width: 160px;
+		width: auto;
 	}
 
 	.col-bits {
-		width: auto; /* Takes remaining space */
+		width: auto;
 	}
 
 	/* Hide Package column on narrow screens */
 	@media (max-width: 768px) {
 		.col-package {
 			display: none;
-		}
-
-		.col-maint {
-			width: 4.5rem;
-			min-width: 4.5rem;
-			padding: 0.5rem 0.25rem;
 		}
 
 		th {
@@ -101,11 +98,6 @@
 
 	/* Ultra-compact for split-screen */
 	@media (max-width: 680px) {
-		.col-maint {
-			width: 3.5rem;
-			min-width: 3.5rem;
-		}
-
 		th {
 			padding: 0.3rem 0.15rem;
 			font-size: 0.65rem;
@@ -115,11 +107,6 @@
 
 	/* Extreme narrow */
 	@media (max-width: 500px) {
-		.col-maint {
-			width: 2.75rem;
-			min-width: 2.75rem;
-		}
-
 		th {
 			padding: 0.2rem 0.1rem;
 			font-size: 0.55rem;

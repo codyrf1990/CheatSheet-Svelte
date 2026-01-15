@@ -79,7 +79,7 @@
 	.pkg-cell {
 		padding: 0.3rem 0.4rem;
 		vertical-align: top;
-		min-width: 140px;
+		overflow: hidden;
 	}
 
 	.code-btn {
@@ -114,7 +114,7 @@
 	.maint-cell {
 		padding: 0.3rem 0.4rem;
 		vertical-align: top;
-		min-width: 100px;
+		overflow: hidden;
 	}
 
 	.maint-code {
@@ -132,6 +132,7 @@
 	.bits-cell {
 		padding: 0.3rem 0.4rem;
 		vertical-align: top;
+		width: 100%;
 	}
 
 	/* Main bits container - stacks groups grid above loose bits */
@@ -139,13 +140,20 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.375rem;
+		width: 100%;
 	}
 
-	/* 2-column grid for groups */
+	/* Flex layout for groups - fills available width */
 	.groups-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+		display: flex;
+		flex-wrap: wrap;
 		gap: 0.25rem;
+		width: 100%;
+	}
+
+	.groups-grid > :global(.master-bit) {
+		flex: 1 1 200px;
+		min-width: 150px;
 	}
 
 	/* Loose bits section below groups */
@@ -174,7 +182,6 @@
 		}
 
 		.maint-cell {
-			min-width: 4rem;
 			padding: 0.25rem 0.2rem;
 		}
 
@@ -198,7 +205,6 @@
 	/* Ultra-compact for split-screen */
 	@media (max-width: 680px) {
 		.maint-cell {
-			min-width: 3.25rem;
 			padding: 0.2rem 0.15rem;
 		}
 
@@ -222,7 +228,6 @@
 	/* Extreme narrow */
 	@media (max-width: 500px) {
 		.maint-cell {
-			min-width: 2.5rem;
 			padding: 0.15rem 0.1rem;
 		}
 
@@ -239,8 +244,12 @@
 		}
 
 		.groups-grid {
-			grid-template-columns: 1fr;
+			flex-direction: column;
 			gap: 0.125rem;
+		}
+
+		.groups-grid > :global(.master-bit) {
+			flex: 1 1 100%;
 		}
 
 		.loose-bits {
