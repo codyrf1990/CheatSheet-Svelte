@@ -676,20 +676,24 @@
 		}
 	}
 
-	@media (max-width: 500px) {
+	@media (max-width: 640px) {
+		.panel-title {
+			font-size: 0.9rem;
+		}
+
 		.calculator-display {
-			padding: 0.15rem 0.2rem;
-			font-size: 0.65rem;
+			padding: 0.3rem 0.35rem;
+			font-size: 1.05rem;
 		}
 
 		.calc-btn {
-			padding: 0.2rem;
-			font-size: 0.5rem;
+			padding: 0.35rem;
+			font-size: 0.85rem;
 		}
 
 		.calc-btn.quick-percent {
-			padding: 0.075rem;
-			font-size: 0.45rem;
+			padding: 0.15rem;
+			font-size: 0.75rem;
 		}
 	}
 </style>

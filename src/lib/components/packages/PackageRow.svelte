@@ -225,14 +225,14 @@
 		}
 	}
 
-	/* Extreme narrow - keep 2-column layout */
-	@media (max-width: 500px) {
+	/* Narrow viewport - keep 2-column layout, readable text */
+	@media (max-width: 640px) {
 		.maint-cell {
 			padding: 0.15rem 0.1rem;
 		}
 
 		.maint-code {
-			font-size: 0.55rem;
+			font-size: 0.68rem;
 		}
 
 		.bits-cell {

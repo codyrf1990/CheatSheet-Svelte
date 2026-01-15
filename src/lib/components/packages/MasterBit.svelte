@@ -263,14 +263,14 @@
 		}
 	}
 
-	@media (max-width: 500px) {
+	@media (max-width: 640px) {
 		.master-header {
 			padding: 0.125rem 0.2rem;
 			gap: 0.125rem;
 		}
 
 		.master-label {
-			font-size: 0.55rem;
+			font-size: 0.65rem;
 		}
 
 		.expand-toggle {

@@ -859,7 +859,7 @@
 		}
 	}
 
-	@media (max-width: 500px) {
+	@media (max-width: 640px) {
 		.company-page-bar {
 			gap: 0.15rem;
 			padding: 0.1rem 0.15rem;
@@ -868,17 +868,28 @@
 		}
 
 		.company-trigger {
-			padding: 0.1rem 0.2rem;
-			font-size: 0.5rem;
+			padding: 0.15rem 0.25rem;
+			font-size: 0.65rem;
 		}
 
 		.company-name {
-			max-width: 50px;
+			max-width: 120px;
+		}
+
+		.company-name::selection {
+			background: var(--color-solidcam-gold, #d4af37);
+			color: #1a1a1a;
+			text-shadow: none;
 		}
 
 		.page-tab {
-			padding: 0.075rem 0.15rem;
-			font-size: 0.45rem;
+			padding: 0.1rem 0.2rem;
+			font-size: 0.6rem;
+		}
+
+		.edit-controls :global(.btn) {
+			padding: 0.1rem 0.25rem;
+			font-size: 0.6rem;
 		}
 	}
 

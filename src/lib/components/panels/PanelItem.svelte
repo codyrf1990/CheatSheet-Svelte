@@ -170,7 +170,7 @@
 		}
 
 		.item-text {
-			font-size: 0.5rem;
+			font-size: 0.58rem;
 			padding: 0.05rem 0.1rem;
 		}
 

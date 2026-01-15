@@ -166,7 +166,7 @@
 
 	@media (max-width: 640px) {
 		.loose-bit {
-			padding: 0.075rem 0.15rem;
+			padding: 0.06rem 0.15rem;
 		}
 
 		.bit-label {
@@ -174,23 +174,7 @@
 		}
 
 		.bit-text {
-			font-size: 0.5rem;
-		}
-
-		.bit-remove-btn {
-			width: 10px;
-			height: 10px;
-			font-size: 0.55rem;
-		}
-	}
-
-	@media (max-width: 500px) {
-		.loose-bit {
-			padding: 0.06rem 0.15rem;
-		}
-
-		.bit-text {
-			font-size: 0.55rem;
+			font-size: 0.6rem;
 		}
 
 		.bit-remove-btn {

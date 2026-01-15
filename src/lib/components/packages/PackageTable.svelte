@@ -105,11 +105,11 @@
 		}
 	}
 
-	/* Extreme narrow */
-	@media (max-width: 500px) {
+	/* Narrow viewport - keep text readable */
+	@media (max-width: 640px) {
 		th {
-			padding: 0.2rem 0.1rem;
-			font-size: 0.55rem;
+			padding: 0.25rem 0.15rem;
+			font-size: 0.7rem;
 			letter-spacing: 0.04em;
 		}
 	}

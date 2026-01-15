@@ -115,7 +115,7 @@
 
 <style>
 	.maintenance-panel {
-		flex: 1;
+		flex: 0 0 auto;
 		display: flex;
 		flex-direction: column;
 		background: linear-gradient(135deg, rgba(28, 28, 28, 0.94) 0%, rgba(12, 12, 12, 0.92) 100%);
@@ -130,10 +130,10 @@
 	}
 
 	.panel-body {
-		flex: 1;
+		flex: 0 0 auto;
 		display: flex;
 		flex-direction: column;
-		justify-content: space-between;
+		justify-content: flex-start;
 		padding: 0.25rem 0.375rem;
 	}
 
@@ -233,24 +233,15 @@
 		}
 	}
 
-	@media (max-width: 500px) {
-		.maintenance-panel {
-			flex: none;
-		}
-
-		.panel-body {
-			flex: 0 0 auto;
-			justify-content: flex-start;
-		}
-
+	@media (max-width: 640px) {
 		.section-title {
-			font-size: 0.55rem;
+			font-size: 0.7rem;
 		}
 
 		.control-btn {
-			width: 14px;
-			height: 14px;
-			font-size: 0.55rem;
+			width: 18px;
+			height: 18px;
+			font-size: 0.65rem;
 		}
 
 		.panel-items {
