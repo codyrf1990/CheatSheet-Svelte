@@ -70,6 +70,84 @@ function deepCopy<T>(obj: T): T {
 }
 
 /**
+ * Migrate old package state format to new format
+ * Old: { bits: [{text, checked}], groups: [{masterId, items: [{text, checked}]}] }
+ * New: { selectedBits: string[], customBits: string[], order: string[] }
+ */
+function migratePackageState(oldState: unknown): Record<string, { selectedBits: string[]; customBits: string[]; order: string[] }> {
+	if (!oldState || typeof oldState !== 'object') return {};
+
+	const result: Record<string, { selectedBits: string[]; customBits: string[]; order: string[] }> = {};
+
+	for (const [pkgCode, pkgState] of Object.entries(oldState as Record<string, unknown>)) {
+		if (!pkgState || typeof pkgState !== 'object') continue;
+
+		const state = pkgState as {
+			// New format
+			selectedBits?: string[];
+			customBits?: string[];
+			order?: string[];
+			// Old format
+			bits?: Array<{ text: string; checked: boolean } | string>;
+			groups?: Array<{
+				masterId: string;
+				checked?: boolean;
+				indeterminate?: boolean;
+				items?: Array<{ text: string; checked: boolean } | string>;
+			}>;
+		};
+
+		// Check if already in new format
+		if (Array.isArray(state.selectedBits)) {
+			result[pkgCode] = {
+				selectedBits: state.selectedBits,
+				customBits: state.customBits || [],
+				order: state.order || []
+			};
+			continue;
+		}
+
+		// Migrate from old format
+		const selectedBits: string[] = [];
+
+		// Process loose bits
+		if (Array.isArray(state.bits)) {
+			for (const bit of state.bits) {
+				if (typeof bit === 'string') {
+					// Plain string means selected
+					selectedBits.push(bit);
+				} else if (bit && typeof bit === 'object' && bit.checked && bit.text) {
+					selectedBits.push(bit.text);
+				}
+			}
+		}
+
+		// Process groups (master bits with sub-bits)
+		if (Array.isArray(state.groups)) {
+			for (const group of state.groups) {
+				if (!group || !Array.isArray(group.items)) continue;
+
+				for (const item of group.items) {
+					if (typeof item === 'string') {
+						selectedBits.push(item);
+					} else if (item && typeof item === 'object' && item.checked && item.text) {
+						selectedBits.push(item.text);
+					}
+				}
+			}
+		}
+
+		result[pkgCode] = {
+			selectedBits,
+			customBits: [],
+			order: []
+		};
+	}
+
+	return result;
+}
+
+/**
  * Get current company object
  */
 function getCurrentCompany(): Company | null {
@@ -453,6 +531,24 @@ function load(): void {
 			if (recentRaw) {
 				recentIds = JSON.parse(recentRaw);
 			}
+
+			// Migrate package state format in all pages (handles old format)
+			let migrated = false;
+			for (const company of companies) {
+				if (!Array.isArray(company.pages)) continue;
+				for (const page of company.pages) {
+					if (page.state?.packages) {
+						const migratedPackages = migratePackageState(page.state.packages);
+						if (JSON.stringify(migratedPackages) !== JSON.stringify(page.state.packages)) {
+							page.state.packages = migratedPackages;
+							migrated = true;
+						}
+					}
+				}
+			}
+			if (migrated) {
+				console.log('[CompaniesStore] Migrated package state format');
+			}
 		} else {
 			// MIGRATION: Check for old structure
 			const oldPages = localStorage.getItem(OLD_PAGES_KEY);
@@ -568,13 +664,26 @@ function importData(data: unknown): boolean {
 		return false;
 	}
 
-	companies = deepCopy(payload.companies);
+	// Deep copy and migrate package state format in all pages
+	const importedCompanies = deepCopy(payload.companies);
+	for (const company of importedCompanies) {
+		if (!Array.isArray(company.pages)) continue;
+		for (const page of company.pages) {
+			if (page.state?.packages) {
+				// Migrate old package format to new format
+				page.state.packages = migratePackageState(page.state.packages);
+			}
+		}
+	}
+
+	companies = importedCompanies;
 	currentCompanyId = payload.currentCompanyId || null;
 	favoriteIds = Array.isArray(payload.favoriteCompanyIds) ? [...payload.favoriteCompanyIds] : [];
 	recentIds = Array.isArray(payload.recentCompanyIds) ? [...payload.recentCompanyIds] : [];
 
 	ensureIntegrity();
 	save();
+	console.log('[CompaniesStore] Import complete with package migration');
 	return true;
 }
 

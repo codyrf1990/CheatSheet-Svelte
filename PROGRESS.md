@@ -757,6 +757,22 @@ Data migration was completed as part of Phase 4 since the feature components req
   - Wired `onViewAllCompanies` prop to open modal
   - Compact dropdown styles for Operations and CF Tools menus
 
+- [x] **Cloud Data Migration - Old to New Package Format** (2026-01-15)
+  - Files: `src/lib/stores/companies.svelte.ts`
+
+  **Problem:** Old site stored package state in different format than new site
+  - Old: `{ bits: [{text, checked}], groups: [{masterId, items: [{text, checked}]}] }`
+  - New: `{ selectedBits: string[], customBits: string[], order: string[] }`
+
+  **Solution:** Added `migratePackageState()` function that:
+  - Detects old format (has `bits[]` or `groups[]` arrays with `{text, checked}` objects)
+  - Converts to new format (flat `selectedBits[]` array of checked bit names)
+  - Preserves new format data if already migrated
+
+  **Migration applied in:**
+  - `load()` - when loading from localStorage
+  - `importData()` - when importing from cloud sync
+
 ### Remaining / Needs Improvement
 
 - [ ] Further responsive testing at various viewports
