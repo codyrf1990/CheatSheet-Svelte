@@ -76,7 +76,7 @@
 	.checkbox-wrapper {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.25rem;
 		cursor: pointer;
 		user-select: none;
 	}
@@ -103,17 +103,18 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 18px;
-		height: 18px;
+		width: 12px;
+		height: 12px;
 		background: rgba(18, 18, 26, 0.8);
 		border: 1px solid rgba(255, 255, 255, 0.2);
-		border-radius: 4px;
+		border-radius: 2px;
 		transition: all 150ms ease;
+		flex-shrink: 0;
 	}
 
 	.checkbox-control svg {
-		width: 12px;
-		height: 12px;
+		width: 8px;
+		height: 8px;
 		color: #1a1a1a;
 	}
 

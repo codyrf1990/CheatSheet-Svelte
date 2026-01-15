@@ -85,11 +85,11 @@
 	.sub-bit {
 		display: flex;
 		align-items: center;
-		gap: 0.125rem;
-		padding: 0.1rem 0.25rem;
-		padding-left: 0.75rem;
-		border-radius: 3px;
+		gap: 0.1rem;
+		padding: 0.1rem 0.15rem;
+		border-radius: 2px;
 		transition: background-color 150ms ease;
+		min-width: 0;
 	}
 
 	.sub-bit:hover {
@@ -107,16 +107,20 @@
 	.bit-label {
 		display: flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: 0.15rem;
 		flex: 1;
 		cursor: pointer;
+		min-width: 0;
 	}
 
 	.bit-text {
-		font-size: 0.65rem;
+		font-size: 0.55rem;
 		color: rgba(255, 255, 255, 0.85);
 		cursor: pointer;
 		transition: color 150ms ease;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.bit-text:hover {
@@ -127,16 +131,17 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 14px;
-		height: 14px;
+		width: 12px;
+		height: 12px;
 		padding: 0;
 		background: transparent;
 		border: none;
-		border-radius: 3px;
+		border-radius: 2px;
 		color: rgba(255, 255, 255, 0.4);
-		font-size: 0.75rem;
+		font-size: 0.6rem;
 		cursor: pointer;
 		transition: all 150ms ease;
+		flex-shrink: 0;
 	}
 
 	.bit-remove-btn:hover {
@@ -147,34 +152,12 @@
 	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.sub-bit {
-			padding: 0.075rem 0.2rem;
-			padding-left: 0.5rem;
+			padding: 0.075rem 0.1rem;
+			gap: 0.075rem;
+		}
+
+		.bit-label {
 			gap: 0.1rem;
-		}
-
-		.bit-label {
-			gap: 0.2rem;
-		}
-
-		.bit-text {
-			font-size: 0.6rem;
-		}
-
-		.bit-remove-btn {
-			width: 12px;
-			height: 12px;
-			font-size: 0.65rem;
-		}
-	}
-
-	@media (max-width: 640px) {
-		.sub-bit {
-			padding: 0.05rem 0.15rem;
-			padding-left: 0.375rem;
-		}
-
-		.bit-label {
-			gap: 0.15rem;
 		}
 
 		.bit-text {
@@ -184,14 +167,17 @@
 		.bit-remove-btn {
 			width: 10px;
 			height: 10px;
-			font-size: 0.55rem;
+			font-size: 0.5rem;
 		}
 	}
 
-	@media (max-width: 500px) {
+	@media (max-width: 640px) {
 		.sub-bit {
-			padding: 0.04rem 0.1rem;
-			padding-left: 0.25rem;
+			padding: 0.05rem 0.075rem;
+		}
+
+		.bit-label {
+			gap: 0.075rem;
 		}
 
 		.bit-text {
@@ -201,7 +187,23 @@
 		.bit-remove-btn {
 			width: 8px;
 			height: 8px;
-			font-size: 0.45rem;
+			font-size: 0.4rem;
+		}
+	}
+
+	@media (max-width: 500px) {
+		.sub-bit {
+			padding: 0.04rem 0.05rem;
+		}
+
+		.bit-text {
+			font-size: 0.4rem;
+		}
+
+		.bit-remove-btn {
+			width: 6px;
+			height: 6px;
+			font-size: 0.35rem;
 		}
 	}
 </style>

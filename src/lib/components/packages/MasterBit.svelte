@@ -196,42 +196,25 @@
 		transform: rotate(-90deg);
 	}
 
+	/* 3-column grid for sub-bits - key to compactness */
 	.sub-bits {
 		list-style: none;
 		margin: 0;
-		padding: 0.1rem 0;
+		padding: 0.1rem;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.15rem;
 	}
 
 	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.master-header {
-			padding: 0.2rem 0.3rem;
-			gap: 0.2rem;
-		}
-
-		.master-label {
-			font-size: 0.65rem;
-		}
-
-		.expand-toggle {
-			width: 14px;
-			height: 14px;
-		}
-
-		.expand-icon {
-			width: 10px;
-			height: 10px;
-		}
-	}
-
-	@media (max-width: 640px) {
-		.master-header {
-			padding: 0.15rem 0.2rem;
+			padding: 0.15rem 0.25rem;
 			gap: 0.15rem;
 		}
 
 		.master-label {
-			font-size: 0.55rem;
+			font-size: 0.6rem;
 		}
 
 		.expand-toggle {
@@ -240,23 +223,25 @@
 		}
 
 		.expand-icon {
-			width: 8px;
-			height: 8px;
+			width: 9px;
+			height: 9px;
 		}
 
 		.sub-bits {
-			padding: 0.05rem 0;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 0.1rem;
+			padding: 0.075rem;
 		}
 	}
 
-	@media (max-width: 500px) {
+	@media (max-width: 640px) {
 		.master-header {
 			padding: 0.1rem 0.15rem;
 			gap: 0.1rem;
 		}
 
 		.master-label {
-			font-size: 0.45rem;
+			font-size: 0.5rem;
 		}
 
 		.expand-toggle {
@@ -265,8 +250,40 @@
 		}
 
 		.expand-icon {
-			width: 6px;
-			height: 6px;
+			width: 7px;
+			height: 7px;
+		}
+
+		.sub-bits {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 0.075rem;
+			padding: 0.05rem;
+		}
+	}
+
+	@media (max-width: 500px) {
+		.master-header {
+			padding: 0.075rem 0.1rem;
+			gap: 0.075rem;
+		}
+
+		.master-label {
+			font-size: 0.4rem;
+		}
+
+		.expand-toggle {
+			width: 8px;
+			height: 8px;
+		}
+
+		.expand-icon {
+			width: 5px;
+			height: 5px;
+		}
+
+		.sub-bits {
+			grid-template-columns: 1fr;
+			gap: 0.05rem;
 		}
 	}
 </style>

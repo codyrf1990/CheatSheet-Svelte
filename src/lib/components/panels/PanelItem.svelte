@@ -72,9 +72,9 @@
 	.panel-item {
 		display: flex;
 		align-items: center;
-		padding: 0.125rem 0.25rem;
-		gap: 0.1875rem;
-		border-radius: 999px;
+		padding: 0.05rem 0.1rem;
+		gap: 0.1rem;
+		border-radius: 3px;
 		transition: background-color 150ms ease;
 	}
 
@@ -97,18 +97,18 @@
 	.panel-item-main {
 		display: flex;
 		align-items: center;
-		gap: 0.1875rem;
+		gap: 0.1rem;
 		flex: 1;
 		min-width: 0;
 	}
 
 	.item-text {
-		padding: 0.0625rem 0.25rem;
+		padding: 0.04rem 0.15rem;
 		background: transparent;
-		border: 1px solid rgba(255, 255, 255, 0.12);
-		border-radius: 999px;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 3px;
 		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.675rem;
+		font-size: 0.5rem;
 		color: rgba(255, 255, 255, 0.9);
 		cursor: pointer;
 		transition: all 150ms ease;
@@ -126,14 +126,14 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 18px;
-		height: 18px;
+		width: 12px;
+		height: 12px;
 		padding: 0;
 		background: transparent;
 		border: none;
-		border-radius: 4px;
+		border-radius: 2px;
 		color: rgba(255, 255, 255, 0.4);
-		font-size: 1rem;
+		font-size: 0.6rem;
 		cursor: pointer;
 		transition: all 150ms ease;
 		flex-shrink: 0;
@@ -147,54 +147,54 @@
 	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.panel-item {
-			padding: 0.1rem 0.2rem;
-			gap: 0.125rem;
+			padding: 0.04rem 0.075rem;
+			gap: 0.075rem;
 		}
 
 		.item-text {
-			font-size: 0.6rem;
-			padding: 0.05rem 0.2rem;
+			font-size: 0.45rem;
+			padding: 0.03rem 0.1rem;
 		}
 
 		.item-remove-btn {
-			width: 16px;
-			height: 16px;
-			font-size: 0.875rem;
+			width: 10px;
+			height: 10px;
+			font-size: 0.5rem;
 		}
 	}
 
 	@media (max-width: 640px) {
 		.panel-item {
-			padding: 0.075rem 0.15rem;
-			gap: 0.1rem;
+			padding: 0.03rem 0.05rem;
+			gap: 0.05rem;
 		}
 
 		.item-text {
-			font-size: 0.55rem;
-			padding: 0.04rem 0.15rem;
+			font-size: 0.4rem;
+			padding: 0.02rem 0.075rem;
 		}
 
 		.item-remove-btn {
-			width: 14px;
-			height: 14px;
-			font-size: 0.75rem;
+			width: 8px;
+			height: 8px;
+			font-size: 0.4rem;
 		}
 	}
 
 	@media (max-width: 500px) {
 		.panel-item {
-			padding: 0.05rem 0.1rem;
+			padding: 0.02rem 0.04rem;
 		}
 
 		.item-text {
-			font-size: 0.5rem;
-			padding: 0.03rem 0.1rem;
+			font-size: 0.35rem;
+			padding: 0.015rem 0.05rem;
 		}
 
 		.item-remove-btn {
-			width: 12px;
-			height: 12px;
-			font-size: 0.65rem;
+			width: 6px;
+			height: 6px;
+			font-size: 0.3rem;
 		}
 	}
 </style>

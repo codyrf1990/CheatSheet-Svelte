@@ -191,16 +191,16 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
-		padding: clamp(0.4rem, 1.5vw, 1rem);
-		max-width: 1400px;
+		padding: clamp(0.25rem, 1vw, 0.75rem);
+		max-width: 1050px;
 		margin: 0 auto;
 	}
 
 	.content-area {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(200px, 380px);
-		gap: clamp(0.3rem, 0.8vw, 0.6rem);
-		margin-top: clamp(0.3rem, 0.8vw, 0.4rem);
+		grid-template-columns: minmax(0, 1fr) minmax(180px, 320px);
+		gap: clamp(0.2rem, 0.6vw, 0.5rem);
+		margin-top: clamp(0.2rem, 0.5vw, 0.3rem);
 	}
 
 	.main-content {
@@ -211,7 +211,7 @@
 	.sidebar {
 		display: flex;
 		flex-direction: column;
-		gap: 0.35rem;
+		gap: 0.25rem;
 		min-width: 0;
 	}
 
@@ -288,53 +288,57 @@
 		opacity: 1;
 	}
 
-	/* Keep two-column layout at all widths - just compress the sidebar */
+	/* Keep two-column layout at all widths - compress progressively */
 	@media (max-width: 900px) {
 		.content-area {
-			grid-template-columns: minmax(0, 1fr) minmax(180px, 320px);
-			gap: 0.3rem;
+			grid-template-columns: minmax(0, 1fr) minmax(160px, 280px);
+			gap: 0.2rem;
 		}
 
 		.sidebar {
-			gap: 0.3rem;
+			gap: 0.2rem;
 		}
 	}
 
 	@media (max-width: 768px) {
-		.content-area {
-			grid-template-columns: minmax(0, 1fr) minmax(160px, 280px);
-			gap: 0.25rem;
-		}
-
-		.sidebar {
-			gap: 0.25rem;
-		}
-	}
-
-	@media (max-width: 640px) {
-		.page-layout {
-			padding: 0.3rem;
-		}
-
-		.content-area {
-			grid-template-columns: minmax(0, 1fr) minmax(140px, 220px);
-			gap: 0.2rem;
-			margin-top: 0.25rem;
-		}
-
-		.sidebar {
-			gap: 0.2rem;
-		}
-	}
-
-	@media (max-width: 500px) {
 		.page-layout {
 			padding: 0.2rem;
 		}
 
 		.content-area {
-			grid-template-columns: minmax(0, 1fr) minmax(120px, 180px);
+			grid-template-columns: minmax(0, 1fr) minmax(140px, 240px);
 			gap: 0.15rem;
+		}
+
+		.sidebar {
+			gap: 0.15rem;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.page-layout {
+			padding: 0.15rem;
+		}
+
+		.content-area {
+			grid-template-columns: minmax(0, 1fr) minmax(120px, 200px);
+			gap: 0.1rem;
+			margin-top: 0.15rem;
+		}
+
+		.sidebar {
+			gap: 0.1rem;
+		}
+	}
+
+	@media (max-width: 500px) {
+		.page-layout {
+			padding: 0.1rem;
+		}
+
+		.content-area {
+			grid-template-columns: minmax(0, 1fr) minmax(100px, 160px);
+			gap: 0.075rem;
 		}
 	}
 
