@@ -666,6 +666,34 @@ Data migration was completed as part of Phase 4 since the feature components req
   - Button padding: 0.5rem → 0.35rem → 0.25rem → 0.2rem
   - Font sizes: 0.85rem → 0.7rem → 0.6rem → 0.5rem
 
+- [x] **Package Bits 2-Column Grid Layout** (2026-01-15)
+  - Goal: Groups in 2-column grid, loose bits below, more compact overall
+
+  **PackageRow.svelte:**
+  - New `.bits-container` with flex column layout
+  - `.groups-grid` with `repeat(2, minmax(0, 1fr))` CSS grid
+  - Loose bits section below groups with subtle border separator
+  - Falls back to 1-column at 500px
+  - Tighter cell padding (0.3rem 0.4rem)
+
+  **MasterBit.svelte:**
+  - Reduced header padding (0.35rem → 0.25rem)
+  - Smaller expand toggle (20px → 16px)
+  - Font size reduced (0.8125rem → 0.7rem)
+  - Text truncation with ellipsis
+
+  **SubBit.svelte & LooseBit.svelte:**
+  - Tighter default padding (0.1rem 0.25rem)
+  - Smaller font (0.65rem default)
+  - LooseBit gets subtle border + background for visual hierarchy
+  - Reduced indent for SubBit (0.75rem)
+
+  **+page.svelte (Proportions):**
+  - Max-width: 1600px → 1400px (less sprawl)
+  - Sidebar min: 180px → 200px, max: 340px → 380px (more balance)
+  - Reduced page padding with tighter clamp values
+  - Responsive breakpoints adjusted to match
+
 ### Remaining / Needs Improvement
 
 - [ ] PWA configuration with @vite-pwa/sveltekit

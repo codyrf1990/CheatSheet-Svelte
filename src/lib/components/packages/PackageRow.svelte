@@ -11,10 +11,8 @@
 
 	let { pkg, editMode = false }: Props = $props();
 
-	// SC-Mill uses split layout for better visual organization
-	let layoutClass = $derived(
-		pkg.code === 'SC-Mill' ? 'bits-layout bits-layout--split' : 'bits-layout'
-	);
+	let hasGroups = $derived(pkg.groups && pkg.groups.length > 0);
+	let hasLooseBits = $derived(pkg.looseBits && pkg.looseBits.length > 0);
 
 	async function handleCodeCopy() {
 		try {
@@ -33,7 +31,6 @@
 			toastStore.error('Failed to copy');
 		}
 	}
-
 </script>
 
 <tr class="package-row" data-package={pkg.code}>
@@ -49,23 +46,23 @@
 		</button>
 	</td>
 	<td class="bits-cell">
-		<div class="package-bits-wrapper">
-			<div class={layoutClass} data-package-bits={pkg.code}>
-				{#if pkg.groups && pkg.groups.length > 0}
-					<div class="group-column">
-						{#each pkg.groups as group (group.masterId)}
-							<MasterBit {group} packageCode={pkg.code} {editMode} />
-						{/each}
-					</div>
-				{/if}
-				{#if pkg.looseBits && pkg.looseBits.length > 0}
+		<div class="bits-container" data-package-bits={pkg.code}>
+			{#if hasGroups}
+				<div class="groups-grid">
+					{#each pkg.groups as group (group.masterId)}
+						<MasterBit {group} packageCode={pkg.code} {editMode} />
+					{/each}
+				</div>
+			{/if}
+			{#if hasLooseBits}
+				<div class="loose-bits-section" class:has-groups={hasGroups}>
 					<ul class="loose-bits" data-sortable-group={pkg.code}>
 						{#each pkg.looseBits as bit (bit)}
 							<LooseBit {bit} packageCode={pkg.code} {editMode} />
 						{/each}
 					</ul>
-				{/if}
-			</div>
+				</div>
+			{/if}
 		</div>
 	</td>
 </tr>
@@ -80,9 +77,9 @@
 	}
 
 	.pkg-cell {
-		padding: 0.35rem 0.5rem;
+		padding: 0.3rem 0.4rem;
 		vertical-align: top;
-		min-width: 160px;
+		min-width: 140px;
 	}
 
 	.code-btn {
@@ -96,7 +93,7 @@
 
 	.package-code {
 		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.875rem;
+		font-size: 0.8rem;
 		font-weight: 600;
 		color: var(--color-solidcam-gold, #d4af37);
 		transition: color 150ms ease;
@@ -108,21 +105,21 @@
 
 	.package-description {
 		display: block;
-		font-size: 0.75rem;
+		font-size: 0.7rem;
 		color: rgba(255, 255, 255, 0.6);
-		margin-top: 0.25rem;
-		line-height: 1.4;
+		margin-top: 0.15rem;
+		line-height: 1.3;
 	}
 
 	.maint-cell {
-		padding: 0.35rem 0.5rem;
+		padding: 0.3rem 0.4rem;
 		vertical-align: top;
-		min-width: 120px;
+		min-width: 100px;
 	}
 
 	.maint-code {
 		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.8125rem;
+		font-size: 0.75rem;
 		color: rgba(255, 255, 255, 0.8);
 		cursor: pointer;
 		transition: color 150ms ease;
@@ -133,29 +130,32 @@
 	}
 
 	.bits-cell {
-		padding: 0.35rem 0.5rem;
+		padding: 0.3rem 0.4rem;
 		vertical-align: top;
 	}
 
-	.package-bits-wrapper {
-		display: flex;
-	}
-
-	.bits-layout {
-		display: flex;
-		gap: 0.5rem;
-		flex: 1;
-	}
-
-	.bits-layout--split {
-		flex-direction: row;
-	}
-
-	.group-column {
+	/* Main bits container - stacks groups grid above loose bits */
+	.bits-container {
 		display: flex;
 		flex-direction: column;
-		gap: 0.1875rem;
-		min-width: 180px;
+		gap: 0.375rem;
+	}
+
+	/* 2-column grid for groups */
+	.groups-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.25rem;
+	}
+
+	/* Loose bits section below groups */
+	.loose-bits-section {
+		display: flex;
+	}
+
+	.loose-bits-section.has-groups {
+		padding-top: 0.25rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.06);
 	}
 
 	.loose-bits {
@@ -163,7 +163,8 @@
 		margin: 0;
 		padding: 0;
 		display: flex;
-		flex-direction: column;
+		flex-wrap: wrap;
+		gap: 0.25rem;
 	}
 
 	/* Hide Package column on narrow screens */
@@ -173,69 +174,77 @@
 		}
 
 		.maint-cell {
-			min-width: 4.5rem;
-			padding: 0.5rem 0.25rem;
+			min-width: 4rem;
+			padding: 0.25rem 0.2rem;
 		}
 
 		.maint-code {
-			font-size: 0.75rem;
+			font-size: 0.7rem;
 		}
 
 		.bits-cell {
-			padding: 0.5rem;
+			padding: 0.25rem 0.3rem;
 		}
 
-		.group-column {
-			min-width: 150px;
+		.bits-container {
+			gap: 0.25rem;
+		}
+
+		.groups-grid {
+			gap: 0.2rem;
 		}
 	}
 
 	/* Ultra-compact for split-screen */
 	@media (max-width: 680px) {
 		.maint-cell {
-			min-width: 3.5rem;
-			padding: 0.35rem 0.15rem;
+			min-width: 3.25rem;
+			padding: 0.2rem 0.15rem;
 		}
 
 		.maint-code {
-			font-size: 0.625rem;
+			font-size: 0.6rem;
 		}
 
 		.bits-cell {
-			padding: 0.35rem 0.25rem;
+			padding: 0.2rem 0.2rem;
 		}
 
-		.group-column {
-			min-width: 100px;
+		.bits-container {
+			gap: 0.2rem;
 		}
 
-		.bits-layout {
-			gap: 0.35rem;
+		.groups-grid {
+			gap: 0.15rem;
 		}
 	}
 
 	/* Extreme narrow */
 	@media (max-width: 500px) {
 		.maint-cell {
-			min-width: 2.75rem;
-			padding: 0.25rem 0.1rem;
+			min-width: 2.5rem;
+			padding: 0.15rem 0.1rem;
 		}
 
 		.maint-code {
-			font-size: 0.55rem;
+			font-size: 0.5rem;
 		}
 
 		.bits-cell {
-			padding: 0.25rem 0.15rem;
+			padding: 0.15rem 0.125rem;
 		}
 
-		.group-column {
-			min-width: 80px;
+		.bits-container {
+			gap: 0.15rem;
 		}
 
-		.bits-layout {
-			gap: 0.25rem;
-			flex-direction: column;
+		.groups-grid {
+			grid-template-columns: 1fr;
+			gap: 0.125rem;
+		}
+
+		.loose-bits {
+			gap: 0.15rem;
 		}
 	}
 </style>

@@ -82,14 +82,16 @@
 	.loose-bit {
 		display: flex;
 		align-items: center;
-		gap: 0.1875rem;
-		padding: 0.1875rem 0.375rem;
-		border-radius: 4px;
+		gap: 0.125rem;
+		padding: 0.125rem 0.25rem;
+		border-radius: 3px;
+		background: rgba(255, 255, 255, 0.02);
+		border: 1px solid rgba(255, 255, 255, 0.06);
 		transition: background-color 150ms ease;
 	}
 
 	.loose-bit:hover {
-		background-color: rgba(255, 255, 255, 0.05);
+		background-color: rgba(255, 255, 255, 0.06);
 	}
 
 	.loose-bit[draggable='true'] {
@@ -103,14 +105,14 @@
 	.bit-label {
 		display: flex;
 		align-items: center;
-		gap: 0.375rem;
+		gap: 0.25rem;
 		flex: 1;
 		cursor: pointer;
 	}
 
 	.bit-text {
-		font-size: 0.75rem;
-		color: rgba(255, 255, 255, 0.9);
+		font-size: 0.65rem;
+		color: rgba(255, 255, 255, 0.85);
 		cursor: pointer;
 		transition: color 150ms ease;
 	}
@@ -123,14 +125,14 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 18px;
-		height: 18px;
+		width: 14px;
+		height: 14px;
 		padding: 0;
 		background: transparent;
 		border: none;
-		border-radius: 4px;
+		border-radius: 3px;
 		color: rgba(255, 255, 255, 0.4);
-		font-size: 0.875rem;
+		font-size: 0.75rem;
 		cursor: pointer;
 		transition: all 150ms ease;
 	}
@@ -143,28 +145,8 @@
 	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.loose-bit {
-			padding: 0.125rem 0.25rem;
-			gap: 0.125rem;
-		}
-
-		.bit-label {
-			gap: 0.25rem;
-		}
-
-		.bit-text {
-			font-size: 0.65rem;
-		}
-
-		.bit-remove-btn {
-			width: 14px;
-			height: 14px;
-			font-size: 0.75rem;
-		}
-	}
-
-	@media (max-width: 640px) {
-		.loose-bit {
 			padding: 0.1rem 0.2rem;
+			gap: 0.1rem;
 		}
 
 		.bit-label {
@@ -172,7 +154,7 @@
 		}
 
 		.bit-text {
-			font-size: 0.55rem;
+			font-size: 0.6rem;
 		}
 
 		.bit-remove-btn {
@@ -182,9 +164,13 @@
 		}
 	}
 
-	@media (max-width: 500px) {
+	@media (max-width: 640px) {
 		.loose-bit {
 			padding: 0.075rem 0.15rem;
+		}
+
+		.bit-label {
+			gap: 0.15rem;
 		}
 
 		.bit-text {
@@ -195,6 +181,22 @@
 			width: 10px;
 			height: 10px;
 			font-size: 0.55rem;
+		}
+	}
+
+	@media (max-width: 500px) {
+		.loose-bit {
+			padding: 0.05rem 0.1rem;
+		}
+
+		.bit-text {
+			font-size: 0.45rem;
+		}
+
+		.bit-remove-btn {
+			width: 8px;
+			height: 8px;
+			font-size: 0.45rem;
 		}
 	}
 </style>
