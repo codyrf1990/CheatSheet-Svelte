@@ -1,0 +1,528 @@
+# CheatSheet SvelteKit - Progress Tracker
+
+Migration from vanilla JS to SvelteKit 2 + Svelte 5.
+
+---
+
+## Phase 1: Project Setup
+
+**Status:** Complete
+**Started:** 2026-01-15
+**Completed:** 2026-01-15
+
+### Completed
+
+- [x] Initialize SvelteKit project with `npx sv create`
+  - Files: `package.json`, `svelte.config.js`, `tsconfig.json`
+
+- [x] Install all dependencies
+  - Runtime: `firebase`, `zod`
+  - Dev: `@tailwindcss/vite`, `tailwindcss`, `@vite-pwa/sveltekit`
+  - Linting: `eslint`, `prettier`, `eslint-plugin-svelte`, `typescript-eslint`
+
+- [x] Configure path aliases ($components, $stores, $firebase, $types, $data, $utils)
+  - Files: `svelte.config.js`
+
+- [x] Set up Vite with correct plugin order (tailwindcss → sveltekit)
+  - Files: `vite.config.ts`
+
+- [x] Configure ESLint 9 flat config with Svelte support
+  - Files: `eslint.config.js`
+
+- [x] Configure Prettier with Tailwind class sorting
+  - Files: `.prettierrc`
+
+- [x] Set up Tailwind v4 CSS-first config with SolidCAM design tokens
+  - Files: `src/app.css`
+  - Tokens: solidcam-red, solidcam-gold, surface colors, glass effects, shadows
+
+- [x] Create base layout with video background
+  - Files: `src/routes/+layout.svelte`
+
+- [x] Update app.html with fonts (Inter, JetBrains Mono) and meta tags
+  - Files: `src/app.html`
+
+- [x] Create placeholder main page with test styling
+  - Files: `src/routes/+page.svelte`
+
+- [x] Set up security headers (CSP, X-Frame-Options, etc.)
+  - Files: `src/hooks.server.ts`
+
+- [x] Copy static assets from original app
+  - Files: `static/video/Particle.mp4`, `static/img/solidcam-logo.svg`, `static/favicon.png`
+
+- [x] Create directory structure for lib
+  - Directories: `src/lib/{components,stores,firebase,types,data,utils}`
+  - Component subdirs: `ui`, `layout`, `packages`, `panels`, `calculator`, `background`
+
+- [x] Define core TypeScript interfaces
+  - Files: `src/lib/types/index.ts`
+  - Types: Company, Page, PageState, Package, PackageState, Panel, CloudUserData, etc.
+
+- [x] Create environment variable template
+  - Files: `.env.example`
+
+- [x] Create CLAUDE.md project guide
+  - Files: `CLAUDE.md`
+
+### Verification
+
+- `pnpm check` - 0 errors, 0 warnings
+- `pnpm build` - Success (client ~75KB gzipped)
+- `pnpm dev` - Works at http://localhost:5173
+
+---
+
+## Phase 2: Core Components
+
+**Status:** Complete
+**Started:** 2026-01-15
+**Completed:** 2026-01-15
+
+### Completed
+
+- [x] Toast store (runes-based, adapted from TOS Parser)
+  - Files: `src/lib/stores/toast.svelte.ts`
+  - Features: success/error/warning/info, auto-dismiss, pause/resume for WCAG
+
+- [x] ToastContainer component
+  - Files: `src/lib/components/ui/ToastContainer.svelte`
+  - Features: Fixed bottom-right, fly/fade transitions, type-based icons
+
+- [x] Button component (copied from TOS Parser)
+  - Files: `src/lib/components/ui/Button.svelte`
+  - Variants: primary, gold, orange, ghost, danger
+  - Sizes: sm, md, lg
+
+- [x] Input component (copied from TOS Parser)
+  - Files: `src/lib/components/ui/Input.svelte`
+  - Features: Label, error state, gold focus accent, $bindable value
+
+- [x] SmokedGlassCard component (copied from TOS Parser)
+  - Files: `src/lib/components/ui/SmokedGlassCard.svelte`
+  - Features: Padding variants, glow options, glass effect
+
+- [x] Modal component (copied from TOS Parser)
+  - Files: `src/lib/components/ui/Modal.svelte`
+  - Features: Focus trap, escape key, backdrop click, size variants
+
+- [x] Checkbox component (new - tri-state)
+  - Files: `src/lib/components/ui/Checkbox.svelte`
+  - Features: checked/indeterminate/disabled states, gold accent
+
+- [x] CloudSyncIndicator component (new)
+  - Files: `src/lib/components/layout/CloudSyncIndicator.svelte`
+  - Features: Status indicator (connected/syncing/error), username display
+
+- [x] Header component (new - CheatSheet specific)
+  - Files: `src/lib/components/layout/Header.svelte`
+  - Features: Logo, title, nav links, operations dropdown, cloud sync
+
+- [x] Barrel exports for clean imports
+  - Files: `src/lib/components/ui/index.ts`, `src/lib/components/layout/index.ts`
+
+- [x] Updated root layout with ToastContainer
+  - Files: `src/routes/+layout.svelte`
+
+- [x] Updated main page with Header and component showcase
+  - Files: `src/routes/+page.svelte`
+
+### Verification
+
+- `pnpm check` - 0 errors, 0 warnings
+- `pnpm build` - Success (client ~30KB gzipped)
+- All components render correctly
+- Modal focus trap works
+- Toast notifications appear and dismiss
+- Header nav links open in new tabs
+
+### Remaining for Phase 2 (deferred)
+
+- [ ] Sidebar component (needed for panels)
+- [ ] CompanySelector component (needed for page system)
+- [ ] ParticleBackground component (video already in layout)
+
+---
+
+## Phase 3: State Management
+
+**Status:** Complete
+**Started:** 2026-01-15
+**Completed:** 2026-01-15
+
+### Completed
+
+- [x] Sync store (runes-based)
+  - Files: `src/lib/stores/sync.svelte.ts`
+  - Features: username validation/normalization, status tracking, localStorage persistence
+  - localStorage key: `solidcam-sync-username`
+
+- [x] Companies store (runes-based) - Main data store
+  - Files: `src/lib/stores/companies.svelte.ts`
+  - Features: Company CRUD, page CRUD, favorites, recent tracking, search
+  - localStorage keys: `solidcam-companies`, `solidcam-current-company-id`, `solidcam-favorites`, `solidcam-recent`
+  - Migration: Handles legacy `solidcam-pages-data` and `solidcam-cheatsheet-state` formats
+  - Export/import for cloud sync, change handler for external sync
+
+- [x] Packages store (runes-based)
+  - Files: `src/lib/stores/packages.svelte.ts`
+  - Features: Bit selection toggle, master bit logic (select all/none), custom bits, ordering
+  - Syncs with PageState from companies store
+
+- [x] Panels store (runes-based)
+  - Files: `src/lib/stores/panels.svelte.ts`
+  - Features: Item add/remove/toggle, reordering, removed items tracking, restore
+  - Syncs with PageState from companies store
+
+### Verification
+
+- `pnpm check` - 0 errors, 0 warnings
+- `pnpm build` - Success
+
+### Notes
+
+- Toast store was already created in Phase 2
+- User store not needed (username handled by sync store)
+- All stores follow runes pattern from `toast.svelte.ts`
+- localStorage keys match original app for migration compatibility
+
+---
+
+## Phase 4: Feature Components
+
+**Status:** Complete
+**Started:** 2026-01-15
+**Completed:** 2026-01-15
+
+### Completed
+
+- [x] Data migration (included from Phase 5)
+  - Files: `src/lib/data/packages.ts`, `src/lib/data/panels.ts`, `src/lib/data/index.ts`
+  - 5 packages with groups (master bits) and looseBits
+  - 3 panels: standalone-modules, maintenance-skus, solidworks-maintenance
+
+- [x] LooseBit component (standalone bit checkbox)
+  - Files: `src/lib/components/packages/LooseBit.svelte`
+  - Features: Checkbox, click-to-copy, keyboard accessible, draggable
+
+- [x] SubBit component (bit under master group)
+  - Files: `src/lib/components/packages/SubBit.svelte`
+  - Features: Same as LooseBit, linked to masterId for drag-drop scoping
+
+- [x] MasterBit component (expandable group with tri-state checkbox)
+  - Files: `src/lib/components/packages/MasterBit.svelte`
+  - Features: Tri-state checkbox (checked/indeterminate), expand/collapse, renders SubBits
+
+- [x] PackageRow component (single table row)
+  - Files: `src/lib/components/packages/PackageRow.svelte`
+  - Features: Package code, maintenance SKU, bits layout, click-to-copy
+
+- [x] PackageTable component (main table)
+  - Files: `src/lib/components/packages/PackageTable.svelte`
+  - Features: Table with header, iterates packages with PackageRow
+
+- [x] PanelItem component (single panel item)
+  - Files: `src/lib/components/panels/PanelItem.svelte`
+  - Features: Click-to-copy, optional checkbox, remove button, draggable
+
+- [x] Panel component (collapsible container)
+  - Files: `src/lib/components/panels/Panel.svelte`
+  - Features: Title, collapse toggle, +/- controls for editable panels
+
+- [x] EditablePanel component (panel with store integration)
+  - Files: `src/lib/components/panels/EditablePanel.svelte`
+  - Features: Drag-drop reordering, add/remove items, syncs with panelsStore
+
+- [x] Calculator component
+  - Files: `src/lib/components/calculator/Calculator.svelte`, `src/lib/components/calculator/index.ts`
+  - Features: Currency display, +/-/×/÷/%, quick percent buttons (5-30%), click-to-copy
+
+- [x] Barrel exports
+  - Files: `src/lib/components/packages/index.ts`, `src/lib/components/panels/index.ts`
+
+- [x] Main page updated with all components
+  - Files: `src/routes/+page.svelte`
+  - Layout: Package table (main), sidebar with panels + calculator
+
+### Verification
+
+- `pnpm check` - 0 errors, 0 warnings
+- `pnpm build` - Success (client ~39KB gzipped)
+- Package table renders 5 packages
+- Checkboxes toggle with store persistence
+- Master bit tri-state works correctly
+- Click-to-copy shows toast notifications
+- Calculator performs calculations correctly
+- Responsive layout (sidebar stacks on mobile)
+
+### Notes
+
+- Data migration (Phase 5) was included in Phase 4 since components needed the data
+- Accessibility: All interactive elements have keyboard handlers
+- Drag-drop uses HTML5 Drag and Drop API (no external library)
+
+---
+
+## Phase 5: Data Migration
+
+**Status:** Complete (merged into Phase 4)
+
+Data migration was completed as part of Phase 4 since the feature components required the data files to function.
+
+---
+
+## Phase 6: Firebase Integration
+
+**Status:** Complete
+**Started:** 2026-01-15
+**Completed:** 2026-01-15
+
+### Completed
+
+- [x] Firebase client initialization
+  - Files: `src/lib/firebase/client.ts`, `src/lib/firebase/index.ts`
+  - Lazy singleton pattern with SSR safety
+  - Multi-tab support via `persistentMultipleTabManager()`
+
+- [x] Firebase sync operations
+  - Files: `src/lib/firebase/sync.ts`
+  - Load/save user data to Firestore (`users/{normalizedUsername}`)
+  - Debounced writes (900ms) to reduce Firestore costs
+  - Merge strategy on writes for conflict handling
+
+- [x] Cloud sync store integration
+  - Files: `src/lib/stores/sync.svelte.ts`
+  - Connect/disconnect with username
+  - Auto-sync: local changes trigger cloud save
+  - Status tracking: disconnected/connecting/connected/syncing/error
+
+- [x] SyncModal UI component
+  - Files: `src/lib/components/ui/SyncModal.svelte`
+  - Username input with validation
+  - Connected state shows username and last sync time
+  - Error display
+
+- [x] Page integration
+  - Files: `src/routes/+page.svelte`
+  - Store initialization on mount
+  - Sync modal opens from Header CloudSyncIndicator
+
+- [x] Environment configuration
+  - Files: `.env` (Firebase credentials)
+
+- [x] CompanyPageBar component (Company/Page system UI)
+  - Files: `src/lib/components/layout/CompanyPageBar.svelte`, `src/lib/components/layout/index.ts`
+  - Compact header bar design (user chose over original UI)
+  - Company dropdown with search and recents (no favorites per user request)
+  - Page tabs with inline rename on double-click
+  - Right-click context menus for company/page actions
+  - Sync status indicator integrated
+
+- [x] Page integration updated
+  - Files: `src/routes/+page.svelte`
+  - CompanyPageBar positioned below Header
+  - Full company/page switching functionality
+
+### Verification
+
+- `pnpm check` - 0 errors, 0 warnings
+- `pnpm build` - Success (client ~118KB gzipped including Firebase)
+
+### Notes
+
+- Username-based identification (no authentication)
+- Firestore document path: `users/{normalizedUsername}`
+- Schema version tracking for future migrations
+- Offline support via Firestore's persistent local cache
+- CompanyPageBar: User requested cleaner "triple A" design instead of original cluttered UI
+
+---
+
+## Phase 7: PWA & Polish
+
+**Status:** In Progress
+**Started:** 2026-01-15
+
+### Completed
+
+- [x] Triple-A UI Design System Upgrade (from machine-research-ui)
+  - Files: All UI components upgraded
+
+  **Button.svelte:**
+  - Shine effect on hover
+  - Premium layered shadows with inset highlights
+  - 145° gradient backgrounds
+  - Hover lift (`translateY(-3px) scale(1.02)`)
+  - Active press effect
+
+  **Input.svelte:**
+  - Floating label pattern
+  - Focus glow pulse animation
+  - Animated border on focus
+  - Error state animations
+
+  **Modal.svelte:**
+  - Border shimmer animation
+  - Corner accent decorations (no gold lines/diamond per user request)
+  - Close button rotation on hover
+
+  **SmokedGlassCard.svelte:**
+  - Enhanced 145° gradient glass effect
+  - Hover lift effect with shine
+  - Gold/red/accent glow variants
+  - Backdrop blur 12px
+
+  **ToastContainer.svelte:**
+  - Staggered fly-in animations with `backOut` easing
+  - Icon pulse animations
+  - Progress bar with gradient colors
+  - Shine effect animation
+
+  **CompanyPageBar.svelte:**
+  - Premium glass background
+  - Dropdown fade-in animation
+  - Button shine effects
+  - Context menu scale animation
+  - Border shimmer animation (20s cycle)
+
+  **app.css:**
+  - Dark luxury color palette (#0a0a0f base)
+  - Premium scrollbar styling (gold hover)
+  - Enhanced focus states with glow
+  - Text selection styling
+  - Global animations (fadeIn, pulse-gold, shimmer, checkBounce, subtleFloat, glowPulse)
+  - Reduced motion support
+
+- [x] Login Screen Implementation
+  - Files: `src/lib/components/layout/LoginScreen.svelte`
+  - 3 ambient glow effects (gold/red radial gradients)
+  - 6 rising particle animations
+  - Centered SmokedGlassCard with accent glow
+  - Decorative header (lock icon, gradient lines)
+  - Gradient title "Welcome" (white → gold)
+  - Mount entrance animations
+  - Bottom branding
+
+- [x] User Avatar Component
+  - Files: `src/lib/components/layout/UserAvatar.svelte`
+  - Spinning conic gradient ring (gold → red → gold, 8s)
+  - User icon in center
+  - Username display with sign-out link
+  - Sync status indicator
+
+- [x] Login Gate in Layout
+  - Files: `src/routes/+layout.svelte`
+  - Shows LoginScreen when not authenticated
+  - Shows main app when logged in
+  - Loading spinner during initialization
+
+- [x] **Header.svelte - Machine Research UI Match** (2026-01-15)
+  - Files: `src/lib/components/layout/Header.svelte`
+  - 2-row navigation layout (Row 1: external links, Row 2: dropdowns)
+  - Short labels matching Machine Research: Main Support, Ticket Site, University, Academy, ChatBot
+  - Color mapping: Red → Red → Purple → Blue → Orange
+  - Icons on all nav links (support, ticket, video, book, chat)
+  - External link indicator (arrow slides in on hover)
+  - Gray dropdown buttons (Operations, CF Tools) that turn gold when active
+  - Title glow (radial gold gradient behind title)
+  - Border shimmer animation (25s gold/red gradient)
+  - Responsive grid layout matching Machine Research
+
+- [x] **Logo.svelte Component** (2026-01-15)
+  - Files: `src/lib/components/layout/Logo.svelte`
+  - Responsive width: `clamp(180px, 22vw, 280px)`
+  - Breathing red glow animation (3s pulse)
+  - Drop shadows and lighten blend mode
+  - Hover scale effect (1.02)
+
+- [x] **CF Tools Dropdown** (2026-01-15)
+  - Files: `src/routes/+page.svelte`
+  - Links: TOS Tracker, Opp Tracker, Packages & Maintenance, Machine Catalogue
+  - External link icons on items
+  - Gold hover state with padding shift
+
+- [x] **Operations Dropdown Updated** (2026-01-15)
+  - Files: `src/routes/+page.svelte`
+  - Gray button style (not gold)
+  - Items: Sales Tax Guide, Current Products (matching Machine Research)
+  - Icons on menu items
+
+- [x] **UI Refinement - Match TOS Parser "Triple-A" Quality** (2026-01-15)
+  - Files: Multiple component updates
+
+  **Logo.svelte:**
+  - Replaced SVG with PNG from TOS Parser (white subtext version)
+  - File: `static/images/solidcam-logo.png`
+
+  **+layout.svelte:**
+  - Removed heavy 80-95% overlay on background
+  - Added LuxuryBackground pattern (subtle base gradient at z-index -2)
+  - Video now plays at full visibility (no opacity reduction)
+
+  **Button.svelte:**
+  - Changed to pill shape (`border-radius: 9999px`)
+  - Faster transitions (`150ms ease` instead of `250ms cubic-bezier`)
+  - Simpler hover (`translateY(-2px)` + brightness, no scale)
+  - Removed shine overlay effect
+  - 2-stop gradients (135deg) instead of 3-stop (145deg)
+  - Lighter font-weight (500 vs 600)
+
+  **Input.svelte:**
+  - Removed floating label pattern (static label above)
+  - Removed animated border with mask-composite
+  - Removed pulsing glow animation
+  - Simpler focus state with box-shadow ring
+  - Faster transitions (150ms ease)
+
+  **SmokedGlassCard.svelte:**
+  - Reduced blur (8px vs 12px)
+  - Subtler border (0.04 vs 0.06 opacity)
+  - Simpler 2-stop gradient (135deg)
+  - Darker shadow (0.4 vs 0.35 opacity)
+  - Removed shine effect and hoverable state
+  - Reduced glow variants (3 vs 5)
+
+  **Modal.svelte:**
+  - Removed border shimmer animation
+  - Removed corner accent decorations
+  - Plain white title (no gradient)
+  - Simpler close button (no rotation or glow)
+  - Reduced overlay blur (4px vs 8px)
+  - Single powerful shadow vs layered
+
+  **app.css:**
+  - Simplified transitions to use `ease` instead of `cubic-bezier`
+  - Darker shadow values for more depth (0.4-0.6 opacity)
+  - Reduced glass blur (8px)
+  - Better text-muted contrast (#9ca3af for WCAG AA)
+
+### Verification
+
+- `pnpm check` - 0 errors, 0 warnings
+- `pnpm build` - Success (client ~121KB gzipped)
+
+### Remaining / Needs Improvement
+
+- [ ] PWA configuration with @vite-pwa/sveltekit
+- [ ] Sales Tax Guide modal implementation
+- [ ] Current Products modal implementation
+- [ ] Package table styling refinements to match Machine Research cards
+- [ ] Panel components styling updates
+- [ ] Calculator styling updates
+- [ ] Further responsive testing
+- [ ] Accessibility audit
+- [ ] Final polish and testing
+
+---
+
+## Blockers
+
+None currently.
+
+---
+
+## Notes
+
+- Reference project: `/home/cody/Projects/TOS Parser Svelte/`
+- Original app: `/home/cody/CheatSheet/` (read-only)
+- All research docs in `.docs/`

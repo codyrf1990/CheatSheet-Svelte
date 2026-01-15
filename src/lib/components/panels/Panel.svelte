@@ -1,0 +1,201 @@
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+
+	interface Props {
+		id: string;
+		title: string;
+		editable?: boolean;
+		children: Snippet;
+		removeMode?: boolean;
+		onAddItem?: () => void;
+		onToggleRemove?: () => void;
+	}
+
+	let {
+		id,
+		title,
+		editable = false,
+		children,
+		removeMode = false,
+		onAddItem,
+		onToggleRemove
+	}: Props = $props();
+
+	// Local collapsed state
+	let collapsed = $state(false);
+
+	function handleCollapseToggle() {
+		collapsed = !collapsed;
+	}
+
+	function handleAddClick() {
+		onAddItem?.();
+	}
+
+	function handleRemoveToggle() {
+		onToggleRemove?.();
+	}
+</script>
+
+<section class="panel" data-panel={id} data-panel-editable={editable ? 'true' : 'false'}>
+	<div class="panel-head">
+		<button type="button" class="panel-title-btn" onclick={handleCollapseToggle}>
+			<svg
+				class="collapse-icon"
+				class:rotated={collapsed}
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+			>
+				<path d="M19 9l-7 7-7-7" />
+			</svg>
+			<h2 class="panel-title">{title}</h2>
+		</button>
+		{#if editable}
+			<div class="panel-controls">
+				<button
+					type="button"
+					class="panel-control-btn"
+					onclick={handleAddClick}
+					aria-label="Add item to {title}"
+				>
+					+
+				</button>
+				<button
+					type="button"
+					class="panel-control-btn"
+					class:active={removeMode}
+					onclick={handleRemoveToggle}
+					aria-pressed={removeMode}
+					aria-label="Toggle delete mode for {title}"
+				>
+					&minus;
+				</button>
+			</div>
+		{/if}
+	</div>
+	{#if !collapsed}
+		<div class="panel-body">
+			{@render children()}
+		</div>
+	{/if}
+</section>
+
+<style>
+	.panel {
+		/* Smoked glass styling */
+		background: linear-gradient(135deg, rgba(28, 28, 28, 0.94) 0%, rgba(12, 12, 12, 0.92) 100%);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		border: 1px solid rgba(255, 255, 255, 0.04);
+		border-radius: 12px;
+		box-shadow:
+			0 25px 50px rgba(0, 0, 0, 0.4),
+			0 10px 20px rgba(0, 0, 0, 0.2),
+			inset 0 1px 0 rgba(255, 255, 255, 0.03);
+		overflow: hidden;
+	}
+
+	.panel-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.4rem 0.6rem;
+		background: rgba(255, 255, 255, 0.03);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.panel-title-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+	}
+
+	.collapse-icon {
+		width: 16px;
+		height: 16px;
+		color: rgba(255, 255, 255, 0.5);
+		transition: transform 200ms ease;
+	}
+
+	.collapse-icon.rotated {
+		transform: rotate(-90deg);
+	}
+
+	.panel-title {
+		margin: 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	.panel-controls {
+		display: flex;
+		gap: 0.25rem;
+	}
+
+	.panel-control-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		padding: 0;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 6px;
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 1.25rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 150ms ease;
+	}
+
+	.panel-control-btn:hover {
+		background: rgba(255, 255, 255, 0.1);
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	.panel-control-btn.active {
+		background: rgba(200, 16, 46, 0.2);
+		border-color: rgba(200, 16, 46, 0.4);
+		color: #ff6666;
+	}
+
+	.panel-body {
+		padding: 0.35rem 0.5rem;
+	}
+
+	/* Double reduction for maintenance panels (-20% of -20%) */
+	.panel[data-panel="maintenance-combined"] .panel-head,
+	.panel[data-panel="maintenance-skus"] .panel-head,
+	.panel[data-panel="solidworks-maintenance"] .panel-head {
+		padding: 0.32rem 0.48rem;
+		gap: 0.256rem;
+	}
+
+	.panel[data-panel="maintenance-combined"] .panel-title,
+	.panel[data-panel="maintenance-skus"] .panel-title,
+	.panel[data-panel="solidworks-maintenance"] .panel-title {
+		font-size: 0.75rem;
+	}
+
+	.panel[data-panel="maintenance-combined"] .panel-body,
+	.panel[data-panel="maintenance-skus"] .panel-body,
+	.panel[data-panel="solidworks-maintenance"] .panel-body {
+		padding: 0.28rem 0.4rem;
+	}
+
+	.panel[data-panel="maintenance-combined"] .panel-control-btn,
+	.panel[data-panel="maintenance-skus"] .panel-control-btn,
+	.panel[data-panel="solidworks-maintenance"] .panel-control-btn {
+		width: 24px;
+		height: 24px;
+		font-size: 1rem;
+	}
+</style>
