@@ -4,7 +4,7 @@
 	import { PackageTable } from '$components/packages';
 	import { MaintenancePanel } from '$components/panels';
 	import { Calculator } from '$components/calculator';
-	import { SalesTaxModal, CurrentProductsModal } from '$components/ui';
+	import { SalesTaxModal, CurrentProductsModal, CompaniesModal } from '$components/ui';
 	import { toastStore } from '$stores/toast.svelte';
 	import { syncStore } from '$stores/sync.svelte';
 	import { companiesStore } from '$stores/companies.svelte';
@@ -37,6 +37,7 @@
 	// Modal states
 	let showSalesTaxModal = $state(false);
 	let showProductsModal = $state(false);
+	let showCompaniesModal = $state(false);
 
 	// CF Tools links array (matching Machine Research)
 	const cfToolsLinks = [
@@ -115,6 +116,7 @@
 		editMode={packageEditMode}
 		onToggleEdit={togglePackageEditMode}
 		onResetOrder={handleResetOrder}
+		onViewAllCompanies={() => (showCompaniesModal = true)}
 	/>
 
 	<!-- Main Content Area -->
@@ -193,6 +195,7 @@
 <!-- Modals -->
 <SalesTaxModal open={showSalesTaxModal} onclose={() => (showSalesTaxModal = false)} />
 <CurrentProductsModal open={showProductsModal} onclose={() => (showProductsModal = false)} />
+<CompaniesModal open={showCompaniesModal} onclose={() => (showCompaniesModal = false)} />
 
 <style>
 	.page-layout {
@@ -228,13 +231,13 @@
 	/* Dropdown menus - positioned absolutely on page */
 	.dropdown-menu {
 		position: fixed;
-		min-width: 200px;
+		min-width: 160px;
 		background: linear-gradient(145deg, rgba(32, 32, 38, 0.98), rgba(24, 24, 30, 0.98));
 		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 12px;
+		border-radius: 10px;
 		box-shadow:
-			0 20px 50px rgba(0, 0, 0, 0.5),
-			0 8px 20px rgba(0, 0, 0, 0.3),
+			0 12px 32px rgba(0, 0, 0, 0.4),
+			0 4px 12px rgba(0, 0, 0, 0.2),
 			inset 0 1px 0 rgba(255, 255, 255, 0.05);
 		backdrop-filter: blur(16px);
 		z-index: 1000;
@@ -256,10 +259,10 @@
 	.dropdown-item {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 0.5rem;
 		width: 100%;
-		padding: 0.75rem 1rem;
-		font-size: 0.8125rem;
+		padding: 0.5rem 0.75rem;
+		font-size: 0.7rem;
 		color: rgba(255, 255, 255, 0.8);
 		background: transparent;
 		border: none;
@@ -272,7 +275,7 @@
 	.dropdown-item:hover {
 		background: rgba(212, 175, 55, 0.15);
 		color: #d4af37;
-		padding-left: 1.25rem;
+		padding-left: 0.9rem;
 	}
 
 	.dropdown-item:not(:last-child) {
@@ -283,15 +286,15 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 18px;
-		height: 18px;
+		width: 14px;
+		height: 14px;
 		flex-shrink: 0;
 		opacity: 0.7;
 	}
 
 	.dropdown-icon svg {
-		width: 16px;
-		height: 16px;
+		width: 12px;
+		height: 12px;
 	}
 
 	.dropdown-item:hover .dropdown-icon {

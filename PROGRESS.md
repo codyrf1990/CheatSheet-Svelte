@@ -732,6 +732,31 @@ Data migration was completed as part of Phase 4 since the feature components req
   - Post processor SKUs with derivative codes
   - Scrollable content with custom scrollbar styling
 
+- [x] **Companies Dropdown Fix & Modal** (2026-01-15)
+  - Files: `src/lib/components/layout/CompanyPageBar.svelte`, `src/lib/components/ui/CompaniesModal.svelte`, `src/routes/+page.svelte`
+
+  **Problem Fixed:** Dropdown was invisible due to `backdrop-filter: blur()` on parent creating a containing block that clipped `position: fixed` elements
+
+  **Solution:** Moved dropdown menu outside `.company-page-bar` div entirely
+
+  **CompanyPageBar.svelte:**
+  - Dropdown now uses `position: fixed` with dynamic positioning via `getBoundingClientRect()`
+  - Fixed header (search) + scrollable list + fixed footer layout
+  - Compact "+" and "View All (N)" buttons in footer
+  - Both buttons same height via shared base `.footer-btn` class
+
+  **CompaniesModal.svelte (NEW):**
+  - Full modal for viewing/managing all companies
+  - Search bar at top (fixed)
+  - Scrollable company list with hover actions (rename/delete)
+  - "Current" badge on active company
+  - "+ New Company" button and count in footer
+
+  **+page.svelte:**
+  - Added `showCompaniesModal` state
+  - Wired `onViewAllCompanies` prop to open modal
+  - Compact dropdown styles for Operations and CF Tools menus
+
 ### Remaining / Needs Improvement
 
 - [ ] Further responsive testing at various viewports

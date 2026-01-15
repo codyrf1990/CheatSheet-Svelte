@@ -9,9 +9,15 @@
 		editMode?: boolean;
 		onToggleEdit?: () => void;
 		onResetOrder?: () => void;
+		onViewAllCompanies?: () => void;
 	}
 
-	let { editMode = false, onToggleEdit, onResetOrder }: Props = $props();
+	let { editMode = false, onToggleEdit, onResetOrder, onViewAllCompanies }: Props = $props();
+
+	function onViewAll() {
+		closeDropdown();
+		onViewAllCompanies?.();
+	}
 
 	// Reactive state from stores
 	let currentCompany = $derived(companiesStore.current);
@@ -22,6 +28,7 @@
 
 	// Local UI state
 	let dropdownOpen = $state(false);
+	let dropdownPosition = $state({ top: 0, left: 0 });
 	let searchQuery = $state('');
 	let editingPageId = $state<string | null>(null);
 	let editingPageName = $state('');
@@ -45,10 +52,18 @@
 		}
 	});
 
-	function toggleDropdown() {
+	function toggleDropdown(e: MouseEvent) {
+		e.stopPropagation();
 		dropdownOpen = !dropdownOpen;
 		if (dropdownOpen) {
 			searchQuery = '';
+			// Calculate position from trigger button
+			const button = e.currentTarget as HTMLElement;
+			const rect = button.getBoundingClientRect();
+			dropdownPosition = {
+				top: rect.bottom + 8,
+				left: rect.left
+			};
 		}
 	}
 
@@ -193,7 +208,7 @@
 	// Close dropdown/context when clicking outside
 	function handleWindowClick(e: MouseEvent) {
 		const target = e.target as HTMLElement;
-		if (!target.closest('.company-dropdown') && dropdownOpen) {
+		if (!target.closest('.company-dropdown') && !target.closest('.dropdown-menu') && dropdownOpen) {
 			closeDropdown();
 		}
 		if (!target.closest('.context-menu') && contextMenu) {
@@ -225,64 +240,6 @@
 			</svg>
 		</button>
 
-		{#if dropdownOpen}
-			<div class="dropdown-menu">
-				<!-- Search -->
-				<div class="dropdown-search">
-					<input
-						type="search"
-						placeholder="Search companies..."
-						bind:value={searchQuery}
-						class="search-input"
-					/>
-				</div>
-
-				<!-- Search Results -->
-				{#if searchQuery.trim()}
-					<div class="dropdown-section">
-						<div class="section-title">Results ({filteredCompanies().length})</div>
-						{#if filteredCompanies().length > 0}
-							{#each filteredCompanies() as company (company.id)}
-								<button
-									type="button"
-									class="company-item"
-									class:active={company.id === currentCompany?.id}
-									onclick={() => handleCompanySelect(company.id)}
-								>
-									{company.name}
-								</button>
-							{/each}
-						{:else}
-							<div class="no-results">No companies found</div>
-						{/if}
-					</div>
-				{:else if recent.length > 0}
-					<!-- Recent -->
-					<div class="dropdown-section">
-						<div class="section-title">Recent</div>
-						{#each recent.slice(0, 8) as company (company.id)}
-							<button
-								type="button"
-								class="company-item"
-								class:active={company.id === currentCompany?.id}
-								onclick={() => handleCompanySelect(company.id)}
-							>
-								{company.name}
-							</button>
-						{/each}
-					</div>
-				{/if}
-
-				<!-- New Company -->
-				<div class="dropdown-footer">
-					<button type="button" class="new-company-btn" onclick={handleNewCompany}>
-						<span class="btn-shine"></span>
-						+ New Company
-					</button>
-					<span class="company-count">{allCompanies.length} total</span>
-				</div>
-			</div>
-		{/if}
 	</div>
 
 	<!-- Divider -->
@@ -331,6 +288,68 @@
 		{/if}
 	</div>
 </div>
+
+<!-- Company Dropdown Menu (outside company-page-bar to escape backdrop-filter clipping) -->
+{#if dropdownOpen}
+	<div class="dropdown-menu" style="top: {dropdownPosition.top}px; left: {dropdownPosition.left}px;">
+		<!-- Search (fixed) -->
+		<div class="dropdown-header">
+			<input
+				type="search"
+				placeholder="Search companies..."
+				bind:value={searchQuery}
+				class="search-input"
+			/>
+		</div>
+
+		<!-- Scrollable List -->
+		<div class="dropdown-list">
+			{#if searchQuery.trim()}
+				<div class="dropdown-section">
+					<div class="section-title">Results ({filteredCompanies().length})</div>
+					{#if filteredCompanies().length > 0}
+						{#each filteredCompanies() as company (company.id)}
+							<button
+								type="button"
+								class="company-item"
+								class:active={company.id === currentCompany?.id}
+								onclick={() => handleCompanySelect(company.id)}
+							>
+								{company.name}
+							</button>
+						{/each}
+					{:else}
+						<div class="no-results">No companies found</div>
+					{/if}
+				</div>
+			{:else if recent.length > 0}
+				<div class="dropdown-section">
+					<div class="section-title">Recent</div>
+					{#each recent.slice(0, 8) as company (company.id)}
+						<button
+							type="button"
+							class="company-item"
+							class:active={company.id === currentCompany?.id}
+							onclick={() => handleCompanySelect(company.id)}
+						>
+							{company.name}
+						</button>
+					{/each}
+				</div>
+			{:else}
+				<div class="no-results">No recent companies</div>
+			{/if}
+		</div>
+
+		<!-- Footer (fixed) -->
+		<div class="dropdown-footer">
+			<button type="button" class="footer-btn footer-btn--new" onclick={handleNewCompany}>+</button>
+			<button type="button" class="footer-btn footer-btn--view" onclick={onViewAll}>
+				View All ({allCompanies.length})
+			</button>
+		</div>
+	</div>
+{/if}
 
 <!-- Context Menu -->
 {#if contextMenu}
@@ -453,18 +472,17 @@
 
 	/* Dropdown Menu */
 	.dropdown-menu {
-		position: absolute;
-		top: calc(100% + 0.5rem);
-		left: 0;
-		min-width: 280px;
-		max-height: 400px;
-		overflow-y: auto;
+		position: fixed;
+		display: flex;
+		flex-direction: column;
+		min-width: 220px;
+		max-height: 320px;
 		background: linear-gradient(145deg, rgba(32, 32, 38, 0.98), rgba(24, 24, 30, 0.98));
 		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 14px;
+		border-radius: 10px;
 		box-shadow:
-			0 20px 50px rgba(0, 0, 0, 0.5),
-			0 8px 20px rgba(0, 0, 0, 0.3),
+			0 12px 32px rgba(0, 0, 0, 0.4),
+			0 4px 12px rgba(0, 0, 0, 0.2),
 			inset 0 1px 0 rgba(255, 255, 255, 0.05);
 		backdrop-filter: blur(16px);
 		z-index: 1000;
@@ -482,19 +500,43 @@
 		}
 	}
 
-	.dropdown-search {
-		padding: 0.75rem;
+	.dropdown-header {
+		flex-shrink: 0;
+		padding: 0.5rem;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+	}
+
+	.dropdown-list {
+		flex: 1;
+		overflow-y: auto;
+		min-height: 0;
+	}
+
+	.dropdown-list::-webkit-scrollbar {
+		width: 5px;
+	}
+
+	.dropdown-list::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.dropdown-list::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.15);
+		border-radius: 3px;
+	}
+
+	.dropdown-list::-webkit-scrollbar-thumb:hover {
+		background: rgba(255, 255, 255, 0.25);
 	}
 
 	.search-input {
 		width: 100%;
-		padding: 0.625rem 0.875rem;
+		padding: 0.4rem 0.6rem;
 		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 8px;
+		border-radius: 6px;
 		color: #f5f5f5;
-		font-size: 0.875rem;
+		font-size: 0.75rem;
 		transition: all 200ms ease;
 	}
 
@@ -509,13 +551,13 @@
 	}
 
 	.dropdown-section {
-		padding: 0.5rem;
+		padding: 0.35rem;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 	}
 
 	.section-title {
-		padding: 0.25rem 0.5rem;
-		font-size: 0.6875rem;
+		padding: 0.15rem 0.4rem;
+		font-size: 0.6rem;
 		font-weight: 600;
 		color: rgba(255, 255, 255, 0.4);
 		text-transform: uppercase;
@@ -525,12 +567,12 @@
 	.company-item {
 		display: block;
 		width: 100%;
-		padding: 0.625rem 0.75rem;
+		padding: 0.4rem 0.5rem;
 		background: transparent;
 		border: none;
-		border-radius: 8px;
+		border-radius: 6px;
 		color: rgba(255, 255, 255, 0.8);
-		font-size: 0.875rem;
+		font-size: 0.75rem;
 		text-align: left;
 		cursor: pointer;
 		transition: all 150ms ease;
@@ -539,7 +581,7 @@
 	.company-item:hover {
 		background: rgba(255, 255, 255, 0.08);
 		color: #f5f5f5;
-		padding-left: 1rem;
+		padding-left: 0.75rem;
 	}
 
 	.company-item.active {
@@ -548,61 +590,55 @@
 	}
 
 	.no-results {
-		padding: 1rem;
+		padding: 0.75rem;
 		text-align: center;
 		color: rgba(255, 255, 255, 0.4);
-		font-size: 0.875rem;
+		font-size: 0.75rem;
 	}
 
 	.dropdown-footer {
+		flex-shrink: 0;
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		padding: 0.75rem;
+		gap: 0.25rem;
+		padding: 0.35rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.06);
 	}
 
-	.new-company-btn {
-		position: relative;
-		overflow: hidden;
-		padding: 0.5rem 1rem;
-		background: linear-gradient(145deg, #e8c547, #d4af37, #b8941f);
+	.footer-btn {
+		padding: 0.3rem 0.5rem;
 		border: none;
-		border-radius: 8px;
-		color: #1a1a1a;
-		font-size: 0.8125rem;
-		font-weight: 600;
+		border-radius: 5px;
+		font-size: 0.65rem;
+		font-weight: 500;
 		cursor: pointer;
-		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-		box-shadow:
-			0 2px 8px rgba(212, 175, 55, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.25);
+		transition: all 150ms ease;
 	}
 
-	.btn-shine {
-		position: absolute;
-		top: 0;
-		left: -100%;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-		transition: left 400ms ease;
+	.footer-btn--new {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		background: linear-gradient(145deg, #e8c547, #d4af37);
+		color: #1a1a1a;
+		font-weight: 700;
 	}
 
-	.new-company-btn:hover {
-		transform: translateY(-2px);
-		box-shadow:
-			0 4px 16px rgba(212, 175, 55, 0.4),
-			0 0 30px rgba(212, 175, 55, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.3);
+	.footer-btn--new:hover {
+		transform: scale(1.05);
+		box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
 	}
 
-	.new-company-btn:hover .btn-shine {
-		left: 100%;
+	.footer-btn--view {
+		flex: 1;
+		background: rgba(255, 255, 255, 0.06);
+		color: rgba(255, 255, 255, 0.7);
 	}
 
-	.company-count {
-		font-size: 0.75rem;
-		color: rgba(255, 255, 255, 0.4);
+	.footer-btn--view:hover {
+		background: rgba(255, 255, 255, 0.1);
+		color: #f5f5f5;
 	}
 
 	/* Divider */
@@ -895,15 +931,14 @@
 		.company-page-bar::before,
 		.status-dot,
 		.dropdown-menu,
-		.context-menu,
-		.btn-shine {
+		.context-menu {
 			animation: none;
 		}
 
 		.company-trigger,
 		.page-tab,
 		.company-item,
-		.new-company-btn {
+		.footer-btn {
 			transition: none;
 		}
 	}
