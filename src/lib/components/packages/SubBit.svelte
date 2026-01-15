@@ -171,37 +171,37 @@
 
 	@media (max-width: 640px) {
 		.sub-bit {
-			padding: 0.05rem 0.075rem;
+			padding: 0.05rem 0.1rem;
 		}
 
 		.bit-label {
-			gap: 0.075rem;
+			gap: 0.1rem;
 		}
 
 		.bit-text {
-			font-size: 0.45rem;
+			font-size: 0.5rem;
 		}
 
 		.bit-remove-btn {
-			width: 8px;
-			height: 8px;
-			font-size: 0.4rem;
+			width: 10px;
+			height: 10px;
+			font-size: 0.45rem;
 		}
 	}
 
 	@media (max-width: 500px) {
 		.sub-bit {
-			padding: 0.04rem 0.05rem;
+			padding: 0.06rem 0.1rem;
 		}
 
 		.bit-text {
-			font-size: 0.4rem;
+			font-size: 0.5rem;
 		}
 
 		.bit-remove-btn {
-			width: 6px;
-			height: 6px;
-			font-size: 0.35rem;
+			width: 10px;
+			height: 10px;
+			font-size: 0.45rem;
 		}
 	}
 </style>

@@ -694,6 +694,20 @@ Data migration was completed as part of Phase 4 since the feature components req
   - Reduced page padding with tighter clamp values
   - Responsive breakpoints adjusted to match
 
+- [x] **Viewport-Height Filling Layout** (2026-01-15)
+  - Goal: Cards align to bottom of viewport, no wasted space
+
+  **+page.svelte:**
+  - Changed `min-height: 100vh` → `height: 100vh` on `.page-layout`
+  - Added `flex: 1` and `min-height: 0` to `.content-area`
+  - Added `min-height: 0` to `.sidebar` for proper flex behavior
+
+  **MaintenancePanel.svelte:**
+  - Added `flex: 1` to `.maintenance-panel` (grows to fill space)
+  - Removed redundant "Maintenance SKUs" title from panel header (section headers sufficient)
+  - Changed panel-head to `justify-content: flex-end` (only shows +/- controls)
+  - Removed unused `.panel-title` CSS
+
 ### Remaining / Needs Improvement
 
 - [ ] PWA configuration with @vite-pwa/sveltekit

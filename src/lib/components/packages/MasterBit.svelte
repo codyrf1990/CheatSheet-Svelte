@@ -265,27 +265,27 @@
 
 	@media (max-width: 500px) {
 		.master-header {
-			padding: 0.075rem 0.1rem;
-			gap: 0.075rem;
+			padding: 0.125rem 0.2rem;
+			gap: 0.125rem;
 		}
 
 		.master-label {
-			font-size: 0.4rem;
+			font-size: 0.55rem;
 		}
 
 		.expand-toggle {
+			width: 12px;
+			height: 12px;
+		}
+
+		.expand-icon {
 			width: 8px;
 			height: 8px;
 		}
 
-		.expand-icon {
-			width: 5px;
-			height: 5px;
-		}
-
 		.sub-bits {
-			grid-template-columns: 1fr;
-			gap: 0.05rem;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 0.06rem;
 		}
 	}
 </style>

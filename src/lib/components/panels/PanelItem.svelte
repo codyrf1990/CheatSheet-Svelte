@@ -108,7 +108,7 @@
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 3px;
 		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.6rem;
+		font-size: 0.65rem;
 		color: rgba(255, 255, 255, 0.9);
 		cursor: pointer;
 		transition: all 150ms ease;
@@ -147,13 +147,31 @@
 	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.panel-item {
-			padding: 0.04rem 0.075rem;
-			gap: 0.075rem;
+			padding: 0.03rem 0.05rem;
+			gap: 0.05rem;
 		}
 
 		.item-text {
-			font-size: 0.45rem;
-			padding: 0.03rem 0.1rem;
+			font-size: 0.55rem;
+			padding: 0.075rem 0.125rem;
+		}
+
+		.item-remove-btn {
+			width: 12px;
+			height: 12px;
+			font-size: 0.55rem;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.panel-item {
+			padding: 0.02rem 0.04rem;
+			gap: 0.04rem;
+		}
+
+		.item-text {
+			font-size: 0.5rem;
+			padding: 0.05rem 0.1rem;
 		}
 
 		.item-remove-btn {
@@ -163,38 +181,20 @@
 		}
 	}
 
-	@media (max-width: 640px) {
-		.panel-item {
-			padding: 0.03rem 0.05rem;
-			gap: 0.05rem;
-		}
-
-		.item-text {
-			font-size: 0.4rem;
-			padding: 0.02rem 0.075rem;
-		}
-
-		.item-remove-btn {
-			width: 8px;
-			height: 8px;
-			font-size: 0.4rem;
-		}
-	}
-
 	@media (max-width: 500px) {
 		.panel-item {
-			padding: 0.02rem 0.04rem;
+			padding: 0.03rem 0.05rem;
 		}
 
 		.item-text {
-			font-size: 0.35rem;
-			padding: 0.015rem 0.05rem;
+			font-size: 0.55rem;
+			padding: 0.06rem 0.12rem;
 		}
 
 		.item-remove-btn {
-			width: 6px;
-			height: 6px;
-			font-size: 0.3rem;
+			width: 12px;
+			height: 12px;
+			font-size: 0.55rem;
 		}
 	}
 </style>

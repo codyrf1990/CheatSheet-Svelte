@@ -225,14 +225,14 @@
 		}
 	}
 
-	/* Extreme narrow */
+	/* Extreme narrow - keep 2-column layout */
 	@media (max-width: 500px) {
 		.maint-cell {
 			padding: 0.15rem 0.1rem;
 		}
 
 		.maint-code {
-			font-size: 0.5rem;
+			font-size: 0.55rem;
 		}
 
 		.bits-cell {
@@ -240,20 +240,20 @@
 		}
 
 		.bits-container {
-			gap: 0.15rem;
-		}
-
-		.groups-grid {
-			flex-direction: column;
 			gap: 0.125rem;
 		}
 
+		.groups-grid {
+			gap: 0.1rem;
+		}
+
 		.groups-grid > :global(.master-bit) {
-			flex: 1 1 100%;
+			flex: 1 1 120px;
+			min-width: 100px;
 		}
 
 		.loose-bits {
-			gap: 0.15rem;
+			gap: 0.1rem;
 		}
 	}
 </style>

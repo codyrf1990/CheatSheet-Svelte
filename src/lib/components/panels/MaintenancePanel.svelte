@@ -48,34 +48,28 @@
 </script>
 
 <section class="maintenance-panel">
-	<div class="panel-head">
-		<h2 class="panel-title">Maintenance SKUs</h2>
-		<div class="panel-controls">
-			<button
-				type="button"
-				class="panel-control-btn"
-				onclick={handleAddMaintenance}
-				aria-label="Add maintenance item"
-			>
-				+
-			</button>
-			<button
-				type="button"
-				class="panel-control-btn"
-				class:active={removeMode}
-				onclick={handleToggleRemove}
-				aria-pressed={removeMode}
-				aria-label="Toggle delete mode"
-			>
-				&minus;
-			</button>
-		</div>
-	</div>
-
 	<div class="panel-body">
 		<!-- Maintenance SKUs Section -->
 		<div class="section">
-			<h3 class="section-header">Maintenance SKUs</h3>
+			<div class="section-header">
+				<span class="section-title">Maintenance SKUs</span>
+				<div class="section-controls">
+					<button
+						type="button"
+						class="control-btn"
+						onclick={handleAddMaintenance}
+						aria-label="Add maintenance item"
+					>+</button>
+					<button
+						type="button"
+						class="control-btn"
+						class:active={removeMode}
+						onclick={handleToggleRemove}
+						aria-pressed={removeMode}
+						aria-label="Toggle delete mode"
+					>&minus;</button>
+				</div>
+			</div>
 			<ul class="panel-items">
 				{#each maintenanceItems() as item (item)}
 					<PanelItem
@@ -92,7 +86,17 @@
 
 		<!-- SolidWorks SKUs Section -->
 		<div class="section">
-			<h3 class="section-header">SolidWorks SKUs</h3>
+			<div class="section-header">
+				<span class="section-title">SolidWorks SKUs</span>
+				<div class="section-controls">
+					<button
+						type="button"
+						class="control-btn"
+						onclick={handleAddSolidworks}
+						aria-label="Add SolidWorks item"
+					>+</button>
+				</div>
+			</div>
 			<ul class="panel-items">
 				{#each solidworksItems() as item (item)}
 					<PanelItem
@@ -111,6 +115,9 @@
 
 <style>
 	.maintenance-panel {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
 		background: linear-gradient(135deg, rgba(28, 28, 28, 0.94) 0%, rgba(12, 12, 12, 0.92) 100%);
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
@@ -120,59 +127,13 @@
 			0 25px 50px rgba(0, 0, 0, 0.4),
 			0 10px 20px rgba(0, 0, 0, 0.2),
 			inset 0 1px 0 rgba(255, 255, 255, 0.03);
-		overflow: hidden;
-	}
-
-	.panel-head {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0.3rem 0.5rem;
-		background: rgba(255, 255, 255, 0.03);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-	}
-
-	.panel-title {
-		margin: 0;
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: rgba(255, 255, 255, 0.9);
-	}
-
-	.panel-controls {
-		display: flex;
-		gap: 0.25rem;
-	}
-
-	.panel-control-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 26px;
-		height: 26px;
-		padding: 0;
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 6px;
-		color: rgba(255, 255, 255, 0.7);
-		font-size: 1.1rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 150ms ease;
-	}
-
-	.panel-control-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: rgba(255, 255, 255, 0.9);
-	}
-
-	.panel-control-btn.active {
-		background: rgba(200, 16, 46, 0.2);
-		border-color: rgba(200, 16, 46, 0.4);
-		color: #ff6666;
 	}
 
 	.panel-body {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
 		padding: 0.25rem 0.375rem;
 	}
 
@@ -185,14 +146,53 @@
 	}
 
 	.section-header {
-		margin: 0 0 0.25rem 0;
-		padding: 0.15rem 0.25rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin: 0 0 0.2rem 0;
+		padding: 0.1rem 0.2rem;
+		border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+	}
+
+	.section-title {
 		font-size: 0.65rem;
 		font-weight: 600;
 		color: var(--color-solidcam-gold, #d4af37);
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+	}
+
+	.section-controls {
+		display: flex;
+		gap: 0.15rem;
+	}
+
+	.control-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 18px;
+		height: 18px;
+		padding: 0;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 4px;
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 0.8rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 150ms ease;
+	}
+
+	.control-btn:hover {
+		background: rgba(255, 255, 255, 0.1);
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	.control-btn.active {
+		background: rgba(200, 16, 46, 0.2);
+		border-color: rgba(200, 16, 46, 0.4);
+		color: #ff6666;
 	}
 
 	.panel-items {
@@ -206,33 +206,55 @@
 
 	/* Responsive */
 	@media (max-width: 768px) {
-		.panel-head {
-			padding: 0.25rem 0.4rem;
+		.section-title {
+			font-size: 0.6rem;
 		}
 
-		.panel-title {
-			font-size: 0.75rem;
-		}
-
-		.panel-control-btn {
-			width: 22px;
-			height: 22px;
-			font-size: 0.9rem;
-		}
-
-		.section-header {
-			font-size: 0.55rem;
+		.control-btn {
+			width: 16px;
+			height: 16px;
+			font-size: 0.7rem;
 		}
 	}
 
 	@media (max-width: 640px) {
-		.panel-items {
-			grid-template-columns: 1fr;
-			gap: 0.1rem;
+		.section-title {
+			font-size: 0.55rem;
 		}
 
-		.section-header {
-			font-size: 0.5rem;
+		.control-btn {
+			width: 14px;
+			height: 14px;
+			font-size: 0.6rem;
+		}
+
+		.panel-items {
+			gap: 0.1rem;
+		}
+	}
+
+	@media (max-width: 500px) {
+		.maintenance-panel {
+			flex: none;
+		}
+
+		.panel-body {
+			flex: 0 0 auto;
+			justify-content: flex-start;
+		}
+
+		.section-title {
+			font-size: 0.55rem;
+		}
+
+		.control-btn {
+			width: 14px;
+			height: 14px;
+			font-size: 0.55rem;
+		}
+
+		.panel-items {
+			gap: 0.1rem;
 		}
 	}
 </style>

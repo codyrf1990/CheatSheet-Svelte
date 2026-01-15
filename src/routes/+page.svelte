@@ -198,10 +198,12 @@
 	}
 
 	.content-area {
+		flex: 1;
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) minmax(180px, 320px);
 		gap: clamp(0.2rem, 0.6vw, 0.5rem);
 		margin-top: clamp(0.2rem, 0.5vw, 0.3rem);
+		min-height: 0;
 	}
 
 	.main-content {
@@ -213,6 +215,7 @@
 		flex-direction: column;
 		gap: 0.25rem;
 		min-width: 0;
+		min-height: 0;
 	}
 
 	/* Dropdown menus - positioned absolutely on page */
@@ -339,6 +342,11 @@
 		.content-area {
 			grid-template-columns: minmax(0, 1fr) minmax(100px, 160px);
 			gap: 0.075rem;
+			align-items: start;
+		}
+
+		.sidebar {
+			align-self: start;
 		}
 	}
 
