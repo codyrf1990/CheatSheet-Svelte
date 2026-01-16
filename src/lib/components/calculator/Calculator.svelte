@@ -399,52 +399,55 @@
 	}
 </script>
 
-<section class="panel calculator-panel" data-panel="calculator">
+<section class="panel calculator-panel" data-panel="calculator" aria-label="Price calculator">
 	<div class="panel-head">
 		<h2 class="panel-title">Calculator</h2>
 	</div>
 	<div class="calculator-shell">
-		<div class="calculator">
+		<div class="calculator" role="application" aria-label="Calculator">
 			<button
 				type="button"
 				class="calculator-display"
 				onclick={handleDisplayClick}
 				ondblclick={handleDisplayDoubleClick}
+				aria-label="Display: {displayText}. Click to copy discount, double-click to copy full value"
+				aria-live="polite"
 			>
 				{displayText}
 			</button>
 			<div class="calculator-buttons">
-				<button type="button" class="calc-btn clear" onclick={handleClear}>AC</button>
-				<button type="button" class="calc-btn" onclick={handleDelete}>DEL</button>
-				<button type="button" class="calc-btn operation" onclick={handlePercent}>%</button>
-				<button type="button" class="calc-btn operation" onclick={() => handleOperator('/')}>÷</button>
+				<button type="button" class="calc-btn clear" onclick={handleClear} aria-label="All clear">AC</button>
+				<button type="button" class="calc-btn" onclick={handleDelete} aria-label="Delete last digit">DEL</button>
+				<button type="button" class="calc-btn operation" onclick={handlePercent} aria-label="Percent">%</button>
+				<button type="button" class="calc-btn operation" onclick={() => handleOperator('/')} aria-label="Divide">÷</button>
 
-				<button type="button" class="calc-btn" onclick={() => inputDigit('7')}>7</button>
-				<button type="button" class="calc-btn" onclick={() => inputDigit('8')}>8</button>
-				<button type="button" class="calc-btn" onclick={() => inputDigit('9')}>9</button>
-				<button type="button" class="calc-btn operation" onclick={() => handleOperator('*')}>×</button>
+				<button type="button" class="calc-btn" onclick={() => inputDigit('7')} aria-label="7">7</button>
+				<button type="button" class="calc-btn" onclick={() => inputDigit('8')} aria-label="8">8</button>
+				<button type="button" class="calc-btn" onclick={() => inputDigit('9')} aria-label="9">9</button>
+				<button type="button" class="calc-btn operation" onclick={() => handleOperator('*')} aria-label="Multiply">×</button>
 
-				<button type="button" class="calc-btn" onclick={() => inputDigit('4')}>4</button>
-				<button type="button" class="calc-btn" onclick={() => inputDigit('5')}>5</button>
-				<button type="button" class="calc-btn" onclick={() => inputDigit('6')}>6</button>
-				<button type="button" class="calc-btn operation" onclick={() => handleOperator('-')}>−</button>
+				<button type="button" class="calc-btn" onclick={() => inputDigit('4')} aria-label="4">4</button>
+				<button type="button" class="calc-btn" onclick={() => inputDigit('5')} aria-label="5">5</button>
+				<button type="button" class="calc-btn" onclick={() => inputDigit('6')} aria-label="6">6</button>
+				<button type="button" class="calc-btn operation" onclick={() => handleOperator('-')} aria-label="Subtract">−</button>
 
-				<button type="button" class="calc-btn" onclick={() => inputDigit('1')}>1</button>
-				<button type="button" class="calc-btn" onclick={() => inputDigit('2')}>2</button>
-				<button type="button" class="calc-btn" onclick={() => inputDigit('3')}>3</button>
-				<button type="button" class="calc-btn operation" onclick={() => handleOperator('+')}>+</button>
+				<button type="button" class="calc-btn" onclick={() => inputDigit('1')} aria-label="1">1</button>
+				<button type="button" class="calc-btn" onclick={() => inputDigit('2')} aria-label="2">2</button>
+				<button type="button" class="calc-btn" onclick={() => inputDigit('3')} aria-label="3">3</button>
+				<button type="button" class="calc-btn operation" onclick={() => handleOperator('+')} aria-label="Add">+</button>
 
-				<button type="button" class="calc-btn" onclick={handleToggleSign}>+/−</button>
-				<button type="button" class="calc-btn" onclick={() => inputDigit('0')}>0</button>
-				<button type="button" class="calc-btn" onclick={inputDecimal}>.</button>
-				<button type="button" class="calc-btn equals" onclick={handleEquals}>=</button>
+				<button type="button" class="calc-btn" onclick={handleToggleSign} aria-label="Toggle positive/negative">+/−</button>
+				<button type="button" class="calc-btn" onclick={() => inputDigit('0')} aria-label="0">0</button>
+				<button type="button" class="calc-btn" onclick={inputDecimal} aria-label="Decimal point">.</button>
+				<button type="button" class="calc-btn equals" onclick={handleEquals} aria-label="Equals">=</button>
 			</div>
-			<div class="calculator-quick-row">
+			<div class="calculator-quick-row" aria-label="Quick discount percentages">
 				{#each quickPercents as pct}
 					<button
 						type="button"
 						class="calc-btn quick-percent"
 						onclick={() => handleQuickPercent(pct)}
+						aria-label="Calculate {pct} percent discount"
 					>
 						{pct}%
 					</button>

@@ -12,12 +12,13 @@
 
 <div class="package-table-container">
 	<div class="main-table">
-		<table>
+		<table aria-label="SolidCAM packages and included bits">
+			<caption class="sr-only">SolidCAM package options with maintenance SKUs and included software bits</caption>
 			<thead>
 				<tr>
-					<th class="col-package">Package</th>
-					<th class="col-maint">Maintenance</th>
-					<th class="col-bits">Included Bits</th>
+					<th scope="col" class="col-package">Package</th>
+					<th scope="col" class="col-maint">Maintenance</th>
+					<th scope="col" class="col-bits">Included Bits</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -112,5 +113,18 @@
 			font-size: 0.7rem;
 			letter-spacing: 0.04em;
 		}
+	}
+
+	/* Screen reader only */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 </style>

@@ -29,8 +29,11 @@
 	{@html webManifestLink}
 </svelte:head>
 
-<!-- Video Background (no overlay) -->
-<div class="fixed inset-0 -z-10 overflow-hidden">
+<!-- Skip to main content link (accessibility) -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- Video Background (decorative) -->
+<div class="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
 	<video
 		autoplay
 		loop
@@ -44,7 +47,7 @@
 </div>
 
 <!-- Content Gate -->
-<div class="relative min-h-screen">
+<div class="relative min-h-screen" id="main-content">
 	{#if !initialized}
 		<div class="loading-screen">
 			<div class="loading-spinner"></div>
@@ -60,6 +63,28 @@
 <ToastContainer />
 
 <style>
+	/* Skip link - visible only when focused */
+	.skip-link {
+		position: fixed;
+		top: -100px;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 9999;
+		padding: 0.75rem 1.5rem;
+		background: #0a0a0f;
+		color: #d4af37;
+		border: 2px solid #d4af37;
+		border-radius: 8px;
+		font-weight: 600;
+		text-decoration: none;
+		transition: top 200ms ease;
+	}
+
+	.skip-link:focus {
+		top: 1rem;
+		outline: none;
+	}
+
 	.loading-screen {
 		display: flex;
 		align-items: center;

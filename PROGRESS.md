@@ -795,10 +795,85 @@ Data migration was completed as part of Phase 4 since the feature components req
   - User switches companies
   - User switches pages
 
+- [x] **Comprehensive Accessibility Audit** (2026-01-15)
+  - Files: Multiple component updates
+
+  **+layout.svelte - Landmarks:**
+  - Added skip-to-content link (`<a href="#main-content" class="skip-link">`)
+  - Added `id="main-content"` to content container
+  - Added `aria-hidden="true"` on decorative video background
+  - Skip link CSS: visually hidden until focused
+
+  **CompanyPageBar.svelte - Tab Roles:**
+  - Page tabs: `role="tablist"`, `role="tab"`, `aria-selected`
+  - Company dropdown: `role="listbox"`, `role="option"`, `aria-selected`
+  - Context menus: `role="menu"`, `role="menuitem"`
+  - Search input: `aria-label="Search companies"`
+  - Company trigger: `aria-haspopup="listbox"`, `aria-expanded`
+  - Add tab button: `aria-label`
+
+  **Input.svelte - Form Accessibility:**
+  - Added `hint` prop for descriptive text
+  - `aria-describedby` links error AND hint to input
+  - `aria-invalid="true"` when error present
+  - `.sr-only` class for screen-reader-only text
+  - Required indicator: visual asterisk + "(required)" sr-only text
+  - Improved placeholder contrast (0.35 → 0.5)
+
+  **Checkbox.svelte - Focus States:**
+  - Added visible `focus-visible` outline (2px solid gold)
+  - Added focus outline-offset and box-shadow
+  - Improved unchecked border contrast (0.2 → 0.4)
+
+  **CompaniesModal.svelte:**
+  - `aria-label` on search input
+  - `aria-label` on rename/delete buttons with company name
+  - `:focus-within` visibility for action buttons
+
+  **CurrentProductsModal.svelte - Tab Roles:**
+  - Tab container: `role="tablist"`, `aria-label`
+  - Tabs: `role="tab"`, `aria-selected`
+  - Content: `role="tabpanel"`, `aria-label`
+
+  **Calculator.svelte:**
+  - Wrapper: `role="application"`, `aria-label="Calculator"`
+  - Display: `aria-label` with current value, `aria-live="polite"`
+  - Number buttons: `aria-label` with digit
+  - Operator buttons: `aria-label` with operation name
+  - Quick percents: `aria-label="Calculate N percent discount"`
+  - Clear/delete: `aria-label="All clear"`, `aria-label="Delete last digit"`
+
+  **PackageTable.svelte:**
+  - Table: `aria-label="SolidCAM packages and included bits"`
+  - Added `<caption class="sr-only">` describing table purpose
+  - Header cells: `scope="col"` attribute
+
+  **MasterBit.svelte - Expandable:**
+  - Expand button: `aria-controls` linked to sub-bits container ID
+  - Sub-bits list: `id="subbits-{masterId}"`, `role="group"`, `aria-label`
+  - SVG icons: `aria-hidden="true"`
+
+  **Header.svelte:**
+  - Removed redundant `role="banner"` (implicit on `<header>`)
+  - Nav: `aria-label="Main navigation"`
+  - External links: `aria-label="{label} (opens in new window)"`
+  - Dropdown buttons: `aria-haspopup="menu"`, `aria-expanded`
+  - Decorative icons: `aria-hidden="true"`
+
+  **LoginScreen.svelte - Hint & Contrast:**
+  - Converted separate hint paragraph to Input `hint` prop
+  - Improved brand text contrast (0.35 → 0.5)
+  - Improved brand version contrast (0.5 → 0.7)
+  - Improved divider visibility (0.15 → 0.25)
+
+  **Color Contrast Improvements:**
+  - Input placeholder: rgba(255,255,255,0.35) → 0.5
+  - CompanyPageBar search placeholder: 0.35 → 0.5
+  - LoginScreen brand text/version: improved to WCAG AA levels
+
 ### Remaining / Needs Improvement
 
 - [ ] Further responsive testing at various viewports
-- [ ] Accessibility audit
 - [ ] Final polish and testing
 
 ---

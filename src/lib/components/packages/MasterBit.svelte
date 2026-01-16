@@ -100,7 +100,8 @@
 			class="expand-toggle"
 			onclick={handleExpandToggle}
 			aria-expanded={expanded}
-			aria-label={expanded ? 'Collapse group' : 'Expand group'}
+			aria-controls="subbits-{group.masterId}"
+			aria-label="{expanded ? 'Collapse' : 'Expand'} {group.label}"
 		>
 			<svg
 				class="expand-icon"
@@ -109,13 +110,14 @@
 				fill="none"
 				stroke="currentColor"
 				stroke-width="2"
+				aria-hidden="true"
 			>
 				<path d="M19 9l-7 7-7-7" />
 			</svg>
 		</button>
 	</div>
 	{#if expanded}
-		<ul class="sub-bits" data-sortable-group={group.masterId}>
+		<ul id="subbits-{group.masterId}" class="sub-bits" data-sortable-group={group.masterId} role="group" aria-label="{group.label} options">
 			{#each group.bits as bit, index (bit)}
 				<SubBit
 					{bit}

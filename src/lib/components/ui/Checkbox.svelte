@@ -106,7 +106,7 @@
 		width: 12px;
 		height: 12px;
 		background: rgba(18, 18, 26, 0.8);
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.4);
 		border-radius: 2px;
 		transition: all 150ms ease;
 		flex-shrink: 0;
@@ -138,8 +138,9 @@
 
 	/* Focus state */
 	.checkbox-input input:focus-visible + .checkbox-control {
-		outline: none;
-		box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
+		outline: 2px solid #d4af37;
+		outline-offset: 2px;
+		box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
 	}
 
 	.checkbox-label {

@@ -222,11 +222,13 @@
 
 <Modal {open} {onclose} title="SolidCAM Product Catalog" size="wide">
 	<!-- Tabs -->
-	<div class="tabs-container">
+	<div class="tabs-container" role="tablist" aria-label="Product categories">
 		{#each tabs as tab}
 			<button
+				role="tab"
 				class="tab-btn"
 				class:active={activeTab === tab.id}
+				aria-selected={activeTab === tab.id}
 				onclick={() => (activeTab = tab.id)}
 			>
 				{tab.label}
@@ -235,7 +237,7 @@
 	</div>
 
 	<!-- Tab Content -->
-	<div class="tab-content">
+	<div class="tab-content" role="tabpanel" aria-label="{tabs.find(t => t.id === activeTab)?.label || 'Content'}">
 		{#if activeTab === 'overview'}
 			<!-- Overview Tab -->
 			<section class="section">

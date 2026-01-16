@@ -4,14 +4,25 @@
 	interface Props extends HTMLInputAttributes {
 		label?: string;
 		error?: string;
+		hint?: string;
 		value?: string;
 		showRequired?: boolean;
 	}
 
-	let { label, error, class: className = '', id, value = $bindable(''), showRequired = false, ...rest }: Props = $props();
+	let { label, error, hint, class: className = '', id, value = $bindable(''), showRequired = false, ...rest }: Props = $props();
 
 	let inputId = $derived(id || crypto.randomUUID());
+	let errorId = $derived(`${inputId}-error`);
+	let hintId = $derived(`${inputId}-hint`);
 	let isRequired = $derived(rest.required || showRequired);
+
+	// Build aria-describedby combining hint and error
+	let ariaDescribedBy = $derived.by(() => {
+		const ids: string[] = [];
+		if (hint) ids.push(hintId);
+		if (error) ids.push(errorId);
+		return ids.length > 0 ? ids.join(' ') : undefined;
+	});
 </script>
 
 <div class="input-wrapper {className}" class:has-error={error}>
@@ -19,15 +30,28 @@
 		<label for={inputId} class="input-label">
 			{label}
 			{#if isRequired}
-				<span class="required-indicator">*</span>
+				<span class="required-indicator" aria-hidden="true">*</span>
+				<span class="sr-only">(required)</span>
 			{/if}
 		</label>
 	{/if}
 
-	<input id={inputId} class="input-field" class:has-error={error} bind:value {...rest} />
+	<input
+		id={inputId}
+		class="input-field"
+		class:has-error={error}
+		bind:value
+		aria-invalid={error ? 'true' : undefined}
+		aria-describedby={ariaDescribedBy}
+		{...rest}
+	/>
+
+	{#if hint}
+		<span id={hintId} class="input-hint">{hint}</span>
+	{/if}
 
 	{#if error}
-		<span class="input-error" role="alert">{error}</span>
+		<span id={errorId} class="input-error" role="alert">{error}</span>
 	{/if}
 </div>
 
@@ -56,7 +80,20 @@
 	}
 
 	.input-field::placeholder {
-		color: rgba(255, 255, 255, 0.35);
+		color: rgba(255, 255, 255, 0.5);
+	}
+
+	/* Screen reader only */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	.input-field:focus {
@@ -68,6 +105,11 @@
 
 	.input-field.has-error {
 		border-color: #ef4444;
+	}
+
+	.input-hint {
+		font-size: 0.75rem;
+		color: rgba(255, 255, 255, 0.5);
 	}
 
 	.input-error {

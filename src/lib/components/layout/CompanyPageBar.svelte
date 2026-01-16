@@ -228,6 +228,8 @@
 			onclick={toggleDropdown}
 			oncontextmenu={handleCompanyContextMenu}
 			aria-expanded={dropdownOpen}
+			aria-haspopup="listbox"
+			aria-label="Select company, currently {currentCompany?.name || 'none'}"
 		>
 			<span class="company-name">{currentCompany?.name || 'No Company'}</span>
 			<span
@@ -246,7 +248,7 @@
 	<div class="divider"></div>
 
 	<!-- Page Tabs -->
-	<div class="page-tabs">
+	<div class="page-tabs" role="tablist" aria-label="Company pages">
 		{#if currentCompany}
 			{#each currentCompany.pages as page (page.id)}
 				{#if editingPageId === page.id}
@@ -257,13 +259,16 @@
 						bind:value={editingPageName}
 						onblur={handlePageRenameSubmit}
 						onkeydown={handlePageRenameKeydown}
+						aria-label="Page name"
 						autofocus
 					/>
 				{:else}
 					<button
 						type="button"
+						role="tab"
 						class="page-tab"
 						class:active={page.id === currentCompany.currentPageId}
+						aria-selected={page.id === currentCompany.currentPageId}
 						onclick={() => handlePageSelect(page.id)}
 						ondblclick={() => handlePageDoubleClick(page.id, page.name)}
 						oncontextmenu={(e) => handlePageContextMenu(e, page.id)}
@@ -273,7 +278,7 @@
 				{/if}
 			{/each}
 		{/if}
-		<button type="button" class="page-tab add-tab" onclick={handleNewPage} title="New page">
+		<button type="button" class="page-tab add-tab" onclick={handleNewPage} aria-label="Add new page">
 			+
 		</button>
 	</div>
@@ -291,7 +296,7 @@
 
 <!-- Company Dropdown Menu (outside company-page-bar to escape backdrop-filter clipping) -->
 {#if dropdownOpen}
-	<div class="dropdown-menu" style="top: {dropdownPosition.top}px; left: {dropdownPosition.left}px;">
+	<div class="dropdown-menu" role="listbox" aria-label="Companies" style="top: {dropdownPosition.top}px; left: {dropdownPosition.left}px;">
 		<!-- Search (fixed) -->
 		<div class="dropdown-header">
 			<input
@@ -299,6 +304,7 @@
 				placeholder="Search companies..."
 				bind:value={searchQuery}
 				class="search-input"
+				aria-label="Search companies"
 			/>
 		</div>
 
@@ -311,8 +317,10 @@
 						{#each filteredCompanies() as company (company.id)}
 							<button
 								type="button"
+								role="option"
 								class="company-item"
 								class:active={company.id === currentCompany?.id}
+								aria-selected={company.id === currentCompany?.id}
 								onclick={() => handleCompanySelect(company.id)}
 							>
 								{company.name}
@@ -328,8 +336,10 @@
 					{#each recent.slice(0, 8) as company (company.id)}
 						<button
 							type="button"
+							role="option"
 							class="company-item"
 							class:active={company.id === currentCompany?.id}
+							aria-selected={company.id === currentCompany?.id}
 							onclick={() => handleCompanySelect(company.id)}
 						>
 							{company.name}
@@ -343,7 +353,7 @@
 
 		<!-- Footer (fixed) -->
 		<div class="dropdown-footer">
-			<button type="button" class="footer-btn footer-btn--new" onclick={handleNewCompany}>+</button>
+			<button type="button" class="footer-btn footer-btn--new" onclick={handleNewCompany} aria-label="Create new company">+</button>
 			<button type="button" class="footer-btn footer-btn--view" onclick={onViewAll}>
 				View All ({allCompanies.length})
 			</button>
@@ -353,15 +363,15 @@
 
 <!-- Context Menu -->
 {#if contextMenu}
-	<div class="context-menu" style="left: {contextMenu.x}px; top: {contextMenu.y}px;">
+	<div class="context-menu" role="menu" aria-label="{contextMenu.type === 'company' ? 'Company actions' : 'Page actions'}" style="left: {contextMenu.x}px; top: {contextMenu.y}px;">
 		{#if contextMenu.type === 'company'}
-			<button type="button" onclick={handleRenameCompany}>Rename</button>
-			<button type="button" onclick={handleDuplicateCompany}>Duplicate</button>
-			<button type="button" class="danger" onclick={handleDeleteCompany}>Delete</button>
+			<button type="button" role="menuitem" onclick={handleRenameCompany}>Rename</button>
+			<button type="button" role="menuitem" onclick={handleDuplicateCompany}>Duplicate</button>
+			<button type="button" role="menuitem" class="danger" onclick={handleDeleteCompany}>Delete</button>
 		{:else}
-			<button type="button" onclick={handleRenamePage}>Rename</button>
-			<button type="button" onclick={handleCopyPage}>Copy</button>
-			<button type="button" class="danger" onclick={handleDeletePage}>Delete</button>
+			<button type="button" role="menuitem" onclick={handleRenamePage}>Rename</button>
+			<button type="button" role="menuitem" onclick={handleCopyPage}>Copy</button>
+			<button type="button" role="menuitem" class="danger" onclick={handleDeletePage}>Delete</button>
 		{/if}
 	</div>
 {/if}
@@ -541,7 +551,7 @@
 	}
 
 	.search-input::placeholder {
-		color: rgba(255, 255, 255, 0.35);
+		color: rgba(255, 255, 255, 0.5);
 	}
 
 	.search-input:focus {

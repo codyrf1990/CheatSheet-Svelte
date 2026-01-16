@@ -79,18 +79,12 @@
 							placeholder="e.g., john.doe"
 							bind:value={username}
 							{error}
+							hint="This is just an identifier, not a secure login"
 							autocomplete="username"
 							autocapitalize="none"
 							disabled={isLoading}
 						/>
 					</div>
-
-					<p class="login-hint">
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-							<circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/>
-						</svg>
-						This is just an identifier, not a secure login
-					</p>
 
 					<Button type="submit" variant="gold" size="lg" disabled={isLoading} class="submit-btn">
 						{#if isLoading}
@@ -337,24 +331,6 @@
 		position: relative;
 	}
 
-	.login-hint {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		font-size: 0.75rem;
-		color: rgba(255, 255, 255, 0.4);
-		margin: 0;
-		line-height: 1.5;
-	}
-
-	.login-hint svg {
-		width: 14px;
-		height: 14px;
-		flex-shrink: 0;
-		opacity: 0.6;
-	}
-
 	:global(.submit-btn) {
 		width: 100%;
 		position: relative;
@@ -426,19 +402,19 @@
 
 	.brand-text {
 		font-size: 0.75rem;
-		color: rgba(255, 255, 255, 0.35);
+		color: rgba(255, 255, 255, 0.5);
 		letter-spacing: 0.05em;
 	}
 
 	.brand-divider {
 		width: 1px;
 		height: 12px;
-		background: rgba(255, 255, 255, 0.15);
+		background: rgba(255, 255, 255, 0.25);
 	}
 
 	.brand-version {
 		font-size: 0.7rem;
-		color: rgba(212, 175, 55, 0.5);
+		color: rgba(212, 175, 55, 0.7);
 		font-weight: 500;
 	}
 
