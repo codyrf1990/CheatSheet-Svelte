@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Panel as PanelType } from '$types';
 	import { panelsStore } from '$stores/panels.svelte';
-	import { Button, Input, Modal } from '$components/ui';
+	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import PanelItem from './PanelItem.svelte';
 
 	interface Props {
@@ -13,39 +13,19 @@
 
 	// Local state
 	let removeMode = $state(false);
-	let addDialogOpen = $state(false);
-	let addDialogTarget = $state<'maintenance' | 'solidworks' | null>(null);
-	let addDialogValue = $state('');
 
-	let addDialogTitle = $derived(() => {
-		if (addDialogTarget === 'maintenance') return 'Add Maintenance SKU';
-		if (addDialogTarget === 'solidworks') return 'Add SolidWorks SKU';
-		return '';
+	// Merge static items with custom items from global prefs
+	let maintenanceItems = $derived(() => {
+		const staticItems = maintenancePanel.items;
+		const customItems = userPrefsStore.getCustomPanelItems(maintenancePanel.id);
+		return [...staticItems, ...customItems.filter((c) => !staticItems.includes(c))];
 	});
 
-	let addDialogLabel = $derived(() => {
-		if (addDialogTarget === 'maintenance') return 'Maintenance SKU';
-		if (addDialogTarget === 'solidworks') return 'SolidWorks SKU';
-		return '';
+	let solidworksItems = $derived(() => {
+		const staticItems = solidworksPanel.items;
+		const customItems = userPrefsStore.getCustomPanelItems(solidworksPanel.id);
+		return [...staticItems, ...customItems.filter((c) => !staticItems.includes(c))];
 	});
-
-	let addDialogValid = $derived(() => addDialogValue.trim().length > 0);
-
-	// Always show panel's base items
-	let maintenanceItems = $derived(() => maintenancePanel.items);
-	let solidworksItems = $derived(() => solidworksPanel.items);
-
-	function handleAddMaintenance() {
-		addDialogTarget = 'maintenance';
-		addDialogValue = '';
-		addDialogOpen = true;
-	}
-
-	function handleAddSolidworks() {
-		addDialogTarget = 'solidworks';
-		addDialogValue = '';
-		addDialogOpen = true;
-	}
 
 	function handleToggleRemove() {
 		removeMode = !removeMode;
@@ -55,35 +35,18 @@
 		panelsStore.toggleItem(panelId, item);
 	}
 
-	function handleItemRemove(panelId: string, item: string) {
-		panelsStore.removeItem(panelId, item);
-	}
-
-	function closeAddDialog() {
-		addDialogOpen = false;
-		addDialogTarget = null;
-		addDialogValue = '';
-	}
-
-	function submitAddDialog() {
-		if (!addDialogTarget) return;
-		const text = addDialogValue.trim();
-		if (!text) return;
-
-		if (addDialogTarget === 'maintenance') {
-			panelsStore.addItem(maintenancePanel.id, text);
+	function handleItemRemove(panelId: string, item: string, isCustom: boolean) {
+		if (isCustom) {
+			// Remove from global user prefs
+			userPrefsStore.removeCustomPanelItem(panelId, item);
 		} else {
-			panelsStore.addItem(solidworksPanel.id, text);
+			// Mark as removed in panel state (per-page)
+			panelsStore.removeItem(panelId, item);
 		}
-
-		closeAddDialog();
 	}
 
-	function handleAddDialogKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' && addDialogValid()) {
-			e.preventDefault();
-			submitAddDialog();
-		}
+	function isCustomItem(panelId: string, item: string): boolean {
+		return userPrefsStore.isCustomPanelItem(panelId, item);
 	}
 </script>
 
@@ -94,12 +57,6 @@
 			<div class="section-header">
 				<span class="section-title">Maintenance SKUs</span>
 				<div class="section-controls">
-					<button
-						type="button"
-						class="control-btn"
-						onclick={handleAddMaintenance}
-						aria-label="Add maintenance item">+</button
-					>
 					<button
 						type="button"
 						class="control-btn"
@@ -117,8 +74,10 @@
 						checked={panelsStore.hasItem(maintenancePanel.id, item)}
 						showCheckbox={true}
 						{removeMode}
+						isCustom={isCustomItem(maintenancePanel.id, item)}
 						onToggle={() => handleItemToggle(maintenancePanel.id, item)}
-						onRemove={() => handleItemRemove(maintenancePanel.id, item)}
+						onRemove={() =>
+							handleItemRemove(maintenancePanel.id, item, isCustomItem(maintenancePanel.id, item))}
 					/>
 				{/each}
 			</ul>
@@ -128,14 +87,6 @@
 		<div class="section">
 			<div class="section-header">
 				<span class="section-title">SolidWorks SKUs</span>
-				<div class="section-controls">
-					<button
-						type="button"
-						class="control-btn"
-						onclick={handleAddSolidworks}
-						aria-label="Add SolidWorks item">+</button
-					>
-				</div>
 			</div>
 			<ul class="panel-items">
 				{#each solidworksItems() as item (item)}
@@ -144,39 +95,16 @@
 						checked={panelsStore.hasItem(solidworksPanel.id, item)}
 						showCheckbox={true}
 						{removeMode}
+						isCustom={isCustomItem(solidworksPanel.id, item)}
 						onToggle={() => handleItemToggle(solidworksPanel.id, item)}
-						onRemove={() => handleItemRemove(solidworksPanel.id, item)}
+						onRemove={() =>
+							handleItemRemove(solidworksPanel.id, item, isCustomItem(solidworksPanel.id, item))}
 					/>
 				{/each}
 			</ul>
 		</div>
 	</div>
 </section>
-
-{#snippet addDialogFooter()}
-	<div class="dialog-actions">
-		<Button variant="ghost" size="sm" onclick={closeAddDialog}>Cancel</Button>
-		<Button variant="gold" size="sm" onclick={submitAddDialog} disabled={!addDialogValid()}>
-			Add
-		</Button>
-	</div>
-{/snippet}
-
-<Modal
-	open={addDialogOpen}
-	onclose={closeAddDialog}
-	title={addDialogTitle()}
-	footer={addDialogFooter}
->
-	<div class="dialog-form">
-		<Input
-			label={addDialogLabel()}
-			placeholder={addDialogLabel()}
-			bind:value={addDialogValue}
-			onkeydown={handleAddDialogKeydown}
-		/>
-	</div>
-</Modal>
 
 <style>
 	.maintenance-panel {
@@ -275,19 +203,6 @@
 		padding: var(--space-0);
 		list-style: none;
 		margin: 0;
-	}
-
-	.dialog-form {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-2);
-	}
-
-	.dialog-actions {
-		display: flex;
-		justify-content: flex-end;
-		gap: var(--space-2);
-		width: 100%;
 	}
 
 	/* Responsive */

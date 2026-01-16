@@ -2,7 +2,7 @@
 	import { companiesStore } from '$stores/companies.svelte';
 	import { syncStore } from '$stores/sync.svelte';
 	import { toastStore } from '$stores/toast.svelte';
-	import { Button, Input, Modal } from '$components/ui';
+	import { AddSkuModal, Button, Input, Modal } from '$components/ui';
 
 	interface Props {
 		editMode?: boolean;
@@ -25,6 +25,7 @@
 	let syncStatus = $derived(syncStore.status);
 
 	// Local UI state
+	let showAddSkuModal = $state(false);
 	let dropdownOpen = $state(false);
 	let dropdownPosition = $state({ top: 0, left: 0 });
 	let searchQuery = $state('');
@@ -431,6 +432,7 @@
 
 	<!-- Edit Controls -->
 	<div class="edit-controls">
+		<Button variant="gold" size="sm" onclick={() => (showAddSkuModal = true)}>+ SKU</Button>
 		<Button variant={editMode ? 'primary' : 'ghost'} size="sm" onclick={onToggleEdit}>
 			{editMode ? 'Done' : 'Edit Order'}
 		</Button>
@@ -569,6 +571,8 @@
 		</div>
 	{/if}
 </Modal>
+
+<AddSkuModal bind:open={showAddSkuModal} onclose={() => (showAddSkuModal = false)} />
 
 <style>
 	.company-page-bar {

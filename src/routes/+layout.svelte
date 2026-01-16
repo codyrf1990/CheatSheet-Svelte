@@ -6,6 +6,7 @@
 	import { ToastContainer } from '$components/ui';
 	import { LoginScreen } from '$components/layout';
 	import { syncStore } from '$stores/sync.svelte';
+	import { userPrefsStore } from '$stores/userPrefs.svelte';
 
 	interface Props {
 		children: Snippet;
@@ -16,6 +17,7 @@
 
 	onMount(() => {
 		syncStore.load();
+		userPrefsStore.init();
 		initialized = true;
 	});
 

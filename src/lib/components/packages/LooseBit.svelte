@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { Checkbox } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
+	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 
 	interface Props {
 		bit: string;
 		packageCode: string;
 		editMode?: boolean;
+		isCustom?: boolean;
 		draggable?: boolean;
 		ondragstart?: (e: DragEvent) => void;
 		ondragover?: (e: DragEvent) => void;
@@ -17,6 +19,7 @@
 		bit,
 		packageCode,
 		editMode = false,
+		isCustom = false,
 		draggable = false,
 		ondragstart,
 		ondragover,
@@ -47,12 +50,14 @@
 	}
 
 	function handleRemove() {
-		packagesStore.removeCustomBit(packageCode, bit);
+		// Remove custom bits from global user prefs
+		userPrefsStore.removeCustomPackageBit(packageCode, bit);
 	}
 </script>
 
 <li
 	class="loose-bit"
+	class:custom={isCustom}
 	data-sortable-item
 	data-bit={bit}
 	draggable={draggable && editMode}
@@ -64,14 +69,16 @@
 		<Checkbox checked={isSelected} onchange={handleToggle} />
 		<span
 			class="bit-text"
+			class:custom={isCustom}
 			role="button"
 			tabindex="0"
 			onclick={handleCopy}
 			onkeydown={handleKeydown}
-			data-copyable-bit>{bit}</span
+			data-copyable-bit
+			>{#if isCustom}<span class="custom-indicator">+</span>{/if}{bit}</span
 		>
 	</label>
-	{#if editMode}
+	{#if editMode && isCustom}
 		<button type="button" class="bit-remove-btn" onclick={handleRemove} aria-label="Remove {bit}">
 			&times;
 		</button>
@@ -119,6 +126,20 @@
 
 	.bit-text:hover {
 		color: var(--color-solidcam-gold, #d4af37);
+	}
+
+	.bit-text.custom {
+		color: var(--color-solidcam-gold, #d4af37);
+	}
+
+	.custom-indicator {
+		font-weight: 600;
+		margin-right: 2px;
+	}
+
+	.loose-bit.custom {
+		border-color: rgba(212, 175, 55, 0.3);
+		background: rgba(212, 175, 55, 0.05);
 	}
 
 	.bit-remove-btn {

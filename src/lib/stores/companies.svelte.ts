@@ -536,7 +536,6 @@ function load(): void {
 			}
 
 			// Migrate package state format in all pages (handles old format)
-			let migrated = false;
 			for (const company of companies) {
 				if (!Array.isArray(company.pages)) continue;
 				for (const page of company.pages) {
@@ -544,12 +543,10 @@ function load(): void {
 						const migratedPackages = migratePackageState(page.state.packages);
 						if (JSON.stringify(migratedPackages) !== JSON.stringify(page.state.packages)) {
 							page.state.packages = migratedPackages;
-							migrated = true;
 						}
 					}
 				}
 			}
-			// Migration complete - no logging needed in production
 		} else {
 			// MIGRATION: Check for old structure
 			const oldPages = localStorage.getItem(OLD_PAGES_KEY);

@@ -8,6 +8,7 @@
 		showCheckbox?: boolean;
 		removeMode?: boolean;
 		draggable?: boolean;
+		isCustom?: boolean;
 		onToggle?: () => void;
 		onRemove?: () => void;
 		ondragstart?: (e: DragEvent) => void;
@@ -21,6 +22,7 @@
 		showCheckbox = false,
 		removeMode = false,
 		draggable = false,
+		isCustom = false,
 		onToggle,
 		onRemove,
 		ondragstart,
@@ -49,6 +51,7 @@
 <li
 	class="panel-item"
 	class:remove-mode={removeMode}
+	class:custom={isCustom}
 	data-sortable-item
 	draggable={draggable && !removeMode}
 	{ondragstart}
@@ -59,7 +62,9 @@
 		{#if showCheckbox}
 			<Checkbox {checked} onchange={handleCheckboxChange} />
 		{/if}
-		<button type="button" class="item-text" onclick={handleCopy}>{item}</button>
+		<button type="button" class="item-text" class:custom={isCustom} onclick={handleCopy}>
+			{#if isCustom}<span class="custom-indicator">+</span>{/if}{item}
+		</button>
 	</div>
 	{#if removeMode}
 		<button type="button" class="item-remove-btn" onclick={handleRemove} aria-label="Remove {item}">
@@ -120,6 +125,17 @@
 
 	.item-text:hover {
 		color: var(--color-solidcam-gold, #d4af37);
+	}
+
+	.item-text.custom {
+		border-color: rgba(212, 175, 55, 0.3);
+		background: rgba(212, 175, 55, 0.05);
+	}
+
+	.custom-indicator {
+		color: var(--color-solidcam-gold, #d4af37);
+		font-weight: 600;
+		margin-right: 2px;
 	}
 
 	.item-remove-btn {

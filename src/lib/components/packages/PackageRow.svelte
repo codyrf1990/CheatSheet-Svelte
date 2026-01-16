@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Package } from '$types';
 	import { toastStore } from '$stores/toast.svelte';
+	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import MasterBit from './MasterBit.svelte';
 	import LooseBit from './LooseBit.svelte';
 
@@ -12,7 +13,19 @@
 	let { pkg, editMode = false }: Props = $props();
 
 	let hasGroups = $derived(pkg.groups && pkg.groups.length > 0);
-	let hasLooseBits = $derived(pkg.looseBits && pkg.looseBits.length > 0);
+
+	// Merge static loose bits with custom bits from global prefs
+	let allLooseBits = $derived(() => {
+		const staticBits = pkg.looseBits || [];
+		const customBits = userPrefsStore.getCustomPackageBits(pkg.code);
+		return [...staticBits, ...customBits.filter((c) => !staticBits.includes(c))];
+	});
+
+	let hasLooseBits = $derived(allLooseBits().length > 0);
+
+	function isCustomBit(bit: string): boolean {
+		return userPrefsStore.isCustomPackageBit(pkg.code, bit);
+	}
 
 	async function handleCodeCopy() {
 		try {
@@ -57,8 +70,8 @@
 			{#if hasLooseBits}
 				<div class="loose-bits-section" class:has-groups={hasGroups}>
 					<ul class="loose-bits" data-sortable-group={pkg.code}>
-						{#each pkg.looseBits as bit (bit)}
-							<LooseBit {bit} packageCode={pkg.code} {editMode} />
+						{#each allLooseBits() as bit (bit)}
+							<LooseBit {bit} packageCode={pkg.code} {editMode} isCustom={isCustomBit(bit)} />
 						{/each}
 					</ul>
 				</div>
