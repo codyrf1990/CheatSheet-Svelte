@@ -1,38 +1,77 @@
-# sv
+# SolidCAM CheatSheet
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Package and panel selection tool for SolidCAM sales operations.
 
-## Creating a project
+## Stack
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **SvelteKit 2.49** + **Svelte 5.46** (runes)
+- **Tailwind CSS 4** (CSS-first config)
+- **TypeScript 5.9**
+- **Firebase 12** (Firestore with offline persistence)
+- **PWA** (@vite-pwa/sveltekit)
 
-```sh
-# create a new project in the current directory
-npx sv create
+## Development
 
-# create a new project in my-app
-npx sv create my-app
+```bash
+pnpm install    # Install dependencies
+pnpm dev        # Start dev server at localhost:5173
+pnpm build      # Production build
+pnpm preview    # Preview production build
 ```
 
-## Developing
+## Quality
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```bash
+pnpm check      # Type check + Svelte validation
+pnpm lint       # ESLint + Prettier check
+pnpm format     # Auto-format code
 ```
 
-## Building
+## Project Structure
 
-To create a production version of your app:
-
-```sh
-npm run build
+```text
+src/
+├── routes/           # SvelteKit routes (+page.svelte, +layout.svelte)
+├── lib/
+│   ├── components/   # Svelte components
+│   │   ├── ui/       # Button, Modal, Input, Checkbox, Toast
+│   │   ├── layout/   # Header, Sidebar, CompanyPageBar
+│   │   ├── packages/ # PackageTable, MasterBit, SubBit
+│   │   ├── panels/   # Panel, PanelItem, EditablePanel
+│   │   └── calculator/
+│   ├── stores/       # Runes-based state (*.svelte.ts)
+│   ├── firebase/     # Firestore client
+│   ├── types/        # TypeScript interfaces
+│   ├── data/         # Package/panel definitions
+│   └── utils/        # Helpers
+├── app.css           # Tailwind + theme tokens
+└── app.html
+static/
+├── video/            # Background video
+├── audio/            # Sound effects
+└── icons/            # PWA icons
 ```
 
-You can preview the production build with `npm run preview`.
+## Environment
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Copy `.env.example` to `.env` and fill in Firebase credentials:
+
+```env
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+```
+
+## Features
+
+- Multi-company/page management
+- Package bit selection with master/sub checkboxes
+- Customizable panels with drag-drop reordering
+- Cloud sync via Firebase
+- Offline-first PWA
+- Sales tax calculator
+- Current products lookup
+
+## License
+
+Proprietary - SolidCAM internal use only.
