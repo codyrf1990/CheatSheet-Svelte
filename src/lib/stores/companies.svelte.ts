@@ -549,9 +549,7 @@ function load(): void {
 					}
 				}
 			}
-			if (migrated) {
-				console.log('[CompaniesStore] Migrated package state format');
-			}
+			// Migration complete - no logging needed in production
 		} else {
 			// MIGRATION: Check for old structure
 			const oldPages = localStorage.getItem(OLD_PAGES_KEY);
@@ -689,7 +687,6 @@ function importData(data: unknown): boolean {
 
 	ensureIntegrity();
 	save();
-	console.log('[CompaniesStore] Import complete with package migration');
 	return true;
 }
 
