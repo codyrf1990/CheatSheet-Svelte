@@ -8,6 +8,7 @@
 	import { toastStore } from '$stores/toast.svelte';
 	import { syncStore } from '$stores/sync.svelte';
 	import { companiesStore } from '$stores/companies.svelte';
+	import { packagesStore } from '$stores/packages.svelte';
 	import { packages, panels } from '$data';
 
 	// Derived sync state from store
@@ -50,6 +51,12 @@
 	// Initialize stores on mount
 	onMount(() => {
 		companiesStore.load();
+	});
+
+	// Sync page state to packagesStore when company/page changes
+	$effect(() => {
+		const pageState = companiesStore.currentPageState;
+		packagesStore.loadFromPageState(pageState);
 	});
 
 	async function handleLogout() {

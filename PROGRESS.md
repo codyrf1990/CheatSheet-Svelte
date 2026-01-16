@@ -773,6 +773,28 @@ Data migration was completed as part of Phase 4 since the feature components req
   - `load()` - when loading from localStorage
   - `importData()` - when importing from cloud sync
 
+- [x] **Fix: Migrated Data Not Displaying in UI** (2026-01-15)
+  - Files: `src/routes/+page.svelte`
+
+  **Problem:** After loading cloud data with migration, checkboxes showed unchecked
+  - Root cause: Missing sync between `companiesStore` and `packagesStore`
+  - Migration transformed data correctly in `companiesStore.currentPageState`
+  - But `packagesStore` (which UI reads from) was never populated
+
+  **Solution:** Added `$effect` to sync stores:
+
+  ```typescript
+  $effect(() => {
+      const pageState = companiesStore.currentPageState;
+      packagesStore.loadFromPageState(pageState);
+  });
+  ```
+
+  **Effect runs when:**
+  - App first loads (after `companiesStore.load()`)
+  - User switches companies
+  - User switches pages
+
 ### Remaining / Needs Improvement
 
 - [ ] Further responsive testing at various viewports
