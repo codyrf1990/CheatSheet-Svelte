@@ -19,13 +19,21 @@ function createDefaultState(): PanelState {
 }
 
 /**
- * Get state for a specific panel (creates default if missing)
+ * Get state for a specific panel (creates default if missing, normalizes old data)
  */
 function getState(panelId: string): PanelState {
 	if (!panelStates[panelId]) {
 		panelStates[panelId] = createDefaultState();
 	}
-	return panelStates[panelId];
+	// Normalize old data that may be missing arrays
+	const state = panelStates[panelId];
+	if (!Array.isArray(state.items)) {
+		state.items = [];
+	}
+	if (!Array.isArray(state.removedItems)) {
+		state.removedItems = [];
+	}
+	return state;
 }
 
 /**
@@ -39,7 +47,7 @@ function getItems(panelId: string): string[] {
  * Check if a panel has an item
  */
 function hasItem(panelId: string, item: string): boolean {
-	return panelStates[panelId]?.items.includes(item) ?? false;
+	return panelStates[panelId]?.items?.includes(item) ?? false;
 }
 
 /**

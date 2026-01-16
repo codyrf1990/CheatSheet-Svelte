@@ -1,7 +1,22 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { fly, scale } from 'svelte/transition';
 	import { backOut, quintOut } from 'svelte/easing';
+
+	let prefersReducedMotion = $state(false);
+
+	onMount(() => {
+		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+		prefersReducedMotion = mediaQuery.matches;
+
+		const handleChange = () => {
+			prefersReducedMotion = mediaQuery.matches;
+		};
+
+		mediaQuery.addEventListener('change', handleChange);
+		return () => mediaQuery.removeEventListener('change', handleChange);
+	});
 </script>
 
 {#if toastStore.all.length > 0}
@@ -11,8 +26,17 @@
 			<div
 				class="toast toast-{t.type}"
 				role={t.type === 'error' ? 'alert' : 'status'}
-				in:fly={{ x: 120, duration: 400, easing: backOut, delay: index * 50 }}
-				out:scale={{ duration: 200, easing: quintOut, start: 0.95 }}
+				in:fly={{
+					x: prefersReducedMotion ? 0 : 120,
+					duration: prefersReducedMotion ? 0 : 400,
+					easing: backOut,
+					delay: prefersReducedMotion ? 0 : index * 50
+				}}
+				out:scale={{
+					duration: prefersReducedMotion ? 0 : 200,
+					easing: quintOut,
+					start: prefersReducedMotion ? 1 : 0.95
+				}}
 				onmouseenter={() => toastStore.pause(t.id)}
 				onmouseleave={() => toastStore.resume(t.id)}
 				onfocusin={() => toastStore.pause(t.id)}
@@ -286,7 +310,7 @@
 
 		.toast-progress-fill {
 			animation: none;
-			transform: scaleX(0);
+			transform: scaleX(1);
 		}
 	}
 </style>

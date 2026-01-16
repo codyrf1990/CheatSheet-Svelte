@@ -10,8 +10,22 @@
 
 	let { open, onclose }: Props = $props();
 
+	// Auto-focus action for inline inputs
+	function autofocus(node: HTMLInputElement) {
+		// Use requestAnimationFrame to ensure DOM is ready
+		requestAnimationFrame(() => {
+			node.focus();
+			node.select();
+		});
+	}
+
 	// Local state
 	let searchQuery = $state('');
+	let newCompanyOpen = $state(false);
+	let newCompanyName = $state('');
+	let renamingCompanyId = $state<string | null>(null);
+	let renamingValue = $state('');
+	let deleteConfirmId = $state<string | null>(null);
 
 	// Reactive data from store
 	let allCompanies = $derived(companiesStore.all);
@@ -29,45 +43,130 @@
 	}
 
 	function handleNewCompany() {
-		const name = prompt('New company name:');
-		if (name?.trim()) {
-			companiesStore.create(name.trim());
-			toastStore.success('Company created');
+		newCompanyOpen = true;
+		newCompanyName = '';
+		renamingCompanyId = null;
+		deleteConfirmId = null;
+	}
+
+	function closeNewCompany() {
+		newCompanyOpen = false;
+		newCompanyName = '';
+	}
+
+	function handleNewCompanySubmit() {
+		const name = newCompanyName.trim();
+		if (!name) return;
+		companiesStore.create(name);
+		toastStore.success('Company created');
+		closeNewCompany();
+	}
+
+	function handleNewCompanyKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			handleNewCompanySubmit();
+		} else if (e.key === 'Escape') {
+			e.preventDefault();
+			closeNewCompany();
 		}
 	}
 
-	function handleRenameCompany(companyId: string, currentName: string) {
-		const newName = prompt('Rename company:', currentName);
-		if (newName?.trim() && newName !== currentName) {
-			companiesStore.rename(companyId, newName.trim());
+	function startRenameCompany(companyId: string, currentName: string) {
+		renamingCompanyId = companyId;
+		renamingValue = currentName;
+		deleteConfirmId = null;
+	}
+
+	function cancelRenameCompany() {
+		renamingCompanyId = null;
+		renamingValue = '';
+	}
+
+	function submitRenameCompany(companyId: string, currentName: string) {
+		const newName = renamingValue.trim();
+		if (newName && newName !== currentName) {
+			companiesStore.rename(companyId, newName);
 			toastStore.success('Company renamed');
 		}
+		cancelRenameCompany();
 	}
 
-	function handleDeleteCompany(companyId: string, companyName: string) {
+	function handleRenameKeydown(e: KeyboardEvent, companyId: string, currentName: string) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			submitRenameCompany(companyId, currentName);
+		} else if (e.key === 'Escape') {
+			e.preventDefault();
+			cancelRenameCompany();
+		}
+	}
+
+	function requestDeleteCompany(companyId: string) {
+		deleteConfirmId = companyId;
+		renamingCompanyId = null;
+	}
+
+	function cancelDeleteCompany() {
+		deleteConfirmId = null;
+	}
+
+	function handleDeleteCompany(companyId: string) {
 		if (allCompanies.length <= 1) {
 			toastStore.error('Cannot delete the last company');
 			return;
 		}
-		if (confirm(`Delete "${companyName}"? This cannot be undone.`)) {
-			companiesStore.delete(companyId);
-			toastStore.success('Company deleted');
-		}
+		companiesStore.delete(companyId);
+		toastStore.success('Company deleted');
+		deleteConfirmId = null;
 	}
 
 	// Reset search when modal opens
 	$effect(() => {
 		if (open) {
 			searchQuery = '';
+			newCompanyOpen = false;
+			newCompanyName = '';
+			renamingCompanyId = null;
+			renamingValue = '';
+			deleteConfirmId = null;
 		}
 	});
 </script>
 
 {#snippet footer()}
 	<div class="modal-footer-content">
-		<button type="button" class="new-company-btn" onclick={handleNewCompany}>
-			+ New Company
-		</button>
+		<div class="footer-left">
+			{#if newCompanyOpen}
+				<div class="new-company-form">
+					<input
+						type="text"
+						class="new-company-input"
+						placeholder="New company name"
+						bind:value={newCompanyName}
+						onkeydown={handleNewCompanyKeydown}
+						aria-label="New company name"
+						use:autofocus
+					/>
+					<div class="new-company-actions">
+						<button type="button" class="new-company-btn" onclick={handleNewCompanySubmit}>
+							Create
+						</button>
+						<button
+							type="button"
+							class="new-company-btn new-company-btn--ghost"
+							onclick={closeNewCompany}
+						>
+							Cancel
+						</button>
+					</div>
+				</div>
+			{:else}
+				<button type="button" class="new-company-btn" onclick={handleNewCompany}>
+					+ New Company
+				</button>
+			{/if}
+		</div>
 		<span class="company-count">{allCompanies.length} companies</span>
 	</div>
 {/snippet}
@@ -90,55 +189,104 @@
 			{#if filteredCompanies.length > 0}
 				{#each filteredCompanies as company (company.id)}
 					<div class="company-row" class:active={company.id === currentCompany?.id}>
-						<button
-							type="button"
-							class="company-name-btn"
-							onclick={() => handleCompanySelect(company.id)}
-						>
-							<span class="company-name">{company.name}</span>
-							{#if company.id === currentCompany?.id}
-								<span class="current-badge">Current</span>
+						{#if renamingCompanyId === company.id}
+							<div class="company-edit">
+								<input
+									type="text"
+									class="edit-input"
+									bind:value={renamingValue}
+									onkeydown={(e) => handleRenameKeydown(e, company.id, company.name)}
+									aria-label="Rename {company.name}"
+									use:autofocus
+								/>
+								<div class="edit-actions">
+									<button
+										type="button"
+										class="action-btn action-btn--text action-btn--confirm"
+										onclick={() => submitRenameCompany(company.id, company.name)}
+									>
+										Save
+									</button>
+									<button
+										type="button"
+										class="action-btn action-btn--text"
+										onclick={cancelRenameCompany}
+									>
+										Cancel
+									</button>
+								</div>
+							</div>
+						{:else}
+							<button
+								type="button"
+								class="company-name-btn"
+								onclick={() => handleCompanySelect(company.id)}
+								disabled={deleteConfirmId === company.id}
+							>
+								<span class="company-name">{company.name}</span>
+								{#if company.id === currentCompany?.id}
+									<span class="current-badge">Current</span>
+								{/if}
+							</button>
+							{#if deleteConfirmId === company.id}
+								<div class="company-actions confirm-actions">
+									<button
+										type="button"
+										class="action-btn action-btn--text action-btn--danger"
+										onclick={() => handleDeleteCompany(company.id)}
+									>
+										Delete
+									</button>
+									<button
+										type="button"
+										class="action-btn action-btn--text"
+										onclick={cancelDeleteCompany}
+									>
+										Cancel
+									</button>
+								</div>
+							{:else}
+								<div class="company-actions">
+									<button
+										type="button"
+										class="action-btn"
+										onclick={() => startRenameCompany(company.id, company.name)}
+										aria-label="Rename {company.name}"
+									>
+										<svg
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											aria-hidden="true"
+										>
+											<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+											<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+										</svg>
+									</button>
+									<button
+										type="button"
+										class="action-btn action-btn--danger"
+										onclick={() => requestDeleteCompany(company.id)}
+										aria-label="Delete {company.name}"
+										disabled={allCompanies.length <= 1}
+									>
+										<svg
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="2"
+											aria-hidden="true"
+										>
+											<polyline points="3 6 5 6 21 6" />
+											<path
+												d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+											/>
+										</svg>
+									</button>
+								</div>
 							{/if}
-						</button>
-						<div class="company-actions">
-							<button
-								type="button"
-								class="action-btn"
-								onclick={() => handleRenameCompany(company.id, company.name)}
-								aria-label="Rename {company.name}"
-							>
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-									aria-hidden="true"
-								>
-									<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-									<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-								</svg>
-							</button>
-							<button
-								type="button"
-								class="action-btn action-btn--danger"
-								onclick={() => handleDeleteCompany(company.id, company.name)}
-								aria-label="Delete {company.name}"
-								disabled={allCompanies.length <= 1}
-							>
-								<svg
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-									aria-hidden="true"
-								>
-									<polyline points="3 6 5 6 21 6" />
-									<path
-										d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-									/>
-								</svg>
-							</button>
-						</div>
+						{/if}
 					</div>
 				{/each}
 			{:else}
@@ -340,6 +488,42 @@
 		width: 100%;
 	}
 
+	.footer-left {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		min-width: 0;
+	}
+
+	.new-company-form {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+	}
+
+	.new-company-input {
+		flex: 1;
+		min-width: 120px;
+		padding: 0.4rem 0.6rem;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 8px;
+		color: #f5f5f5;
+		font-size: 0.75rem;
+	}
+
+	.new-company-input:focus {
+		outline: none;
+		border-color: var(--color-solidcam-gold, #d4af37);
+		box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+	}
+
+	.new-company-actions {
+		display: flex;
+		gap: 0.35rem;
+	}
+
 	.new-company-btn {
 		padding: 0.5rem 1rem;
 		background: linear-gradient(145deg, #e8c547, #d4af37, #b8941f);
@@ -362,8 +546,69 @@
 			inset 0 1px 0 rgba(255, 255, 255, 0.3);
 	}
 
+	.new-company-btn--ghost {
+		background: rgba(255, 255, 255, 0.08);
+		color: rgba(255, 255, 255, 0.8);
+		box-shadow: none;
+	}
+
+	.new-company-btn--ghost:hover {
+		transform: none;
+		box-shadow: none;
+		background: rgba(255, 255, 255, 0.12);
+		color: #f5f5f5;
+	}
+
 	.company-count {
 		font-size: 0.75rem;
 		color: rgba(255, 255, 255, 0.4);
+	}
+
+	.company-edit {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex: 1;
+		min-width: 0;
+		padding: 0.25rem 0.5rem;
+	}
+
+	.edit-input {
+		flex: 1;
+		min-width: 120px;
+		padding: 0.4rem 0.6rem;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		border-radius: 6px;
+		color: #f5f5f5;
+		font-size: 0.75rem;
+	}
+
+	.edit-input:focus {
+		outline: none;
+		border-color: var(--color-solidcam-gold, #d4af37);
+		box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+	}
+
+	.edit-actions {
+		display: flex;
+		gap: 0.25rem;
+	}
+
+	.action-btn--text {
+		width: auto;
+		height: auto;
+		padding: 0.3rem 0.5rem;
+		font-size: 0.7rem;
+	}
+
+	.action-btn--confirm {
+		background: rgba(212, 175, 55, 0.2);
+		color: #d4af37;
+		border-color: rgba(212, 175, 55, 0.3);
+	}
+
+	.confirm-actions {
+		opacity: 1;
 	}
 </style>

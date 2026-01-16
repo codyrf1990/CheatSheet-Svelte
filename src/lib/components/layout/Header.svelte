@@ -295,7 +295,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.25rem;
+		gap: var(--space-1);
 	}
 
 	.title-container {
@@ -314,7 +314,7 @@
 	}
 
 	.header-title {
-		font-size: 1rem;
+		font-size: var(--text-xl);
 		font-weight: 700;
 		color: #f5f5f5;
 		margin: 0;
@@ -331,14 +331,14 @@
 	.header-nav {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		align-items: center;
 	}
 
 	.nav-row {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.2rem;
+		gap: var(--space-0-5);
 		align-items: center;
 		justify-content: center;
 	}
@@ -346,9 +346,9 @@
 	.nav-link {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.2rem;
+		gap: var(--space-0-5);
 		padding: 0.15rem 0.4rem;
-		font-size: 0.7rem;
+		font-size: var(--text-xs);
 		font-weight: 500;
 		border-radius: 6px;
 		text-decoration: none;

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Panel as PanelType } from '$types';
 	import { panelsStore } from '$stores/panels.svelte';
+	import { Button, Input, Modal } from '$components/ui';
 	import Panel from './Panel.svelte';
 	import PanelItem from './PanelItem.svelte';
 
@@ -13,6 +14,12 @@
 
 	// Local state
 	let removeMode = $state(false);
+	let addDialogOpen = $state(false);
+	let addDialogValue = $state('');
+
+	let addDialogTitle = $derived(() => `Add ${panel.title}`);
+	let addDialogLabel = $derived(() => `${panel.title} item`);
+	let addDialogValid = $derived(() => addDialogValue.trim().length > 0);
 
 	// Always show panel's base items - store tracks checked/removed state separately
 	let items = $derived(() => panel.items);
@@ -21,12 +28,8 @@
 	let draggedIndex = $state<number | null>(null);
 
 	function handleAddItem() {
-		const value = prompt(`Add a new item to ${panel.title}:`);
-		if (!value) return;
-		const text = value.trim();
-		if (!text) return;
-
-		panelsStore.addItem(panel.id, text);
+		addDialogValue = '';
+		addDialogOpen = true;
 	}
 
 	function handleToggleRemove() {
@@ -73,6 +76,25 @@
 	function handleDragEnd() {
 		draggedIndex = null;
 	}
+
+	function closeAddDialog() {
+		addDialogOpen = false;
+		addDialogValue = '';
+	}
+
+	function submitAddDialog() {
+		const text = addDialogValue.trim();
+		if (!text) return;
+		panelsStore.addItem(panel.id, text);
+		closeAddDialog();
+	}
+
+	function handleAddDialogKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' && addDialogValid()) {
+			e.preventDefault();
+			submitAddDialog();
+		}
+	}
 </script>
 
 <Panel
@@ -101,6 +123,31 @@
 	</ul>
 </Panel>
 
+{#snippet addDialogFooter()}
+	<div class="dialog-actions">
+		<Button variant="ghost" size="sm" onclick={closeAddDialog}>Cancel</Button>
+		<Button variant="gold" size="sm" onclick={submitAddDialog} disabled={!addDialogValid()}>
+			Add
+		</Button>
+	</div>
+{/snippet}
+
+<Modal
+	open={addDialogOpen}
+	onclose={closeAddDialog}
+	title={addDialogTitle()}
+	footer={addDialogFooter}
+>
+	<div class="dialog-form">
+		<Input
+			label={addDialogLabel()}
+			placeholder={addDialogLabel()}
+			bind:value={addDialogValue}
+			onkeydown={handleAddDialogKeydown}
+		/>
+	</div>
+</Modal>
+
 <style>
 	.panel-items {
 		display: grid;
@@ -109,6 +156,19 @@
 		padding: 0.0625rem;
 		list-style: none;
 		margin: 0;
+	}
+
+	.dialog-form {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+	}
+
+	.dialog-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--space-2);
+		width: 100%;
 	}
 
 	/* Single column at narrow viewports */

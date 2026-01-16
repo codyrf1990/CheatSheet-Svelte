@@ -66,9 +66,9 @@
 	}
 
 	th {
-		padding: 0.4rem 0.5rem;
+		padding: var(--space-1) var(--space-2);
 		text-align: left;
-		font-size: 0.75rem;
+		font-size: var(--text-sm);
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.12em;
@@ -94,16 +94,16 @@
 		}
 
 		th {
-			padding: 0.45rem 0.4rem;
-			font-size: 0.75rem;
+			padding: var(--space-1) var(--space-0-5);
+			font-size: var(--text-sm);
 		}
 	}
 
 	/* Ultra-compact for split-screen */
 	@media (max-width: 680px) {
 		th {
-			padding: 0.3rem 0.15rem;
-			font-size: 0.65rem;
+			padding: var(--space-0-5) var(--space-0);
+			font-size: var(--text-2xs);
 			letter-spacing: 0.06em;
 		}
 	}
@@ -111,8 +111,8 @@
 	/* Narrow viewport - keep text readable */
 	@media (max-width: 640px) {
 		th {
-			padding: 0.25rem 0.15rem;
-			font-size: 0.7rem;
+			padding: var(--space-1) var(--space-0);
+			font-size: var(--text-xs);
 			letter-spacing: 0.04em;
 		}
 	}

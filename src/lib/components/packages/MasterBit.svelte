@@ -153,15 +153,15 @@
 	.master-header {
 		display: flex;
 		align-items: center;
-		gap: 0.25rem;
-		padding: 0.25rem 0.375rem;
+		gap: var(--space-1);
+		padding: var(--space-1) calc(var(--space-1) + var(--space-0));
 		background: rgba(255, 255, 255, 0.03);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 	}
 
 	.master-label {
 		flex: 1;
-		font-size: 0.7rem;
+		font-size: var(--text-xs);
 		font-weight: 600;
 		color: var(--color-solidcam-gold, #d4af37);
 		cursor: pointer;
@@ -210,21 +210,21 @@
 	.sub-bits {
 		list-style: none;
 		margin: 0;
-		padding: 0.15rem;
+		padding: var(--space-0-5);
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.2rem;
+		gap: var(--space-0-5);
 	}
 
 	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.master-header {
-			padding: 0.15rem 0.25rem;
-			gap: 0.15rem;
+			padding: var(--space-0-5) var(--space-1);
+			gap: var(--space-0-5);
 		}
 
 		.master-label {
-			font-size: 0.6rem;
+			font-size: var(--text-2xs);
 		}
 
 		.expand-toggle {
@@ -239,19 +239,19 @@
 
 		.sub-bits {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 0.1rem;
-			padding: 0.075rem;
+			gap: var(--space-0);
+			padding: var(--space-px);
 		}
 	}
 
 	@media (max-width: 640px) {
 		.master-header {
-			padding: 0.1rem 0.15rem;
-			gap: 0.1rem;
+			padding: var(--space-0) var(--space-0-5);
+			gap: var(--space-0);
 		}
 
 		.master-label {
-			font-size: 0.5rem;
+			font-size: var(--text-2xs);
 		}
 
 		.expand-toggle {
@@ -266,8 +266,8 @@
 
 		.sub-bits {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 0.075rem;
-			padding: 0.05rem;
+			gap: var(--space-px);
+			padding: var(--space-px);
 		}
 	}
 </style>

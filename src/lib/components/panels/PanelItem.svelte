@@ -72,8 +72,8 @@
 	.panel-item {
 		display: flex;
 		align-items: center;
-		padding: 0.05rem 0.1rem;
-		gap: 0.1rem;
+		padding: var(--space-px) var(--space-0);
+		gap: var(--space-0);
 		border-radius: 3px;
 		transition: background-color 150ms ease;
 	}
@@ -97,18 +97,18 @@
 	.panel-item-main {
 		display: flex;
 		align-items: center;
-		gap: 0.1rem;
+		gap: var(--space-0);
 		flex: 1;
 		min-width: 0;
 	}
 
 	.item-text {
-		padding: 0.1rem 0.2rem;
+		padding: var(--space-0) var(--space-0-5);
 		background: transparent;
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 3px;
 		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.65rem;
+		font-size: var(--text-xs);
 		color: rgba(255, 255, 255, 0.9);
 		cursor: pointer;
 		transition: all 150ms ease;
@@ -133,7 +133,7 @@
 		border: none;
 		border-radius: 2px;
 		color: rgba(255, 255, 255, 0.4);
-		font-size: 0.6rem;
+		font-size: var(--text-2xs);
 		cursor: pointer;
 		transition: all 150ms ease;
 		flex-shrink: 0;
@@ -147,54 +147,54 @@
 	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.panel-item {
-			padding: 0.03rem 0.05rem;
-			gap: 0.05rem;
+			padding: var(--space-px);
+			gap: var(--space-px);
 		}
 
 		.item-text {
-			font-size: 0.55rem;
-			padding: 0.075rem 0.125rem;
+			font-size: var(--text-2xs);
+			padding: var(--space-px) var(--space-0);
 		}
 
 		.item-remove-btn {
 			width: 12px;
 			height: 12px;
-			font-size: 0.55rem;
+			font-size: var(--text-2xs);
 		}
 	}
 
 	@media (max-width: 640px) {
 		.panel-item {
-			padding: 0.02rem 0.04rem;
-			gap: 0.04rem;
+			padding: var(--space-px);
+			gap: var(--space-px);
 		}
 
 		.item-text {
-			font-size: 0.58rem;
-			padding: 0.05rem 0.1rem;
+			font-size: var(--text-2xs);
+			padding: var(--space-px) var(--space-0);
 		}
 
 		.item-remove-btn {
 			width: 10px;
 			height: 10px;
-			font-size: 0.5rem;
+			font-size: var(--text-2xs);
 		}
 	}
 
 	@media (max-width: 500px) {
 		.panel-item {
-			padding: 0.03rem 0.05rem;
+			padding: var(--space-px);
 		}
 
 		.item-text {
-			font-size: 0.55rem;
-			padding: 0.06rem 0.12rem;
+			font-size: var(--text-2xs);
+			padding: var(--space-px) var(--space-0);
 		}
 
 		.item-remove-btn {
 			width: 12px;
 			height: 12px;
-			font-size: 0.55rem;
+			font-size: var(--text-2xs);
 		}
 	}
 </style>

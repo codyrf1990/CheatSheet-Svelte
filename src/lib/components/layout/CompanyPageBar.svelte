@@ -2,7 +2,7 @@
 	import { companiesStore } from '$stores/companies.svelte';
 	import { syncStore } from '$stores/sync.svelte';
 	import { toastStore } from '$stores/toast.svelte';
-	import { Button } from '$components/ui';
+	import { Button, Input, Modal } from '$components/ui';
 
 	interface Props {
 		editMode?: boolean;
@@ -30,6 +30,13 @@
 	let searchQuery = $state('');
 	let editingPageId = $state<string | null>(null);
 	let editingPageName = $state('');
+	let dropdownTriggerRef = $state<HTMLButtonElement | null>(null);
+	let dialogType = $state<
+		'new-company' | 'rename-company' | 'rename-page' | 'delete-company' | 'delete-page' | null
+	>(null);
+	let dialogTargetId = $state<string | null>(null);
+	let dialogTargetLabel = $state('');
+	let dialogInput = $state('');
 
 	// Context menu state
 	let contextMenu = $state<{ x: number; y: number; type: 'company' | 'page'; id?: string } | null>(
@@ -55,6 +62,61 @@
 				return { symbol: '○', color: 'rgba(255,255,255,0.3)', title: 'Not synced' };
 		}
 	});
+
+	let isConfirmDialog = $derived(
+		() => dialogType === 'delete-company' || dialogType === 'delete-page'
+	);
+	let dialogTitle = $derived(() => {
+		switch (dialogType) {
+			case 'new-company':
+				return 'New Company';
+			case 'rename-company':
+				return 'Rename Company';
+			case 'rename-page':
+				return 'Rename Page';
+			case 'delete-company':
+				return 'Delete Company';
+			case 'delete-page':
+				return 'Delete Page';
+			default:
+				return '';
+		}
+	});
+	let dialogActionLabel = $derived(() => {
+		switch (dialogType) {
+			case 'new-company':
+				return 'Create';
+			case 'rename-company':
+			case 'rename-page':
+				return 'Save';
+			case 'delete-company':
+			case 'delete-page':
+				return 'Delete';
+			default:
+				return '';
+		}
+	});
+	let dialogInputLabel = $derived(() => {
+		switch (dialogType) {
+			case 'new-company':
+			case 'rename-company':
+				return 'Company name';
+			case 'rename-page':
+				return 'Page name';
+			default:
+				return '';
+		}
+	});
+	let dialogMessage = $derived(() => {
+		if (dialogType === 'delete-company') {
+			return `Delete "${dialogTargetLabel}"? This cannot be undone.`;
+		}
+		if (dialogType === 'delete-page') {
+			return `Delete "${dialogTargetLabel}"? This cannot be undone.`;
+		}
+		return '';
+	});
+	let dialogInputValid = $derived(() => dialogInput.trim().length > 0);
 
 	function toggleDropdown(e: MouseEvent) {
 		e.stopPropagation();
@@ -86,12 +148,12 @@
 	}
 
 	function handleNewCompany() {
-		const name = prompt('New company name:');
-		if (name?.trim()) {
-			companiesStore.create(name.trim());
-			closeDropdown();
-			toastStore.success('Company created');
-		}
+		dialogType = 'new-company';
+		dialogTargetId = null;
+		dialogTargetLabel = '';
+		dialogInput = '';
+		closeDropdown();
+		closeContextMenu();
 	}
 
 	function handleNewPage() {
@@ -117,11 +179,11 @@
 	}
 
 	function handleRenameCompany() {
-		const newName = prompt('Rename company:', currentCompany?.name);
-		if (newName?.trim() && currentCompany) {
-			companiesStore.rename(currentCompany.id, newName.trim());
-			toastStore.success('Company renamed');
-		}
+		if (!currentCompany) return;
+		dialogType = 'rename-company';
+		dialogTargetId = currentCompany.id;
+		dialogTargetLabel = currentCompany.name;
+		dialogInput = currentCompany.name;
 		closeContextMenu();
 	}
 
@@ -136,14 +198,15 @@
 	}
 
 	function handleDeleteCompany() {
-		if (currentCompany && allCompanies.length > 1) {
-			if (confirm(`Delete "${currentCompany.name}"? This cannot be undone.`)) {
-				companiesStore.delete(currentCompany.id);
-				toastStore.success('Company deleted');
-			}
-		} else {
+		if (!currentCompany) return;
+		if (allCompanies.length <= 1) {
 			toastStore.error('Cannot delete the last company');
+			closeContextMenu();
+			return;
 		}
+		dialogType = 'delete-company';
+		dialogTargetId = currentCompany.id;
+		dialogTargetLabel = currentCompany.name;
 		closeContextMenu();
 	}
 
@@ -152,11 +215,10 @@
 		if (!pageId) return;
 		const page = currentCompany?.pages.find((p) => p.id === pageId);
 		if (page) {
-			const newName = prompt('Rename page:', page.name);
-			if (newName?.trim()) {
-				companiesStore.renamePage(page.id, newName.trim());
-				toastStore.success('Page renamed');
-			}
+			dialogType = 'rename-page';
+			dialogTargetId = page.id;
+			dialogTargetLabel = page.name;
+			dialogInput = page.name;
 		}
 		closeContextMenu();
 	}
@@ -179,10 +241,10 @@
 			closeContextMenu();
 			return;
 		}
-		if (confirm('Delete this page?')) {
-			companiesStore.deletePage(pageId);
-			toastStore.success('Page deleted');
-		}
+		const page = currentCompany.pages.find((p) => p.id === pageId);
+		dialogType = 'delete-page';
+		dialogTargetId = pageId;
+		dialogTargetLabel = page?.name || 'this page';
 		closeContextMenu();
 	}
 
@@ -209,6 +271,66 @@
 		}
 	}
 
+	function closeDialog() {
+		dialogType = null;
+		dialogTargetId = null;
+		dialogTargetLabel = '';
+		dialogInput = '';
+	}
+
+	function handleDialogSubmit() {
+		if (!dialogType) return;
+
+		if (dialogType === 'new-company') {
+			const name = dialogInput.trim();
+			if (!name) return;
+			companiesStore.create(name);
+			toastStore.success('Company created');
+			closeDialog();
+			return;
+		}
+
+		if (dialogType === 'rename-company') {
+			const name = dialogInput.trim();
+			if (!dialogTargetId || !name) return;
+			companiesStore.rename(dialogTargetId, name);
+			toastStore.success('Company renamed');
+			closeDialog();
+			return;
+		}
+
+		if (dialogType === 'rename-page') {
+			const name = dialogInput.trim();
+			if (!dialogTargetId || !name) return;
+			companiesStore.renamePage(dialogTargetId, name);
+			toastStore.success('Page renamed');
+			closeDialog();
+			return;
+		}
+
+		if (dialogType === 'delete-company') {
+			if (!dialogTargetId) return;
+			companiesStore.delete(dialogTargetId);
+			toastStore.success('Company deleted');
+			closeDialog();
+			return;
+		}
+
+		if (dialogType === 'delete-page') {
+			if (!dialogTargetId) return;
+			companiesStore.deletePage(dialogTargetId);
+			toastStore.success('Page deleted');
+			closeDialog();
+		}
+	}
+
+	function handleDialogInputKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' && dialogInputValid()) {
+			e.preventDefault();
+			handleDialogSubmit();
+		}
+	}
+
 	// Close dropdown/context when clicking outside
 	function handleWindowClick(e: MouseEvent) {
 		const target = e.target as HTMLElement;
@@ -219,9 +341,22 @@
 			closeContextMenu();
 		}
 	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key !== 'Escape') return;
+
+		if (dropdownOpen) {
+			closeDropdown();
+			dropdownTriggerRef?.focus();
+		}
+
+		if (contextMenu) {
+			closeContextMenu();
+		}
+	}
 </script>
 
-<svelte:window onclick={handleWindowClick} />
+<svelte:window onclick={handleWindowClick} onkeydown={handleKeydown} />
 
 <div class="company-page-bar">
 	<!-- Company Selector -->
@@ -229,6 +364,7 @@
 		<button
 			type="button"
 			class="company-trigger"
+			bind:this={dropdownTriggerRef}
 			onclick={toggleDropdown}
 			oncontextmenu={handleCompanyContextMenu}
 			aria-expanded={dropdownOpen}
@@ -404,12 +540,42 @@
 	</div>
 {/if}
 
+{#snippet dialogFooter()}
+	<div class="dialog-actions">
+		<Button variant="ghost" size="sm" onclick={closeDialog}>Cancel</Button>
+		{#if isConfirmDialog()}
+			<Button variant="danger" size="sm" onclick={handleDialogSubmit}>
+				{dialogActionLabel()}
+			</Button>
+		{:else}
+			<Button variant="gold" size="sm" onclick={handleDialogSubmit} disabled={!dialogInputValid()}>
+				{dialogActionLabel()}
+			</Button>
+		{/if}
+	</div>
+{/snippet}
+
+<Modal open={dialogType !== null} onclose={closeDialog} title={dialogTitle()} footer={dialogFooter}>
+	{#if isConfirmDialog()}
+		<p class="dialog-message">{dialogMessage()}</p>
+	{:else}
+		<div class="dialog-form">
+			<Input
+				label={dialogInputLabel()}
+				placeholder={dialogInputLabel()}
+				bind:value={dialogInput}
+				onkeydown={handleDialogInputKeydown}
+			/>
+		</div>
+	{/if}
+</Modal>
+
 <style>
 	.company-page-bar {
 		position: relative;
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		padding: 0.3rem 0.625rem;
 		background: linear-gradient(145deg, rgba(24, 24, 30, 0.85) 0%, rgba(18, 18, 24, 0.9) 100%);
 		border: 1px solid rgba(255, 255, 255, 0.06);
@@ -466,7 +632,7 @@
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 10px;
 		color: #f5f5f5;
-		font-size: 0.8125rem;
+		font-size: var(--text-base);
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -489,7 +655,7 @@
 	}
 
 	.status-dot {
-		font-size: 0.75rem;
+		font-size: var(--text-sm);
 		animation: statusPulse 2s ease-in-out infinite;
 	}
 
@@ -580,7 +746,7 @@
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 6px;
 		color: #f5f5f5;
-		font-size: 0.75rem;
+		font-size: var(--text-sm);
 		transition: all 200ms ease;
 	}
 
@@ -601,7 +767,7 @@
 
 	.section-title {
 		padding: 0.15rem 0.4rem;
-		font-size: 0.6rem;
+		font-size: var(--text-2xs);
 		font-weight: 600;
 		color: rgba(255, 255, 255, 0.4);
 		text-transform: uppercase;
@@ -616,7 +782,7 @@
 		border: none;
 		border-radius: 6px;
 		color: rgba(255, 255, 255, 0.8);
-		font-size: 0.75rem;
+		font-size: var(--text-sm);
 		text-align: left;
 		cursor: pointer;
 		transition: all 150ms ease;
@@ -637,7 +803,7 @@
 		padding: 0.75rem;
 		text-align: center;
 		color: rgba(255, 255, 255, 0.4);
-		font-size: 0.75rem;
+		font-size: var(--text-sm);
 	}
 
 	.dropdown-footer {
@@ -653,7 +819,7 @@
 		padding: 0.3rem 0.5rem;
 		border: none;
 		border-radius: 5px;
-		font-size: 0.65rem;
+		font-size: var(--text-2xs);
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 150ms ease;
@@ -702,7 +868,7 @@
 	.page-tabs {
 		display: flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		flex: 1;
 		overflow-x: auto;
 		padding: 0;
@@ -724,7 +890,7 @@
 		border: 1px solid transparent;
 		border-radius: 8px;
 		color: rgba(255, 255, 255, 0.6);
-		font-size: 0.75rem;
+		font-size: var(--text-sm);
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -746,7 +912,7 @@
 
 	.page-tab.add-tab {
 		color: rgba(255, 255, 255, 0.4);
-		font-size: 0.875rem;
+		font-size: var(--text-lg);
 		padding: 0.25rem 0.5rem;
 	}
 
@@ -761,7 +927,7 @@
 		border: 1px solid var(--color-solidcam-gold, #d4af37);
 		border-radius: 8px;
 		color: #f5f5f5;
-		font-size: 0.8125rem;
+		font-size: var(--text-base);
 		width: 70px;
 		box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
 	}
@@ -774,7 +940,7 @@
 	.edit-controls {
 		display: flex;
 		align-items: center;
-		gap: 0.35rem;
+		gap: var(--space-1);
 		z-index: 1;
 		flex-shrink: 0;
 	}
@@ -814,7 +980,7 @@
 		background: transparent;
 		border: none;
 		color: rgba(255, 255, 255, 0.8);
-		font-size: 0.8125rem;
+		font-size: var(--text-base);
 		text-align: left;
 		cursor: pointer;
 		transition: all 150ms ease;
@@ -832,6 +998,26 @@
 	.context-menu button.danger:hover {
 		background: rgba(239, 68, 68, 0.15);
 		color: #ef4444;
+	}
+
+	.dialog-form {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+	}
+
+	.dialog-message {
+		margin: 0;
+		font-size: var(--text-base);
+		color: rgba(255, 255, 255, 0.8);
+		line-height: 1.4;
+	}
+
+	.dialog-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--space-2);
+		width: 100%;
 	}
 
 	/* Focus states */
@@ -881,8 +1067,8 @@
 		}
 
 		.chevron {
-			width: 12px;
-			height: 12px;
+			width: 14px;
+			height: 14px;
 		}
 
 		.page-tab {
@@ -907,6 +1093,7 @@
 			padding: 0.15rem 0.25rem;
 			font-size: 0.55rem;
 			border-radius: 6px;
+			min-height: 24px;
 		}
 
 		.company-name {
@@ -914,8 +1101,8 @@
 		}
 
 		.chevron {
-			width: 10px;
-			height: 10px;
+			width: 16px;
+			height: 16px;
 		}
 
 		.status-dot {
@@ -938,8 +1125,9 @@
 		}
 
 		.edit-controls :global(.btn) {
-			padding: 0.1rem 0.25rem;
-			font-size: 0.6rem;
+			min-height: 24px;
+			padding: 0.2rem 0.45rem;
+			font-size: 0.65rem;
 		}
 	}
 

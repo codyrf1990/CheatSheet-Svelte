@@ -82,8 +82,8 @@
 	.loose-bit {
 		display: flex;
 		align-items: center;
-		gap: 0.125rem;
-		padding: 0.125rem 0.25rem;
+		gap: var(--space-0);
+		padding: var(--space-0) var(--space-1);
 		border-radius: 3px;
 		background: rgba(255, 255, 255, 0.02);
 		border: 1px solid rgba(255, 255, 255, 0.06);
@@ -105,13 +105,13 @@
 	.bit-label {
 		display: flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		flex: 1;
 		cursor: pointer;
 	}
 
 	.bit-text {
-		font-size: 0.65rem;
+		font-size: var(--text-xs);
 		color: rgba(255, 255, 255, 0.85);
 		cursor: pointer;
 		transition: color 150ms ease;
@@ -132,7 +132,7 @@
 		border: none;
 		border-radius: 3px;
 		color: rgba(255, 255, 255, 0.4);
-		font-size: 0.75rem;
+		font-size: var(--text-sm);
 		cursor: pointer;
 		transition: all 150ms ease;
 	}
@@ -145,42 +145,42 @@
 	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.loose-bit {
-			padding: 0.1rem 0.2rem;
-			gap: 0.1rem;
+			padding: var(--space-0) var(--space-0-5);
+			gap: var(--space-0);
 		}
 
 		.bit-label {
-			gap: 0.2rem;
+			gap: var(--space-0-5);
 		}
 
 		.bit-text {
-			font-size: 0.6rem;
+			font-size: var(--text-2xs);
 		}
 
 		.bit-remove-btn {
 			width: 12px;
 			height: 12px;
-			font-size: 0.65rem;
+			font-size: var(--text-xs);
 		}
 	}
 
 	@media (max-width: 640px) {
 		.loose-bit {
-			padding: 0.06rem 0.15rem;
+			padding: var(--space-px) var(--space-0);
 		}
 
 		.bit-label {
-			gap: 0.15rem;
+			gap: var(--space-0-5);
 		}
 
 		.bit-text {
-			font-size: 0.6rem;
+			font-size: var(--text-2xs);
 		}
 
 		.bit-remove-btn {
 			width: 12px;
 			height: 12px;
-			font-size: 0.55rem;
+			font-size: var(--text-2xs);
 		}
 	}
 </style>

@@ -25,9 +25,9 @@
 	};
 
 	const sizes = {
-		sm: 'px-3 py-1.5 text-sm',
-		md: 'px-4 py-2 text-base',
-		lg: 'px-6 py-3 text-lg'
+		sm: 'btn-sm',
+		md: 'btn-md',
+		lg: 'btn-lg'
 	};
 </script>
 
@@ -47,6 +47,21 @@
 		transition: all 150ms ease;
 		border: none;
 		outline: none;
+	}
+
+	.btn-sm {
+		padding: calc(var(--space-1) + var(--space-0)) var(--space-3);
+		font-size: var(--text-sm);
+	}
+
+	.btn-md {
+		padding: var(--space-2) var(--space-4);
+		font-size: var(--text-base);
+	}
+
+	.btn-lg {
+		padding: var(--space-3) calc(var(--space-4) + var(--space-2));
+		font-size: var(--text-lg);
 	}
 
 	.btn:hover {

@@ -62,7 +62,10 @@ let doubled = $derived(count * 2);
 let filtered = $derived.by(() => items.filter((i) => i.active));
 
 // Props
-interface Props { name: string; count?: number; }
+interface Props {
+	name: string;
+	count?: number;
+}
 let { name, count = 0 }: Props = $props();
 
 // Two-way binding
@@ -70,8 +73,8 @@ let { value = $bindable() }: Props = $props();
 
 // Effects (cleanup via return)
 $effect(() => {
-    const sub = store.subscribe();
-    return () => sub.unsubscribe();
+	const sub = store.subscribe();
+	return () => sub.unsubscribe();
 });
 ```
 
@@ -85,10 +88,18 @@ $effect(() => {
 let items = $state<Item[]>([]);
 
 export const exampleStore = {
-    get all() { return items; },
-    get count() { return items.length; },
-    add(item: Item) { items = [...items, item]; },
-    remove(id: string) { items = items.filter(i => i.id !== id); }
+	get all() {
+		return items;
+	},
+	get count() {
+		return items.length;
+	},
+	add(item: Item) {
+		items = [...items, item];
+	},
+	remove(id: string) {
+		items = items.filter((i) => i.id !== id);
+	}
 };
 ```
 
@@ -96,30 +107,30 @@ export const exampleStore = {
 
 ```typescript
 interface Company {
-    id: string;
-    name: string;
-    pages: Page[];
-    currentPageId: string;
-    isFavorite: boolean;
-    createdAt: number;
-    updatedAt: number;
+	id: string;
+	name: string;
+	pages: Page[];
+	currentPageId: string;
+	isFavorite: boolean;
+	createdAt: number;
+	updatedAt: number;
 }
 
 interface Page {
-    id: string;
-    name: string;
-    state: PageState;
+	id: string;
+	name: string;
+	state: PageState;
 }
 
 interface PageState {
-    panels: Record<string, PanelState>;
-    packages: Record<string, PackageState>;
+	panels: Record<string, PanelState>;
+	packages: Record<string, PackageState>;
 }
 
 interface PackageState {
-    selectedBits: string[];
-    customBits: string[];
-    order: string[];
+	selectedBits: string[];
+	customBits: string[];
+	order: string[];
 }
 ```
 
@@ -132,9 +143,9 @@ interface PackageState {
 @import 'tailwindcss';
 
 @theme {
-    --color-solidcam-red: #c8102e;
-    --color-solidcam-gold: #d4af37;
-    --color-surface-dark: #1a1a1a;
+	--color-solidcam-red: #c8102e;
+	--color-solidcam-gold: #d4af37;
+	--color-surface-dark: #1a1a1a;
 }
 ```
 
@@ -149,10 +160,10 @@ interface PackageState {
 
 ```typescript
 plugins: [
-    tailwindcss(),      // FIRST
-    sveltekit(),        // SECOND
-    SvelteKitPWA({})    // THIRD
-]
+	tailwindcss(), // FIRST
+	sveltekit(), // SECOND
+	SvelteKitPWA({}) // THIRD
+];
 ```
 
 ## Firebase
@@ -161,7 +172,7 @@ plugins: [
 import { initializeFirestore, persistentLocalCache } from 'firebase/firestore';
 
 const db = initializeFirestore(app, {
-    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+	localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
 });
 ```
 

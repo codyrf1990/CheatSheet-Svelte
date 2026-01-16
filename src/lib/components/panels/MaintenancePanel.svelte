@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Panel as PanelType } from '$types';
 	import { panelsStore } from '$stores/panels.svelte';
+	import { Button, Input, Modal } from '$components/ui';
 	import PanelItem from './PanelItem.svelte';
 
 	interface Props {
@@ -12,25 +13,38 @@
 
 	// Local state
 	let removeMode = $state(false);
+	let addDialogOpen = $state(false);
+	let addDialogTarget = $state<'maintenance' | 'solidworks' | null>(null);
+	let addDialogValue = $state('');
+
+	let addDialogTitle = $derived(() => {
+		if (addDialogTarget === 'maintenance') return 'Add Maintenance SKU';
+		if (addDialogTarget === 'solidworks') return 'Add SolidWorks SKU';
+		return '';
+	});
+
+	let addDialogLabel = $derived(() => {
+		if (addDialogTarget === 'maintenance') return 'Maintenance SKU';
+		if (addDialogTarget === 'solidworks') return 'SolidWorks SKU';
+		return '';
+	});
+
+	let addDialogValid = $derived(() => addDialogValue.trim().length > 0);
 
 	// Always show panel's base items
 	let maintenanceItems = $derived(() => maintenancePanel.items);
 	let solidworksItems = $derived(() => solidworksPanel.items);
 
 	function handleAddMaintenance() {
-		const value = prompt('Add a new Maintenance SKU:');
-		if (!value) return;
-		const text = value.trim();
-		if (!text) return;
-		panelsStore.addItem(maintenancePanel.id, text);
+		addDialogTarget = 'maintenance';
+		addDialogValue = '';
+		addDialogOpen = true;
 	}
 
 	function handleAddSolidworks() {
-		const value = prompt('Add a new SolidWorks SKU:');
-		if (!value) return;
-		const text = value.trim();
-		if (!text) return;
-		panelsStore.addItem(solidworksPanel.id, text);
+		addDialogTarget = 'solidworks';
+		addDialogValue = '';
+		addDialogOpen = true;
 	}
 
 	function handleToggleRemove() {
@@ -43,6 +57,33 @@
 
 	function handleItemRemove(panelId: string, item: string) {
 		panelsStore.removeItem(panelId, item);
+	}
+
+	function closeAddDialog() {
+		addDialogOpen = false;
+		addDialogTarget = null;
+		addDialogValue = '';
+	}
+
+	function submitAddDialog() {
+		if (!addDialogTarget) return;
+		const text = addDialogValue.trim();
+		if (!text) return;
+
+		if (addDialogTarget === 'maintenance') {
+			panelsStore.addItem(maintenancePanel.id, text);
+		} else {
+			panelsStore.addItem(solidworksPanel.id, text);
+		}
+
+		closeAddDialog();
+	}
+
+	function handleAddDialogKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' && addDialogValid()) {
+			e.preventDefault();
+			submitAddDialog();
+		}
 	}
 </script>
 
@@ -112,6 +153,31 @@
 	</div>
 </section>
 
+{#snippet addDialogFooter()}
+	<div class="dialog-actions">
+		<Button variant="ghost" size="sm" onclick={closeAddDialog}>Cancel</Button>
+		<Button variant="gold" size="sm" onclick={submitAddDialog} disabled={!addDialogValid()}>
+			Add
+		</Button>
+	</div>
+{/snippet}
+
+<Modal
+	open={addDialogOpen}
+	onclose={closeAddDialog}
+	title={addDialogTitle()}
+	footer={addDialogFooter}
+>
+	<div class="dialog-form">
+		<Input
+			label={addDialogLabel()}
+			placeholder={addDialogLabel()}
+			bind:value={addDialogValue}
+			onkeydown={handleAddDialogKeydown}
+		/>
+	</div>
+</Modal>
+
 <style>
 	.maintenance-panel {
 		flex: 0 0 auto;
@@ -133,11 +199,11 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
-		padding: 0.25rem 0.375rem;
+		padding: var(--space-1) var(--space-2);
 	}
 
 	.section {
-		margin-bottom: 0.5rem;
+		margin-bottom: var(--space-2);
 	}
 
 	.section:last-child {
@@ -148,13 +214,13 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin: 0 0 0.2rem 0;
-		padding: 0.1rem 0.2rem;
+		margin: 0 0 var(--space-0-5) 0;
+		padding: var(--space-0) var(--space-0-5);
 		border-bottom: 1px solid rgba(212, 175, 55, 0.2);
 	}
 
 	.section-title {
-		font-size: 0.65rem;
+		font-size: var(--text-xs);
 		font-weight: 600;
 		color: var(--color-solidcam-gold, #d4af37);
 		text-transform: uppercase;
@@ -163,24 +229,32 @@
 
 	.section-controls {
 		display: flex;
-		gap: 0.15rem;
+		gap: var(--space-0-5);
 	}
 
 	.control-btn {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 18px;
-		height: 18px;
+		width: 20px;
+		height: 20px;
 		padding: 0;
+		position: relative;
+		overflow: visible;
 		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 4px;
 		color: rgba(255, 255, 255, 0.7);
-		font-size: 0.8rem;
+		font-size: 0.75rem;
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 150ms ease;
+	}
+
+	.control-btn::before {
+		content: '';
+		position: absolute;
+		inset: -2px;
 	}
 
 	.control-btn:hover {
@@ -197,54 +271,43 @@
 	.panel-items {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.15rem;
-		padding: 0.1rem;
+		gap: var(--space-0-5);
+		padding: var(--space-0);
 		list-style: none;
 		margin: 0;
+	}
+
+	.dialog-form {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+	}
+
+	.dialog-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--space-2);
+		width: 100%;
 	}
 
 	/* Responsive */
 	@media (max-width: 768px) {
 		.section-title {
-			font-size: 0.6rem;
+			font-size: var(--text-2xs);
 		}
 
 		.control-btn {
-			width: 16px;
-			height: 16px;
 			font-size: 0.7rem;
 		}
 	}
 
 	@media (max-width: 640px) {
 		.section-title {
-			font-size: 0.55rem;
-		}
-
-		.control-btn {
-			width: 14px;
-			height: 14px;
-			font-size: 0.6rem;
+			font-size: var(--text-2xs);
 		}
 
 		.panel-items {
-			gap: 0.1rem;
-		}
-	}
-
-	@media (max-width: 640px) {
-		.section-title {
-			font-size: 0.7rem;
-		}
-
-		.control-btn {
-			width: 18px;
-			height: 18px;
-			font-size: 0.65rem;
-		}
-
-		.panel-items {
-			gap: 0.1rem;
+			gap: var(--space-0);
 		}
 	}
 </style>

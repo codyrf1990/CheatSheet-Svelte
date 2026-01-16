@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { Header, CompanyPageBar } from '$components/layout';
 	import { PackageTable } from '$components/packages';
 	import { MaintenancePanel } from '$components/panels';
 	import { Calculator } from '$components/calculator';
 	import { SalesTaxModal, CurrentProductsModal, CompaniesModal } from '$components/ui';
+	import type { PageState } from '$types';
 	import { toastStore } from '$stores/toast.svelte';
 	import { syncStore } from '$stores/sync.svelte';
 	import { companiesStore } from '$stores/companies.svelte';
 	import { packagesStore } from '$stores/packages.svelte';
+	import { panelsStore } from '$stores/panels.svelte';
 	import { packages, panels } from '$data';
 
 	// Derived sync state from store
@@ -57,6 +59,43 @@
 	$effect(() => {
 		const pageState = companiesStore.currentPageState;
 		packagesStore.loadFromPageState(pageState);
+		panelsStore.loadFromPageState(pageState);
+	});
+
+	// Save changes back - debounced to batch rapid changes
+	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	$effect(() => {
+		// These reads ARE tracked - effect runs when packages/panels change
+		// void marks intentional read for dependency tracking
+		void packagesStore.all;
+		void panelsStore.all;
+
+		// Clear any pending save
+		if (saveTimeout) clearTimeout(saveTimeout);
+
+		// Debounce: wait 150ms after last change before saving
+		saveTimeout = setTimeout(() => {
+			untrack(() => {
+				const currentPage = companiesStore.currentPage;
+				if (!currentPage) return;
+
+				const newState: PageState = {
+					packages: packagesStore.getPageState(),
+					panels: panelsStore.getPageState()
+				};
+
+				const previousState = companiesStore.currentPageState;
+				if (JSON.stringify(previousState) !== JSON.stringify(newState)) {
+					companiesStore.savePageState(currentPage.id, newState);
+				}
+			});
+		}, 150);
+
+		// Cleanup on effect re-run or unmount
+		return () => {
+			if (saveTimeout) clearTimeout(saveTimeout);
+		};
 	});
 
 	async function handleLogout() {
@@ -221,7 +260,7 @@
 		flex: 1;
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) minmax(180px, 320px);
-		gap: clamp(0.2rem, 0.6vw, 0.5rem);
+		gap: clamp(var(--space-0-5), 0.6vw, var(--space-2));
 		min-height: 0;
 	}
 
@@ -232,7 +271,7 @@
 	.sidebar {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		min-width: 0;
 		min-height: 0;
 	}
@@ -270,8 +309,8 @@
 		align-items: center;
 		gap: 0.5rem;
 		width: 100%;
-		padding: 0.5rem 0.75rem;
-		font-size: 0.7rem;
+		padding: var(--space-2) var(--space-3);
+		font-size: var(--text-xs);
 		color: rgba(255, 255, 255, 0.8);
 		background: transparent;
 		border: none;
@@ -314,11 +353,11 @@
 	@media (max-width: 900px) {
 		.content-area {
 			grid-template-columns: minmax(0, 1fr) minmax(160px, 280px);
-			gap: 0.2rem;
+			gap: var(--space-0-5);
 		}
 
 		.sidebar {
-			gap: 0.2rem;
+			gap: var(--space-0-5);
 		}
 	}
 
@@ -329,11 +368,11 @@
 
 		.content-area {
 			grid-template-columns: minmax(0, 1fr) minmax(140px, 240px);
-			gap: 0.15rem;
+			gap: var(--space-0);
 		}
 
 		.sidebar {
-			gap: 0.15rem;
+			gap: var(--space-0);
 		}
 	}
 
@@ -344,11 +383,11 @@
 
 		.content-area {
 			grid-template-columns: minmax(0, 1fr) minmax(120px, 200px);
-			gap: 0.1rem;
+			gap: var(--space-0);
 		}
 
 		.sidebar {
-			gap: 0.1rem;
+			gap: var(--space-0);
 		}
 	}
 
@@ -359,7 +398,7 @@
 
 		.content-area {
 			grid-template-columns: minmax(0, 1fr) minmax(100px, 160px);
-			gap: 0.075rem;
+			gap: var(--space-px);
 			align-items: start;
 		}
 

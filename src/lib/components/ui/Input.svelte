@@ -68,19 +68,19 @@
 	.input-wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--space-2);
 	}
 
 	.input-label {
-		font-size: 0.875rem;
+		font-size: var(--text-lg);
 		font-weight: 500;
 		color: rgba(255, 255, 255, 0.7);
 	}
 
 	.input-field {
 		width: 100%;
-		padding: 0.625rem 0.875rem;
-		font-size: 1rem;
+		padding: calc(var(--space-2) + var(--space-0)) calc(var(--space-3) + var(--space-0));
+		font-size: var(--text-xl);
 		color: #f5f5f5;
 		background-color: rgba(18, 18, 26, 0.8);
 		border: 1px solid rgba(255, 255, 255, 0.08);
@@ -117,26 +117,26 @@
 	}
 
 	.input-hint {
-		font-size: 0.75rem;
+		font-size: var(--text-sm);
 		color: rgba(255, 255, 255, 0.5);
 	}
 
 	.input-error {
-		font-size: 0.75rem;
+		font-size: var(--text-sm);
 		color: #ef4444;
 	}
 
 	.required-indicator {
 		color: #ef4444;
 		font-weight: 600;
-		margin-left: 0.25rem;
+		margin-left: var(--space-1);
 	}
 
 	/* Enhanced error state with red left border */
 	.has-error .input-field {
 		border-color: #ef4444;
 		border-left: 3px solid #ef4444;
-		padding-left: calc(0.875rem - 2px);
+		padding-left: calc(var(--space-3) + var(--space-0) - 2px);
 	}
 
 	.has-error .input-field:focus {

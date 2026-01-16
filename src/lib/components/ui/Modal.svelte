@@ -148,7 +148,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 1rem;
+		padding: var(--space-4);
 		background: rgba(0, 0, 0, 0.8);
 		backdrop-filter: blur(4px);
 	}
@@ -185,14 +185,14 @@
 	.modal.full .modal-body {
 		flex: 1;
 		overflow-y: auto;
-		padding: 1rem 1.5rem;
+		padding: var(--space-4) calc(var(--space-4) + var(--space-2));
 	}
 
 	.modal-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 1.25rem 1.5rem;
+		padding: calc(var(--space-4) + var(--space-1)) calc(var(--space-4) + var(--space-2));
 		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 	}
 
@@ -223,14 +223,14 @@
 	}
 
 	.modal-body {
-		padding: 1.5rem;
+		padding: calc(var(--space-4) + var(--space-2));
 	}
 
 	.modal-footer {
 		display: flex;
 		justify-content: flex-end;
-		gap: 0.75rem;
-		padding: 1rem 1.5rem;
+		gap: var(--space-3);
+		padding: var(--space-4) calc(var(--space-4) + var(--space-2));
 		border-top: 1px solid rgba(255, 255, 255, 0.06);
 	}
 

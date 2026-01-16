@@ -84,6 +84,10 @@
 	.checkbox-input {
 		position: relative;
 		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
 	}
 
 	.checkbox-input input {
@@ -98,8 +102,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 12px;
-		height: 12px;
+		width: 20px;
+		height: 20px;
 		background: rgba(18, 18, 26, 0.8);
 		border: 1px solid rgba(255, 255, 255, 0.4);
 		border-radius: 2px;
@@ -108,8 +112,8 @@
 	}
 
 	.checkbox-control svg {
-		width: 8px;
-		height: 8px;
+		width: 10px;
+		height: 10px;
 		color: #1a1a1a;
 	}
 

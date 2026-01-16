@@ -93,7 +93,7 @@
 
 	.package-code {
 		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.8rem;
+		font-size: var(--text-base);
 		font-weight: 600;
 		color: var(--color-solidcam-gold, #d4af37);
 		transition: color 150ms ease;
@@ -105,7 +105,7 @@
 
 	.package-description {
 		display: block;
-		font-size: 0.7rem;
+		font-size: var(--text-xs);
 		color: rgba(255, 255, 255, 0.6);
 		margin-top: 0.15rem;
 		line-height: 1.3;
@@ -119,7 +119,7 @@
 
 	.maint-code {
 		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.75rem;
+		font-size: var(--text-sm);
 		color: rgba(255, 255, 255, 0.8);
 		cursor: pointer;
 		transition: color 150ms ease;
@@ -139,7 +139,7 @@
 	.bits-container {
 		display: flex;
 		flex-direction: column;
-		gap: 0.375rem;
+		gap: calc(var(--space-1) + var(--space-0));
 		width: 100%;
 	}
 
@@ -147,7 +147,7 @@
 	.groups-grid {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		width: 100%;
 	}
 
@@ -162,7 +162,7 @@
 	}
 
 	.loose-bits-section.has-groups {
-		padding-top: 0.25rem;
+		padding-top: var(--space-1);
 		border-top: 1px solid rgba(255, 255, 255, 0.06);
 	}
 
@@ -172,7 +172,7 @@
 		padding: 0;
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.25rem;
+		gap: var(--space-1);
 	}
 
 	/* Hide Package column on narrow screens */
@@ -186,7 +186,7 @@
 		}
 
 		.maint-code {
-			font-size: 0.7rem;
+			font-size: var(--text-xs);
 		}
 
 		.bits-cell {
@@ -194,11 +194,11 @@
 		}
 
 		.bits-container {
-			gap: 0.25rem;
+			gap: var(--space-1);
 		}
 
 		.groups-grid {
-			gap: 0.2rem;
+			gap: var(--space-0-5);
 		}
 	}
 
@@ -209,7 +209,7 @@
 		}
 
 		.maint-code {
-			font-size: 0.6rem;
+			font-size: var(--text-2xs);
 		}
 
 		.bits-cell {
@@ -217,11 +217,11 @@
 		}
 
 		.bits-container {
-			gap: 0.2rem;
+			gap: var(--space-0-5);
 		}
 
 		.groups-grid {
-			gap: 0.15rem;
+			gap: var(--space-0-5);
 		}
 	}
 
@@ -232,7 +232,7 @@
 		}
 
 		.maint-code {
-			font-size: 0.68rem;
+			font-size: var(--text-xs);
 		}
 
 		.bits-cell {
@@ -240,11 +240,11 @@
 		}
 
 		.bits-container {
-			gap: 0.125rem;
+			gap: var(--space-0);
 		}
 
 		.groups-grid {
-			gap: 0.1rem;
+			gap: var(--space-0);
 		}
 
 		.groups-grid > :global(.master-bit) {
@@ -253,7 +253,7 @@
 		}
 
 		.loose-bits {
-			gap: 0.1rem;
+			gap: var(--space-0);
 		}
 	}
 </style>
