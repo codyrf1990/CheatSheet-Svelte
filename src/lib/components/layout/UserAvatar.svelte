@@ -32,11 +32,9 @@
 			Sign out
 		</button>
 	</div>
-	{#if status === 'syncing'}
-		<div class="sync-indicator">
-			<div class="sync-spinner"></div>
-		</div>
-	{/if}
+	<div class="sync-indicator" class:visible={status === 'syncing'}>
+		<div class="sync-spinner"></div>
+	</div>
 </div>
 
 <style>
@@ -143,6 +141,12 @@
 	.sync-indicator {
 		margin-left: 0.25rem;
 		flex-shrink: 0;
+		opacity: 0;
+		transition: opacity 150ms ease;
+	}
+
+	.sync-indicator.visible {
+		opacity: 1;
 	}
 
 	.sync-spinner {

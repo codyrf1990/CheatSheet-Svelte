@@ -6,6 +6,6 @@ export { default as CurrentProductsModal } from './CurrentProductsModal.svelte';
 export { default as Input } from './Input.svelte';
 export { default as Modal } from './Modal.svelte';
 export { default as SalesTaxModal } from './SalesTaxModal.svelte';
+export { default as Skeleton } from './Skeleton.svelte';
 export { default as SmokedGlassCard } from './SmokedGlassCard.svelte';
-export { default as SyncModal } from './SyncModal.svelte';
 export { default as ToastContainer } from './ToastContainer.svelte';

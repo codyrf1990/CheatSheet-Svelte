@@ -1,13 +1,18 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import SmokedGlassCard from '$components/ui/SmokedGlassCard.svelte';
 	import Button from '$components/ui/Button.svelte';
 	import Input from '$components/ui/Input.svelte';
+	import Checkbox from '$components/ui/Checkbox.svelte';
 	import { syncStore } from '$stores/sync.svelte';
 
 	let username = $state('');
 	let error = $state('');
 	let isLoading = $state(false);
 	let mounted = $state(false);
+	let isOffline = $state(false);
+	let rememberMe = $state(syncStore.rememberMe);
+	let loginStep = $state<'idle' | 'connecting' | 'syncing' | 'success'>('idle');
 
 	$effect(() => {
 		// Trigger entrance animation
@@ -15,24 +20,61 @@
 		return () => clearTimeout(timer);
 	});
 
+	// Track online/offline status
+	$effect(() => {
+		if (!browser) return;
+
+		isOffline = !navigator.onLine;
+
+		const handleOnline = () => (isOffline = false);
+		const handleOffline = () => (isOffline = true);
+
+		window.addEventListener('online', handleOnline);
+		window.addEventListener('offline', handleOffline);
+
+		return () => {
+			window.removeEventListener('online', handleOnline);
+			window.removeEventListener('offline', handleOffline);
+		};
+	});
+
 	async function handleSubmit(e: SubmitEvent) {
 		e.preventDefault();
 		error = '';
 
 		if (!username.trim()) {
-			error = 'Please enter a username';
+			error = 'Please enter a tag';
 			return;
 		}
 
 		isLoading = true;
+		loginStep = 'connecting';
+
 		try {
-			await syncStore.connect(username);
+			// Brief delay to show connecting step
+			await new Promise((r) => setTimeout(r, 400));
+			loginStep = 'syncing';
+
+			await syncStore.connect(username, rememberMe);
+
+			// Show success state
+			loginStep = 'success';
+			await new Promise((r) => setTimeout(r, 800));
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to login';
+			error = err instanceof Error ? err.message : 'Failed to connect';
+			loginStep = 'idle';
 		} finally {
 			isLoading = false;
 		}
 	}
+
+	// Step labels for progress display
+	const stepLabels = {
+		idle: '',
+		connecting: 'Connecting...',
+		syncing: 'Syncing...',
+		success: 'Ready!'
+	};
 </script>
 
 <div class="login-screen">
@@ -51,6 +93,22 @@
 		{/each}
 	</div>
 
+	<!-- Offline indicator -->
+	{#if isOffline}
+		<div class="offline-banner">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<line x1="1" y1="1" x2="23" y2="23" />
+				<path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
+				<path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
+				<path d="M10.71 5.05A16 16 0 0 1 22.58 9" />
+				<path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88" />
+				<path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+				<line x1="12" y1="20" x2="12.01" y2="20" />
+			</svg>
+			<span>You're offline — data will sync when connected</span>
+		</div>
+	{/if}
+
 	<div class="logo-top" class:mounted>
 		<img src="/img/solidcam-logo.svg" alt="SolidCAM" class="logo-img" />
 	</div>
@@ -64,7 +122,7 @@
 					<div class="deco-icon">
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 							<path
-								d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+								d="M7 7h.01M7 3h5a1.99 1.99 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"
 							/>
 						</svg>
 					</div>
@@ -73,30 +131,48 @@
 
 				<div class="title-group">
 					<h1 class="login-title">Welcome</h1>
-					<p class="login-subtitle">Enter your username to get started</p>
+					<p class="login-subtitle">Pick a tag to get started</p>
 				</div>
 
 				<form onsubmit={handleSubmit} class="login-form">
-					<div class="input-wrapper">
+					<div class="input-wrapper" class:has-error={error}>
 						<Input
-							label="Username"
+							label="Tag"
 							type="text"
-							placeholder="e.g., john.doe"
+							placeholder="e.g., carlos"
 							bind:value={username}
 							{error}
-							hint="This is just an identifier, not a secure login"
-							autocomplete="username"
+							hint="Used to save and sync your selections"
+							autocomplete="nickname"
 							autocapitalize="none"
+							autofocus
 							disabled={isLoading}
 						/>
 					</div>
 
-					<Button type="submit" variant="gold" size="lg" disabled={isLoading} class="submit-btn">
-						{#if isLoading}
+					<div class="remember-row">
+						<Checkbox bind:checked={rememberMe} disabled={isLoading}>
+							Remember me
+						</Checkbox>
+					</div>
+
+					<Button
+						type="submit"
+						variant="gold"
+						size="lg"
+						disabled={isLoading}
+						class="submit-btn {loginStep === 'success' ? 'success' : ''}"
+					>
+						{#if loginStep === 'success'}
+							<svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+								<polyline points="20 6 9 17 4 12" />
+							</svg>
+							Ready!
+						{:else if isLoading}
 							<span class="loading-spinner"></span>
-							Signing in...
+							{stepLabels[loginStep]}
 						{:else}
-							Continue
+							Start
 							<svg
 								viewBox="0 0 24 24"
 								fill="none"
@@ -230,6 +306,42 @@
 		}
 	}
 
+	/* Offline banner */
+	.offline-banner {
+		position: absolute;
+		top: 1rem;
+		left: 50%;
+		transform: translateX(-50%);
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		background: rgba(239, 68, 68, 0.15);
+		border: 1px solid rgba(239, 68, 68, 0.3);
+		border-radius: 8px;
+		color: #fca5a5;
+		font-size: 0.8rem;
+		animation: slideDown 0.3s ease;
+		z-index: 10;
+	}
+
+	.offline-banner svg {
+		width: 16px;
+		height: 16px;
+		flex-shrink: 0;
+	}
+
+	@keyframes slideDown {
+		from {
+			opacity: 0;
+			transform: translateX(-50%) translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(-50%) translateY(0);
+		}
+	}
+
 	/* Logo */
 	.logo-top {
 		position: absolute;
@@ -356,16 +468,71 @@
 		position: relative;
 	}
 
+	.remember-row {
+		display: flex;
+		align-items: center;
+		margin-top: -0.5rem;
+	}
+
+	.input-wrapper.has-error {
+		animation: shake 0.3s ease;
+	}
+
+	@keyframes shake {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		25% {
+			transform: translateX(-4px);
+		}
+		75% {
+			transform: translateX(4px);
+		}
+	}
+
 	:global(.submit-btn) {
 		width: 100%;
+		min-width: 160px;
 		position: relative;
 		overflow: hidden;
+		justify-content: center;
+	}
+
+	.arrow-icon,
+	.loading-spinner,
+	.success-icon {
+		width: 18px;
+		height: 18px;
+		flex-shrink: 0;
 	}
 
 	.arrow-icon {
-		width: 18px;
-		height: 18px;
 		transition: transform 200ms ease;
+	}
+
+	.success-icon {
+		color: #000;
+		animation: successPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	}
+
+	@keyframes successPop {
+		0% {
+			transform: scale(0);
+			opacity: 0;
+		}
+		50% {
+			transform: scale(1.2);
+		}
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+
+	:global(.submit-btn.success) {
+		background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+		border-color: #22c55e;
 	}
 
 	:global(.submit-btn:hover) .arrow-icon {
@@ -373,8 +540,6 @@
 	}
 
 	.loading-spinner {
-		width: 16px;
-		height: 16px;
 		border: 2px solid rgba(0, 0, 0, 0.2);
 		border-top-color: currentColor;
 		border-radius: 50%;

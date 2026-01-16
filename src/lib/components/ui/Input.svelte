@@ -55,13 +55,15 @@
 		{...rest}
 	/>
 
-	{#if hint}
-		<span id={hintId} class="input-hint">{hint}</span>
-	{/if}
+	<div class="feedback-space">
+		{#if hint}
+			<span id={hintId} class="input-hint">{hint}</span>
+		{/if}
 
-	{#if error}
-		<span id={errorId} class="input-error" role="alert">{error}</span>
-	{/if}
+		{#if error}
+			<span id={errorId} class="input-error" role="alert">{error}</span>
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -114,6 +116,13 @@
 
 	.input-field.has-error {
 		border-color: #ef4444;
+	}
+
+	.feedback-space {
+		min-height: 1.25rem;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
 	}
 
 	.input-hint {

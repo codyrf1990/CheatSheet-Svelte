@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
-	import { ToastContainer } from '$components/ui';
+	import { ToastContainer, Skeleton } from '$components/ui';
 	import { LoginScreen } from '$components/layout';
 	import { syncStore } from '$stores/sync.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
@@ -52,7 +52,15 @@
 <div class="relative min-h-screen" id="main-content">
 	{#if !initialized}
 		<div class="loading-screen">
-			<div class="loading-spinner"></div>
+			<div class="skeleton-card">
+				<Skeleton variant="circular" width="44px" height="44px" />
+				<div class="skeleton-text-group">
+					<Skeleton width="120px" height="1.5rem" />
+					<Skeleton width="180px" height="0.875rem" />
+				</div>
+				<Skeleton width="100%" height="48px" class="skeleton-input" />
+				<Skeleton width="100%" height="48px" class="skeleton-button" />
+			</div>
 		</div>
 	{:else if !isLoggedIn}
 		<LoginScreen />
@@ -92,20 +100,35 @@
 		align-items: center;
 		justify-content: center;
 		min-height: 100vh;
+		padding: 2rem;
 	}
 
-	.loading-spinner {
-		width: 40px;
-		height: 40px;
-		border: 3px solid rgba(255, 255, 255, 0.1);
-		border-top-color: #d4af37;
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
+	.skeleton-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.5rem;
+		width: 100%;
+		max-width: 380px;
+		padding: 2rem;
+		background: rgba(20, 20, 28, 0.8);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 16px;
+		backdrop-filter: blur(20px);
 	}
 
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
+	.skeleton-text-group {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	:global(.skeleton-input) {
+		border-radius: 8px !important;
+	}
+
+	:global(.skeleton-button) {
+		border-radius: 10px !important;
 	}
 </style>

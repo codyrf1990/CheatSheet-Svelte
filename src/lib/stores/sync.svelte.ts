@@ -9,9 +9,11 @@ import { loadUserData, queueSave, cancelPendingSave, flushPendingSave } from '$f
 import { companiesStore } from './companies.svelte';
 
 const SYNC_USERNAME_KEY = 'solidcam-sync-username';
+const REMEMBER_ME_KEY = 'solidcam-remember-me';
 
 // Reactive state
 let username = $state<string | null>(null);
+let rememberMe = $state<boolean>(true);
 let status = $state<SyncStatus>('disconnected');
 let lastSyncTime = $state<number | null>(null);
 let error = $state<string | null>(null);
@@ -79,18 +81,19 @@ function stopAutoSync(): void {
 /**
  * Connect to cloud sync with username
  */
-async function connect(name: string): Promise<boolean> {
+async function connect(name: string, remember: boolean = true): Promise<boolean> {
 	if (!browser) return false;
 
 	// Validate username
 	if (!validateUsername(name)) {
-		error = 'Invalid username. Use 2-50 characters: letters, numbers, spaces, - or _';
+		error = 'Invalid tag. Use 2-50 characters: letters, numbers, spaces, - or _';
 		return false;
 	}
 
 	const trimmedName = name.trim();
 	error = null;
 	status = 'connecting';
+	rememberMe = remember;
 
 	try {
 		// Try to load existing cloud data
@@ -179,10 +182,14 @@ function load(): void {
 	if (!browser) return;
 
 	try {
+		// Load remember me preference
+		const storedRemember = localStorage.getItem(REMEMBER_ME_KEY);
+		rememberMe = storedRemember !== 'false'; // Default to true
+
 		const storedUsername = localStorage.getItem(SYNC_USERNAME_KEY);
 		if (storedUsername) {
 			// Auto-connect with stored username
-			connect(storedUsername);
+			connect(storedUsername, rememberMe);
 		}
 	} catch (err) {
 		console.error('[SyncStore] Failed to load:', err);
@@ -196,7 +203,10 @@ function saveToLocalStorage(): void {
 	if (!browser) return;
 
 	try {
-		if (username) {
+		// Save remember me preference
+		localStorage.setItem(REMEMBER_ME_KEY, String(rememberMe));
+
+		if (username && rememberMe) {
 			localStorage.setItem(SYNC_USERNAME_KEY, username);
 		} else {
 			localStorage.removeItem(SYNC_USERNAME_KEY);
@@ -231,6 +241,9 @@ export const syncStore = {
 	},
 	get error() {
 		return error;
+	},
+	get rememberMe() {
+		return rememberMe;
 	},
 
 	// Operations
