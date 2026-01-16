@@ -15,8 +15,8 @@
 	let { children }: Props = $props();
 	let initialized = $state(false);
 
-	onMount(() => {
-		syncStore.load();
+	onMount(async () => {
+		await syncStore.load();
 		userPrefsStore.init();
 		initialized = true;
 	});

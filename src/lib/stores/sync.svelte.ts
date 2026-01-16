@@ -10,6 +10,7 @@ import { companiesStore } from './companies.svelte';
 
 const SYNC_USERNAME_KEY = 'solidcam-sync-username';
 const REMEMBER_ME_KEY = 'solidcam-remember-me';
+const LAST_USERNAME_KEY = 'solidcam-last-username';
 
 // Reactive state
 let username = $state<string | null>(null);
@@ -135,6 +136,12 @@ async function disconnect(): Promise<void> {
 	// Flush any pending changes first
 	if (username) {
 		await flushPendingSave();
+		// Save last username for pre-filling only if rememberMe is true
+		if (browser && rememberMe) {
+			localStorage.setItem(LAST_USERNAME_KEY, username);
+		} else if (browser) {
+			localStorage.removeItem(LAST_USERNAME_KEY);
+		}
 	}
 
 	stopAutoSync();
@@ -178,7 +185,7 @@ async function sync(): Promise<boolean> {
 /**
  * Load username from localStorage and auto-connect
  */
-function load(): void {
+async function load(): Promise<void> {
 	if (!browser) return;
 
 	try {
@@ -189,7 +196,7 @@ function load(): void {
 		const storedUsername = localStorage.getItem(SYNC_USERNAME_KEY);
 		if (storedUsername) {
 			// Auto-connect with stored username
-			connect(storedUsername, rememberMe);
+			await connect(storedUsername, rememberMe);
 		}
 	} catch (err) {
 		console.error('[SyncStore] Failed to load:', err);
@@ -206,6 +213,7 @@ function saveToLocalStorage(): void {
 		// Save remember me preference
 		localStorage.setItem(REMEMBER_ME_KEY, String(rememberMe));
 
+		// Only save for auto-connect if rememberMe is true
 		if (username && rememberMe) {
 			localStorage.setItem(SYNC_USERNAME_KEY, username);
 		} else {
@@ -220,6 +228,9 @@ export const syncStore = {
 	// Getters
 	get username() {
 		return username;
+	},
+	get lastUsername() {
+		return browser ? localStorage.getItem(LAST_USERNAME_KEY) : null;
 	},
 	get normalizedUsername() {
 		return username ? normalizeUsername(username) : null;

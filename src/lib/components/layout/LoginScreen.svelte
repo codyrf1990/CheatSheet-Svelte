@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import SmokedGlassCard from '$components/ui/SmokedGlassCard.svelte';
 	import Button from '$components/ui/Button.svelte';
 	import Input from '$components/ui/Input.svelte';
 	import Checkbox from '$components/ui/Checkbox.svelte';
 	import { syncStore } from '$stores/sync.svelte';
 
-	let username = $state('');
+	let username = $state(syncStore.lastUsername || '');
 	let error = $state('');
 	let isLoading = $state(false);
 	let mounted = $state(false);
@@ -109,9 +108,15 @@
 		</div>
 	{/if}
 
-	<div class="logo-top" class:mounted>
-		<img src="/img/solidcam-logo.svg" alt="SolidCAM" class="logo-img" />
-	</div>
+	<a
+		href="https://solidcam.com/en-us/"
+		target="_blank"
+		rel="noopener noreferrer"
+		class="logo-top"
+		class:mounted
+	>
+		<img src="/images/solidcam-logo.png" alt="SolidCAM" class="logo-img" />
+	</a>
 
 	<div class="login-container" class:mounted>
 		<SmokedGlassCard padding="lg" glow="accent" class="login-card">
@@ -135,25 +140,23 @@
 				</div>
 
 				<form onsubmit={handleSubmit} class="login-form">
-					<div class="input-wrapper" class:has-error={error}>
-						<Input
-							label="Tag"
-							type="text"
-							placeholder="e.g., carlos"
-							bind:value={username}
-							{error}
-							hint="Used to save and sync your selections"
-							autocomplete="nickname"
-							autocapitalize="none"
-							autofocus
-							disabled={isLoading}
-						/>
-					</div>
-
-					<div class="remember-row">
-						<Checkbox bind:checked={rememberMe} disabled={isLoading}>
-							Remember me
-						</Checkbox>
+					<div class="input-row" class:has-error={error}>
+						<div class="input-wrapper">
+							<Input
+								type="text"
+								placeholder="e.g., carlos"
+								bind:value={username}
+								{error}
+								hint="Used to save and sync your selections"
+								autocomplete="nickname"
+								autocapitalize="none"
+								autofocus
+								disabled={isLoading}
+							/>
+						</div>
+						<div class="remember-checkbox" title="Remember me">
+							<Checkbox bind:checked={rememberMe} disabled={isLoading} aria-label="Remember me" />
+						</div>
 					</div>
 
 					<Button
@@ -199,8 +202,6 @@
 	<!-- Bottom branding -->
 	<div class="bottom-brand" class:mounted>
 		<span class="brand-text">SolidCAM CheatSheet</span>
-		<span class="brand-divider"></span>
-		<span class="brand-version">v1.0</span>
 	</div>
 </div>
 
@@ -350,6 +351,43 @@
 		transform: translateX(-50%) translateY(-20px);
 		opacity: 0;
 		transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+		width: clamp(187px, 22vw, 300px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: clamp(0.4rem, 1vw, 0.6rem);
+		border-radius: 14px;
+	}
+
+	/* Breathing red glow cloud under tagline */
+	.logo-top::after {
+		content: '';
+		position: absolute;
+		bottom: 5%;
+		left: 0%;
+		right: -20%;
+		height: 35%;
+		background: radial-gradient(
+			ellipse 60% 80% at 50% 100%,
+			rgba(200, 16, 46, 0.8) 0%,
+			rgba(200, 16, 46, 0.4) 40%,
+			transparent 70%
+		);
+		filter: blur(12px);
+		animation: glow-breathe 3s ease-in-out infinite;
+		pointer-events: none;
+	}
+
+	@keyframes glow-breathe {
+		0%,
+		100% {
+			opacity: 0.7;
+			transform: scaleY(0.95);
+		}
+		50% {
+			opacity: 1;
+			transform: scaleY(1.05);
+		}
 	}
 
 	.logo-top.mounted {
@@ -358,8 +396,15 @@
 	}
 
 	.logo-img {
-		height: 48px;
-		filter: drop-shadow(0 0 20px rgba(200, 16, 46, 0.3));
+		width: 100%;
+		height: auto;
+		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+		transition: transform 200ms ease;
+		mix-blend-mode: lighten;
+	}
+
+	.logo-top:hover .logo-img {
+		transform: scale(1.02);
 	}
 
 	/* Login container */
@@ -464,17 +509,23 @@
 		gap: 1.25rem;
 	}
 
+	.input-row {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+	}
+
 	.input-wrapper {
+		flex: 1;
 		position: relative;
 	}
 
-	.remember-row {
-		display: flex;
-		align-items: center;
-		margin-top: -0.5rem;
+	.remember-checkbox {
+		padding-top: 0.65rem;
+		flex-shrink: 0;
 	}
 
-	.input-wrapper.has-error {
+	.input-row.has-error {
 		animation: shake 0.3s ease;
 	}
 
@@ -579,9 +630,6 @@
 	.bottom-brand {
 		position: absolute;
 		bottom: 1.5rem;
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
 		opacity: 0;
 		transform: translateY(10px);
 		transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s;
@@ -596,18 +644,6 @@
 		font-size: 0.75rem;
 		color: rgba(255, 255, 255, 0.5);
 		letter-spacing: 0.05em;
-	}
-
-	.brand-divider {
-		width: 1px;
-		height: 12px;
-		background: rgba(255, 255, 255, 0.25);
-	}
-
-	.brand-version {
-		font-size: 0.7rem;
-		color: rgba(212, 175, 55, 0.7);
-		font-weight: 500;
 	}
 
 	@media (max-width: 480px) {
@@ -628,7 +664,8 @@
 	@media (prefers-reduced-motion: reduce) {
 		.ambient-glow,
 		.particle,
-		.deco-icon {
+		.deco-icon,
+		.logo-top::after {
 			animation: none;
 		}
 
