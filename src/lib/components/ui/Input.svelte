@@ -9,7 +9,16 @@
 		showRequired?: boolean;
 	}
 
-	let { label, error, hint, class: className = '', id, value = $bindable(''), showRequired = false, ...rest }: Props = $props();
+	let {
+		label,
+		error,
+		hint,
+		class: className = '',
+		id,
+		value = $bindable(''),
+		showRequired = false,
+		...rest
+	}: Props = $props();
 
 	let inputId = $derived(id || crypto.randomUUID());
 	let errorId = $derived(`${inputId}-error`);

@@ -1,6 +1,7 @@
 # Firebase/Firestore Best Practices (2026)
 
 ## SDK Version
+
 Firebase JavaScript SDK v12.x (modular)
 
 ## Initialization
@@ -10,33 +11,33 @@ Firebase JavaScript SDK v12.x (modular)
 import { browser } from '$app/environment';
 import { initializeApp, getApps } from 'firebase/app';
 import {
-  initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager
+	initializeFirestore,
+	persistentLocalCache,
+	persistentMultipleTabManager
 } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  // ...
+	apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+	authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+	projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID
+	// ...
 };
 
 let db: Firestore | null = null;
 
 export function getDb() {
-  if (!browser) return null;
-  if (db) return db;
+	if (!browser) return null;
+	if (db) return db;
 
-  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+	const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
-  db = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-      tabManager: persistentMultipleTabManager()
-    })
-  });
+	db = initializeFirestore(app, {
+		localCache: persistentLocalCache({
+			tabManager: persistentMultipleTabManager()
+		})
+	});
 
-  return db;
+	return db;
 }
 ```
 
@@ -48,36 +49,42 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { getDb } from './client';
 
 export function useDocument<T>(path: string) {
-  let data = $state<T | null>(null);
-  let loading = $state(true);
-  let error = $state<Error | null>(null);
+	let data = $state<T | null>(null);
+	let loading = $state(true);
+	let error = $state<Error | null>(null);
 
-  $effect(() => {
-    const db = getDb();
-    if (!db) return;
+	$effect(() => {
+		const db = getDb();
+		if (!db) return;
 
-    const docRef = doc(db, path);
-    const unsubscribe = onSnapshot(
-      docRef,
-      (snapshot) => {
-        data = snapshot.exists() ? snapshot.data() as T : null;
-        loading = false;
-      },
-      (err) => {
-        error = err;
-        loading = false;
-      }
-    );
+		const docRef = doc(db, path);
+		const unsubscribe = onSnapshot(
+			docRef,
+			(snapshot) => {
+				data = snapshot.exists() ? (snapshot.data() as T) : null;
+				loading = false;
+			},
+			(err) => {
+				error = err;
+				loading = false;
+			}
+		);
 
-    // Cleanup on unmount
-    return () => unsubscribe();
-  });
+		// Cleanup on unmount
+		return () => unsubscribe();
+	});
 
-  return {
-    get data() { return data; },
-    get loading() { return loading; },
-    get error() { return error; }
-  };
+	return {
+		get data() {
+			return data;
+		},
+		get loading() {
+			return loading;
+		},
+		get error() {
+			return error;
+		}
+	};
 }
 ```
 
@@ -87,33 +94,34 @@ export function useDocument<T>(path: string) {
 // lib/firebase/useCollection.svelte.ts
 import { collection, query, onSnapshot, type QueryConstraint } from 'firebase/firestore';
 
-export function useCollection<T>(
-  path: string,
-  ...constraints: QueryConstraint[]
-) {
-  let data = $state<T[]>([]);
-  let loading = $state(true);
+export function useCollection<T>(path: string, ...constraints: QueryConstraint[]) {
+	let data = $state<T[]>([]);
+	let loading = $state(true);
 
-  $effect(() => {
-    const db = getDb();
-    if (!db) return;
+	$effect(() => {
+		const db = getDb();
+		if (!db) return;
 
-    const q = query(collection(db, path), ...constraints);
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as T[];
-      loading = false;
-    });
+		const q = query(collection(db, path), ...constraints);
+		const unsubscribe = onSnapshot(q, (snapshot) => {
+			data = snapshot.docs.map((doc) => ({
+				id: doc.id,
+				...doc.data()
+			})) as T[];
+			loading = false;
+		});
 
-    return () => unsubscribe();
-  });
+		return () => unsubscribe();
+	});
 
-  return {
-    get data() { return data; },
-    get loading() { return loading; }
-  };
+	return {
+		get data() {
+			return data;
+		},
+		get loading() {
+			return loading;
+		}
+	};
 }
 ```
 
@@ -123,18 +131,17 @@ export function useCollection<T>(
 // lib/utils/debounce.ts
 const timers = new Map<string, ReturnType<typeof setTimeout>>();
 
-export function debouncedWrite(
-  key: string,
-  fn: () => Promise<void>,
-  delay = 900
-) {
-  const existing = timers.get(key);
-  if (existing) clearTimeout(existing);
+export function debouncedWrite(key: string, fn: () => Promise<void>, delay = 900) {
+	const existing = timers.get(key);
+	if (existing) clearTimeout(existing);
 
-  timers.set(key, setTimeout(async () => {
-    await fn();
-    timers.delete(key);
-  }, delay));
+	timers.set(
+		key,
+		setTimeout(async () => {
+			await fn();
+			timers.delete(key);
+		}, delay)
+	);
 }
 ```
 
@@ -146,33 +153,35 @@ import { getAuth } from 'firebase-admin/auth';
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const sessionCookie = event.cookies.get('__session');
+	const sessionCookie = event.cookies.get('__session');
 
-  if (sessionCookie) {
-    try {
-      const claims = await getAuth().verifySessionCookie(sessionCookie, true);
-      event.locals.user = claims;
-    } catch {
-      event.cookies.delete('__session', { path: '/' });
-    }
-  }
+	if (sessionCookie) {
+		try {
+			const claims = await getAuth().verifySessionCookie(sessionCookie, true);
+			event.locals.user = claims;
+		} catch {
+			event.cookies.delete('__session', { path: '/' });
+		}
+	}
 
-  return resolve(event);
+	return resolve(event);
 };
 ```
 
 ## Offline Persistence
 
 Multi-tab persistence (recommended):
+
 ```typescript
 initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager()
-  })
+	localCache: persistentLocalCache({
+		tabManager: persistentMultipleTabManager()
+	})
 });
 ```
 
 **Notes**:
+
 - Only works in Chrome, Safari, Firefox
 - One tab becomes "primary client"
 - Writes resolve immediately in cache, promises wait for online
@@ -218,17 +227,18 @@ import firebase from 'firebase/app';
 ## Firestore Lite (Read-Only)
 
 80% smaller bundle for read-only operations:
+
 ```typescript
 import { getFirestore, doc, getDoc } from 'firebase/firestore/lite';
 ```
 
 ## Bundle Size Impact
 
-| Configuration | Size (gzipped) |
-|--------------|----------------|
-| Full v8 SDK | ~300KB+ |
-| Modular v12 (Auth + Firestore) | ~30-50KB |
-| Firestore Lite only | ~15KB |
+| Configuration                  | Size (gzipped) |
+| ------------------------------ | -------------- |
+| Full v8 SDK                    | ~300KB+        |
+| Modular v12 (Auth + Firestore) | ~30-50KB       |
+| Firestore Lite only            | ~15KB          |
 
 ## CheatSheet Firebase Structure
 
@@ -249,6 +259,7 @@ users/{normalizedUsername}
 ```
 
 ## References
+
 - [Firebase Web Docs](https://firebase.google.com/docs/web/setup)
 - [Firestore Offline](https://firebase.google.com/docs/firestore/manage-data/enable-offline)
 - [Security Rules](https://firebase.google.com/docs/firestore/security/get-started)

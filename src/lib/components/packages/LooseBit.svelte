@@ -68,8 +68,8 @@
 			tabindex="0"
 			onclick={handleCopy}
 			onkeydown={handleKeydown}
-			data-copyable-bit
-		>{bit}</span>
+			data-copyable-bit>{bit}</span
+		>
 	</label>
 	{#if editMode}
 		<button type="button" class="bit-remove-btn" onclick={handleRemove} aria-label="Remove {bit}">

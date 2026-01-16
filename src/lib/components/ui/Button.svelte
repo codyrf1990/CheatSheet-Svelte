@@ -8,7 +8,13 @@
 		children: Snippet;
 	}
 
-	let { variant = 'primary', size = 'md', class: className = '', children, ...rest }: Props = $props();
+	let {
+		variant = 'primary',
+		size = 'md',
+		class: className = '',
+		children,
+		...rest
+	}: Props = $props();
 
 	const variants = {
 		primary: 'btn-primary',

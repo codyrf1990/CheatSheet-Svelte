@@ -104,7 +104,13 @@
 
 			{#if syncStatus === 'syncing'}
 				<div class="sync-status syncing">
-					<svg class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<svg
+						class="spinner"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
 						<path d="M21 12a9 9 0 11-6.219-8.56" />
 					</svg>
 					<span>Syncing...</span>
@@ -132,11 +138,12 @@
 		<!-- Disconnected state -->
 		<div class="sync-disconnected">
 			<p class="description">
-				Enter a username to sync your data to the cloud. Your selections will be saved and accessible from any device.
+				Enter a username to sync your data to the cloud. Your selections will be saved and
+				accessible from any device.
 			</p>
 
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="input-area" onkeydown={handleKeydown}>
+			<div class="input-area" onkeydown={handleKeydown}>
 				<Input
 					label="Username"
 					placeholder="Enter your username"
@@ -149,7 +156,13 @@
 
 			{#if syncStatus === 'connecting'}
 				<div class="sync-status connecting">
-					<svg class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<svg
+						class="spinner"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
 						<path d="M21 12a9 9 0 11-6.219-8.56" />
 					</svg>
 					<span>Connecting...</span>
@@ -157,10 +170,12 @@
 			{/if}
 
 			<div class="actions">
-				<Button variant="ghost" onclick={onclose} disabled={isLoading}>
-					Cancel
-				</Button>
-				<Button variant="gold" onclick={handleConnect} disabled={isLoading || !usernameInput.trim()}>
+				<Button variant="ghost" onclick={onclose} disabled={isLoading}>Cancel</Button>
+				<Button
+					variant="gold"
+					onclick={handleConnect}
+					disabled={isLoading || !usernameInput.trim()}
+				>
 					{isLoading ? 'Connecting...' : 'Connect'}
 				</Button>
 			</div>

@@ -13,7 +13,9 @@
 <div class="package-table-container">
 	<div class="main-table">
 		<table aria-label="SolidCAM packages and included bits">
-			<caption class="sr-only">SolidCAM package options with maintenance SKUs and included software bits</caption>
+			<caption class="sr-only"
+				>SolidCAM package options with maintenance SKUs and included software bits</caption
+			>
 			<thead>
 				<tr>
 					<th scope="col" class="col-package">Package</th>

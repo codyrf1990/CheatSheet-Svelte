@@ -114,7 +114,11 @@
 			sku: 'SC-Sim5x',
 			desc: 'Auto 3+2 Roughing, Rotary, HSM to 5X Conversion, Geodesic, SWARF'
 		},
-		{ name: 'Edge Breaking', sku: 'SC-EdgeBreak', desc: 'Automatic deburring with precise orientation' },
+		{
+			name: 'Edge Breaking',
+			sku: 'SC-EdgeBreak',
+			desc: 'Automatic deburring with precise orientation'
+		},
 		{ name: 'Edge Trimming', sku: 'SC-EdgeTrim', desc: 'Precise trimming of thin materials' },
 		{
 			name: 'Auto 3+2 Roughing',
@@ -223,7 +227,7 @@
 <Modal {open} {onclose} title="SolidCAM Product Catalog" size="wide">
 	<!-- Tabs -->
 	<div class="tabs-container" role="tablist" aria-label="Product categories">
-		{#each tabs as tab}
+		{#each tabs as tab (tab.id)}
 			<button
 				role="tab"
 				class="tab-btn"
@@ -237,7 +241,11 @@
 	</div>
 
 	<!-- Tab Content -->
-	<div class="tab-content" role="tabpanel" aria-label="{tabs.find(t => t.id === activeTab)?.label || 'Content'}">
+	<div
+		class="tab-content"
+		role="tabpanel"
+		aria-label={tabs.find((t) => t.id === activeTab)?.label || 'Content'}
+	>
 		{#if activeTab === 'overview'}
 			<!-- Overview Tab -->
 			<section class="section">
@@ -248,7 +256,7 @@
 						<span>SKU</span>
 						<span>Description</span>
 					</div>
-					{#each foundationalPackages as item}
+					{#each foundationalPackages as item (item.sku)}
 						<div class="table-row">
 							<strong>{item.product}</strong>
 							<code>{item.sku}</code>
@@ -266,7 +274,7 @@
 						<span>SKU</span>
 						<span>Note</span>
 					</div>
-					{#each swBundles as item}
+					{#each swBundles as item (item.sku)}
 						<div class="table-row">
 							<strong>{item.product}</strong>
 							<code>{item.sku}</code>
@@ -284,7 +292,7 @@
 						<span>SKU</span>
 						<span>Includes</span>
 					</div>
-					{#each upgradePackages as item}
+					{#each upgradePackages as item (item.sku)}
 						<div class="table-row">
 							<strong>{item.pkg}</strong>
 							<code>{item.sku}</code>
@@ -297,7 +305,7 @@
 			<section class="section">
 				<h4 class="section-title">SOLIDWORKS Product Codes</h4>
 				<div class="code-grid">
-					{#each swProductCodes as item}
+					{#each swProductCodes as item (item.code)}
 						<div class="code-item">
 							<code>{item.code}</code>
 							<span>{item.name}</span>
@@ -313,7 +321,7 @@
 			<section class="section">
 				<h4 class="section-title">Milling Modules</h4>
 				<div class="module-list">
-					{#each millingModules as mod}
+					{#each millingModules as mod (mod.sku)}
 						<div class="module-item">
 							<div class="module-header">
 								<strong>{mod.name}</strong>
@@ -329,7 +337,7 @@
 			<section class="section">
 				<h4 class="section-title">Turning Modules</h4>
 				<div class="module-list">
-					{#each turningModules as mod}
+					{#each turningModules as mod (mod.sku)}
 						<div class="module-item">
 							<div class="module-header">
 								<strong>{mod.name}</strong>
@@ -344,7 +352,7 @@
 			<section class="section">
 				<h4 class="section-title">Add-on Modules</h4>
 				<div class="module-list">
-					{#each addonModules as mod}
+					{#each addonModules as mod (mod.sku)}
 						<div class="module-item">
 							<div class="module-header">
 								<strong>{mod.name}</strong>
@@ -359,7 +367,7 @@
 			<section class="section">
 				<h4 class="section-title">SolidShop</h4>
 				<div class="module-list">
-					{#each solidShopModules as mod}
+					{#each solidShopModules as mod (mod.sku)}
 						<div class="module-item">
 							<div class="module-header">
 								<strong>{mod.name}</strong>
@@ -376,7 +384,7 @@
 				<h4 class="section-title">Training Credits</h4>
 				<p class="note">Credits apply to 1 hour remote training or $100 toward onsite training</p>
 				<div class="code-grid">
-					{#each trainingCredits as item}
+					{#each trainingCredits as item (item.sku)}
 						<div class="code-item">
 							<code>{item.sku}</code>
 							<span>{item.credits}</span>
@@ -393,7 +401,7 @@
 						<span>Description</span>
 						<span>Price</span>
 					</div>
-					{#each trainingHours as item}
+					{#each trainingHours as item (item.sku)}
 						<div class="table-row">
 							<code>{item.sku}</code>
 							<span>{item.desc}</span>
@@ -421,7 +429,7 @@
 						<span>Code</span>
 						<span>Usage</span>
 					</div>
-					{#each discountCodes as item}
+					{#each discountCodes as item (item.code)}
 						<div class="table-row">
 							<code>{item.code}</code>
 							<span>{item.usage}</span>
@@ -444,7 +452,7 @@
 				<h4 class="section-title">Post Processor Services</h4>
 				<p class="note">Lead time: 4-6 weeks. * = Simulation required</p>
 				<div class="module-list">
-					{#each postProcessors as post}
+					{#each postProcessors as post (post.sku)}
 						<div class="module-item module-item--compact">
 							<div class="module-header">
 								<strong>{post.name}</strong>
@@ -461,7 +469,7 @@
 				<h4 class="section-title">Machine Simulation Development</h4>
 				<p class="note">Customer must supply SolidWorks models of machine</p>
 				<div class="code-grid">
-					{#each simDevelopment as item}
+					{#each simDevelopment as item (item.code)}
 						<div class="code-item">
 							<code>{item.code}</code>
 							<span>{item.name}</span>

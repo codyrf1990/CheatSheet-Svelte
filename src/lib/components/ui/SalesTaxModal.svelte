@@ -34,7 +34,7 @@
 		<section class="tax-section">
 			<h4 class="section-title section-title--required">States Required to Collect Sales Tax</h4>
 			<div class="states-grid">
-				{#each requiredStates as state}
+				{#each requiredStates as state (state)}
 					<span class="state-tag state-tag--required">{state}</span>
 				{/each}
 			</div>
@@ -44,7 +44,7 @@
 		<section class="tax-section">
 			<h4 class="section-title section-title--exempt">States Exempt from Sales Tax</h4>
 			<div class="states-grid">
-				{#each exemptStates as state}
+				{#each exemptStates as state (state)}
 					<span class="state-tag state-tag--exempt">{state}</span>
 				{/each}
 			</div>

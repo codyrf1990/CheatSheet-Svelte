@@ -33,7 +33,9 @@
 						</svg>
 					{:else if t.type === 'warning'}
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-							<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+							<path
+								d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+							/>
 							<line x1="12" y1="9" x2="12" y2="13" />
 							<line x1="12" y1="17" x2="12.01" y2="17" />
 						</svg>
@@ -105,8 +107,12 @@
 	}
 
 	@keyframes toastShine {
-		0% { left: -50%; }
-		100% { left: 150%; }
+		0% {
+			left: -50%;
+		}
+		100% {
+			left: 150%;
+		}
 	}
 
 	/* Icon styling */
@@ -131,8 +137,15 @@
 	}
 
 	@keyframes iconPulse {
-		0%, 100% { transform: scale(1); opacity: 0.15; }
-		50% { transform: scale(1.1); opacity: 0.25; }
+		0%,
+		100% {
+			transform: scale(1);
+			opacity: 0.15;
+		}
+		50% {
+			transform: scale(1.1);
+			opacity: 0.25;
+		}
 	}
 
 	.toast-icon svg {
@@ -230,8 +243,12 @@
 	}
 
 	@keyframes progressShrink {
-		from { transform: scaleX(1); }
-		to { transform: scaleX(0); }
+		from {
+			transform: scaleX(1);
+		}
+		to {
+			transform: scaleX(0);
+		}
 	}
 
 	.toast-progress-success {

@@ -4,12 +4,12 @@
 
 ```svelte
 <script lang="ts">
-  interface Props {
-    name: string;
-    count?: number;
-    onSave: (data: { id: string }) => void;
-  }
-  let { name, count = 0, onSave }: Props = $props();
+	interface Props {
+		name: string;
+		count?: number;
+		onSave: (data: { id: string }) => void;
+	}
+	let { name, count = 0, onSave }: Props = $props();
 </script>
 ```
 
@@ -17,12 +17,12 @@
 
 ```svelte
 <script lang="ts">
-  import type { HTMLButtonAttributes } from 'svelte/elements';
+	import type { HTMLButtonAttributes } from 'svelte/elements';
 
-  interface Props extends HTMLButtonAttributes {
-    variant?: 'primary' | 'secondary';
-  }
-  let { variant = 'primary', ...rest }: Props = $props();
+	interface Props extends HTMLButtonAttributes {
+		variant?: 'primary' | 'secondary';
+	}
+	let { variant = 'primary', ...rest }: Props = $props();
 </script>
 
 <button {...rest}>{variant}</button>
@@ -32,17 +32,17 @@
 
 ```svelte
 <script lang="ts" generics="T extends { id: string }">
-  interface Props {
-    items: T[];
-    onSelect: (item: T) => void;
-  }
-  let { items, onSelect }: Props = $props();
+	interface Props {
+		items: T[];
+		onSelect: (item: T) => void;
+	}
+	let { items, onSelect }: Props = $props();
 </script>
 
 {#each items as item (item.id)}
-  <button onclick={() => onSelect(item)}>
-    {item.id}
-  </button>
+	<button onclick={() => onSelect(item)}>
+		{item.id}
+	</button>
 {/each}
 ```
 
@@ -64,33 +64,39 @@ let items = $state<string[]>([]);
 ```typescript
 // stores/user.svelte.ts
 interface User {
-  id: string;
-  name: string;
-  email: string;
+	id: string;
+	name: string;
+	email: string;
 }
 
 let currentUser = $state<User | null>(null);
 let isLoading = $state(false);
 
 export function createUserStore() {
-  return {
-    get current() { return currentUser; },
-    get isLoggedIn() { return currentUser !== null; },
-    get loading() { return isLoading; },
+	return {
+		get current() {
+			return currentUser;
+		},
+		get isLoggedIn() {
+			return currentUser !== null;
+		},
+		get loading() {
+			return isLoading;
+		},
 
-    async login(username: string) {
-      isLoading = true;
-      try {
-        currentUser = await fetchUser(username);
-      } finally {
-        isLoading = false;
-      }
-    },
+		async login(username: string) {
+			isLoading = true;
+			try {
+				currentUser = await fetchUser(username);
+			} finally {
+				isLoading = false;
+			}
+		},
 
-    logout() {
-      currentUser = null;
-    }
-  };
+		logout() {
+			currentUser = null;
+		}
+	};
 }
 
 export const userStore = createUserStore();
@@ -100,13 +106,13 @@ export const userStore = createUserStore();
 
 ```svelte
 <script lang="ts">
-  function handleClick(event: MouseEvent) {
-    console.log(event.clientX);
-  }
+	function handleClick(event: MouseEvent) {
+		console.log(event.clientX);
+	}
 
-  function handleInput(event: Event & { currentTarget: HTMLInputElement }) {
-    console.log(event.currentTarget.value);
-  }
+	function handleInput(event: Event & { currentTarget: HTMLInputElement }) {
+		console.log(event.currentTarget.value);
+	}
 </script>
 
 <button onclick={handleClick}>Click</button>
@@ -120,16 +126,16 @@ export const userStore = createUserStore();
 import { z } from 'zod';
 
 export const userSchema = z.object({
-  name: z.string().min(3),
-  email: z.string().email(),
-  age: z.number().min(18).optional()
+	name: z.string().min(3),
+	email: z.string().email(),
+	age: z.number().min(18).optional()
 });
 
 export type User = z.infer<typeof userSchema>;
 
 // Type guard
 export function isUser(data: unknown): data is User {
-  return userSchema.safeParse(data).success;
+	return userSchema.safeParse(data).success;
 }
 ```
 
@@ -137,21 +143,21 @@ export function isUser(data: unknown): data is User {
 
 ```json
 {
-  "extends": "./.svelte-kit/tsconfig.json",
-  "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "target": "ES2022",
-    "sourceMap": true,
-    "skipLibCheck": true
-  }
+	"extends": "./.svelte-kit/tsconfig.json",
+	"compilerOptions": {
+		"strict": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"target": "ES2022",
+		"sourceMap": true,
+		"skipLibCheck": true
+	}
 }
 ```
 
@@ -172,26 +178,27 @@ let component: Component<{ name: string }>;
 
 ```svelte
 <script lang="ts">
-  let count = $state(0);
+	let count = $state(0);
 
-  // Auto-inferred as number
-  let doubled = $derived(count * 2);
+	// Auto-inferred as number
+	let doubled = $derived(count * 2);
 
-  // Explicit return type
-  let status = $derived<'low' | 'high'>(() => {
-    return count > 10 ? 'high' : 'low';
-  });
+	// Explicit return type
+	let status = $derived<'low' | 'high'>(() => {
+		return count > 10 ? 'high' : 'low';
+	});
 </script>
 ```
 
 ## Key Changes from Svelte 4
 
-| Svelte 4 | Svelte 5 |
-|----------|----------|
+| Svelte 4                    | Svelte 5                           |
+| --------------------------- | ---------------------------------- |
 | `ComponentProps<Component>` | `ComponentProps<typeof Component>` |
-| Components are classes | Components are functions |
-| `createEventDispatcher<T>` | Callback props with types |
+| Components are classes      | Components are functions           |
+| `createEventDispatcher<T>`  | Callback props with types          |
 
 ## References
+
 - [Svelte TypeScript Docs](https://svelte.dev/docs/svelte/typescript)
 - [$props Docs](https://svelte.dev/docs/svelte/$props)

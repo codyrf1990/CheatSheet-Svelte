@@ -6,19 +6,20 @@ This document defines the technology stack for the CheatSheet rewrite, based on 
 
 ## Core Stack
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **SvelteKit** | 2.49+ | Full-stack framework |
-| **Svelte** | 5.46+ | UI framework (runes) |
-| **Tailwind CSS** | 4.x | Styling (CSS-first config) |
-| **TypeScript** | 5.9+ | Type safety |
-| **Vite** | 7.3+ | Build tool |
-| **Firebase** | 12.x | Cloud database |
-| **Vercel** | adapter-vercel | Deployment |
+| Technology       | Version        | Purpose                    |
+| ---------------- | -------------- | -------------------------- |
+| **SvelteKit**    | 2.49+          | Full-stack framework       |
+| **Svelte**       | 5.46+          | UI framework (runes)       |
+| **Tailwind CSS** | 4.x            | Styling (CSS-first config) |
+| **TypeScript**   | 5.9+           | Type safety                |
+| **Vite**         | 7.3+           | Build tool                 |
+| **Firebase**     | 12.x           | Cloud database             |
+| **Vercel**       | adapter-vercel | Deployment                 |
 
 ## Key Features
 
 ### Svelte 5 Runes
+
 - `$state()` for reactive state
 - `$derived()` for computed values
 - `$effect()` for side effects
@@ -26,6 +27,7 @@ This document defines the technology stack for the CheatSheet rewrite, based on 
 - `$bindable()` for two-way binding
 
 ### Tailwind CSS v4
+
 - CSS-first configuration via `@theme` directive
 - No `tailwind.config.js` required
 - Native cascade layers
@@ -33,6 +35,7 @@ This document defines the technology stack for the CheatSheet rewrite, based on 
 - OKLCH color space
 
 ### SvelteKit Features
+
 - Hybrid SSR/CSR rendering
 - File-based routing
 - OpenTelemetry support
@@ -40,6 +43,7 @@ This document defines the technology stack for the CheatSheet rewrite, based on 
 - Vite 7 + Rolldown support
 
 ### PWA Support
+
 - `@vite-pwa/sveltekit` for zero-config PWA
 - Workbox for service worker management
 - Offline-first caching strategies
@@ -82,17 +86,18 @@ src/
 
 ## Performance Targets
 
-| Metric | Target |
-|--------|--------|
+| Metric         | Target   |
+| -------------- | -------- |
 | Initial bundle | < 100 KB |
-| TTI (offline) | < 200ms |
-| LCP | < 2.5s |
-| FID | < 100ms |
-| CLS | < 0.1 |
+| TTI (offline)  | < 200ms  |
+| LCP            | < 2.5s   |
+| FID            | < 100ms  |
+| CLS            | < 0.1    |
 
 ## References
 
 See individual guide documents for detailed best practices:
+
 - [SVELTEKIT-GUIDE.md](./SVELTEKIT-GUIDE.md)
 - [TAILWIND-V4-GUIDE.md](./TAILWIND-V4-GUIDE.md)
 - [TYPESCRIPT-SVELTE.md](./TYPESCRIPT-SVELTE.md)

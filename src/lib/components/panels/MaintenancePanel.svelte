@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Panel as PanelType } from '$types';
 	import { panelsStore } from '$stores/panels.svelte';
-	import Panel from './Panel.svelte';
 	import PanelItem from './PanelItem.svelte';
 
 	interface Props {
@@ -58,16 +57,16 @@
 						type="button"
 						class="control-btn"
 						onclick={handleAddMaintenance}
-						aria-label="Add maintenance item"
-					>+</button>
+						aria-label="Add maintenance item">+</button
+					>
 					<button
 						type="button"
 						class="control-btn"
 						class:active={removeMode}
 						onclick={handleToggleRemove}
 						aria-pressed={removeMode}
-						aria-label="Toggle delete mode"
-					>&minus;</button>
+						aria-label="Toggle delete mode">&minus;</button
+					>
 				</div>
 			</div>
 			<ul class="panel-items">
@@ -93,8 +92,8 @@
 						type="button"
 						class="control-btn"
 						onclick={handleAddSolidworks}
-						aria-label="Add SolidWorks item"
-					>+</button>
+						aria-label="Add SolidWorks item">+</button
+					>
 				</div>
 			</div>
 			<ul class="panel-items">

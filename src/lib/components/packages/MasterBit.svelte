@@ -117,7 +117,13 @@
 		</button>
 	</div>
 	{#if expanded}
-		<ul id="subbits-{group.masterId}" class="sub-bits" data-sortable-group={group.masterId} role="group" aria-label="{group.label} options">
+		<ul
+			id="subbits-{group.masterId}"
+			class="sub-bits"
+			data-sortable-group={group.masterId}
+			role="group"
+			aria-label="{group.label} options"
+		>
 			{#each group.bits as bit, index (bit)}
 				<SubBit
 					{bit}
@@ -262,32 +268,6 @@
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 			gap: 0.075rem;
 			padding: 0.05rem;
-		}
-	}
-
-	@media (max-width: 640px) {
-		.master-header {
-			padding: 0.125rem 0.2rem;
-			gap: 0.125rem;
-		}
-
-		.master-label {
-			font-size: 0.65rem;
-		}
-
-		.expand-toggle {
-			width: 12px;
-			height: 12px;
-		}
-
-		.expand-icon {
-			width: 8px;
-			height: 8px;
-		}
-
-		.sub-bits {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 0.06rem;
 		}
 	}
 </style>

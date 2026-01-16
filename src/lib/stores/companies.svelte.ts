@@ -74,10 +74,13 @@ function deepCopy<T>(obj: T): T {
  * Old: { bits: [{text, checked}], groups: [{masterId, items: [{text, checked}]}] }
  * New: { selectedBits: string[], customBits: string[], order: string[] }
  */
-function migratePackageState(oldState: unknown): Record<string, { selectedBits: string[]; customBits: string[]; order: string[] }> {
+function migratePackageState(
+	oldState: unknown
+): Record<string, { selectedBits: string[]; customBits: string[]; order: string[] }> {
 	if (!oldState || typeof oldState !== 'object') return {};
 
-	const result: Record<string, { selectedBits: string[]; customBits: string[]; order: string[] }> = {};
+	const result: Record<string, { selectedBits: string[]; customBits: string[]; order: string[] }> =
+		{};
 
 	for (const [pkgCode, pkgState] of Object.entries(oldState as Record<string, unknown>)) {
 		if (!pkgState || typeof pkgState !== 'object') continue;
@@ -622,7 +625,10 @@ function save(): void {
 		console.error('[CompaniesStore] Failed to save:', err);
 
 		// Handle quota errors
-		if (err instanceof Error && (err.name === 'QuotaExceededError' || (err as { code?: number }).code === 22)) {
+		if (
+			err instanceof Error &&
+			(err.name === 'QuotaExceededError' || (err as { code?: number }).code === 22)
+		) {
 			alert(
 				'WARNING: Storage quota exceeded!\n\n' +
 					'Your changes could not be saved due to limited browser storage.\n\n' +
@@ -709,7 +715,9 @@ export const companiesStore = {
 		return page?.state ? deepCopy(page.state) : createEmptyPageState();
 	},
 	get favorites() {
-		return favoriteIds.map((id) => companies.find((c) => c.id === id)).filter((c): c is Company => c !== undefined);
+		return favoriteIds
+			.map((id) => companies.find((c) => c.id === id))
+			.filter((c): c is Company => c !== undefined);
 	},
 	get recent() {
 		return recentIds

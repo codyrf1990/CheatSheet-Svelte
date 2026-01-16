@@ -90,7 +90,7 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if open}
-	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
 		class="modal-overlay"
 		transition:fade={{ duration: 200 }}
@@ -100,7 +100,13 @@
 		aria-labelledby="modal-title"
 		tabindex="-1"
 	>
-		<div class="modal" class:wide={size === 'wide'} class:full={size === 'full'} bind:this={modalRef} transition:fly={{ y: 24, duration: 300 }}>
+		<div
+			class="modal"
+			class:wide={size === 'wide'}
+			class:full={size === 'full'}
+			bind:this={modalRef}
+			transition:fly={{ y: 24, duration: 300 }}
+		>
 			<div class="modal-header">
 				<h2 id="modal-title" class="modal-title">{title}</h2>
 				<button class="close-btn" onclick={onclose} aria-label="Close modal">

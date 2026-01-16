@@ -4,15 +4,15 @@ SolidCAM Package/Panel selection tool - rewrite from vanilla JS to SvelteKit 2 +
 
 ## Tech Stack
 
-| Technology | Version | Notes |
-|------------|---------|-------|
-| SvelteKit | 2.49+ | Minimal template with TypeScript |
-| Svelte | 5.46+ | **Runes only** - no legacy syntax |
-| Tailwind CSS | 4.x | CSS-first config via `@tailwindcss/vite` |
-| TypeScript | 5.9+ | Strict mode enabled |
-| Vite | 7.3+ | Plugin order: tailwindcss → sveltekit → pwa |
-| Firebase | 12.x | Firestore with persistent local cache |
-| PWA | @vite-pwa/sveltekit | Offline-first |
+| Technology   | Version             | Notes                                       |
+| ------------ | ------------------- | ------------------------------------------- |
+| SvelteKit    | 2.49+               | Minimal template with TypeScript            |
+| Svelte       | 5.46+               | **Runes only** - no legacy syntax           |
+| Tailwind CSS | 4.x                 | CSS-first config via `@tailwindcss/vite`    |
+| TypeScript   | 5.9+                | Strict mode enabled                         |
+| Vite         | 7.3+                | Plugin order: tailwindcss → sveltekit → pwa |
+| Firebase     | 12.x                | Firestore with persistent local cache       |
+| PWA          | @vite-pwa/sveltekit | Offline-first                               |
 
 ## Project Structure
 
@@ -61,10 +61,13 @@ let items = $state<Item[]>([]);
 
 // Computed values (NO side effects!)
 let doubled = $derived(count * 2);
-let filtered = $derived.by(() => items.filter(i => i.active));
+let filtered = $derived.by(() => items.filter((i) => i.active));
 
 // Props (replaces export let)
-interface Props { name: string; count?: number; }
+interface Props {
+	name: string;
+	count?: number;
+}
 let { name, count = 0 } = $props();
 
 // Two-way binding
@@ -72,8 +75,8 @@ let { value = $bindable() } = $props();
 
 // Side effects (cleanup via return)
 $effect(() => {
-  const sub = store.subscribe();
-  return () => sub.unsubscribe();
+	const sub = store.subscribe();
+	return () => sub.unsubscribe();
 });
 ```
 
@@ -90,10 +93,18 @@ Stores use `.svelte.ts` extension with runes:
 let companies = $state<Company[]>([]);
 
 export const companiesStore = {
-  get all() { return companies; },
-  get current() { return companies.find(c => c.id === currentId); },
-  add(company: Company) { companies = [...companies, company]; },
-  remove(id: string) { companies = companies.filter(c => c.id !== id); }
+	get all() {
+		return companies;
+	},
+	get current() {
+		return companies.find((c) => c.id === currentId);
+	},
+	add(company: Company) {
+		companies = [...companies, company];
+	},
+	remove(id: string) {
+		companies = companies.filter((c) => c.id !== id);
+	}
 };
 ```
 
@@ -101,30 +112,30 @@ export const companiesStore = {
 
 ```typescript
 interface Company {
-  id: string;
-  name: string;
-  pages: Page[];
-  currentPageId: string;
-  isFavorite: boolean;
-  createdAt: number;
-  updatedAt: number;
+	id: string;
+	name: string;
+	pages: Page[];
+	currentPageId: string;
+	isFavorite: boolean;
+	createdAt: number;
+	updatedAt: number;
 }
 
 interface Page {
-  id: string;
-  name: string;
-  state: PageState;
+	id: string;
+	name: string;
+	state: PageState;
 }
 
 interface PageState {
-  panels: Record<string, PanelState>;
-  packages: Record<string, PackageState>;
+	panels: Record<string, PanelState>;
+	packages: Record<string, PackageState>;
 }
 
 interface PackageState {
-  selectedBits: string[];
-  customBits: string[];
-  order: string[];
+	selectedBits: string[];
+	customBits: string[];
+	order: string[];
 }
 ```
 
@@ -134,23 +145,24 @@ interface PackageState {
 
 ```css
 /* src/app.css */
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --color-solidcam-red: #c8102e;
-  --color-solidcam-dark-red: #8b0000;
-  --color-solidcam-gold: #d4af37;
-  --color-surface-dark: #1a1a1a;
-  --color-surface-alt: #2d2d2d;
-  --color-glass: oklch(0.1 0 0 / 0.32);
-  --color-glass-border: oklch(1 0 0 / 0.22);
-  --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --ease-fast: 160ms ease;
-  --ease-smooth: 240ms ease;
+	--color-solidcam-red: #c8102e;
+	--color-solidcam-dark-red: #8b0000;
+	--color-solidcam-gold: #d4af37;
+	--color-surface-dark: #1a1a1a;
+	--color-surface-alt: #2d2d2d;
+	--color-glass: oklch(0.1 0 0 / 0.32);
+	--color-glass-border: oklch(1 0 0 / 0.22);
+	--font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	--ease-fast: 160ms ease;
+	--ease-smooth: 240ms ease;
 }
 ```
 
 **Syntax changes from v3:**
+
 - `h-10!` not `!h-10` (important)
 - `bg-black/50` not `bg-opacity-50`
 - `mr-(--spacing)` not `mr-[var(--spacing)]`
@@ -179,16 +191,21 @@ export default defineConfig({
 ```typescript
 // src/lib/firebase/client.ts
 import { initializeApp } from 'firebase/app';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import {
+	initializeFirestore,
+	persistentLocalCache,
+	persistentMultipleTabManager
+} from 'firebase/firestore';
 
 const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager()
-  })
+	localCache: persistentLocalCache({
+		tabManager: persistentMultipleTabManager()
+	})
 });
 ```
 
 **Environment variables (.env):**
+
 ```
 VITE_FIREBASE_API_KEY=xxx
 VITE_FIREBASE_AUTH_DOMAIN=xxx
@@ -198,6 +215,7 @@ VITE_FIREBASE_PROJECT_ID=xxx
 ## localStorage Keys (Maintain for Migration)
 
 These keys MUST match the original app for seamless data migration:
+
 - `solidcam-companies`
 - `solidcam-current-company-id`
 - `solidcam-favorites`
@@ -211,14 +229,14 @@ These keys MUST match the original app for seamless data migration:
 
 ## Key Files to Migrate
 
-| Original File | Lines | Migration Target |
-|--------------|-------|------------------|
-| `assets/js/dom.js` | 4,865 | Split into components |
-| `assets/js/data.js` | ~200 | `src/lib/data/` |
-| `assets/js/page-system.js` | ~620 | `src/lib/stores/companies.svelte.ts` |
-| `assets/js/cloud-sync.js` | ~188 | `src/lib/firebase/sync.ts` |
-| `assets/js/calculator.js` | ~300 | `src/lib/components/calculator/` |
-| `assets/css/main.css` | 6,881 | Tailwind + component styles |
+| Original File              | Lines | Migration Target                     |
+| -------------------------- | ----- | ------------------------------------ |
+| `assets/js/dom.js`         | 4,865 | Split into components                |
+| `assets/js/data.js`        | ~200  | `src/lib/data/`                      |
+| `assets/js/page-system.js` | ~620  | `src/lib/stores/companies.svelte.ts` |
+| `assets/js/cloud-sync.js`  | ~188  | `src/lib/firebase/sync.ts`           |
+| `assets/js/calculator.js`  | ~300  | `src/lib/components/calculator/`     |
+| `assets/css/main.css`      | 6,881 | Tailwind + component styles          |
 
 ## Critical Rules
 
@@ -244,23 +262,28 @@ Format:
 
 ```markdown
 ## Phase X: [Name]
+
 **Status:** In Progress | Complete
 **Started:** YYYY-MM-DD
 
 ### Completed
+
 - [x] Task description
   - Files: `path/to/file.ts`
 
 ### In Progress
+
 - [ ] Current task
 
 ### Blockers
+
 - Issue description (if any)
 ```
 
 ## Documentation
 
 All research docs in `.docs/`:
+
 - `MIGRATION-PLAN.md` - 7-phase migration plan
 - `SVELTEKIT-GUIDE.md` - Svelte 5 runes patterns
 - `TAILWIND-V4-GUIDE.md` - Tailwind v4 setup

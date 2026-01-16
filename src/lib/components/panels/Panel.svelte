@@ -172,28 +172,28 @@
 	}
 
 	/* Double reduction for maintenance panels (-20% of -20%) */
-	.panel[data-panel="maintenance-combined"] .panel-head,
-	.panel[data-panel="maintenance-skus"] .panel-head,
-	.panel[data-panel="solidworks-maintenance"] .panel-head {
+	.panel[data-panel='maintenance-combined'] .panel-head,
+	.panel[data-panel='maintenance-skus'] .panel-head,
+	.panel[data-panel='solidworks-maintenance'] .panel-head {
 		padding: 0.24rem 0.4rem;
 		gap: 0.2rem;
 	}
 
-	.panel[data-panel="maintenance-combined"] .panel-title,
-	.panel[data-panel="maintenance-skus"] .panel-title,
-	.panel[data-panel="solidworks-maintenance"] .panel-title {
+	.panel[data-panel='maintenance-combined'] .panel-title,
+	.panel[data-panel='maintenance-skus'] .panel-title,
+	.panel[data-panel='solidworks-maintenance'] .panel-title {
 		font-size: 0.7rem;
 	}
 
-	.panel[data-panel="maintenance-combined"] .panel-body,
-	.panel[data-panel="maintenance-skus"] .panel-body,
-	.panel[data-panel="solidworks-maintenance"] .panel-body {
+	.panel[data-panel='maintenance-combined'] .panel-body,
+	.panel[data-panel='maintenance-skus'] .panel-body,
+	.panel[data-panel='solidworks-maintenance'] .panel-body {
 		padding: 0.2rem 0.3rem;
 	}
 
-	.panel[data-panel="maintenance-combined"] .panel-control-btn,
-	.panel[data-panel="maintenance-skus"] .panel-control-btn,
-	.panel[data-panel="solidworks-maintenance"] .panel-control-btn {
+	.panel[data-panel='maintenance-combined'] .panel-control-btn,
+	.panel[data-panel='maintenance-skus'] .panel-control-btn,
+	.panel[data-panel='solidworks-maintenance'] .panel-control-btn {
 		width: 22px;
 		height: 22px;
 		font-size: 0.9rem;

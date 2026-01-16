@@ -16,7 +16,12 @@
 
 <div class="cloud-indicator" data-status={status}>
 	{#if isConnected}
-		<span class="status-dot" class:connected={status === 'connected'} class:syncing={isSyncing} class:error={status === 'error'}></span>
+		<span
+			class="status-dot"
+			class:connected={status === 'connected'}
+			class:syncing={isSyncing}
+			class:error={status === 'error'}
+		></span>
 		<span class="user-icon">👤</span>
 		<span class="username">{username}</span>
 		{#if isSyncing}
@@ -115,7 +120,8 @@
 	}
 
 	@keyframes pulse {
-		0%, 100% {
+		0%,
+		100% {
 			opacity: 1;
 		}
 		50% {

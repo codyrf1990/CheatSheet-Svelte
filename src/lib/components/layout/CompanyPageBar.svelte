@@ -3,7 +3,6 @@
 	import { syncStore } from '$stores/sync.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { Button } from '$components/ui';
-	import type { Company } from '$types';
 
 	interface Props {
 		editMode?: boolean;
@@ -21,7 +20,6 @@
 
 	// Reactive state from stores
 	let currentCompany = $derived(companiesStore.current);
-	let currentPage = $derived(companiesStore.currentPage);
 	let allCompanies = $derived(companiesStore.all);
 	let recent = $derived(companiesStore.recent);
 	let syncStatus = $derived(syncStore.status);
@@ -34,7 +32,9 @@
 	let editingPageName = $state('');
 
 	// Context menu state
-	let contextMenu = $state<{ x: number; y: number; type: 'company' | 'page'; id?: string } | null>(null);
+	let contextMenu = $state<{ x: number; y: number; type: 'company' | 'page'; id?: string } | null>(
+		null
+	);
 
 	// Filtered companies based on search
 	let filteredCompanies = $derived(() => {
@@ -45,10 +45,14 @@
 	// Status indicator
 	let statusIndicator = $derived(() => {
 		switch (syncStatus) {
-			case 'connected': return { symbol: '●', color: 'var(--color-success, #22c55e)', title: 'Synced' };
-			case 'syncing': return { symbol: '○', color: 'var(--color-solidcam-gold, #d4af37)', title: 'Syncing...' };
-			case 'error': return { symbol: '⚠', color: 'var(--color-error, #ef4444)', title: 'Sync error' };
-			default: return { symbol: '○', color: 'rgba(255,255,255,0.3)', title: 'Not synced' };
+			case 'connected':
+				return { symbol: '●', color: 'var(--color-success, #22c55e)', title: 'Synced' };
+			case 'syncing':
+				return { symbol: '○', color: 'var(--color-solidcam-gold, #d4af37)', title: 'Syncing...' };
+			case 'error':
+				return { symbol: '⚠', color: 'var(--color-error, #ef4444)', title: 'Sync error' };
+			default:
+				return { symbol: '○', color: 'rgba(255,255,255,0.3)', title: 'Not synced' };
 		}
 	});
 
@@ -146,7 +150,7 @@
 	function handleRenamePage() {
 		const pageId = contextMenu?.id;
 		if (!pageId) return;
-		const page = currentCompany?.pages.find(p => p.id === pageId);
+		const page = currentCompany?.pages.find((p) => p.id === pageId);
 		if (page) {
 			const newName = prompt('Rename page:', page.name);
 			if (newName?.trim()) {
@@ -235,13 +239,14 @@
 			<span
 				class="status-dot"
 				style="color: {statusIndicator().color}"
-				title={statusIndicator().title}
-			>{statusIndicator().symbol}</span>
+				title={statusIndicator().title}>{statusIndicator().symbol}</span
+			>
 			<svg class="chevron" class:open={dropdownOpen} viewBox="0 0 20 20" fill="currentColor">
-				<path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" />
+				<path
+					d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+				/>
 			</svg>
 		</button>
-
 	</div>
 
 	<!-- Divider -->
@@ -278,7 +283,12 @@
 				{/if}
 			{/each}
 		{/if}
-		<button type="button" class="page-tab add-tab" onclick={handleNewPage} aria-label="Add new page">
+		<button
+			type="button"
+			class="page-tab add-tab"
+			onclick={handleNewPage}
+			aria-label="Add new page"
+		>
 			+
 		</button>
 	</div>
@@ -296,7 +306,12 @@
 
 <!-- Company Dropdown Menu (outside company-page-bar to escape backdrop-filter clipping) -->
 {#if dropdownOpen}
-	<div class="dropdown-menu" role="listbox" aria-label="Companies" style="top: {dropdownPosition.top}px; left: {dropdownPosition.left}px;">
+	<div
+		class="dropdown-menu"
+		role="listbox"
+		aria-label="Companies"
+		style="top: {dropdownPosition.top}px; left: {dropdownPosition.left}px;"
+	>
 		<!-- Search (fixed) -->
 		<div class="dropdown-header">
 			<input
@@ -353,7 +368,12 @@
 
 		<!-- Footer (fixed) -->
 		<div class="dropdown-footer">
-			<button type="button" class="footer-btn footer-btn--new" onclick={handleNewCompany} aria-label="Create new company">+</button>
+			<button
+				type="button"
+				class="footer-btn footer-btn--new"
+				onclick={handleNewCompany}
+				aria-label="Create new company">+</button
+			>
 			<button type="button" class="footer-btn footer-btn--view" onclick={onViewAll}>
 				View All ({allCompanies.length})
 			</button>
@@ -363,15 +383,23 @@
 
 <!-- Context Menu -->
 {#if contextMenu}
-	<div class="context-menu" role="menu" aria-label="{contextMenu.type === 'company' ? 'Company actions' : 'Page actions'}" style="left: {contextMenu.x}px; top: {contextMenu.y}px;">
+	<div
+		class="context-menu"
+		role="menu"
+		aria-label={contextMenu.type === 'company' ? 'Company actions' : 'Page actions'}
+		style="left: {contextMenu.x}px; top: {contextMenu.y}px;"
+	>
 		{#if contextMenu.type === 'company'}
 			<button type="button" role="menuitem" onclick={handleRenameCompany}>Rename</button>
 			<button type="button" role="menuitem" onclick={handleDuplicateCompany}>Duplicate</button>
-			<button type="button" role="menuitem" class="danger" onclick={handleDeleteCompany}>Delete</button>
+			<button type="button" role="menuitem" class="danger" onclick={handleDeleteCompany}
+				>Delete</button
+			>
 		{:else}
 			<button type="button" role="menuitem" onclick={handleRenamePage}>Rename</button>
 			<button type="button" role="menuitem" onclick={handleCopyPage}>Copy</button>
-			<button type="button" role="menuitem" class="danger" onclick={handleDeletePage}>Delete</button>
+			<button type="button" role="menuitem" class="danger" onclick={handleDeletePage}>Delete</button
+			>
 		{/if}
 	</div>
 {/if}
@@ -383,11 +411,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.3rem 0.625rem;
-		background: linear-gradient(
-			145deg,
-			rgba(24, 24, 30, 0.85) 0%,
-			rgba(18, 18, 24, 0.9) 100%
-		);
+		background: linear-gradient(145deg, rgba(24, 24, 30, 0.85) 0%, rgba(18, 18, 24, 0.9) 100%);
 		border: 1px solid rgba(255, 255, 255, 0.06);
 		border-radius: 12px;
 		backdrop-filter: blur(8px);
@@ -402,7 +426,8 @@
 		content: '';
 		position: absolute;
 		inset: -1px;
-		background: linear-gradient(90deg,
+		background: linear-gradient(
+			90deg,
 			transparent 0%,
 			rgba(212, 175, 55, 0.15) 25%,
 			rgba(200, 16, 46, 0.1) 50%,
@@ -418,8 +443,12 @@
 	}
 
 	@keyframes barBorderShimmer {
-		0% { background-position: 200% 0; }
-		100% { background-position: -200% 0; }
+		0% {
+			background-position: 200% 0;
+		}
+		100% {
+			background-position: -200% 0;
+		}
 	}
 
 	/* Company Dropdown */
@@ -465,8 +494,13 @@
 	}
 
 	@keyframes statusPulse {
-		0%, 100% { opacity: 0.8; }
-		50% { opacity: 1; }
+		0%,
+		100% {
+			opacity: 0.8;
+		}
+		50% {
+			opacity: 1;
+		}
 	}
 
 	.chevron {
@@ -864,8 +898,9 @@
 
 	@media (max-width: 640px) {
 		.company-page-bar {
-			gap: 0.2rem;
-			padding: 0.15rem 0.25rem;
+			gap: 0.15rem;
+			padding: 0.1rem 0.15rem;
+			border-radius: 8px;
 		}
 
 		.company-trigger {
@@ -900,34 +935,6 @@
 
 		.divider {
 			height: 12px;
-		}
-	}
-
-	@media (max-width: 640px) {
-		.company-page-bar {
-			gap: 0.15rem;
-			padding: 0.1rem 0.15rem;
-			border-radius: 8px;
-		}
-
-		.company-trigger {
-			padding: 0.15rem 0.25rem;
-			font-size: 0.65rem;
-		}
-
-		.company-name {
-			max-width: 120px;
-		}
-
-		.company-name::selection {
-			background: var(--color-solidcam-gold, #d4af37);
-			color: #1a1a1a;
-			text-shadow: none;
-		}
-
-		.page-tab {
-			padding: 0.1rem 0.2rem;
-			font-size: 0.6rem;
 		}
 
 		.edit-controls :global(.btn) {

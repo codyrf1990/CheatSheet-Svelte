@@ -34,6 +34,14 @@ export default defineConfig(
 				parser: ts.parser,
 				svelteConfig
 			}
+		},
+		rules: {
+			// External links don't need resolve()
+			'svelte/no-navigation-without-resolve': 'off',
+			// Safe usage for PWA manifest
+			'svelte/no-at-html-tags': 'off',
+			// Regular Map is intentional in some stores
+			'svelte/prefer-svelte-reactivity': 'off'
 		}
 	}
 );

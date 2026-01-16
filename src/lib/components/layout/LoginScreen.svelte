@@ -11,7 +11,7 @@
 
 	$effect(() => {
 		// Trigger entrance animation
-		const timer = setTimeout(() => mounted = true, 100);
+		const timer = setTimeout(() => (mounted = true), 100);
 		return () => clearTimeout(timer);
 	});
 
@@ -43,8 +43,11 @@
 
 	<!-- Floating particles -->
 	<div class="particles">
-		{#each Array(6) as _, i}
-			<div class="particle" style="--delay: {i * 0.8}s; --x: {10 + i * 15}%; --duration: {8 + i * 2}s;"></div>
+		{#each [0, 1, 2, 3, 4, 5] as i (i)}
+			<div
+				class="particle"
+				style="--delay: {i * 0.8}s; --x: {10 + i * 15}%; --duration: {8 + i * 2}s;"
+			></div>
 		{/each}
 	</div>
 
@@ -60,7 +63,9 @@
 					<div class="deco-line left"></div>
 					<div class="deco-icon">
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-							<path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+							<path
+								d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+							/>
 						</svg>
 					</div>
 					<div class="deco-line right"></div>
@@ -92,8 +97,14 @@
 							Signing in...
 						{:else}
 							Continue
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="arrow-icon">
-								<path d="M5 12h14m-7-7l7 7-7 7"/>
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								class="arrow-icon"
+							>
+								<path d="M5 12h14m-7-7l7 7-7 7" />
 							</svg>
 						{/if}
 					</Button>
@@ -166,10 +177,19 @@
 	}
 
 	@keyframes ambientFloat {
-		0%, 100% { transform: translate(0, 0) scale(1); }
-		25% { transform: translate(20px, -30px) scale(1.1); }
-		50% { transform: translate(-10px, 20px) scale(0.95); }
-		75% { transform: translate(30px, 10px) scale(1.05); }
+		0%,
+		100% {
+			transform: translate(0, 0) scale(1);
+		}
+		25% {
+			transform: translate(20px, -30px) scale(1.1);
+		}
+		50% {
+			transform: translate(-10px, 20px) scale(0.95);
+		}
+		75% {
+			transform: translate(30px, 10px) scale(1.05);
+		}
 	}
 
 	/* Particles */
@@ -296,8 +316,13 @@
 	}
 
 	@keyframes iconFloat {
-		0%, 100% { transform: translateY(0); }
-		50% { transform: translateY(-3px); }
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(-3px);
+		}
 	}
 
 	.title-group {
@@ -357,7 +382,9 @@
 	}
 
 	@keyframes spin {
-		to { transform: rotate(360deg); }
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	/* Footer decoration */
