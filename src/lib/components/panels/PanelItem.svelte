@@ -50,7 +50,7 @@
 
 <li
 	class="panel-item"
-	class:remove-mode={removeMode}
+	class:remove-mode={removeMode && isCustom}
 	class:custom={isCustom}
 	data-sortable-item
 	draggable={draggable && !removeMode}
@@ -66,7 +66,7 @@
 			{#if isCustom}<span class="custom-indicator">+</span>{/if}{item}
 		</button>
 	</div>
-	{#if removeMode}
+	{#if removeMode && isCustom}
 		<button type="button" class="item-remove-btn" onclick={handleRemove} aria-label="Remove {item}">
 			&times;
 		</button>

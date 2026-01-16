@@ -8,6 +8,7 @@
 		bit: string;
 		packageCode: string;
 		editMode?: boolean;
+		removeMode?: boolean;
 		isCustom?: boolean;
 		draggable?: boolean;
 		ondragstart?: (e: DragEvent) => void;
@@ -19,6 +20,7 @@
 		bit,
 		packageCode,
 		editMode = false,
+		removeMode = false,
 		isCustom = false,
 		draggable = false,
 		ondragstart,
@@ -58,6 +60,7 @@
 <li
 	class="loose-bit"
 	class:custom={isCustom}
+	class:remove-mode={removeMode && isCustom}
 	data-sortable-item
 	data-bit={bit}
 	draggable={draggable && editMode}
@@ -78,7 +81,7 @@
 			>{#if isCustom}<span class="custom-indicator">+</span>{/if}{bit}</span
 		>
 	</label>
-	{#if editMode && isCustom}
+	{#if (editMode || removeMode) && isCustom}
 		<button type="button" class="bit-remove-btn" onclick={handleRemove} aria-label="Remove {bit}">
 			&times;
 		</button>

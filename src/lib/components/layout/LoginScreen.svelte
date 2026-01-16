@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import SmokedGlassCard from '$components/ui/SmokedGlassCard.svelte';
 	import Button from '$components/ui/Button.svelte';
 	import Input from '$components/ui/Input.svelte';

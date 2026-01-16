@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Package } from '$types';
+	import { panelsStore } from '$stores/panels.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import MasterBit from './MasterBit.svelte';
@@ -11,6 +12,9 @@
 	}
 
 	let { pkg, editMode = false }: Props = $props();
+
+	// Use global remove mode from store
+	let removeMode = $derived(panelsStore.removeMode);
 
 	let hasGroups = $derived(pkg.groups && pkg.groups.length > 0);
 
@@ -71,7 +75,7 @@
 				<div class="loose-bits-section" class:has-groups={hasGroups}>
 					<ul class="loose-bits" data-sortable-group={pkg.code}>
 						{#each allLooseBits() as bit (bit)}
-							<LooseBit {bit} packageCode={pkg.code} {editMode} isCustom={isCustomBit(bit)} />
+							<LooseBit {bit} packageCode={pkg.code} {editMode} {removeMode} isCustom={isCustomBit(bit)} />
 						{/each}
 					</ul>
 				</div>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { companiesStore } from '$stores/companies.svelte';
+	import { panelsStore } from '$stores/panels.svelte';
 	import { syncStore } from '$stores/sync.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { AddSkuModal, Button, Input, Modal } from '$components/ui';
@@ -433,6 +434,13 @@
 	<!-- Edit Controls -->
 	<div class="edit-controls">
 		<Button variant="gold" size="sm" onclick={() => (showAddSkuModal = true)}>+ SKU</Button>
+		<Button
+			variant={panelsStore.removeMode ? 'danger' : 'ghost'}
+			size="sm"
+			onclick={() => panelsStore.toggleRemoveMode()}
+		>
+			− SKU
+		</Button>
 		<Button variant={editMode ? 'primary' : 'ghost'} size="sm" onclick={onToggleEdit}>
 			{editMode ? 'Done' : 'Edit Order'}
 		</Button>

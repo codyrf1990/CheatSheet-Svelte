@@ -11,8 +11,8 @@
 
 	let { maintenancePanel, solidworksPanel }: Props = $props();
 
-	// Local state
-	let removeMode = $state(false);
+	// Use global remove mode from store
+	let removeMode = $derived(panelsStore.removeMode);
 
 	// Merge static items with custom items from global prefs
 	let maintenanceItems = $derived(() => {
@@ -26,10 +26,6 @@
 		const customItems = userPrefsStore.getCustomPanelItems(solidworksPanel.id);
 		return [...staticItems, ...customItems.filter((c) => !staticItems.includes(c))];
 	});
-
-	function handleToggleRemove() {
-		removeMode = !removeMode;
-	}
 
 	function handleItemToggle(panelId: string, item: string) {
 		panelsStore.toggleItem(panelId, item);
@@ -56,16 +52,6 @@
 		<div class="section">
 			<div class="section-header">
 				<span class="section-title">Maintenance SKUs</span>
-				<div class="section-controls">
-					<button
-						type="button"
-						class="control-btn"
-						class:active={removeMode}
-						onclick={handleToggleRemove}
-						aria-pressed={removeMode}
-						aria-label="Toggle delete mode">&minus;</button
-					>
-				</div>
 			</div>
 			<ul class="panel-items">
 				{#each maintenanceItems() as item (item)}
@@ -155,47 +141,6 @@
 		letter-spacing: 0.05em;
 	}
 
-	.section-controls {
-		display: flex;
-		gap: var(--space-0-5);
-	}
-
-	.control-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 20px;
-		height: 20px;
-		padding: 0;
-		position: relative;
-		overflow: visible;
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 4px;
-		color: rgba(255, 255, 255, 0.7);
-		font-size: 0.75rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 150ms ease;
-	}
-
-	.control-btn::before {
-		content: '';
-		position: absolute;
-		inset: -2px;
-	}
-
-	.control-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: rgba(255, 255, 255, 0.9);
-	}
-
-	.control-btn.active {
-		background: rgba(200, 16, 46, 0.2);
-		border-color: rgba(200, 16, 46, 0.4);
-		color: #ff6666;
-	}
-
 	.panel-items {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -209,10 +154,6 @@
 	@media (max-width: 768px) {
 		.section-title {
 			font-size: var(--text-2xs);
-		}
-
-		.control-btn {
-			font-size: 0.7rem;
 		}
 	}
 

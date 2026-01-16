@@ -7,6 +7,7 @@ import type { PanelState, PageState } from '$types';
 
 // Reactive state
 let panelStates = $state<Record<string, PanelState>>({});
+let removeMode = $state(false);
 
 /**
  * Create default panel state
@@ -166,6 +167,9 @@ export const panelsStore = {
 	get all() {
 		return panelStates;
 	},
+	get removeMode() {
+		return removeMode;
+	},
 
 	// State access
 	getState,
@@ -183,5 +187,13 @@ export const panelsStore = {
 	// State sync
 	loadFromPageState,
 	getPageState,
-	reset
+	reset,
+
+	// Remove mode
+	toggleRemoveMode() {
+		removeMode = !removeMode;
+	},
+	setRemoveMode(value: boolean) {
+		removeMode = value;
+	}
 };
