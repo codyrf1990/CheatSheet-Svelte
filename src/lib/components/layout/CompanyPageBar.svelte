@@ -34,7 +34,7 @@
 	let editingPageName = $state('');
 	let dropdownTriggerRef = $state<HTMLButtonElement | null>(null);
 	let dialogType = $state<
-		'new-company' | 'rename-company' | 'rename-page' | 'delete-company' | 'delete-page' | null
+		'new-company' | 'rename-company' | 'rename-page' | 'delete-company' | 'delete-page' | 'reset-order' | null
 	>(null);
 	let dialogTargetId = $state<string | null>(null);
 	let dialogTargetLabel = $state('');
@@ -66,7 +66,7 @@
 	});
 
 	let isConfirmDialog = $derived(
-		() => dialogType === 'delete-company' || dialogType === 'delete-page'
+		() => dialogType === 'delete-company' || dialogType === 'delete-page' || dialogType === 'reset-order'
 	);
 	let dialogTitle = $derived(() => {
 		switch (dialogType) {
@@ -80,6 +80,8 @@
 				return 'Delete Company';
 			case 'delete-page':
 				return 'Delete Page';
+			case 'reset-order':
+				return 'Reset Order';
 			default:
 				return '';
 		}
@@ -94,6 +96,8 @@
 			case 'delete-company':
 			case 'delete-page':
 				return 'Delete';
+			case 'reset-order':
+				return 'Reset';
 			default:
 				return '';
 		}
@@ -115,6 +119,9 @@
 		}
 		if (dialogType === 'delete-page') {
 			return `Delete "${dialogTargetLabel}"? This cannot be undone.`;
+		}
+		if (dialogType === 'reset-order') {
+			return 'Reset all items to their default order? Custom items will remain but move to the end.';
 		}
 		return '';
 	});
@@ -323,6 +330,13 @@
 			companiesStore.deletePage(dialogTargetId);
 			toastStore.success('Page deleted');
 			closeDialog();
+			return;
+		}
+
+		if (dialogType === 'reset-order') {
+			onResetOrder?.();
+			toastStore.success('Order reset');
+			closeDialog();
 		}
 	}
 
@@ -445,7 +459,7 @@
 			{editMode ? 'Done' : 'Edit Order'}
 		</Button>
 		{#if editMode}
-			<Button variant="ghost" size="sm" onclick={onResetOrder}>Reset</Button>
+			<Button variant="ghost" size="sm" onclick={() => (dialogType = 'reset-order')}>Reset</Button>
 		{/if}
 	</div>
 </div>

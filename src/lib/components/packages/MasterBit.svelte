@@ -3,6 +3,7 @@
 	import { Checkbox } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
 	import { toastStore } from '$stores/toast.svelte';
+	import { applyOrder } from '$lib/utils/order';
 	import SubBit from './SubBit.svelte';
 
 	interface Props {
@@ -16,11 +17,39 @@
 	// Local state for expand/collapse
 	let expanded = $state(true);
 
-	// Derived state from store
-	let masterState = $derived(packagesStore.getMasterBitState(packageCode, group.bits));
+	// Compute effective bits considering groupMembership overrides
+	let effectiveBits = $derived(() => {
+		const state = packagesStore.getStateReadOnly(packageCode);
+		const membership = state.groupMembership || {};
+
+		// Start with static bits that haven't been moved elsewhere
+		const bits = group.bits.filter((bit) => {
+			const assignedGroup = membership[bit];
+			return !assignedGroup || assignedGroup === group.masterId;
+		});
+
+		// Add bits that have been moved to this group from elsewhere
+		for (const [bit, assignedGroup] of Object.entries(membership)) {
+			if (assignedGroup === group.masterId && !group.bits.includes(bit)) {
+				bits.push(bit);
+			}
+		}
+
+		return bits;
+	});
+
+	// Apply stored order to effective bits
+	let orderedBits = $derived(() => {
+		const storedOrder = packagesStore.getStateReadOnly(packageCode).order;
+		return applyOrder(effectiveBits(), storedOrder);
+	});
+
+	// Derived state from store - use effective bits for checkbox state
+	let masterState = $derived(packagesStore.getMasterBitState(packageCode, effectiveBits()));
 
 	function handleMasterToggle() {
-		packagesStore.toggleMasterBit(packageCode, group.masterId, group.bits);
+		if (editMode) return;
+		packagesStore.toggleMasterBit(packageCode, group.masterId, effectiveBits());
 	}
 
 	function handleExpandToggle() {
@@ -46,13 +75,20 @@
 
 	// Drag and drop state for reordering
 	let draggedIndex = $state<number | null>(null);
+	let draggedBit = $state<string | null>(null);
 
-	function handleDragStart(e: DragEvent, index: number) {
+	function handleDragStart(e: DragEvent, index: number, bit: string) {
 		if (!editMode) return;
+		e.stopPropagation();
 		draggedIndex = index;
+		draggedBit = bit;
 		if (e.dataTransfer) {
 			e.dataTransfer.effectAllowed = 'move';
-			e.dataTransfer.setData('text/plain', String(index));
+			// Include bit name and source group for cross-group moves
+			e.dataTransfer.setData(
+				'application/json',
+				JSON.stringify({ bit, sourceGroup: group.masterId })
+			);
 		}
 	}
 
@@ -65,16 +101,56 @@
 	}
 
 	function handleDrop(e: DragEvent, dropIndex: number) {
-		if (!editMode || draggedIndex === null) return;
+		if (!editMode) return;
 		e.preventDefault();
 
-		if (draggedIndex !== dropIndex) {
-			const newOrder = [...group.bits];
+		// Try to get cross-group drag data
+		const jsonData = e.dataTransfer?.getData('application/json');
+		if (jsonData) {
+			try {
+				const data = JSON.parse(jsonData);
+				if (data.bit && data.sourceGroup && data.sourceGroup !== group.masterId) {
+					// Cross-group move: from loose or another group to this group
+					packagesStore.moveBitToGroup(packageCode, data.bit, group.masterId);
+					draggedIndex = null;
+					draggedBit = null;
+					return;
+				}
+			} catch {
+				// Not valid JSON, continue with normal drop
+			}
+		}
+
+		// Normal reorder within this group
+		if (draggedIndex !== null && draggedIndex !== dropIndex) {
+			const newOrder = [...orderedBits()];
 			const [removed] = newOrder.splice(draggedIndex, 1);
 			newOrder.splice(dropIndex, 0, removed);
 			packagesStore.setOrder(packageCode, newOrder);
 		}
 		draggedIndex = null;
+		draggedBit = null;
+	}
+
+	// Handle drop on the sub-bits container itself
+	function handleContainerDrop(e: DragEvent) {
+		if (!editMode) return;
+		e.preventDefault();
+
+		const jsonData = e.dataTransfer?.getData('application/json');
+		if (jsonData) {
+			try {
+				const data = JSON.parse(jsonData);
+				if (data.bit && data.sourceGroup && data.sourceGroup !== group.masterId) {
+					// Cross-group move to this group
+					packagesStore.moveBitToGroup(packageCode, data.bit, group.masterId);
+				}
+			} catch {
+				// Ignore
+			}
+		}
+		draggedIndex = null;
+		draggedBit = null;
 	}
 </script>
 
@@ -120,22 +196,28 @@
 		<ul
 			id="subbits-{group.masterId}"
 			class="sub-bits"
+			class:edit-mode={editMode}
 			data-sortable-group={group.masterId}
 			role="group"
 			aria-label="{group.label} options"
+			ondragover={handleDragOver}
+			ondrop={handleContainerDrop}
 		>
-			{#each group.bits as bit, index (bit)}
+			{#each orderedBits() as bit, index (bit)}
 				<SubBit
 					{bit}
 					{packageCode}
 					masterId={group.masterId}
 					{editMode}
 					draggable={editMode}
-					ondragstart={(e) => handleDragStart(e, index)}
+					ondragstart={(e) => handleDragStart(e, index, bit)}
 					ondragover={handleDragOver}
 					ondrop={(e) => handleDrop(e, index)}
 				/>
 			{/each}
+			{#if editMode && orderedBits().length === 0}
+				<li class="drop-hint">Drop items here</li>
+			{/if}
 		</ul>
 	{/if}
 </div>
@@ -214,6 +296,21 @@
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: var(--space-0-5);
+		min-height: 24px;
+	}
+
+	.sub-bits.edit-mode {
+		outline: 1px dashed rgba(212, 175, 55, 0.2);
+		outline-offset: -2px;
+	}
+
+	.drop-hint {
+		grid-column: span 2;
+		font-size: var(--text-2xs);
+		color: rgba(255, 255, 255, 0.4);
+		font-style: italic;
+		text-align: center;
+		padding: var(--space-0-5);
 	}
 
 	/* Narrow viewport compaction */

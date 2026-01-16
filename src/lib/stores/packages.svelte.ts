@@ -15,18 +15,28 @@ function createDefaultState(): PackageState {
 	return {
 		selectedBits: [],
 		customBits: [],
-		order: []
+		order: [],
+		looseBitsOrder: []
 	};
 }
 
 /**
  * Get state for a specific package (creates default if missing)
+ * WARNING: Do NOT use inside $derived - use getStateReadOnly instead
  */
 function getState(packageCode: string): PackageState {
 	if (!packageStates[packageCode]) {
 		packageStates[packageCode] = createDefaultState();
 	}
 	return packageStates[packageCode];
+}
+
+/**
+ * Get state for a specific package (read-only, safe for $derived)
+ * Returns existing state or default values without mutating store
+ */
+function getStateReadOnly(packageCode: string): PackageState {
+	return packageStates[packageCode] ?? createDefaultState();
 }
 
 /**
@@ -149,6 +159,41 @@ function setOrder(packageCode: string, order: string[]): void {
 }
 
 /**
+ * Set order for loose bits (for drag-drop reordering)
+ */
+function setLooseBitsOrder(packageCode: string, order: string[]): void {
+	const state = getState(packageCode);
+	state.looseBitsOrder = [...order];
+	packageStates = { ...packageStates };
+}
+
+/**
+ * Move a bit to a different group (or 'loose' for loose bits)
+ * @param packageCode - The package code
+ * @param bit - The bit to move
+ * @param targetGroup - The target group masterId (or 'loose' for loose bits)
+ */
+function moveBitToGroup(packageCode: string, bit: string, targetGroup: string): void {
+	const state = getState(packageCode);
+	if (!state.groupMembership) {
+		state.groupMembership = {};
+	}
+	state.groupMembership[bit] = targetGroup;
+	packageStates = { ...packageStates };
+}
+
+/**
+ * Get the group a bit belongs to (with overrides applied)
+ * @param packageCode - The package code
+ * @param bit - The bit name
+ * @param defaultGroup - The default group from static data
+ */
+function getBitGroup(packageCode: string, bit: string, defaultGroup: string): string {
+	const state = packageStates[packageCode];
+	return state?.groupMembership?.[bit] ?? defaultGroup;
+}
+
+/**
  * Load state from page state (from companies store)
  */
 function loadFromPageState(pageState: PageState): void {
@@ -174,6 +219,20 @@ function reset(): void {
 	packageStates = {};
 }
 
+/**
+ * Reset all order arrays and group membership to default
+ * Keeps selections and custom bits intact
+ */
+function resetAllOrders(): void {
+	for (const packageCode of Object.keys(packageStates)) {
+		const state = packageStates[packageCode];
+		state.order = [];
+		state.looseBitsOrder = [];
+		state.groupMembership = {};
+	}
+	packageStates = { ...packageStates };
+}
+
 export const packagesStore = {
 	// Getters
 	get all() {
@@ -182,6 +241,7 @@ export const packagesStore = {
 
 	// State access
 	getState,
+	getStateReadOnly,
 	isBitSelected,
 	getMasterBitState,
 
@@ -197,9 +257,15 @@ export const packagesStore = {
 
 	// Ordering
 	setOrder,
+	setLooseBitsOrder,
+
+	// Group membership
+	moveBitToGroup,
+	getBitGroup,
 
 	// State sync
 	loadFromPageState,
 	getPageState,
-	reset
+	reset,
+	resetAllOrders
 };

@@ -28,6 +28,7 @@
 	let isSelected = $derived(packagesStore.isBitSelected(packageCode, bit));
 
 	function handleToggle() {
+		if (editMode) return;
 		packagesStore.toggleBit(packageCode, bit);
 	}
 
@@ -47,14 +48,11 @@
 			handleCopy();
 		}
 	}
-
-	function handleRemove() {
-		packagesStore.removeCustomBit(packageCode, bit);
-	}
 </script>
 
 <li
 	class="sub-bit"
+	class:edit-mode={editMode}
 	data-sortable-item
 	data-bit={bit}
 	data-parent={masterId}
@@ -64,7 +62,9 @@
 	{ondrop}
 >
 	<label class="bit-label">
-		<Checkbox checked={isSelected} onchange={handleToggle} />
+		<span class="checkbox-wrapper">
+			<Checkbox checked={isSelected} onchange={handleToggle} />
+		</span>
 		<span
 			class="bit-text"
 			role="button"
@@ -74,11 +74,6 @@
 			data-copyable-bit>{bit}</span
 		>
 	</label>
-	{#if editMode}
-		<button type="button" class="bit-remove-btn" onclick={handleRemove} aria-label="Remove {bit}">
-			&times;
-		</button>
-	{/if}
 </li>
 
 <style>
@@ -98,10 +93,35 @@
 
 	.sub-bit[draggable='true'] {
 		cursor: grab;
+		user-select: none;
 	}
 
 	.sub-bit[draggable='true']:active {
 		cursor: grabbing;
+	}
+
+	.sub-bit[draggable='true'] .bit-label,
+	.sub-bit[draggable='true'] .bit-label .bit-text {
+		cursor: grab;
+	}
+
+	.sub-bit[draggable='true']:active .bit-label,
+	.sub-bit[draggable='true']:active .bit-label .bit-text {
+		cursor: grabbing;
+	}
+
+	.sub-bit.edit-mode {
+		outline: 1px dashed rgba(212, 175, 55, 0.4);
+		outline-offset: -1px;
+	}
+
+	.sub-bit.edit-mode .bit-label {
+		pointer-events: none;
+	}
+
+	.checkbox-wrapper {
+		display: flex;
+		align-items: center;
 	}
 
 	.bit-label {
@@ -125,28 +145,6 @@
 		color: var(--color-solidcam-gold, #d4af37);
 	}
 
-	.bit-remove-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 12px;
-		height: 12px;
-		padding: 0;
-		background: transparent;
-		border: none;
-		border-radius: 2px;
-		color: rgba(255, 255, 255, 0.4);
-		font-size: var(--text-2xs);
-		cursor: pointer;
-		transition: all 150ms ease;
-		flex-shrink: 0;
-	}
-
-	.bit-remove-btn:hover {
-		background: rgba(200, 16, 46, 0.2);
-		color: #c8102e;
-	}
-
 	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.sub-bit {
@@ -161,12 +159,6 @@
 		.bit-text {
 			font-size: var(--text-2xs);
 		}
-
-		.bit-remove-btn {
-			width: 10px;
-			height: 10px;
-			font-size: var(--text-2xs);
-		}
 	}
 
 	@media (max-width: 640px) {
@@ -179,12 +171,6 @@
 		}
 
 		.bit-text {
-			font-size: var(--text-2xs);
-		}
-
-		.bit-remove-btn {
-			width: 10px;
-			height: 10px;
 			font-size: var(--text-2xs);
 		}
 	}

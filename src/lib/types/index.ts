@@ -37,6 +37,7 @@ export interface Panel {
 export interface PanelState {
 	items: string[];
 	removedItems?: string[];
+	itemsOrder?: string[];
 }
 
 // Package System
@@ -58,6 +59,9 @@ export interface PackageState {
 	selectedBits: string[];
 	customBits: string[];
 	order: string[];
+	looseBitsOrder?: string[];
+	/** Maps bit name to masterId (or 'loose' for loose bits). Overrides static group membership. */
+	groupMembership?: Record<string, string>;
 }
 
 // Cloud Sync

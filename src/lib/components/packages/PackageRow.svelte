@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { Package } from '$types';
+	import { packagesStore } from '$stores/packages.svelte';
 	import { panelsStore } from '$stores/panels.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
+	import { applyOrder } from '$lib/utils/order';
 	import MasterBit from './MasterBit.svelte';
 	import LooseBit from './LooseBit.svelte';
 
@@ -18,11 +20,28 @@
 
 	let hasGroups = $derived(pkg.groups && pkg.groups.length > 0);
 
-	// Merge static loose bits with custom bits from global prefs
+	// Merge static loose bits with custom bits and moved bits, then apply stored order
 	let allLooseBits = $derived(() => {
 		const staticBits = pkg.looseBits || [];
 		const customBits = userPrefsStore.getCustomPackageBits(pkg.code);
-		return [...staticBits, ...customBits.filter((c) => !staticBits.includes(c))];
+		const state = packagesStore.getStateReadOnly(pkg.code);
+
+		// Include bits that have been moved to 'loose' from groups
+		const movedToLoose: string[] = [];
+		if (state.groupMembership) {
+			for (const [bit, group] of Object.entries(state.groupMembership)) {
+				if (group === 'loose' && !staticBits.includes(bit) && !customBits.includes(bit)) {
+					movedToLoose.push(bit);
+				}
+			}
+		}
+
+		const allBits = [
+			...staticBits,
+			...customBits.filter((c) => !staticBits.includes(c)),
+			...movedToLoose
+		];
+		return applyOrder(allBits, state.looseBitsOrder);
 	});
 
 	let hasLooseBits = $derived(allLooseBits().length > 0);
@@ -48,6 +67,94 @@
 			toastStore.error('Failed to copy');
 		}
 	}
+
+	// Drag and drop state for reordering loose bits
+	let draggedIndex = $state<number | null>(null);
+	let draggedBit = $state<string | null>(null);
+
+	function handleDragStart(e: DragEvent, index: number, bit: string) {
+		if (!editMode) return;
+		e.stopPropagation();
+		draggedIndex = index;
+		draggedBit = bit;
+		if (e.dataTransfer) {
+			e.dataTransfer.effectAllowed = 'move';
+			// Include bit name and source group in drag data for cross-group moves
+			e.dataTransfer.setData('application/json', JSON.stringify({ bit, sourceGroup: 'loose' }));
+		}
+	}
+
+	function handleDragOver(e: DragEvent) {
+		if (!editMode) return;
+		e.preventDefault();
+		if (e.dataTransfer) {
+			e.dataTransfer.dropEffect = 'move';
+		}
+	}
+
+	function handleDrop(e: DragEvent, dropIndex: number) {
+		if (!editMode) return;
+		e.preventDefault();
+
+		// Try to get cross-group drag data
+		const jsonData = e.dataTransfer?.getData('application/json');
+		if (jsonData) {
+			try {
+				const data = JSON.parse(jsonData);
+				if (data.bit && data.sourceGroup && data.sourceGroup !== 'loose') {
+					// Cross-group move: from a MasterBit group to loose bits
+					packagesStore.moveBitToGroup(pkg.code, data.bit, 'loose');
+					// Add to end of loose bits order
+					const currentOrder = [...allLooseBits()];
+					if (!currentOrder.includes(data.bit)) {
+						currentOrder.push(data.bit);
+						packagesStore.setLooseBitsOrder(pkg.code, currentOrder);
+					}
+					draggedIndex = null;
+					draggedBit = null;
+					return;
+				}
+			} catch {
+				// Not valid JSON, continue with normal drop
+			}
+		}
+
+		// Normal reorder within loose bits
+		if (draggedIndex !== null && draggedIndex !== dropIndex) {
+			const newOrder = [...allLooseBits()];
+			const [removed] = newOrder.splice(draggedIndex, 1);
+			newOrder.splice(dropIndex, 0, removed);
+			packagesStore.setLooseBitsOrder(pkg.code, newOrder);
+		}
+		draggedIndex = null;
+		draggedBit = null;
+	}
+
+	// Handle drop on the loose bits container itself (not just on items)
+	function handleLooseBitsContainerDrop(e: DragEvent) {
+		if (!editMode) return;
+		e.preventDefault();
+
+		const jsonData = e.dataTransfer?.getData('application/json');
+		if (jsonData) {
+			try {
+				const data = JSON.parse(jsonData);
+				if (data.bit && data.sourceGroup && data.sourceGroup !== 'loose') {
+					// Cross-group move: from a MasterBit group to loose bits
+					packagesStore.moveBitToGroup(pkg.code, data.bit, 'loose');
+					const currentOrder = [...allLooseBits()];
+					if (!currentOrder.includes(data.bit)) {
+						currentOrder.push(data.bit);
+						packagesStore.setLooseBitsOrder(pkg.code, currentOrder);
+					}
+				}
+			} catch {
+				// Ignore
+			}
+		}
+		draggedIndex = null;
+		draggedBit = null;
+	}
 </script>
 
 <tr class="package-row" data-package={pkg.code}>
@@ -71,13 +178,34 @@
 					{/each}
 				</div>
 			{/if}
-			{#if hasLooseBits}
-				<div class="loose-bits-section" class:has-groups={hasGroups}>
+			{#if hasLooseBits || editMode}
+				<div
+					class="loose-bits-section"
+					class:has-groups={hasGroups}
+					class:edit-mode={editMode}
+					role="group"
+					aria-label="Loose bits drop zone"
+					ondragover={handleDragOver}
+					ondrop={handleLooseBitsContainerDrop}
+				>
 					<ul class="loose-bits" data-sortable-group={pkg.code}>
-						{#each allLooseBits() as bit (bit)}
-							<LooseBit {bit} packageCode={pkg.code} {editMode} {removeMode} isCustom={isCustomBit(bit)} />
+						{#each allLooseBits() as bit, index (bit)}
+							<LooseBit
+								{bit}
+								packageCode={pkg.code}
+								{editMode}
+								{removeMode}
+								isCustom={isCustomBit(bit)}
+								draggable={editMode}
+								ondragstart={(e) => handleDragStart(e, index, bit)}
+								ondragover={handleDragOver}
+								ondrop={(e) => handleDrop(e, index)}
+							/>
 						{/each}
 					</ul>
+					{#if editMode && allLooseBits().length === 0}
+						<span class="drop-hint">Drop items here</span>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -176,11 +304,27 @@
 	/* Loose bits section below groups */
 	.loose-bits-section {
 		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		min-height: 24px;
 	}
 
 	.loose-bits-section.has-groups {
 		padding-top: var(--space-1);
 		border-top: 1px solid rgba(255, 255, 255, 0.06);
+	}
+
+	.loose-bits-section.edit-mode {
+		outline: 1px dashed rgba(212, 175, 55, 0.3);
+		outline-offset: 2px;
+		border-radius: 4px;
+		padding: var(--space-0-5);
+	}
+
+	.drop-hint {
+		font-size: var(--text-2xs);
+		color: rgba(255, 255, 255, 0.4);
+		font-style: italic;
 	}
 
 	.loose-bits {

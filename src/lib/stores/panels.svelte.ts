@@ -15,7 +15,8 @@ let removeMode = $state(false);
 function createDefaultState(): PanelState {
 	return {
 		items: [],
-		removedItems: []
+		removedItems: [],
+		itemsOrder: []
 	};
 }
 
@@ -33,6 +34,9 @@ function getState(panelId: string): PanelState {
 	}
 	if (!Array.isArray(state.removedItems)) {
 		state.removedItems = [];
+	}
+	if (!Array.isArray(state.itemsOrder)) {
+		state.itemsOrder = [];
 	}
 	return state;
 }
@@ -102,12 +106,27 @@ function toggleItem(panelId: string, item: string): void {
 }
 
 /**
+ * Set the display order for items in a panel (e.g., from drag-drop)
+ */
+function setItemsOrder(panelId: string, newOrder: string[]): void {
+	const state = getState(panelId);
+	state.itemsOrder = [...newOrder];
+	panelStates = { ...panelStates };
+}
+
+/**
+ * Get the stored display order for a panel
+ */
+function getItemsOrder(panelId: string): string[] {
+	return panelStates[panelId]?.itemsOrder ?? [];
+}
+
+/**
  * Reorder items in a panel (e.g., from drag-drop)
+ * @deprecated Use setItemsOrder instead
  */
 function reorderItems(panelId: string, newOrder: string[]): void {
-	const state = getState(panelId);
-	state.items = [...newOrder];
-	panelStates = { ...panelStates };
+	setItemsOrder(panelId, newOrder);
 }
 
 /**
@@ -162,6 +181,20 @@ function reset(): void {
 	panelStates = {};
 }
 
+/**
+ * Reset all order arrays to default (empty = original order)
+ * Keeps items and removed items intact
+ */
+function resetAllOrders(): void {
+	for (const panelId of Object.keys(panelStates)) {
+		const state = panelStates[panelId];
+		if (state.itemsOrder) {
+			state.itemsOrder = [];
+		}
+	}
+	panelStates = { ...panelStates };
+}
+
 export const panelsStore = {
 	// Getters
 	get all() {
@@ -180,6 +213,8 @@ export const panelsStore = {
 	addItem,
 	removeItem,
 	toggleItem,
+	setItemsOrder,
+	getItemsOrder,
 	reorderItems,
 	clearItems,
 	restoreItems,
@@ -188,6 +223,7 @@ export const panelsStore = {
 	loadFromPageState,
 	getPageState,
 	reset,
+	resetAllOrders,
 
 	// Remove mode
 	toggleRemoveMode() {

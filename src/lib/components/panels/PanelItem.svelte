@@ -6,6 +6,7 @@
 		item: string;
 		checked?: boolean;
 		showCheckbox?: boolean;
+		editMode?: boolean;
 		removeMode?: boolean;
 		draggable?: boolean;
 		isCustom?: boolean;
@@ -20,6 +21,7 @@
 		item,
 		checked = false,
 		showCheckbox = false,
+		editMode = false,
 		removeMode = false,
 		draggable = false,
 		isCustom = false,
@@ -31,6 +33,7 @@
 	}: Props = $props();
 
 	async function handleCopy() {
+		if (editMode) return;
 		try {
 			await navigator.clipboard.writeText(item);
 			toastStore.success('Copied!', 1500);
@@ -40,6 +43,7 @@
 	}
 
 	function handleCheckboxChange() {
+		if (editMode) return;
 		onToggle?.();
 	}
 
@@ -50,6 +54,7 @@
 
 <li
 	class="panel-item"
+	class:edit-mode={editMode}
 	class:remove-mode={removeMode && isCustom}
 	class:custom={isCustom}
 	data-sortable-item
@@ -60,7 +65,9 @@
 >
 	<div class="panel-item-main">
 		{#if showCheckbox}
-			<Checkbox {checked} onchange={handleCheckboxChange} />
+			<span class="checkbox-wrapper">
+				<Checkbox {checked} onchange={handleCheckboxChange} />
+			</span>
 		{/if}
 		<button type="button" class="item-text" class:custom={isCustom} onclick={handleCopy}>
 			{#if isCustom}<span class="custom-indicator">+</span>{/if}{item}
@@ -89,10 +96,35 @@
 
 	.panel-item[draggable='true'] {
 		cursor: grab;
+		user-select: none;
 	}
 
 	.panel-item[draggable='true']:active {
 		cursor: grabbing;
+	}
+
+	.panel-item[draggable='true'] .panel-item-main,
+	.panel-item[draggable='true'] .item-text {
+		cursor: grab;
+	}
+
+	.panel-item[draggable='true']:active .panel-item-main,
+	.panel-item[draggable='true']:active .item-text {
+		cursor: grabbing;
+	}
+
+	.panel-item.edit-mode {
+		outline: 1px dashed rgba(212, 175, 55, 0.4);
+		outline-offset: -1px;
+	}
+
+	.panel-item.edit-mode .panel-item-main {
+		pointer-events: none;
+	}
+
+	.checkbox-wrapper {
+		display: flex;
+		align-items: center;
 	}
 
 	.panel-item.remove-mode {

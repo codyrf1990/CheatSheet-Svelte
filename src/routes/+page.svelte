@@ -25,7 +25,8 @@
 	}
 
 	function handleResetOrder() {
-		// TODO: Reset to default order
+		packagesStore.resetAllOrders();
+		panelsStore.resetAllOrders();
 		packageEditMode = false;
 	}
 
@@ -177,6 +178,7 @@
 			<MaintenancePanel
 				maintenancePanel={panels.find((p) => p.id === 'maintenance-skus')!}
 				solidworksPanel={panels.find((p) => p.id === 'solidworks-maintenance')!}
+				editMode={packageEditMode}
 			/>
 			<Calculator />
 		</aside>

@@ -31,6 +31,7 @@
 	let isSelected = $derived(packagesStore.isBitSelected(packageCode, bit));
 
 	function handleToggle() {
+		if (editMode) return;
 		packagesStore.toggleBit(packageCode, bit);
 	}
 
@@ -59,6 +60,7 @@
 
 <li
 	class="loose-bit"
+	class:edit-mode={editMode}
 	class:custom={isCustom}
 	class:remove-mode={removeMode && isCustom}
 	data-sortable-item
@@ -69,7 +71,9 @@
 	{ondrop}
 >
 	<label class="bit-label">
-		<Checkbox checked={isSelected} onchange={handleToggle} />
+		<span class="checkbox-wrapper">
+			<Checkbox checked={isSelected} onchange={handleToggle} />
+		</span>
 		<span
 			class="bit-text"
 			class:custom={isCustom}
@@ -81,7 +85,7 @@
 			>{#if isCustom}<span class="custom-indicator">+</span>{/if}{bit}</span
 		>
 	</label>
-	{#if (editMode || removeMode) && isCustom}
+	{#if removeMode && isCustom}
 		<button type="button" class="bit-remove-btn" onclick={handleRemove} aria-label="Remove {bit}">
 			&times;
 		</button>
@@ -106,10 +110,35 @@
 
 	.loose-bit[draggable='true'] {
 		cursor: grab;
+		user-select: none;
 	}
 
 	.loose-bit[draggable='true']:active {
 		cursor: grabbing;
+	}
+
+	.loose-bit[draggable='true'] .bit-label,
+	.loose-bit[draggable='true'] .bit-label .bit-text {
+		cursor: grab;
+	}
+
+	.loose-bit[draggable='true']:active .bit-label,
+	.loose-bit[draggable='true']:active .bit-label .bit-text {
+		cursor: grabbing;
+	}
+
+	.loose-bit.edit-mode {
+		outline: 1px dashed rgba(212, 175, 55, 0.4);
+		outline-offset: -1px;
+	}
+
+	.loose-bit.edit-mode .bit-label {
+		pointer-events: none;
+	}
+
+	.checkbox-wrapper {
+		display: flex;
+		align-items: center;
 	}
 
 	.bit-label {
