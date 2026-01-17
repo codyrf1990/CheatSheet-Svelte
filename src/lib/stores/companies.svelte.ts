@@ -4,7 +4,7 @@
  * Ported from original page-system.js (~683 lines)
  */
 
-import type { Company, Page, PageState } from '$types';
+import type { Company, Page, PageState, PackageState } from '$types';
 
 // localStorage keys (must match original for migration)
 const CURRENT_COMPANY_KEY = 'solidcam-current-company-id';
@@ -15,6 +15,9 @@ const RECENT_STORAGE_KEY = 'solidcam-recent';
 // Legacy keys for migration
 const OLD_PAGES_KEY = 'solidcam-pages-data';
 const OLD_STATE_KEY = 'solidcam-cheatsheet-state';
+
+export const DEFAULT_COMPANY_NAME = 'Untitled Company';
+export const DEFAULT_PAGE_NAME = 'P1';
 
 // Reactive state
 let companies = $state<Company[]>([]);
@@ -42,7 +45,7 @@ function createEmptyPageState(): PageState {
 /**
  * Build a default company with one empty page
  */
-function buildDefaultCompany(name: string = 'Untitled Company'): Company {
+function buildDefaultCompany(name: string = DEFAULT_COMPANY_NAME): Company {
 	const pageId = generateId('page');
 	return {
 		id: generateId('comp'),
@@ -50,7 +53,7 @@ function buildDefaultCompany(name: string = 'Untitled Company'): Company {
 		pages: [
 			{
 				id: pageId,
-				name: 'P1',
+				name: DEFAULT_PAGE_NAME,
 				state: createEmptyPageState()
 			}
 		],
@@ -72,15 +75,14 @@ function deepCopy<T>(obj: T): T {
 /**
  * Migrate old package state format to new format
  * Old: { bits: [{text, checked}], groups: [{masterId, items: [{text, checked}]}] }
- * New: { selectedBits: string[], customBits: string[], order: string[] }
+ * New: { selectedBits: string[], customBits: string[], order: string[], looseBitsOrder?: string[], groupMembership?: Record<string, string> }
  */
 function migratePackageState(
 	oldState: unknown
-): Record<string, { selectedBits: string[]; customBits: string[]; order: string[] }> {
+): Record<string, PackageState> {
 	if (!oldState || typeof oldState !== 'object') return {};
 
-	const result: Record<string, { selectedBits: string[]; customBits: string[]; order: string[] }> =
-		{};
+	const result: Record<string, PackageState> = {};
 
 	for (const [pkgCode, pkgState] of Object.entries(oldState as Record<string, unknown>)) {
 		if (!pkgState || typeof pkgState !== 'object') continue;
@@ -90,6 +92,8 @@ function migratePackageState(
 			selectedBits?: string[];
 			customBits?: string[];
 			order?: string[];
+			looseBitsOrder?: string[];
+			groupMembership?: Record<string, string>;
 			// Old format
 			bits?: Array<{ text: string; checked: boolean } | string>;
 			groups?: Array<{
@@ -105,7 +109,9 @@ function migratePackageState(
 			result[pkgCode] = {
 				selectedBits: state.selectedBits,
 				customBits: state.customBits || [],
-				order: state.order || []
+				order: state.order || [],
+				looseBitsOrder: state.looseBitsOrder || [],
+				groupMembership: state.groupMembership || {}
 			};
 			continue;
 		}
@@ -143,7 +149,9 @@ function migratePackageState(
 		result[pkgCode] = {
 			selectedBits,
 			customBits: [],
-			order: []
+			order: [],
+			looseBitsOrder: [],
+			groupMembership: {}
 		};
 	}
 
@@ -189,7 +197,7 @@ function ensureIntegrity(): void {
 	}
 
 	if (companies.length === 0) {
-		companies = [buildDefaultCompany('Untitled Company')];
+		companies = [buildDefaultCompany(DEFAULT_COMPANY_NAME)];
 	}
 
 	// Validate each company
@@ -202,7 +210,7 @@ function ensureIntegrity(): void {
 		// Ensure at least one page
 		if (company.pages.length === 0) {
 			const pageId = generateId('page');
-			company.pages = [{ id: pageId, name: 'P1', state: createEmptyPageState() }];
+			company.pages = [{ id: pageId, name: DEFAULT_PAGE_NAME, state: createEmptyPageState() }];
 			company.currentPageId = pageId;
 		}
 
@@ -220,7 +228,7 @@ function ensureIntegrity(): void {
 		// Validate pages
 		company.pages = company.pages.map((page) => ({
 			id: page.id || generateId('page'),
-			name: page.name || 'P1',
+			name: page.name || DEFAULT_PAGE_NAME,
 			state: page.state || createEmptyPageState()
 		}));
 
@@ -253,7 +261,7 @@ function emitChange(): void {
 
 // ============ Company Operations ============
 
-function create(name: string = 'Untitled Company'): Company {
+function create(name: string = DEFAULT_COMPANY_NAME): Company {
 	const company = buildDefaultCompany(name);
 	companies = [...companies, company];
 	currentCompanyId = company.id;
@@ -290,7 +298,7 @@ function remove(id: string): string | null {
 			trackRecentAccess(currentCompanyId);
 		} else {
 			// No companies left, create a new one
-			const newCompany = create('Untitled Company');
+			const newCompany = create(DEFAULT_COMPANY_NAME);
 			return newCompany.id;
 		}
 	}
@@ -466,7 +474,7 @@ function resetPages(): void {
 
 	const defaultPage: Page = {
 		id: generateId('page'),
-		name: 'P1',
+		name: DEFAULT_PAGE_NAME,
 		state: createEmptyPageState()
 	};
 
@@ -556,7 +564,7 @@ function load(): void {
 				const oldData = JSON.parse(oldPages);
 				const newCompany: Company = {
 					id: generateId('comp'),
-					name: 'Untitled Company',
+					name: DEFAULT_COMPANY_NAME,
 					pages: oldData.pages || [],
 					currentPageId: oldData.currentPageId || oldData.pages?.[0]?.id || null,
 					createdAt: Date.now(),
@@ -573,11 +581,11 @@ function load(): void {
 					const pageId = generateId('page');
 					const newCompany: Company = {
 						id: generateId('comp'),
-						name: 'Untitled Company',
+						name: DEFAULT_COMPANY_NAME,
 						pages: [
 							{
 								id: pageId,
-								name: 'P1',
+								name: DEFAULT_PAGE_NAME,
 								state: JSON.parse(oldState)
 							}
 						],
@@ -601,7 +609,7 @@ function load(): void {
 	} catch (err) {
 		console.error('[CompaniesStore] Failed to load:', err);
 		// Fallback: Create empty company
-		companies = [buildDefaultCompany('Untitled Company')];
+		companies = [buildDefaultCompany(DEFAULT_COMPANY_NAME)];
 		currentCompanyId = companies[0].id;
 		save();
 	}

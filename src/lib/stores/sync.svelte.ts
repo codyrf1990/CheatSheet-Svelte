@@ -6,7 +6,7 @@
 import { browser } from '$app/environment';
 import type { SyncStatus } from '$types';
 import { loadUserData, queueSave, cancelPendingSave, flushPendingSave } from '$firebase';
-import { companiesStore } from './companies.svelte';
+import { companiesStore, DEFAULT_COMPANY_NAME, DEFAULT_PAGE_NAME } from './companies.svelte';
 
 const SYNC_USERNAME_KEY = 'solidcam-sync-username';
 const REMEMBER_ME_KEY = 'solidcam-remember-me';
@@ -21,6 +21,57 @@ let error = $state<string | null>(null);
 
 // Auto-sync handler reference
 let autoSyncEnabled = false;
+
+type LocalData = ReturnType<typeof companiesStore.exportData>;
+
+function getLocalUpdatedAt(): number {
+	const companies = companiesStore.all;
+	let latest = 0;
+	for (const company of companies) {
+		if (company.updatedAt && company.updatedAt > latest) {
+			latest = company.updatedAt;
+		}
+	}
+	return latest;
+}
+
+function isDefaultLocalData(data: LocalData): boolean {
+	if (!data || typeof data !== 'object') return true;
+
+	if (Array.isArray(data.favoriteCompanyIds) && data.favoriteCompanyIds.length > 0) {
+		return false;
+	}
+	if (Array.isArray(data.recentCompanyIds) && data.recentCompanyIds.length > 0) {
+		return false;
+	}
+
+	if (!Array.isArray(data.companies) || data.companies.length === 0) {
+		return true;
+	}
+	if (data.companies.length > 1) {
+		return false;
+	}
+
+	const company = data.companies[0];
+	if (!company || company.name !== DEFAULT_COMPANY_NAME || company.isFavorite) {
+		return false;
+	}
+	if (!Array.isArray(company.pages) || company.pages.length === 0) {
+		return true;
+	}
+	if (company.pages.length > 1) {
+		return false;
+	}
+
+	const page = company.pages[0];
+	if (!page || page.name !== DEFAULT_PAGE_NAME) {
+		return false;
+	}
+
+	const panels = page.state?.panels ?? {};
+	const packages = page.state?.packages ?? {};
+	return Object.keys(panels).length === 0 && Object.keys(packages).length === 0;
+}
 
 /**
  * Validate username format
@@ -99,14 +150,30 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 	try {
 		// Try to load existing cloud data
 		const cloudData = await loadUserData(trimmedName);
+		const localData = companiesStore.exportData();
+		const localIsDefault = isDefaultLocalData(localData);
+		const localUpdatedAt = getLocalUpdatedAt();
+		const cloudUpdatedAt = cloudData?.updatedAt?.getTime() || 0;
 
 		if (cloudData?.pageSystem) {
-			// Cloud data exists - import it
-			companiesStore.importData(cloudData.pageSystem);
-			lastSyncTime = cloudData.updatedAt?.getTime() || Date.now();
+			if (!localIsDefault && localUpdatedAt > cloudUpdatedAt) {
+				// Local is newer - keep local and push to cloud
+				console.info('[SyncStore] Local data newer than cloud; uploading local changes.', {
+					localUpdatedAt,
+					cloudUpdatedAt
+				});
+				queueSave(trimmedName, localData, (success) => {
+					if (success) {
+						lastSyncTime = Date.now();
+					}
+				});
+			} else {
+				// Cloud is newer (or equal) - import it
+				companiesStore.importData(cloudData.pageSystem);
+				lastSyncTime = cloudUpdatedAt || Date.now();
+			}
 		} else {
 			// No cloud data - push local data
-			const localData = companiesStore.exportData();
 			queueSave(trimmedName, localData, (success) => {
 				if (success) {
 					lastSyncTime = Date.now();
