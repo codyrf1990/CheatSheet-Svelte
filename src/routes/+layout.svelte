@@ -6,6 +6,7 @@
 	import { ToastContainer, Skeleton } from '$components/ui';
 	import { LoginScreen } from '$components/layout';
 	import { syncStore } from '$stores/sync.svelte';
+	import { companiesStore } from '$stores/companies.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 
 	interface Props {
@@ -17,6 +18,7 @@
 	let videoRef: HTMLVideoElement | null = $state(null);
 
 	onMount(async () => {
+		companiesStore.load();
 		await syncStore.load();
 		userPrefsStore.init();
 		initialized = true;

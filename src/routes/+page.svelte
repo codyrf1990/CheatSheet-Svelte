@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, untrack } from 'svelte';
+	import { untrack } from 'svelte';
 	import { Header, CompanyPageBar } from '$components/layout';
 	import { PackageTable } from '$components/packages';
 	import { MaintenancePanel } from '$components/panels';
@@ -50,11 +50,6 @@
 		{ label: 'Packages & Maintenance', href: 'https://codyrf1990.github.io/CheatSheet/' },
 		{ label: 'Machine Catalogue', href: 'https://codyrf1990.github.io/machine-catalog-standalone/' }
 	];
-
-	// Initialize stores on mount
-	onMount(() => {
-		companiesStore.load();
-	});
 
 	// Sync page state to packagesStore when company/page changes
 	$effect(() => {
