@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { toastStore } from '$stores/toast.svelte';
-	import { fly, scale } from 'svelte/transition';
-	import { backOut, quintOut } from 'svelte/easing';
+	import { fly } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
+	import { quintOut, quintIn } from 'svelte/easing';
 
 	let prefersReducedMotion = $state(false);
 
@@ -26,25 +27,23 @@
 			<div
 				class="toast toast-{t.type}"
 				role={t.type === 'error' ? 'alert' : 'status'}
+				animate:flip={{ duration: prefersReducedMotion ? 0 : 200 }}
 				in:fly={{
-					x: prefersReducedMotion ? 0 : 120,
-					duration: prefersReducedMotion ? 0 : 400,
-					easing: backOut,
-					delay: prefersReducedMotion ? 0 : index * 50
-				}}
-				out:scale={{
-					duration: prefersReducedMotion ? 0 : 200,
+					x: prefersReducedMotion ? 0 : 24,
+					duration: prefersReducedMotion ? 0 : 280,
 					easing: quintOut,
-					start: prefersReducedMotion ? 1 : 0.95
+					delay: prefersReducedMotion ? 0 : index * 40
+				}}
+				out:fly={{
+					x: prefersReducedMotion ? 0 : 12,
+					duration: prefersReducedMotion ? 0 : 150,
+					easing: quintIn
 				}}
 				onmouseenter={() => toastStore.pause(t.id)}
 				onmouseleave={() => toastStore.resume(t.id)}
 				onfocusin={() => toastStore.pause(t.id)}
 				onfocusout={() => toastStore.resume(t.id)}
 			>
-				<!-- Shine animation -->
-				<div class="toast-glow"></div>
-
 				<span class="toast-icon">
 					{#if t.type === 'success'}
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -81,7 +80,10 @@
 
 				<!-- Progress bar -->
 				<div class="toast-progress">
-					<div class="toast-progress-fill toast-progress-{t.type}"></div>
+					<div
+						class="toast-progress-fill toast-progress-{t.type}"
+						style="animation-duration: {t.duration}ms"
+					></div>
 				</div>
 			</div>
 		{/each}
@@ -105,38 +107,16 @@
 		display: flex;
 		align-items: center;
 		gap: 0.875rem;
-		padding: 1rem 1.125rem;
-		padding-bottom: 1.25rem; /* Extra space for progress bar */
+		padding: 0.875rem 1rem;
 		background: linear-gradient(145deg, rgba(32, 32, 38, 0.98), rgba(24, 24, 30, 0.98));
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 14px;
 		box-shadow:
-			0 12px 40px rgba(0, 0, 0, 0.5),
-			0 4px 12px rgba(0, 0, 0, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.05);
+			0 8px 24px rgba(0, 0, 0, 0.35),
+			0 2px 8px rgba(0, 0, 0, 0.2),
+			inset 0 1px 0 rgba(255, 255, 255, 0.04);
 		backdrop-filter: blur(16px);
 		overflow: hidden;
-	}
-
-	/* Shine animation */
-	.toast-glow {
-		position: absolute;
-		top: 0;
-		left: -50%;
-		width: 50%;
-		height: 100%;
-		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
-		animation: toastShine 3s ease-in-out infinite;
-		pointer-events: none;
-	}
-
-	@keyframes toastShine {
-		0% {
-			left: -50%;
-		}
-		100% {
-			left: 150%;
-		}
 	}
 
 	/* Icon styling */
@@ -151,27 +131,6 @@
 		flex-shrink: 0;
 	}
 
-	.toast-icon::before {
-		content: '';
-		position: absolute;
-		inset: -4px;
-		border-radius: 50%;
-		opacity: 0.15;
-		animation: iconPulse 2s ease-in-out infinite;
-	}
-
-	@keyframes iconPulse {
-		0%,
-		100% {
-			transform: scale(1);
-			opacity: 0.15;
-		}
-		50% {
-			transform: scale(1.1);
-			opacity: 0.25;
-		}
-	}
-
 	.toast-icon svg {
 		width: 16px;
 		height: 16px;
@@ -179,35 +138,23 @@
 
 	/* Type-specific icon colors */
 	.toast-success .toast-icon {
-		background: rgba(34, 197, 94, 0.2);
+		background: rgba(34, 197, 94, 0.12);
 		color: #22c55e;
-	}
-	.toast-success .toast-icon::before {
-		background: #22c55e;
 	}
 
 	.toast-error .toast-icon {
-		background: rgba(239, 68, 68, 0.2);
+		background: rgba(239, 68, 68, 0.12);
 		color: #ef4444;
-	}
-	.toast-error .toast-icon::before {
-		background: #ef4444;
 	}
 
 	.toast-warning .toast-icon {
-		background: rgba(249, 115, 22, 0.2);
+		background: rgba(249, 115, 22, 0.12);
 		color: #f97316;
-	}
-	.toast-warning .toast-icon::before {
-		background: #f97316;
 	}
 
 	.toast-info .toast-icon {
-		background: rgba(212, 175, 55, 0.2);
+		background: rgba(212, 175, 55, 0.12);
 		color: #d4af37;
-	}
-	.toast-info .toast-icon::before {
-		background: #d4af37;
 	}
 
 	.toast-message {
@@ -254,7 +201,7 @@
 		bottom: 0;
 		left: 0;
 		right: 0;
-		height: 3px;
+		height: 2px;
 		background: rgba(255, 255, 255, 0.05);
 		overflow: hidden;
 	}
@@ -263,7 +210,7 @@
 		height: 100%;
 		width: 100%;
 		transform-origin: left;
-		animation: progressShrink 5s linear forwards;
+		animation: progressShrink linear forwards;
 	}
 
 	@keyframes progressShrink {
@@ -276,19 +223,19 @@
 	}
 
 	.toast-progress-success {
-		background: linear-gradient(90deg, #22c55e, #4ade80);
+		background: linear-gradient(90deg, rgba(34, 197, 94, 0.7), rgba(74, 222, 128, 0.7));
 	}
 
 	.toast-progress-error {
-		background: linear-gradient(90deg, #ef4444, #f87171);
+		background: linear-gradient(90deg, rgba(239, 68, 68, 0.7), rgba(248, 113, 113, 0.7));
 	}
 
 	.toast-progress-warning {
-		background: linear-gradient(90deg, #f59e0b, #fbbf24);
+		background: linear-gradient(90deg, rgba(245, 158, 11, 0.7), rgba(251, 191, 36, 0.7));
 	}
 
 	.toast-progress-info {
-		background: linear-gradient(90deg, #d4af37, #e8c547);
+		background: linear-gradient(90deg, rgba(212, 175, 55, 0.7), rgba(232, 197, 71, 0.7));
 	}
 
 	/* Mobile responsiveness */
@@ -301,13 +248,19 @@
 		}
 	}
 
+	/* Pause progress bar on hover/focus */
+	.toast:hover .toast-progress-fill,
+	.toast:focus-within .toast-progress-fill {
+		animation-play-state: paused;
+	}
+
+	/* Pause progress bar when tab is hidden */
+	:global(.toast-paused) .toast-progress-fill {
+		animation-play-state: paused;
+	}
+
 	/* Reduced motion */
 	@media (prefers-reduced-motion: reduce) {
-		.toast-glow,
-		.toast-icon::before {
-			animation: none;
-		}
-
 		.toast-progress-fill {
 			animation: none;
 			transform: scaleX(1);
