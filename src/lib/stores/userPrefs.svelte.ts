@@ -11,13 +11,15 @@ const STORAGE_KEY = 'solidcam-user-prefs';
 interface UserPrefs {
 	customPanelItems: Record<string, string[]>; // panelId -> custom items
 	customPackageBits: Record<string, string[]>; // packageCode -> custom bits
+	backgroundVideoPaused: boolean; // Whether background video is paused (per device)
 }
 
 // Default state
 function createDefaultPrefs(): UserPrefs {
 	return {
 		customPanelItems: {},
-		customPackageBits: {}
+		customPackageBits: {},
+		backgroundVideoPaused: false // Video plays by default
 	};
 }
 
@@ -31,7 +33,8 @@ function loadPrefs(): UserPrefs {
 			const parsed = JSON.parse(stored);
 			return {
 				customPanelItems: parsed.customPanelItems || {},
-				customPackageBits: parsed.customPackageBits || {}
+				customPackageBits: parsed.customPackageBits || {},
+				backgroundVideoPaused: parsed.backgroundVideoPaused ?? false
 			};
 		}
 	} catch (e) {
@@ -148,6 +151,29 @@ function isCustomPackageBit(packageCode: string, bit: string): boolean {
 	return prefs.customPackageBits[packageCode]?.includes(bit) ?? false;
 }
 
+/**
+ * Check if background video is paused
+ */
+function isBackgroundVideoPaused(): boolean {
+	return prefs.backgroundVideoPaused;
+}
+
+/**
+ * Set background video paused state
+ */
+function setBackgroundVideoPaused(paused: boolean): void {
+	prefs.backgroundVideoPaused = paused;
+	prefs = { ...prefs };
+	save();
+}
+
+/**
+ * Toggle background video paused state
+ */
+function toggleBackgroundVideoPaused(): void {
+	setBackgroundVideoPaused(!prefs.backgroundVideoPaused);
+}
+
 export const userPrefsStore = {
 	// Getters
 	get all() {
@@ -167,5 +193,10 @@ export const userPrefsStore = {
 	getCustomPackageBits,
 	addCustomPackageBit,
 	removeCustomPackageBit,
-	isCustomPackageBit
+	isCustomPackageBit,
+
+	// Background video
+	isBackgroundVideoPaused,
+	setBackgroundVideoPaused,
+	toggleBackgroundVideoPaused
 };

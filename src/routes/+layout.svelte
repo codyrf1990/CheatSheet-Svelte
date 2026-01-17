@@ -14,6 +14,7 @@
 
 	let { children }: Props = $props();
 	let initialized = $state(false);
+	let videoRef: HTMLVideoElement | null = $state(null);
 
 	onMount(async () => {
 		await syncStore.load();
@@ -23,6 +24,19 @@
 
 	const isLoggedIn = $derived(syncStore.isLoggedIn);
 	const webManifestLink = $derived(pwaInfo ? pwaInfo.webManifest.linkTag : '');
+	const backgroundVideoPaused = $derived(userPrefsStore.isBackgroundVideoPaused());
+
+	// Control video playback based on user preference
+	$effect(() => {
+		if (!videoRef) return;
+		if (backgroundVideoPaused) {
+			videoRef.pause();
+		} else {
+			videoRef.play().catch(() => {
+				// Ignore autoplay errors (e.g., user hasn't interacted yet)
+			});
+		}
+	});
 </script>
 
 <svelte:head>
@@ -37,6 +51,7 @@
 <!-- Video Background (decorative) -->
 <div class="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
 	<video
+		bind:this={videoRef}
 		autoplay
 		loop
 		muted

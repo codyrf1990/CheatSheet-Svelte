@@ -245,7 +245,7 @@
 <style>
 	:global(.header) {
 		position: relative;
-		overflow: hidden;
+		z-index: 100; /* Above content below so settings popover isn't clipped */
 	}
 
 	/* Apply grid directly to .header (SmokedGlassCard renders children directly) */
