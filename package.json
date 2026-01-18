@@ -37,6 +37,7 @@
 	},
 	"dependencies": {
 		"firebase": "^12.8.0",
+		"pdfjs-dist": "^5.4.530",
 		"zod": "^4.3.5"
 	}
 }

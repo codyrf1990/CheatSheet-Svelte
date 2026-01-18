@@ -121,6 +121,24 @@ function selectAll(packageCode: string, allBits: string[]): void {
 }
 
 /**
+ * Select multiple bits for a package (union with existing selections)
+ * Used for batch import - adds bits without removing existing ones
+ */
+function selectBits(packageCode: string, bits: string[]): number {
+	const state = getState(packageCode);
+	const beforeCount = state.selectedBits.length;
+
+	// Add bits that aren't already selected (union)
+	const newBits = bits.filter((bit) => !state.selectedBits.includes(bit));
+	if (newBits.length > 0) {
+		state.selectedBits = [...state.selectedBits, ...newBits];
+		packageStates = { ...packageStates };
+	}
+
+	return newBits.length; // Return count of newly added bits
+}
+
+/**
  * Clear all selections for a package
  */
 function clearAll(packageCode: string): void {
@@ -277,6 +295,7 @@ export const packagesStore = {
 	toggleBit,
 	toggleMasterBit,
 	selectAll,
+	selectBits,
 	clearAll,
 
 	// Custom bits

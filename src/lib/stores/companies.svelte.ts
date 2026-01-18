@@ -4,7 +4,7 @@
  * Ported from original page-system.js (~683 lines)
  */
 
-import type { Company, Page, PageState, PackageState } from '$types';
+import type { Company, Page, PageState, PackageState, LicenseInfo } from '$types';
 
 // localStorage keys (must match original for migration)
 const CURRENT_COMPANY_KEY = 'solidcam-current-company-id';
@@ -368,6 +368,52 @@ function search(query: string): Company[] {
 		}
 		return queryIndex === lowerQuery.length;
 	});
+}
+
+/**
+ * Normalize company name for matching
+ * Lowercase, trim, collapse whitespace, remove punctuation
+ */
+function normalizeCompanyName(name: string): string {
+	return name
+		.toLowerCase()
+		.trim()
+		.replace(/\s+/g, ' ')
+		.replace(/[^\w\s]/g, '');
+}
+
+/**
+ * Find a company by name (case-insensitive, normalized matching)
+ * Returns the first match or null if not found
+ */
+function findByName(name: string): Company | null {
+	const normalizedQuery = normalizeCompanyName(name);
+	if (!normalizedQuery) return null;
+
+	return (
+		companies.find((company) => normalizeCompanyName(company.name) === normalizedQuery) ?? null
+	);
+}
+
+/**
+ * Add license data to a company (append-only, never overwrites)
+ * Supports multiple licenses per company
+ */
+function setLicenseData(companyId: string, licenseData: LicenseInfo): boolean {
+	const company = companies.find((c) => c.id === companyId);
+	if (!company) return false;
+
+	// Initialize licenses array if needed
+	if (!company.licenses) {
+		company.licenses = [];
+	}
+
+	// Append new license (never overwrite existing)
+	company.licenses = [...company.licenses, licenseData];
+	company.updatedAt = Date.now();
+	companies = [...companies]; // Trigger reactivity
+	save();
+	return true;
 }
 
 // ============ Page Operations ============
@@ -735,6 +781,8 @@ export const companiesStore = {
 	duplicate,
 	switchTo,
 	search,
+	findByName,
+	setLicenseData,
 
 	// Page operations
 	createPage,

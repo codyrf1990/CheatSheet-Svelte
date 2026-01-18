@@ -1,5 +1,6 @@
 export { default as AddSkuModal } from './AddSkuModal.svelte';
 export { default as Button } from './Button.svelte';
+export { default as ImportLicenseModal } from './ImportLicenseModal.svelte';
 export { default as Checkbox } from './Checkbox.svelte';
 export { default as CompaniesModal } from './CompaniesModal.svelte';
 export { default as CurrentProductsModal } from './CurrentProductsModal.svelte';

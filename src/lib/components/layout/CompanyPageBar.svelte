@@ -3,7 +3,7 @@
 	import { panelsStore } from '$stores/panels.svelte';
 	import { syncStore } from '$stores/sync.svelte';
 	import { toastStore } from '$stores/toast.svelte';
-	import { AddSkuModal, Button, Input, Modal } from '$components/ui';
+	import { AddSkuModal, Button, Input, Modal, ImportLicenseModal } from '$components/ui';
 
 	interface Props {
 		editMode?: boolean;
@@ -27,6 +27,7 @@
 
 	// Local UI state
 	let showAddSkuModal = $state(false);
+	let showImportModal = $state(false);
 	let dropdownOpen = $state(false);
 	let dropdownPosition = $state({ top: 0, left: 0 });
 	let searchQuery = $state('');
@@ -203,6 +204,11 @@
 				toastStore.success('Company duplicated');
 			}
 		}
+		closeContextMenu();
+	}
+
+	function handleImportLicense() {
+		showImportModal = true;
 		closeContextMenu();
 	}
 
@@ -552,6 +558,7 @@
 		{#if contextMenu.type === 'company'}
 			<button type="button" role="menuitem" onclick={handleRenameCompany}>Rename</button>
 			<button type="button" role="menuitem" onclick={handleDuplicateCompany}>Duplicate</button>
+			<button type="button" role="menuitem" onclick={handleImportLicense}>Import License</button>
 			<button type="button" role="menuitem" class="danger" onclick={handleDeleteCompany}
 				>Delete</button
 			>
@@ -595,6 +602,7 @@
 </Modal>
 
 <AddSkuModal bind:open={showAddSkuModal} onclose={() => (showAddSkuModal = false)} />
+<ImportLicenseModal bind:open={showImportModal} onclose={() => (showImportModal = false)} />
 
 <style>
 	.company-page-bar {

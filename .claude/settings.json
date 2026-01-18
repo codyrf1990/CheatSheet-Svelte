@@ -1,5 +1,8 @@
 {
-	"permissions": {
-		"allow": ["Bash(git commit:*)"]
-	}
+  "permissions": {
+    "allow": [
+      "Bash(git commit:*)",
+      "Bash(vercel env:*)"
+    ]
+  }
 }
