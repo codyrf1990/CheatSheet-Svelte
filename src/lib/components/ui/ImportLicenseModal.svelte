@@ -1,19 +1,12 @@
 <script lang="ts">
-	import type { ParsedPDF, ImportResult } from '$lib/types';
-	import {
-		parsePdfs,
-		getImportPreview,
-		importParsedPdfs,
-		calculateImportSummary,
-		needsCompanyNameOverride,
-		getSuggestedCompanyName
-	} from '$lib/services/licenseImport';
+	import type { LicenseInfo, ImportResult } from '$lib/types';
+	import { parseSalesforceText } from '$lib/utils/salesforceParser';
+	import { importLicense, needsCompanyNameInput } from '$lib/services/licenseImport';
 	import { toastStore } from '$lib/stores/toast.svelte';
 	import Modal from './Modal.svelte';
 	import Button from './Button.svelte';
-	import Checkbox from './Checkbox.svelte';
 
-	type ModalState = 'select' | 'parsing' | 'preview' | 'importing' | 'results';
+	type ModalState = 'paste' | 'parsing' | 'preview' | 'importing' | 'results';
 
 	interface Props {
 		open: boolean;
@@ -23,215 +16,116 @@
 	let { open = $bindable(), onclose }: Props = $props();
 
 	// State
-	let modalState = $state<ModalState>('select');
-	let parsedPdfs = $state<ParsedPDF[]>([]);
-	let selectedPdfs = $state<Set<string>>(new Set());
-	let companyNameOverrides = $state<Map<string, string>>(new Map());
-	let importResults = $state<ImportResult[]>([]);
-	let isDragging = $state(false);
-	let fileInput: HTMLInputElement | null = $state(null);
+	let modalState = $state<ModalState>('paste');
+	let pastedText = $state('');
+	let parsedLicense = $state<LicenseInfo | null>(null);
+	let parseError = $state<string | null>(null);
+	let companyNameOverride = $state('');
+	let importResult = $state<ImportResult | null>(null);
+	let showFeatures = $state(false);
 
 	// Derived
-	let validPdfs = $derived(parsedPdfs.filter((p) => p.license && !p.parseError));
+	let canParse = $derived(pastedText.trim().length > 0);
+	let needsCompanyName = $derived(parsedLicense ? needsCompanyNameInput(parsedLicense) : false);
 	let canImport = $derived.by(() => {
-		if (selectedPdfs.size === 0) return false;
-
-		for (const fileName of selectedPdfs) {
-			const pdf = parsedPdfs.find((p) => p.fileName === fileName);
-			if (!pdf?.license) return false;
-
-			// Check if this PDF needs a company name override
-			const needsOverride = needsCompanyNameOverride(pdf);
-			if (needsOverride) {
-				const override = companyNameOverrides.get(fileName);
-				const hasValidName = override && override.trim().length > 0;
-				console.log(`[canImport] ${fileName}: needsOverride=${needsOverride}, override="${override}", valid=${hasValidName}`);
-				if (!hasValidName) return false;
-			}
-		}
+		if (!parsedLicense) return false;
+		if (needsCompanyName && !companyNameOverride.trim()) return false;
 		return true;
 	});
-	let importSummary = $derived(importResults.length > 0 ? calculateImportSummary(importResults) : null);
+	let pageName = $derived(parsedLicense?.dongleNo || 'P1');
 
 	// Reset state when modal opens
 	$effect(() => {
 		if (open) {
-			modalState = 'select';
-			parsedPdfs = [];
-			selectedPdfs = new Set();
-			companyNameOverrides = new Map();
-			importResults = [];
-			isDragging = false;
+			modalState = 'paste';
+			pastedText = '';
+			parsedLicense = null;
+			parseError = null;
+			companyNameOverride = '';
+			importResult = null;
+			showFeatures = false;
 		}
 	});
 
-	// File handling
-	async function handleFileSelect(files: FileList | File[]) {
-		const pdfFiles = Array.from(files).filter((f) => f.name.toLowerCase().endsWith('.pdf'));
-		if (pdfFiles.length === 0) {
-			toastStore.error('No PDF files selected');
-			return;
-		}
+	// Parse handler
+	function handleParse() {
+		if (!canParse) return;
 
 		modalState = 'parsing';
+		parseError = null;
 
-		try {
-			parsedPdfs = await parsePdfs(pdfFiles);
+		// Small delay to show parsing state
+		setTimeout(() => {
+			const result = parseSalesforceText(pastedText);
 
-			// Pre-select all valid PDFs
-			selectedPdfs = new Set(validPdfs.map((p) => p.fileName));
-
-			// Initialize company name overrides for Profile PDFs
-			for (const pdf of parsedPdfs) {
-				if (pdf.license && needsCompanyNameOverride(pdf)) {
-					companyNameOverrides.set(pdf.fileName, getSuggestedCompanyName(pdf));
-				}
+			if (result.parseError || !result.license) {
+				parseError = result.parseError || 'Failed to parse license data';
+				modalState = 'paste';
+				return;
 			}
-			// Force reactivity
-			companyNameOverrides = new Map(companyNameOverrides);
+
+			parsedLicense = result.license;
+
+			// Pre-fill company name if available and valid
+			if (result.license.customer && result.license.customer !== 'Unknown') {
+				companyNameOverride = result.license.customer;
+			} else {
+				companyNameOverride = '';
+			}
 
 			modalState = 'preview';
-		} catch (error) {
-			toastStore.error('Failed to parse PDFs');
-			modalState = 'select';
-		}
-	}
-
-	function handleInputChange(e: Event) {
-		const input = e.target as HTMLInputElement;
-		if (input.files?.length) {
-			handleFileSelect(input.files);
-		}
-	}
-
-	// Drag-drop handlers
-	function handleDragEnter(e: DragEvent) {
-		e.preventDefault();
-		isDragging = true;
-	}
-
-	function handleDragLeave(e: DragEvent) {
-		e.preventDefault();
-		const target = e.currentTarget as HTMLElement;
-		if (!target.contains(e.relatedTarget as Node)) {
-			isDragging = false;
-		}
-	}
-
-	function handleDragOver(e: DragEvent) {
-		e.preventDefault();
-		if (e.dataTransfer) {
-			e.dataTransfer.dropEffect = 'copy';
-		}
-	}
-
-	function handleDrop(e: DragEvent) {
-		e.preventDefault();
-		isDragging = false;
-		const files = e.dataTransfer?.files;
-		if (files?.length) {
-			handleFileSelect(files);
-		}
-	}
-
-	// Selection handlers
-	function handleToggleSelection(fileName: string) {
-		if (selectedPdfs.has(fileName)) {
-			selectedPdfs.delete(fileName);
-		} else {
-			selectedPdfs.add(fileName);
-		}
-		selectedPdfs = new Set(selectedPdfs);
-	}
-
-	function handleSelectAll() {
-		selectedPdfs = new Set(validPdfs.map((p) => p.fileName));
-	}
-
-	function handleDeselectAll() {
-		selectedPdfs = new Set();
-	}
-
-	// Company name override handler
-	function handleCompanyNameChange(fileName: string, newName: string) {
-		companyNameOverrides.set(fileName, newName);
-		companyNameOverrides = new Map(companyNameOverrides);
+		}, 100);
 	}
 
 	// Import handler
-	async function handleImport() {
-		const toImport = parsedPdfs.filter((p) => selectedPdfs.has(p.fileName));
-		if (toImport.length === 0) return;
+	function handleImport() {
+		if (!parsedLicense || !canImport) return;
 
 		modalState = 'importing';
 
-		try {
-			importResults = importParsedPdfs(toImport, companyNameOverrides);
-			modalState = 'results';
+		// Small delay to show importing state
+		setTimeout(() => {
+			try {
+				const companyName = needsCompanyName ? companyNameOverride : parsedLicense!.customer;
+				importResult = importLicense(parsedLicense!, companyName);
 
-			const summary = calculateImportSummary(importResults);
-			if (summary.successCount > 0) {
-				toastStore.success(`Imported ${summary.successCount} license(s)`);
+				modalState = 'results';
+
+				if (importResult.success) {
+					toastStore.success(`License imported for ${importResult.companyName}`);
+				} else {
+					toastStore.error(importResult.errors?.[0] || 'Import failed');
+				}
+			} catch (error) {
+				toastStore.error('Import failed');
+				modalState = 'preview';
 			}
-			if (summary.failureCount > 0) {
-				toastStore.error(`${summary.failureCount} import(s) failed`);
-			}
-		} catch (error) {
-			toastStore.error('Import failed');
-			modalState = 'preview';
-		}
+		}, 100);
 	}
 
 	// Navigation handlers
 	function handleBack() {
-		parsedPdfs = [];
-		selectedPdfs = new Set();
-		companyNameOverrides = new Map();
-		modalState = 'select';
+		parsedLicense = null;
+		parseError = null;
+		companyNameOverride = '';
+		modalState = 'paste';
 	}
 
 	function handleClose() {
 		onclose();
 	}
-
-	// Helpers
-	function truncateFilename(name: string, maxLen = 25): string {
-		if (name.length <= maxLen) return name;
-		const ext = name.slice(name.lastIndexOf('.'));
-		const base = name.slice(0, name.lastIndexOf('.'));
-		const availLen = maxLen - ext.length - 3;
-		return base.slice(0, availLen) + '...' + ext;
-	}
-
-	function getStatusInfo(pdf: ParsedPDF): { text: string; class: string } {
-		if (pdf.parseError) {
-			return { text: 'Error', class: 'status-error' };
-		}
-		if (!pdf.license) {
-			return { text: 'No Data', class: 'status-error' };
-		}
-		if (needsCompanyNameOverride(pdf)) {
-			const override = companyNameOverrides.get(pdf.fileName);
-			if (!override?.trim()) {
-				return { text: 'Name Required', class: 'status-warning' };
-			}
-		}
-		return { text: 'Ready', class: 'status-ready' };
-	}
 </script>
 
 {#snippet footer()}
 	<div class="modal-footer-actions">
-		{#if modalState === 'select'}
+		{#if modalState === 'paste'}
 			<Button variant="ghost" size="sm" onclick={handleClose}>Cancel</Button>
-			<Button variant="gold" size="sm" onclick={() => fileInput?.click()}>Choose Files</Button>
+			<Button variant="gold" size="sm" onclick={handleParse} disabled={!canParse}>Parse</Button>
 		{:else if modalState === 'parsing'}
 			<Button variant="ghost" size="sm" disabled>Parsing...</Button>
 		{:else if modalState === 'preview'}
 			<Button variant="ghost" size="sm" onclick={handleBack}>Back</Button>
-			<Button variant="gold" size="sm" onclick={handleImport} disabled={!canImport}>
-				Import Selected ({selectedPdfs.size})
-			</Button>
+			<Button variant="gold" size="sm" onclick={handleImport} disabled={!canImport}>Import</Button>
 		{:else if modalState === 'importing'}
 			<Button variant="ghost" size="sm" disabled>Importing...</Button>
 		{:else if modalState === 'results'}
@@ -241,129 +135,106 @@
 {/snippet}
 
 <Modal {open} {onclose} title="Import License" size="wide" {footer}>
-	{#if modalState === 'select'}
-		<!-- File picker with drag-drop -->
-		<div
-			class="drop-zone"
-			class:dragging={isDragging}
-			ondragenter={handleDragEnter}
-			ondragleave={handleDragLeave}
-			ondragover={handleDragOver}
-			ondrop={handleDrop}
-			role="button"
-			tabindex="0"
-			onclick={() => fileInput?.click()}
-			onkeydown={(e) => e.key === 'Enter' && fileInput?.click()}
-		>
-			<input
-				bind:this={fileInput}
-				type="file"
-				accept=".pdf"
-				multiple
-				class="file-input"
-				onchange={handleInputChange}
-			/>
-			<div class="drop-zone-content">
-				<svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-					<path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-				</svg>
-				<p class="drop-text">Drag and drop PDF files here</p>
-				<p class="drop-hint">or click to browse</p>
-			</div>
+	{#if modalState === 'paste'}
+		<!-- Textarea for pasting Salesforce text -->
+		<div class="paste-section">
+			<p class="paste-instructions">
+				Open the dongle record in Salesforce, press <kbd>Ctrl+A</kbd> to select all, then <kbd>Ctrl+C</kbd> to copy. Paste below.
+			</p>
+			<textarea
+				class="paste-textarea"
+				class:has-error={!!parseError}
+				bind:value={pastedText}
+				placeholder="Paste Salesforce dongle page text here...
+
+Example:
+Dongle No.    77518
+Customer      Apollo Design Technology, Inc.
+Modeler       Checked    C-axes (Wrap)    Checked
+HSM           Checked    5-axes indexial  Not Checked"
+				rows="12"
+			></textarea>
+			{#if parseError}
+				<p class="error-message">{parseError}</p>
+			{/if}
 		</div>
 
 	{:else if modalState === 'parsing'}
 		<!-- Parsing indicator -->
 		<div class="loading-state">
 			<div class="spinner"></div>
-			<p>Parsing {parsedPdfs.length > 0 ? parsedPdfs.length : ''} PDF files...</p>
+			<p>Parsing license data...</p>
 		</div>
 
 	{:else if modalState === 'preview'}
-		<!-- Preview table -->
-		<div class="preview-wrapper">
-			{#if validPdfs.length === 0}
-				<div class="empty-state">
-					<p>No valid PDFs found. Please check the files and try again.</p>
+		<!-- Preview of parsed data -->
+		<div class="preview-section">
+			{#if parsedLicense}
+				<div class="summary-card">
+					<div class="summary-row">
+						<span class="summary-label">Customer:</span>
+						{#if needsCompanyName}
+							<input
+								type="text"
+								class="company-input"
+								class:required-empty={!companyNameOverride.trim()}
+								bind:value={companyNameOverride}
+								placeholder="Enter company name"
+							/>
+						{:else}
+							<span class="summary-value">{parsedLicense.customer}</span>
+						{/if}
+					</div>
+					<div class="summary-row">
+						<span class="summary-label">Dongle No:</span>
+						<span class="summary-value">{parsedLicense.dongleNo || '-'}</span>
+					</div>
+					<div class="summary-row">
+						<span class="summary-label">Type:</span>
+						<span class="summary-value">
+							{parsedLicense.displayType}
+							{#if parsedLicense.isNetworkLicense}
+								<span class="net-badge">Network</span>
+							{/if}
+						</span>
+					</div>
+					<div class="summary-row">
+						<span class="summary-label">Maintenance:</span>
+						<span class="summary-value">
+							{#if parsedLicense.maintenanceStart && parsedLicense.maintenanceEnd}
+								{parsedLicense.maintenanceStart} - {parsedLicense.maintenanceEnd}
+							{:else}
+								-
+							{/if}
+						</span>
+					</div>
+					<div class="summary-row">
+						<span class="summary-label">SolidCAM Version:</span>
+						<span class="summary-value">{parsedLicense.solidcamVersion || '-'}</span>
+					</div>
 				</div>
-			{:else}
-				<table class="preview-table" role="grid" aria-label="PDF import preview">
-					<thead>
-						<tr>
-							<th scope="col" class="col-select">
-								<Checkbox
-									checked={selectedPdfs.size === validPdfs.length && validPdfs.length > 0}
-									indeterminate={selectedPdfs.size > 0 && selectedPdfs.size < validPdfs.length}
-									onchange={() => (selectedPdfs.size === validPdfs.length ? handleDeselectAll() : handleSelectAll())}
-									aria-label="Select all"
-								/>
-							</th>
-							<th scope="col" class="col-filename">Filename</th>
-							<th scope="col" class="col-company">Company</th>
-							<th scope="col" class="col-dongle">Dongle/Key</th>
-							<th scope="col" class="col-type">Type</th>
-							<th scope="col" class="col-features">Features</th>
-							<th scope="col" class="col-status">Status</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each parsedPdfs as pdf (pdf.fileName)}
-							{@const isValid = pdf.license && !pdf.parseError}
-							{@const status = getStatusInfo(pdf)}
-							{@const preview = isValid ? getImportPreview(pdf) : null}
-							<tr class:error={!isValid}>
-								<td class="col-select">
-									<Checkbox
-										checked={selectedPdfs.has(pdf.fileName)}
-										disabled={!isValid}
-										onchange={() => handleToggleSelection(pdf.fileName)}
-										aria-label="Select {pdf.fileName}"
-									/>
-								</td>
-								<td class="col-filename" title={pdf.fileName}>
-									{truncateFilename(pdf.fileName)}
-								</td>
-								<td class="col-company">
-									{#if pdf.license && needsCompanyNameOverride(pdf)}
-										{@const nameValue = companyNameOverrides.get(pdf.fileName) || ''}
-										<input
-											type="text"
-											class="company-input"
-											class:required-empty={!nameValue.trim()}
-											value={nameValue}
-											oninput={(e) => handleCompanyNameChange(pdf.fileName, e.currentTarget.value)}
-											placeholder="Enter company name"
-											required
-											aria-label="Company name for {pdf.fileName}"
-										/>
-									{:else}
-										{pdf.license?.customer || '-'}
-									{/if}
-								</td>
-								<td class="col-dongle">
-									{pdf.license?.dongleNo || pdf.license?.productKey?.slice(0, 8) || '-'}
-								</td>
-								<td class="col-type">
-									{#if pdf.license}
-										<span class="type-badge">{pdf.license.displayType}</span>
-									{:else}
-										-
-									{/if}
-								</td>
-								<td class="col-features">
-									{#if preview}
-										{preview.mappableFeatures} / {preview.totalFeatures}
-									{:else}
-										-
-									{/if}
-								</td>
-								<td class="col-status">
-									<span class="status {status.class}" title={pdf.parseError || ''}>{status.text}</span>
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
+
+				<div class="features-section">
+					<button
+						class="features-toggle"
+						onclick={() => (showFeatures = !showFeatures)}
+						type="button"
+					>
+						<span class="features-count">{parsedLicense.features.length} features found</span>
+						<span class="toggle-icon">{showFeatures ? '▼' : '▶'}</span>
+					</button>
+					{#if showFeatures}
+						<ul class="features-list">
+							{#each parsedLicense.features as feature}
+								<li>{feature}</li>
+							{/each}
+						</ul>
+					{/if}
+				</div>
+
+				<div class="page-info">
+					<p>Will create/update page: <strong>{pageName}</strong></p>
+				</div>
 			{/if}
 		</div>
 
@@ -371,50 +242,55 @@
 		<!-- Importing indicator -->
 		<div class="loading-state">
 			<div class="spinner"></div>
-			<p>Importing licenses...</p>
+			<p>Importing license...</p>
 		</div>
 
 	{:else if modalState === 'results'}
-		<!-- Results summary -->
-		<div class="results-wrapper">
-			{#if importSummary}
-				<div class="summary-grid">
-					<div class="summary-card">
-						<span class="summary-value success">{importSummary.successCount}</span>
-						<span class="summary-label">Succeeded</span>
+		<!-- Import results -->
+		<div class="results-section">
+			{#if importResult}
+				<div class="result-card" class:success={importResult.success} class:error={!importResult.success}>
+					<div class="result-icon">
+						{#if importResult.success}
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+								<polyline points="22,4 12,14.01 9,11.01" />
+							</svg>
+						{:else}
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<circle cx="12" cy="12" r="10" />
+								<line x1="15" y1="9" x2="9" y2="15" />
+								<line x1="9" y1="9" x2="15" y2="15" />
+							</svg>
+						{/if}
 					</div>
-					<div class="summary-card">
-						<span class="summary-value error">{importSummary.failureCount}</span>
-						<span class="summary-label">Failed</span>
-					</div>
-					<div class="summary-card">
-						<span class="summary-value">{importSummary.newCompanies}</span>
-						<span class="summary-label">New Companies</span>
-					</div>
-					<div class="summary-card">
-						<span class="summary-value">{importSummary.updatedCompanies}</span>
-						<span class="summary-label">Updated</span>
-					</div>
+					<h3>{importResult.success ? 'Import Successful' : 'Import Failed'}</h3>
+					<p class="result-company">{importResult.companyName}</p>
 				</div>
 
-				<div class="details-section">
-					<h4>Details</h4>
-					<ul class="details-list">
-						<li>Features imported: {importSummary.totalFeaturesImported}</li>
-						<li>Features skipped: {importSummary.totalFeaturesSkipped}</li>
-						<li>SKUs added: {importSummary.totalSkusImported}</li>
-					</ul>
-				</div>
+				{#if importResult.success}
+					<div class="stats-grid">
+						<div class="stat-card">
+							<span class="stat-value">{importResult.featuresImported}</span>
+							<span class="stat-label">Bits Selected</span>
+						</div>
+						<div class="stat-card">
+							<span class="stat-value">{importResult.skusImported}</span>
+							<span class="stat-label">SKUs Added</span>
+						</div>
+						<div class="stat-card">
+							<span class="stat-value">{importResult.isNewCompany ? 'New' : 'Updated'}</span>
+							<span class="stat-label">Company</span>
+						</div>
+					</div>
+				{/if}
 
-				{#if importResults.some((r) => r.errors?.length)}
+				{#if importResult.errors?.length}
 					<div class="errors-section">
 						<h4>Errors</h4>
 						<ul class="errors-list">
-							{#each importResults.filter((r) => r.errors?.length) as result}
-								<li>
-									<strong>{result.companyName}:</strong>
-									{result.errors?.join(', ')}
-								</li>
+							{#each importResult.errors as error}
+								<li>{error}</li>
 							{/each}
 						</ul>
 					</div>
@@ -431,67 +307,60 @@
 		justify-content: flex-end;
 	}
 
-	/* Drop zone */
-	.drop-zone {
+	/* Paste section */
+	.paste-section {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		min-height: 200px;
-		padding: var(--space-8);
-		border: 2px dashed rgba(255, 255, 255, 0.2);
-		border-radius: 12px;
-		background: rgba(0, 0, 0, 0.2);
-		cursor: pointer;
-		transition: all 200ms ease;
+		gap: var(--space-3);
 	}
 
-	.drop-zone:hover,
-	.drop-zone.dragging {
+	.paste-instructions {
+		margin: 0;
+		font-size: var(--text-sm);
+		color: rgba(255, 255, 255, 0.7);
+	}
+
+	.paste-instructions kbd {
+		display: inline-block;
+		padding: 2px 6px;
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		border-radius: 4px;
+		font-family: monospace;
+		font-size: 0.85em;
+	}
+
+	.paste-textarea {
+		width: 100%;
+		min-height: 250px;
+		padding: var(--space-3);
+		background: rgba(0, 0, 0, 0.3);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		border-radius: 8px;
+		color: rgba(255, 255, 255, 0.9);
+		font-family: monospace;
+		font-size: var(--text-sm);
+		line-height: 1.5;
+		resize: vertical;
+	}
+
+	.paste-textarea:focus {
+		outline: none;
 		border-color: var(--color-solidcam-gold);
-		background: rgba(212, 175, 55, 0.05);
 	}
 
-	.drop-zone:focus-visible {
-		outline: 2px solid var(--color-solidcam-gold);
-		outline-offset: 2px;
-	}
-
-	.file-input {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		border: 0;
-	}
-
-	.drop-zone-content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: var(--space-2);
-		pointer-events: none;
-	}
-
-	.drop-icon {
-		width: 48px;
-		height: 48px;
+	.paste-textarea::placeholder {
 		color: rgba(255, 255, 255, 0.4);
 	}
 
-	.drop-text {
-		font-size: var(--text-base);
-		color: rgba(255, 255, 255, 0.8);
-		margin: 0;
+	.paste-textarea.has-error {
+		border-color: #ef4444;
 	}
 
-	.drop-hint {
-		font-size: var(--text-sm);
-		color: rgba(255, 255, 255, 0.5);
+	.error-message {
 		margin: 0;
+		color: #f87171;
+		font-size: var(--text-sm);
 	}
 
 	/* Loading state */
@@ -519,59 +388,42 @@
 		}
 	}
 
-	/* Preview table */
-	.preview-wrapper {
-		max-height: 400px;
-		overflow-y: auto;
+	/* Preview section */
+	.preview-section {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
 	}
 
-	.preview-table {
-		width: 100%;
-		border-collapse: collapse;
-		font-size: var(--text-sm);
-	}
-
-	.preview-table th,
-	.preview-table td {
-		padding: var(--space-2) var(--space-3);
-		text-align: left;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-	}
-
-	.preview-table th {
-		font-weight: 600;
-		color: rgba(255, 255, 255, 0.7);
+	.summary-card {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+		padding: var(--space-4);
 		background: rgba(0, 0, 0, 0.3);
-		position: sticky;
-		top: 0;
-		z-index: 1;
+		border-radius: 8px;
+		border: 1px solid rgba(255, 255, 255, 0.06);
 	}
 
-	.preview-table tbody tr:hover {
-		background: rgba(255, 255, 255, 0.02);
+	.summary-row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
 	}
 
-	.preview-table tr.error {
-		opacity: 0.6;
+	.summary-label {
+		min-width: 120px;
+		font-size: var(--text-sm);
+		color: rgba(255, 255, 255, 0.6);
 	}
 
-	.col-select {
-		width: 40px;
-	}
-
-	.col-filename {
-		max-width: 150px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.col-company {
-		min-width: 150px;
+	.summary-value {
+		font-size: var(--text-sm);
+		color: rgba(255, 255, 255, 0.9);
 	}
 
 	.company-input {
-		width: 100%;
+		flex: 1;
 		padding: var(--space-1) var(--space-2);
 		background: rgba(0, 0, 0, 0.3);
 		border: 1px solid rgba(255, 255, 255, 0.2);
@@ -594,17 +446,9 @@
 		background: rgba(239, 68, 68, 0.1);
 	}
 
-	.type-badge {
-		display: inline-block;
-		padding: 2px 6px;
-		background: rgba(255, 255, 255, 0.1);
-		border-radius: 4px;
-		font-size: 0.75rem;
-	}
-
 	.net-badge {
 		display: inline-block;
-		margin-left: 4px;
+		margin-left: 8px;
 		padding: 2px 6px;
 		background: rgba(59, 130, 246, 0.2);
 		color: #60a5fa;
@@ -612,51 +456,126 @@
 		font-size: 0.75rem;
 	}
 
-	.status {
-		display: inline-block;
-		padding: 2px 8px;
-		border-radius: 4px;
-		font-size: 0.75rem;
+	/* Features section */
+	.features-section {
+		padding: var(--space-3);
+		background: rgba(0, 0, 0, 0.2);
+		border-radius: 8px;
+	}
+
+	.features-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		padding: 0;
+		background: none;
+		border: none;
+		color: rgba(255, 255, 255, 0.8);
+		font-size: var(--text-sm);
+		cursor: pointer;
+	}
+
+	.features-toggle:hover {
+		color: rgba(255, 255, 255, 1);
+	}
+
+	.features-count {
 		font-weight: 500;
 	}
 
-	.status-ready {
-		background: rgba(34, 197, 94, 0.2);
-		color: #4ade80;
+	.toggle-icon {
+		font-size: 0.75rem;
 	}
 
-	.status-warning {
-		background: rgba(234, 179, 8, 0.2);
-		color: #facc15;
+	.features-list {
+		margin: var(--space-3) 0 0;
+		padding-left: var(--space-4);
+		color: rgba(255, 255, 255, 0.7);
+		font-size: var(--text-sm);
+		max-height: 200px;
+		overflow-y: auto;
 	}
 
-	.status-error {
-		background: rgba(239, 68, 68, 0.2);
-		color: #f87171;
+	.features-list li {
+		margin-bottom: var(--space-1);
 	}
 
-	.empty-state {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 150px;
-		color: rgba(255, 255, 255, 0.6);
+	.page-info {
+		padding: var(--space-3);
+		background: rgba(212, 175, 55, 0.1);
+		border: 1px solid rgba(212, 175, 55, 0.2);
+		border-radius: 8px;
+		color: rgba(255, 255, 255, 0.8);
+		font-size: var(--text-sm);
 	}
 
-	/* Results */
-	.results-wrapper {
+	.page-info p {
+		margin: 0;
+	}
+
+	.page-info strong {
+		color: var(--color-solidcam-gold);
+	}
+
+	/* Results section */
+	.results-section {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-6);
-	}
-
-	.summary-grid {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
 		gap: var(--space-4);
 	}
 
-	.summary-card {
+	.result-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--space-3);
+		padding: var(--space-6);
+		border-radius: 12px;
+	}
+
+	.result-card.success {
+		background: rgba(34, 197, 94, 0.1);
+		border: 1px solid rgba(34, 197, 94, 0.2);
+	}
+
+	.result-card.error {
+		background: rgba(239, 68, 68, 0.1);
+		border: 1px solid rgba(239, 68, 68, 0.2);
+	}
+
+	.result-icon {
+		width: 48px;
+		height: 48px;
+	}
+
+	.result-card.success .result-icon {
+		color: #4ade80;
+	}
+
+	.result-card.error .result-icon {
+		color: #f87171;
+	}
+
+	.result-card h3 {
+		margin: 0;
+		font-size: var(--text-lg);
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	.result-company {
+		margin: 0;
+		color: rgba(255, 255, 255, 0.7);
+		font-size: var(--text-sm);
+	}
+
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: var(--space-4);
+	}
+
+	.stat-card {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -666,79 +585,59 @@
 		border: 1px solid rgba(255, 255, 255, 0.06);
 	}
 
-	.summary-value {
-		font-size: 2rem;
+	.stat-value {
+		font-size: 1.5rem;
 		font-weight: 700;
 		color: rgba(255, 255, 255, 0.9);
 	}
 
-	.summary-value.success {
-		color: #4ade80;
-	}
-
-	.summary-value.error {
-		color: #f87171;
-	}
-
-	.summary-label {
+	.stat-label {
 		font-size: var(--text-sm);
 		color: rgba(255, 255, 255, 0.6);
 		margin-top: var(--space-1);
 	}
 
-	.details-section,
 	.errors-section {
 		padding: var(--space-4);
-		background: rgba(0, 0, 0, 0.2);
+		background: rgba(239, 68, 68, 0.1);
+		border: 1px solid rgba(239, 68, 68, 0.2);
 		border-radius: 8px;
 	}
 
-	.details-section h4,
 	.errors-section h4 {
 		margin: 0 0 var(--space-3) 0;
 		font-size: var(--text-base);
 		font-weight: 600;
-		color: rgba(255, 255, 255, 0.8);
+		color: #f87171;
 	}
 
-	.details-list,
 	.errors-list {
 		margin: 0;
 		padding-left: var(--space-4);
-		color: rgba(255, 255, 255, 0.7);
+		color: #f87171;
 		font-size: var(--text-sm);
 	}
 
-	.details-list li,
 	.errors-list li {
 		margin-bottom: var(--space-1);
 	}
 
-	.errors-section {
-		background: rgba(239, 68, 68, 0.1);
-		border: 1px solid rgba(239, 68, 68, 0.2);
-	}
-
-	.errors-list {
-		color: #f87171;
-	}
-
 	/* Scrollbar styling */
-	.preview-wrapper::-webkit-scrollbar {
-		width: 8px;
+	.features-list::-webkit-scrollbar {
+		width: 6px;
 	}
 
-	.preview-wrapper::-webkit-scrollbar-track {
+	.features-list::-webkit-scrollbar-track {
 		background: rgba(0, 0, 0, 0.2);
-		border-radius: 4px;
+		border-radius: 3px;
 	}
 
-	.preview-wrapper::-webkit-scrollbar-thumb {
+	.features-list::-webkit-scrollbar-thumb {
 		background: rgba(212, 175, 55, 0.3);
-		border-radius: 4px;
+		border-radius: 3px;
 	}
 
-	.preview-wrapper::-webkit-scrollbar-thumb:hover {
+	.features-list::-webkit-scrollbar-thumb:hover {
 		background: rgba(212, 175, 55, 0.5);
 	}
 </style>

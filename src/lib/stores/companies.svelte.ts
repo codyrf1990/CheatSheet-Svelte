@@ -307,6 +307,22 @@ function remove(id: string): string | null {
 	return currentCompanyId;
 }
 
+/**
+ * Delete all companies and create a fresh default one
+ * DEV ONLY - for testing purposes
+ */
+function deleteAll(): void {
+	companies = [];
+	favoriteIds = [];
+	recentIds = [];
+	currentCompanyId = null;
+
+	// Create a fresh default company
+	const newCompany = create(DEFAULT_COMPANY_NAME);
+	currentCompanyId = newCompany.id;
+	save();
+}
+
 function duplicate(id: string): Company | null {
 	const source = companies.find((c) => c.id === id);
 	if (!source) return null;
@@ -778,6 +794,7 @@ export const companiesStore = {
 	create,
 	rename,
 	delete: remove,
+	deleteAll,
 	duplicate,
 	switchTo,
 	search,

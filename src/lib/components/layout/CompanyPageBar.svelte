@@ -212,6 +212,13 @@
 		closeContextMenu();
 	}
 
+	function handleClearAllCompanies() {
+		if (confirm('DEV: Delete ALL companies? This cannot be undone.')) {
+			companiesStore.deleteAll();
+		}
+		closeContextMenu();
+	}
+
 	function handleDeleteCompany() {
 		if (!currentCompany) return;
 		if (allCompanies.length <= 1) {
@@ -562,6 +569,12 @@
 			<button type="button" role="menuitem" class="danger" onclick={handleDeleteCompany}
 				>Delete</button
 			>
+			{#if import.meta.env.DEV}
+				<hr class="menu-divider" />
+				<button type="button" role="menuitem" class="danger" onclick={handleClearAllCompanies}
+					>DEV: Clear All</button
+				>
+			{/if}
 		{:else}
 			<button type="button" role="menuitem" onclick={handleRenamePage}>Rename</button>
 			<button type="button" role="menuitem" onclick={handleCopyPage}>Copy</button>
@@ -1032,6 +1045,12 @@
 	.context-menu button.danger:hover {
 		background: rgba(239, 68, 68, 0.15);
 		color: #ef4444;
+	}
+
+	.context-menu .menu-divider {
+		margin: 0.25rem 0;
+		border: none;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
 	}
 
 	.dialog-form {

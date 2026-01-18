@@ -60,6 +60,7 @@
 
 	// Save changes back - debounced to batch rapid changes
 	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+	let pendingSavePageId: string | null = null;
 
 	$effect(() => {
 		// These reads ARE tracked - effect runs when packages/panels change
@@ -67,14 +68,29 @@
 		void packagesStore.all;
 		void panelsStore.all;
 
+		// Capture the page ID NOW, not when timeout fires (prevents race condition)
+		const currentPage = companiesStore.currentPage;
+		if (!currentPage) return;
+
 		// Clear any pending save
 		if (saveTimeout) clearTimeout(saveTimeout);
+
+		// Track which page this save is for
+		pendingSavePageId = currentPage.id;
 
 		// Debounce: wait 150ms after last change before saving
 		saveTimeout = setTimeout(() => {
 			untrack(() => {
-				const currentPage = companiesStore.currentPage;
-				if (!currentPage) return;
+				// Use the captured page ID, not current (may have switched)
+				if (!pendingSavePageId) return;
+
+				// Only save if we're still on the same page
+				const nowCurrentPage = companiesStore.currentPage;
+				if (!nowCurrentPage || nowCurrentPage.id !== pendingSavePageId) {
+					// Page changed - don't save stale state to new page
+					pendingSavePageId = null;
+					return;
+				}
 
 				const newState: PageState = {
 					packages: packagesStore.getPageState(),
@@ -83,8 +99,9 @@
 
 				const previousState = companiesStore.currentPageState;
 				if (JSON.stringify(previousState) !== JSON.stringify(newState)) {
-					companiesStore.savePageState(currentPage.id, newState);
+					companiesStore.savePageState(pendingSavePageId, newState);
 				}
+				pendingSavePageId = null;
 			});
 		}, 150);
 
