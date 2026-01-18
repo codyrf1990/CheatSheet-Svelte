@@ -58,16 +58,22 @@ function extractChecked(text: string, fieldName: string): boolean {
 }
 
 /**
- * Validate that text appears to be from a Salesforce dongle page
+ * Validate that text appears to be from a Salesforce dongle or profile page
  */
 export function validateSalesforceText(text: string): ValidationResult {
 	if (!text || text.trim().length === 0) {
 		return { valid: false, error: 'No text provided' };
 	}
 
-	// Must contain Dongle No. field
-	if (!text.includes('Dongle No.')) {
-		return { valid: false, error: 'Not a valid Salesforce dongle page - missing Dongle No.' };
+	// Must contain Dongle No. field OR Profile Name/No. (for profile-only pages)
+	const hasDongleNo = text.includes('Dongle No.');
+	const hasProfileInfo = text.includes('Profile Name') || text.includes('Profile No.');
+
+	if (!hasDongleNo && !hasProfileInfo) {
+		return {
+			valid: false,
+			error: 'Not a valid Salesforce page - missing Dongle No. or Profile info'
+		};
 	}
 
 	// Must have SolidCAM section or feature names
@@ -113,8 +119,29 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 	const solidcamVersion = extractField(text, 'SolidCAM Version');
 
 	// Extract profile info (for Profile pages)
-	const profileNo = extractField(text, 'Profile No\\.');
-	const profileName = extractField(text, 'Profile Name');
+	let profileNo = extractField(text, 'Profile No\\.');
+	let profileName = extractField(text, 'Profile Name');
+
+	// If no explicit Profile Name field, look for "Profile-XXXX" pattern at start of text
+	// This handles cases where Information section is collapsed
+	if (!profileName) {
+		const profileMatch = text.match(/Profile-(\d+)/);
+		if (profileMatch) {
+			profileName = profileMatch[0]; // e.g., "Profile-5801"
+			if (!profileNo) {
+				profileNo = profileMatch[1]; // e.g., "5801"
+			}
+		}
+	}
+
+	// If we have Profile Name like "Profile-5801" but no profileNo, extract it
+	if (profileName && !profileNo) {
+		const numMatch = profileName.match(/Profile-(\d+)/i);
+		if (numMatch) {
+			profileNo = numMatch[1];
+		}
+	}
+
 	const isProfile = !!(profileNo || profileName);
 
 	// Determine if this is a network license
