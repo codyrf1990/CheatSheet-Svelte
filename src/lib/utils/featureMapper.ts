@@ -74,8 +74,10 @@ export const FEATURE_MAP: Record<string, FeatureMapping> = {
 	// SC-Mill-5Axis - Loose
 	'Simultanous 4x': { bit: 'Sim4x', package: 'SC-Mill-5Axis' },
 	'Simultaneous 4x': { bit: 'Sim4x', package: 'SC-Mill-5Axis' },
-	'Simultaneous 4-axes(C axes)': { bit: 'Sim4x', package: 'SC-Mill-5Axis' },
 	Sim4x: { bit: 'Sim4x', package: 'SC-Mill-5Axis' },
+
+	// Profile dataset variant - "Simultaneous 4-axes(C axes)" is C-axes (Wrap), not Sim4x
+	'Simultaneous 4-axes(C axes)': { bit: 'C-axes (Wrap)', package: 'SC-Mill' },
 	'Multi-Axis Roughing': { bit: 'Multiaxis Roughing', package: 'SC-Mill-5Axis' },
 	'Multiaxis Roughing': { bit: 'Multiaxis Roughing', package: 'SC-Mill-5Axis' }
 };

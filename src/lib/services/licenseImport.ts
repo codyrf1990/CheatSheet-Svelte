@@ -167,6 +167,49 @@ export function importLicense(
 	const bitsByPackage = groupByPackage(mappingResult.mappedFeatures);
 	const uniqueSkus = getUniqueSkus(mappingResult.mappedSkus);
 
+	// 6a. Profile dataset special handling
+	if (license.isProfile) {
+		// Profile datasets don't include Modeler/Machinist but they should always be selected
+		if (!bitsByPackage['SC-Mill']) {
+			bitsByPackage['SC-Mill'] = [];
+		}
+		if (!bitsByPackage['SC-Mill'].includes('Modeler')) {
+			bitsByPackage['SC-Mill'].push('Modeler');
+		}
+		if (!bitsByPackage['SC-Mill'].includes('Machinist')) {
+			bitsByPackage['SC-Mill'].push('Machinist');
+		}
+
+		// Profile Sim 5x Level logic:
+		// Sim 5x checked + Sim 5x Level blank + HSS = "everything" (all SIM5X group bits)
+		const hasSim5x = license.features.some(
+			(f) => f === 'Sim 5x' || f === 'Sim5x' || f === 'Simultaneous 5x' || f === 'Simultanous 5x'
+		);
+		const hasHSS = license.features.includes('HSS');
+		// Sim 5x Level blank means no specific level feature was checked
+		const hasSimLevel = license.features.some((f) => f.includes('Sim 5x Level') || f.includes('Sim5xLevel'));
+
+		if (hasSim5x && hasHSS && !hasSimLevel) {
+			// Add all SIM5X group bits
+			if (!bitsByPackage['SC-Mill-5Axis']) {
+				bitsByPackage['SC-Mill-5Axis'] = [];
+			}
+			const sim5xBits = [
+				'Sim5x',
+				'Swarf machining',
+				'5x Drill',
+				'Contour 5x',
+				'Convert5X',
+				'Auto 3+2 Roughing'
+			];
+			for (const bit of sim5xBits) {
+				if (!bitsByPackage['SC-Mill-5Axis'].includes(bit)) {
+					bitsByPackage['SC-Mill-5Axis'].push(bit);
+				}
+			}
+		}
+	}
+
 	// 7. Select bits in each package (union with existing)
 	let totalBitsImported = 0;
 	for (const [packageCode, bits] of Object.entries(bitsByPackage)) {
