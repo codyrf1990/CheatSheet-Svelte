@@ -1,9 +1,11 @@
 /**
  * Packages Store (Svelte 5 Runes)
  * Manages package bit selection state for the current page.
+ * Note: Bit ordering is stored globally in userPrefsStore.
  */
 
 import type { PackageState, PageState } from '$types';
+import { userPrefsStore } from './userPrefs.svelte';
 
 // Reactive state
 let packageStates = $state<Record<string, PackageState>>({});
@@ -151,46 +153,43 @@ function removeCustomBit(packageCode: string, bit: string): void {
 
 /**
  * Set order for bits (for drag-drop reordering)
+ * Saves to global userPrefsStore for persistence across all companies
  */
 function setOrder(packageCode: string, order: string[]): void {
-	const state = getState(packageCode);
-	state.order = [...order];
-	packageStates = { ...packageStates };
+	userPrefsStore.setPackageBitOrder(packageCode, order);
 }
 
 /**
  * Set order for loose bits (for drag-drop reordering)
+ * Saves to global userPrefsStore for persistence across all companies
  */
 function setLooseBitsOrder(packageCode: string, order: string[]): void {
-	const state = getState(packageCode);
-	state.looseBitsOrder = [...order];
-	packageStates = { ...packageStates };
+	userPrefsStore.setPackageLooseBitOrder(packageCode, order);
 }
 
 /**
  * Move a bit to a different group (or 'loose' for loose bits)
+ * Saves to global userPrefsStore for persistence across all companies
  * @param packageCode - The package code
  * @param bit - The bit to move
  * @param targetGroup - The target group masterId (or 'loose' for loose bits)
  */
 function moveBitToGroup(packageCode: string, bit: string, targetGroup: string): void {
-	const state = getState(packageCode);
-	if (!state.groupMembership) {
-		state.groupMembership = {};
-	}
-	state.groupMembership[bit] = targetGroup;
-	packageStates = { ...packageStates };
+	const membership = { ...userPrefsStore.getPackageGroupMembership(packageCode) };
+	membership[bit] = targetGroup;
+	userPrefsStore.setPackageGroupMembership(packageCode, membership);
 }
 
 /**
  * Get the group a bit belongs to (with overrides applied)
+ * Reads from global userPrefsStore
  * @param packageCode - The package code
  * @param bit - The bit name
  * @param defaultGroup - The default group from static data
  */
 function getBitGroup(packageCode: string, bit: string, defaultGroup: string): string {
-	const state = packageStates[packageCode];
-	return state?.groupMembership?.[bit] ?? defaultGroup;
+	const membership = userPrefsStore.getPackageGroupMembership(packageCode);
+	return membership[bit] ?? defaultGroup;
 }
 
 /**
@@ -207,9 +206,20 @@ function loadFromPageState(pageState: PageState): void {
 
 /**
  * Get current state for saving to page state
+ * Note: Order/groupMembership are stored globally in userPrefsStore, not per-page
  */
 function getPageState(): Record<string, PackageState> {
-	return JSON.parse(JSON.stringify(packageStates));
+	const result: Record<string, PackageState> = {};
+	for (const [code, state] of Object.entries(packageStates)) {
+		// Only save selection state per-page; order is global
+		result[code] = {
+			selectedBits: [...state.selectedBits],
+			customBits: [...state.customBits],
+			order: [], // Deprecated - now in userPrefsStore
+			looseBitsOrder: [] // Deprecated - now in userPrefsStore
+		};
+	}
+	return result;
 }
 
 /**
@@ -221,16 +231,34 @@ function reset(): void {
 
 /**
  * Reset all order arrays and group membership to default
- * Keeps selections and custom bits intact
+ * Clears global ordering in userPrefsStore
  */
 function resetAllOrders(): void {
-	for (const packageCode of Object.keys(packageStates)) {
-		const state = packageStates[packageCode];
-		state.order = [];
-		state.looseBitsOrder = [];
-		state.groupMembership = {};
-	}
-	packageStates = { ...packageStates };
+	userPrefsStore.resetAllPackageOrders();
+}
+
+/**
+ * Get the global bit order for a package
+ * Reads from userPrefsStore (global across all companies)
+ */
+function getOrder(packageCode: string): string[] {
+	return userPrefsStore.getPackageBitOrder(packageCode);
+}
+
+/**
+ * Get the global loose bits order for a package
+ * Reads from userPrefsStore (global across all companies)
+ */
+function getLooseBitsOrder(packageCode: string): string[] {
+	return userPrefsStore.getPackageLooseBitOrder(packageCode);
+}
+
+/**
+ * Get the global group membership for a package
+ * Reads from userPrefsStore (global across all companies)
+ */
+function getGroupMembership(packageCode: string): Record<string, string> {
+	return userPrefsStore.getPackageGroupMembership(packageCode);
 }
 
 export const packagesStore = {
@@ -255,11 +283,14 @@ export const packagesStore = {
 	addCustomBit,
 	removeCustomBit,
 
-	// Ordering
+	// Ordering (global - stored in userPrefsStore)
+	getOrder,
 	setOrder,
+	getLooseBitsOrder,
 	setLooseBitsOrder,
 
-	// Group membership
+	// Group membership (global - stored in userPrefsStore)
+	getGroupMembership,
 	moveBitToGroup,
 	getBitGroup,
 

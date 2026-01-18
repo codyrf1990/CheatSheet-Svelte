@@ -17,10 +17,9 @@
 	// Local state for expand/collapse
 	let expanded = $state(true);
 
-	// Compute effective bits considering groupMembership overrides
+	// Compute effective bits considering groupMembership overrides (global)
 	let effectiveBits = $derived(() => {
-		const state = packagesStore.getStateReadOnly(packageCode);
-		const membership = state.groupMembership || {};
+		const membership = packagesStore.getGroupMembership(packageCode);
 
 		// Start with static bits that haven't been moved elsewhere
 		const bits = group.bits.filter((bit) => {
@@ -38,9 +37,9 @@
 		return bits;
 	});
 
-	// Apply stored order to effective bits
+	// Apply stored order to effective bits (global order)
 	let orderedBits = $derived(() => {
-		const storedOrder = packagesStore.getStateReadOnly(packageCode).order;
+		const storedOrder = packagesStore.getOrder(packageCode);
 		return applyOrder(effectiveBits(), storedOrder);
 	});
 

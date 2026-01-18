@@ -20,19 +20,17 @@
 
 	let hasGroups = $derived(pkg.groups && pkg.groups.length > 0);
 
-	// Merge static loose bits with custom bits and moved bits, then apply stored order
+	// Merge static loose bits with custom bits and moved bits, then apply stored order (global)
 	let allLooseBits = $derived(() => {
 		const staticBits = pkg.looseBits || [];
 		const customBits = userPrefsStore.getCustomPackageBits(pkg.code);
-		const state = packagesStore.getStateReadOnly(pkg.code);
+		const membership = packagesStore.getGroupMembership(pkg.code);
 
 		// Include bits that have been moved to 'loose' from groups
 		const movedToLoose: string[] = [];
-		if (state.groupMembership) {
-			for (const [bit, group] of Object.entries(state.groupMembership)) {
-				if (group === 'loose' && !staticBits.includes(bit) && !customBits.includes(bit)) {
-					movedToLoose.push(bit);
-				}
+		for (const [bit, group] of Object.entries(membership)) {
+			if (group === 'loose' && !staticBits.includes(bit) && !customBits.includes(bit)) {
+				movedToLoose.push(bit);
 			}
 		}
 
@@ -41,7 +39,7 @@
 			...customBits.filter((c) => !staticBits.includes(c)),
 			...movedToLoose
 		];
-		return applyOrder(allBits, state.looseBitsOrder);
+		return applyOrder(allBits, packagesStore.getLooseBitsOrder(pkg.code));
 	});
 
 	let hasLooseBits = $derived(allLooseBits().length > 0);
