@@ -27,14 +27,20 @@ const MAINTENANCE_PANEL_ID = 'maintenance-skus';
  * Naming conventions:
  * - Hardware Dongle (5-digit, no network): "77518"
  * - Network Dongle (5-digit + network): "NWD 77518"
- * - Network Product Key (long key): "NPK 7452" (last 4 of key)
- * - Profile only (no dongle, has profile number): "P1", "P2", etc.
+ * - Network Product Key (long key + network): "NPK 7452" (last 4 of key)
+ * - Standalone Product Key (long key, no network): "SPK 7452" (last 4 of key)
+ * - Profile only (no dongle, has profile number): "P5801", etc.
  */
 function generatePageName(license: LicenseInfo): string {
-	// Network Product Key: long product key number
+	// Product Key: long product key number
 	if (license.productKey && license.productKey.length > 4) {
 		const last4 = license.productKey.slice(-4).toUpperCase();
-		return `NPK ${last4}`;
+		if (license.isNetworkLicense) {
+			// Network Product Key
+			return `NPK ${last4}`;
+		}
+		// Standalone Product Key
+		return `SPK ${last4}`;
 	}
 
 	// Hardware or Network Dongle: 5-digit dongle number

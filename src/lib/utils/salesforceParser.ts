@@ -171,12 +171,16 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 	// Generate display type based on actual license characteristics:
 	// - Hardware Dongle: 5-digit dongle, no network
 	// - Network Dongle (NWD): 5-digit dongle + network
-	// - Network Product Key (NPK): Long key (product key with network implied)
-	// - Profile: Has profile number
+	// - Network Product Key (NPK): Long key + network
+	// - Standalone Product Key (SPK): Long key, no network
+	// - Profile: Has profile number (can be NPK or NWD underneath)
 	let displayType = '';
-	if (isKey) {
-		// Long number = Network Product Key
+	if (isKey && isNetwork) {
+		// Long number + network = Network Product Key
 		displayType = 'Network Product Key';
+	} else if (isKey && !isNetwork) {
+		// Long number + no network = Standalone Product Key
+		displayType = 'Standalone Product Key';
 	} else if (isNetwork) {
 		// 5-digit dongle + network = Network Dongle
 		displayType = 'Network Dongle';
@@ -193,7 +197,7 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 		licenseType,
 		dongleType,
 		displayType,
-		isNetworkLicense: isNetwork || isKey, // Product keys are always network
+		isNetworkLicense: isNetwork, // Only true if Net Dongle is checked (product keys are NOT always network)
 		isProfile,
 		profileNo,
 		maintenanceType,
