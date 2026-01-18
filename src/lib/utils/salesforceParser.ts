@@ -85,6 +85,18 @@ export function validateSalesforceText(text: string): ValidationResult {
 }
 
 /**
+ * Check if a dongle number is actually a product key (long number, not 5-digit dongle)
+ * Hardware dongles are 5 digits, product keys are much longer
+ */
+function isProductKey(dongleNo: string): boolean {
+	if (!dongleNo) return false;
+	// Hardware dongles are exactly 5 digits
+	// Product keys are longer numbers (e.g., 711394118544787452)
+	const digitsOnly = dongleNo.replace(/\D/g, '');
+	return digitsOnly.length > 5;
+}
+
+/**
  * Parse header information from Salesforce text
  */
 export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
@@ -100,41 +112,63 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 		extractField(text, 'Maintenance End Date') || extractField(text, 'Maintenance End');
 	const solidcamVersion = extractField(text, 'SolidCAM Version');
 
-	// Determine license type and dongle type
+	// Extract profile info (for Profile pages)
+	const profileNo = extractField(text, 'Profile No\\.');
+	const profileName = extractField(text, 'Profile Name');
+	const isProfile = !!(profileNo || profileName);
+
+	// Determine if this is a network license
 	const isNetwork = extractChecked(text, 'Net Dongle');
+
+	// Determine if the "Dongle No." is actually a product key (long number)
+	const isKey = isProductKey(dongleNo);
+
+	// Determine dongle type from raw field or infer from data
 	let dongleType: DongleType = dongleTypeRaw || 'Unknown';
 
-	// Normalize dongle type
+	// Normalize dongle type from explicit field
 	if (dongleTypeRaw.includes('MINI-NETUSB') || dongleTypeRaw.includes('NETUSB')) {
 		dongleType = 'MINI-NETUSB';
 	} else if (dongleTypeRaw.includes('MINI-USB') || dongleTypeRaw.includes('USB')) {
 		dongleType = 'MINI-USB';
 	} else if (dongleTypeRaw.toLowerCase().includes('software')) {
 		dongleType = 'Software';
+	} else if (isKey) {
+		// Long number = product key (software license)
+		dongleType = 'Software';
 	}
 
 	// Determine license type
-	const licenseType: LicenseType = dongleType === 'Software' ? 'product-key' : 'dongle';
+	const licenseType: LicenseType = isKey || dongleType === 'Software' ? 'product-key' : 'dongle';
 
-	// Generate display type
+	// Generate display type based on actual license characteristics:
+	// - Hardware Dongle: 5-digit dongle, no network
+	// - Network Dongle (NWD): 5-digit dongle + network
+	// - Network Product Key (NPK): Long key (product key with network implied)
+	// - Profile: Has profile number
 	let displayType = '';
-	if (dongleType === 'Software') {
-		displayType = isNetwork ? 'Software (Network)' : 'Software';
-	} else if (dongleType === 'MINI-NETUSB' || isNetwork) {
-		displayType = 'Hardware Dongle (Network)';
+	if (isKey) {
+		// Long number = Network Product Key
+		displayType = 'Network Product Key';
+	} else if (isNetwork) {
+		// 5-digit dongle + network = Network Dongle
+		displayType = 'Network Dongle';
 	} else {
+		// 5-digit dongle, no network = Hardware Dongle
 		displayType = 'Hardware Dongle';
 	}
 
 	return {
 		customer: customer || 'Unknown',
-		dongleNo,
+		dongleNo: isKey ? '' : dongleNo, // Don't store product key in dongleNo
 		serialNo,
+		productKey: isKey ? dongleNo : undefined, // Store long number as productKey
 		licenseType,
 		dongleType,
 		displayType,
-		isNetworkLicense: isNetwork,
-		isProfile: false, // Salesforce text isn't Profile format
+		isNetworkLicense: isNetwork || isKey, // Product keys are always network
+		isProfile,
+		profileNo,
 		maintenanceType,
 		maintenanceStart,
 		maintenanceEnd,
@@ -189,12 +223,13 @@ export function parseSalesforceText(text: string): ParseResult {
 		customer: headerInfo.customer || 'Unknown',
 		dongleNo: headerInfo.dongleNo || '',
 		serialNo: headerInfo.serialNo || '',
-		productKey: undefined,
+		productKey: headerInfo.productKey,
 		licenseType: headerInfo.licenseType || 'dongle',
 		dongleType: headerInfo.dongleType || 'Unknown',
 		displayType: headerInfo.displayType || 'Unknown',
 		isNetworkLicense: headerInfo.isNetworkLicense || false,
-		isProfile: false,
+		isProfile: headerInfo.isProfile || false,
+		profileNo: headerInfo.profileNo,
 		maintenanceType: headerInfo.maintenanceType || '',
 		maintenanceStart: headerInfo.maintenanceStart || '',
 		maintenanceEnd: headerInfo.maintenanceEnd || '',

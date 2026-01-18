@@ -23,18 +23,34 @@ const MAINTENANCE_PANEL_ID = 'maintenance-skus';
 
 /**
  * Generate a meaningful page name from license info
- * - Software licenses (product key): last 4 chars of key
- * - Dongles: dongle number
+ *
+ * Naming conventions:
+ * - Hardware Dongle (5-digit, no network): "77518"
+ * - Network Dongle (5-digit + network): "NWD 77518"
+ * - Network Product Key (long key): "NPK 7452" (last 4 of key)
+ * - Profile only (no dongle, has profile number): "P1", "P2", etc.
  */
 function generatePageName(license: LicenseInfo): string {
-	// For dongles, use dongle number
-	if (license.dongleNo && license.dongleNo.trim()) {
-		return license.dongleNo.trim();
+	// Network Product Key: long product key number
+	if (license.productKey && license.productKey.length > 4) {
+		const last4 = license.productKey.slice(-4).toUpperCase();
+		return `NPK ${last4}`;
 	}
 
-	// For software licenses with product key, use last 4 chars
-	if (license.productKey && license.productKey.length > 4) {
-		return license.productKey.slice(-4).toUpperCase();
+	// Hardware or Network Dongle: 5-digit dongle number
+	if (license.dongleNo && license.dongleNo.trim()) {
+		const dongle = license.dongleNo.trim();
+		if (license.isNetworkLicense) {
+			// Network Dongle
+			return `NWD ${dongle}`;
+		}
+		// Hardware Dongle (standalone)
+		return dongle;
+	}
+
+	// Profile only: use profile number
+	if (license.profileNo) {
+		return `P${license.profileNo}`;
 	}
 
 	// Fallback

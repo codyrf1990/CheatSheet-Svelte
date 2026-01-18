@@ -124,7 +124,8 @@ export interface LicenseInfo {
 	dongleType: DongleType; // 'MINI-USB', 'Software', etc.
 	displayType: string; // Human-readable: 'Hardware Dongle', 'Product Key (Network)', etc.
 	isNetworkLicense: boolean; // Net Dongle checkbox
-	isProfile: boolean; // True if Profile format PDF
+	isProfile: boolean; // True if Profile format (has Profile No.)
+	profileNo?: string; // Profile number (e.g., "1", "2") for profile pages
 
 	// Maintenance
 	maintenanceType: string; // 'SC', 'SC+SW', etc.
