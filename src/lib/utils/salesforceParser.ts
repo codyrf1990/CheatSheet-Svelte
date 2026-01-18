@@ -38,11 +38,12 @@ function escapeRegex(str: string): string {
 
 /**
  * Extract a header field value from Salesforce text
- * Matches "Field Name    value" patterns
+ * Matches "Field Name\tvalue" patterns (tab-separated)
  */
 function extractField(text: string, fieldName: string): string {
-	// Match field name followed by whitespace and value (until newline or next field)
-	const regex = new RegExp(fieldName + '\\s+([^\\n\\t]+?)(?=\\s{2,}|\\n|$)', 'i');
+	// Match field name followed by whitespace and value (until tab, 2+ spaces, newline, or end)
+	// Salesforce copy/paste uses tabs between fields: "Dongle No.\t77518\tMaintenance Type\tSC"
+	const regex = new RegExp(fieldName + '\\s+([^\\n\\t]+?)(?=\\t|\\s{2,}|\\n|$)', 'i');
 	const match = text.match(regex);
 	return match?.[1]?.trim() || '';
 }
@@ -92,8 +93,11 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 	const customer = extractField(text, 'Customer');
 	const dongleTypeRaw = extractField(text, 'Dongle Type');
 	const maintenanceType = extractField(text, 'Maintenance Type');
-	const maintenanceStart = extractField(text, 'Maintenance Start');
-	const maintenanceEnd = extractField(text, 'Maintenance End');
+	// Try both "Maintenance Start Date" (full) and "Maintenance Start" (short)
+	const maintenanceStart =
+		extractField(text, 'Maintenance Start Date') || extractField(text, 'Maintenance Start');
+	const maintenanceEnd =
+		extractField(text, 'Maintenance End Date') || extractField(text, 'Maintenance End');
 	const solidcamVersion = extractField(text, 'SolidCAM Version');
 
 	// Determine license type and dongle type
