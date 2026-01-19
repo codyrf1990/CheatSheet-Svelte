@@ -86,12 +86,12 @@
 		align-items: center;
 		padding: var(--space-px) var(--space-0);
 		gap: var(--space-0);
-		border-radius: 3px;
+		border-radius: var(--radius-2xs);
 		transition: background-color 150ms ease;
 	}
 
 	.panel-item:hover {
-		background: rgba(255, 255, 255, 0.05);
+		background: var(--chip-bg-hover);
 	}
 
 	.panel-item[draggable='true'] {
@@ -142,11 +142,14 @@
 	.item-text {
 		padding: var(--space-0) var(--space-0-5);
 		background: transparent;
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 3px;
+		border: 1px solid var(--chip-border-color);
+		border-radius: var(--radius-2xs);
+		background: var(--chip-bg);
+		box-shadow: var(--chip-shadow);
 		font-family: 'JetBrains Mono', monospace;
 		font-size: var(--text-xs);
-		color: rgba(255, 255, 255, 0.9);
+		color: var(--chip-text-color);
+		line-height: 1.2;
 		cursor: pointer;
 		transition: all 150ms ease;
 		white-space: nowrap;
@@ -156,12 +159,12 @@
 	}
 
 	.item-text:hover {
-		color: var(--color-solidcam-gold, #d4af37);
+		color: var(--chip-text-hover);
 	}
 
 	.item-text.custom {
 		border-color: rgba(212, 175, 55, 0.3);
-		background: rgba(212, 175, 55, 0.05);
+		background: rgba(212, 175, 55, 0.08);
 	}
 
 	.custom-indicator {
@@ -179,7 +182,7 @@
 		padding: 0;
 		background: transparent;
 		border: none;
-		border-radius: 2px;
+		border-radius: var(--radius-2xs);
 		color: rgba(255, 255, 255, 0.4);
 		font-size: var(--text-2xs);
 		cursor: pointer;

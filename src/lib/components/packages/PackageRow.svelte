@@ -212,7 +212,7 @@
 
 <style>
 	.package-row {
-		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 	}
 
 	.package-row:hover {
@@ -239,6 +239,8 @@
 		font-size: var(--text-base);
 		font-weight: 600;
 		color: var(--color-solidcam-gold, #d4af37);
+		letter-spacing: 0.02em;
+		line-height: 1.2;
 		transition: color 150ms ease;
 	}
 
@@ -249,7 +251,7 @@
 	.package-description {
 		display: block;
 		font-size: var(--text-xs);
-		color: rgba(255, 255, 255, 0.6);
+		color: var(--chip-text-muted);
 		margin-top: 0.15rem;
 		line-height: 1.3;
 	}
@@ -263,13 +265,14 @@
 	.maint-code {
 		font-family: 'JetBrains Mono', monospace;
 		font-size: var(--text-sm);
-		color: rgba(255, 255, 255, 0.8);
+		color: var(--chip-text-muted);
+		line-height: 1.2;
 		cursor: pointer;
 		transition: color 150ms ease;
 	}
 
 	.maint-code:hover {
-		color: var(--color-solidcam-gold, #d4af37);
+		color: var(--chip-text-hover);
 	}
 
 	.bits-cell {
@@ -309,13 +312,13 @@
 
 	.loose-bits-section.has-groups {
 		padding-top: var(--space-1);
-		border-top: 1px solid rgba(255, 255, 255, 0.06);
+		border-top: 1px solid var(--chip-border-color);
 	}
 
 	.loose-bits-section.edit-mode {
 		outline: 1px dashed rgba(212, 175, 55, 0.3);
 		outline-offset: 2px;
-		border-radius: 4px;
+		border-radius: var(--radius-xs);
 		padding: var(--space-0-5);
 	}
 

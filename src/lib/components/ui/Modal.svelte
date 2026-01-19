@@ -159,12 +159,11 @@
 		max-height: 90vh;
 		overflow-y: auto;
 
-		/* Smoked glass */
-		background: linear-gradient(135deg, rgba(28, 28, 28, 0.98) 0%, rgba(12, 12, 12, 0.96) 100%);
+		background: var(--modal-bg);
 		backdrop-filter: blur(12px);
-		border: 1px solid rgba(255, 255, 255, 0.06);
-		border-radius: 18px;
-		box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+		border: var(--modal-border);
+		border-radius: var(--modal-radius);
+		box-shadow: var(--modal-shadow);
 	}
 
 	.modal.wide {
@@ -193,13 +192,15 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: calc(var(--space-4) + var(--space-1)) calc(var(--space-4) + var(--space-2));
-		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+		background: var(--tile-header-bg);
+		border-bottom: var(--tile-header-border);
 	}
 
 	.modal-title {
-		font-size: 1.25rem;
-		font-weight: 600;
-		color: #f5f5f5;
+		font-size: var(--modal-title-size);
+		font-weight: var(--modal-title-weight);
+		letter-spacing: var(--modal-title-tracking);
+		color: var(--tile-title-color);
 		margin: 0;
 	}
 
@@ -210,15 +211,15 @@
 		width: 32px;
 		height: 32px;
 		border: none;
-		background: transparent;
+		background: var(--chip-bg);
 		color: rgba(255, 255, 255, 0.5);
-		border-radius: 8px;
+		border-radius: var(--radius-xs);
 		cursor: pointer;
 		transition: all 150ms ease;
 	}
 
 	.close-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background: var(--chip-bg-hover);
 		color: rgba(255, 255, 255, 0.8);
 	}
 
@@ -231,7 +232,8 @@
 		justify-content: flex-end;
 		gap: var(--space-3);
 		padding: var(--space-4) calc(var(--space-4) + var(--space-2));
-		border-top: 1px solid rgba(255, 255, 255, 0.06);
+		background: var(--tile-header-bg);
+		border-top: var(--tile-header-border);
 	}
 
 	/* Scrollbar styling */

@@ -98,14 +98,16 @@
 		align-items: center;
 		gap: var(--space-0);
 		padding: var(--space-0) var(--space-1);
-		border-radius: 3px;
-		background: rgba(255, 255, 255, 0.02);
-		border: 1px solid rgba(255, 255, 255, 0.06);
+		border-radius: var(--radius-2xs);
+		background: var(--chip-bg);
+		border: 1px solid var(--chip-border-color);
+		box-shadow: var(--chip-shadow);
 		transition: background-color 150ms ease;
 	}
 
 	.loose-bit:hover {
-		background-color: rgba(255, 255, 255, 0.06);
+		background-color: var(--chip-bg-hover);
+		border-color: var(--chip-border-color-strong);
 	}
 
 	.loose-bit[draggable='true'] {
@@ -151,13 +153,14 @@
 
 	.bit-text {
 		font-size: var(--text-xs);
-		color: rgba(255, 255, 255, 0.85);
+		color: var(--chip-text-color);
+		line-height: 1.2;
 		cursor: pointer;
 		transition: color 150ms ease;
 	}
 
 	.bit-text:hover {
-		color: var(--color-solidcam-gold, #d4af37);
+		color: var(--chip-text-hover);
 	}
 
 	.bit-text.custom {
@@ -171,7 +174,7 @@
 
 	.loose-bit.custom {
 		border-color: rgba(212, 175, 55, 0.3);
-		background: rgba(212, 175, 55, 0.05);
+		background: rgba(212, 175, 55, 0.08);
 	}
 
 	.bit-remove-btn {
@@ -183,7 +186,7 @@
 		padding: 0;
 		background: transparent;
 		border: none;
-		border-radius: 3px;
+		border-radius: var(--radius-2xs);
 		color: rgba(255, 255, 255, 0.4);
 		font-size: var(--text-sm);
 		cursor: pointer;

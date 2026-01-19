@@ -5,13 +5,14 @@
 	interface Props {
 		packages: Package[];
 		editMode?: boolean;
+		maintenanceRange?: string;
 	}
 
-	let { packages, editMode = false }: Props = $props();
+	let { packages, editMode = false, maintenanceRange = '' }: Props = $props();
 </script>
 
 <div class="package-table-container">
-	<div class="main-table">
+	<div class="main-table tile">
 		<table aria-label="SolidCAM packages and included bits">
 			<caption class="sr-only"
 				>SolidCAM package options with maintenance SKUs and included software bits</caption
@@ -20,7 +21,16 @@
 				<tr>
 					<th scope="col" class="col-package">Package</th>
 					<th scope="col" class="col-maint">Maintenance</th>
-					<th scope="col" class="col-bits">Included Bits</th>
+					<th scope="col" class="col-bits">
+						<div class="bits-header">
+							<span>Included Bits</span>
+							{#if maintenanceRange}
+								<span class="maintenance-range" title="Maintenance dates">
+									{maintenanceRange}
+								</span>
+							{/if}
+						</div>
+					</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -41,16 +51,6 @@
 
 	.main-table {
 		width: 100%;
-		/* Smoked glass styling */
-		background: linear-gradient(135deg, rgba(28, 28, 28, 0.94) 0%, rgba(12, 12, 12, 0.92) 100%);
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-		border: 1px solid rgba(255, 255, 255, 0.04);
-		border-radius: 12px;
-		box-shadow:
-			0 25px 50px rgba(0, 0, 0, 0.4),
-			0 10px 20px rgba(0, 0, 0, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.03);
 		overflow: hidden;
 	}
 
@@ -61,30 +61,82 @@
 	}
 
 	thead {
-		background: linear-gradient(135deg, #c8102e 0%, #8b0000 100%);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		position: relative;
+		background:
+			linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.25) 100%),
+			linear-gradient(135deg, #a10f22 0%, #560910 100%);
+		border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.08),
+			inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+	}
+
+	thead::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(110deg, rgba(255, 255, 255, 0.08), transparent 55%);
+		opacity: 0.6;
+		pointer-events: none;
+	}
+
+	thead::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.18);
+		pointer-events: none;
 	}
 
 	th {
 		padding: var(--space-1) var(--space-2);
 		text-align: left;
-		font-size: var(--text-sm);
-		font-weight: 600;
+		font-size: var(--tile-title-size);
+		font-weight: var(--tile-title-weight);
 		text-transform: uppercase;
-		letter-spacing: 0.12em;
-		color: rgba(255, 255, 255, 0.95);
+		letter-spacing: var(--tile-title-tracking);
+		color: var(--tile-title-color);
+		text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+		position: relative;
+		z-index: 1;
+	}
+
+	thead th + th {
+		border-left: 1px solid rgba(255, 255, 255, 0.12);
 	}
 
 	.col-package {
-		width: auto;
+		width: 22%;
+		min-width: 185px;
 	}
 
 	.col-maint {
-		width: auto;
+		width: 16%;
+		min-width: 140px;
 	}
 
 	.col-bits {
 		width: auto;
+	}
+
+	.bits-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-2);
+		flex-wrap: wrap;
+	}
+
+	.maintenance-range {
+		padding: 2px 10px;
+		border-radius: 999px;
+		background: rgba(0, 0, 0, 0.18);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		font-size: var(--text-xs);
+		font-weight: 600;
+		text-transform: none;
+		letter-spacing: 0.04em;
+		color: rgba(255, 255, 255, 0.95);
 	}
 
 	/* Hide Package column on narrow screens */

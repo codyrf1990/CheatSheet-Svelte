@@ -22,12 +22,21 @@
 	let parsedLicense = $state<LicenseInfo | null>(null);
 	let parseError = $state<string | null>(null);
 	let companyNameOverride = $state('');
+	let maintenanceEndOverride = $state('');
 	let importResult = $state<ImportResult | null>(null);
 	let showFeatures = $state(false);
 
 	// Derived
 	let canParse = $derived(pastedText.trim().length > 0);
 	let needsCompanyName = $derived(parsedLicense ? needsCompanyNameInput(parsedLicense) : false);
+	let maintenanceRange = $derived.by(() => {
+		if (!parsedLicense) return '-';
+		const start = parsedLicense.maintenanceStart?.trim() ?? '';
+		const end = maintenanceEndOverride.trim();
+		if (!start && !end) return '-';
+		if (start && end) return `${start} - ${end}`;
+		return start || end;
+	});
 	let canImport = $derived.by(() => {
 		if (!parsedLicense) return false;
 		if (needsCompanyName && !companyNameOverride.trim()) return false;
@@ -45,6 +54,7 @@
 			parsedLicense = null;
 			parseError = null;
 			companyNameOverride = '';
+			maintenanceEndOverride = '';
 			importResult = null;
 			showFeatures = false;
 		}
@@ -68,6 +78,7 @@
 			}
 
 			parsedLicense = result.license;
+			maintenanceEndOverride = result.license.maintenanceEnd || '';
 
 			// Pre-fill company name if available and valid
 			if (result.license.customer && result.license.customer !== 'Unknown') {
@@ -90,7 +101,11 @@
 		setTimeout(() => {
 			try {
 				const companyName = needsCompanyName ? companyNameOverride : parsedLicense!.customer;
-				importResult = importLicense(parsedLicense!, companyName);
+				const licenseToImport: LicenseInfo = {
+					...parsedLicense!,
+					maintenanceEnd: maintenanceEndOverride.trim()
+				};
+				importResult = importLicense(licenseToImport, companyName);
 
 				modalState = 'results';
 
@@ -111,6 +126,7 @@
 		parsedLicense = null;
 		parseError = null;
 		companyNameOverride = '';
+		maintenanceEndOverride = '';
 		modalState = 'paste';
 	}
 
@@ -204,13 +220,20 @@ HSM           Checked    5-axes indexial  Not Checked"
 					<div class="summary-row">
 						<span class="summary-label">Maintenance:</span>
 						<span class="summary-value">
-							{#if parsedLicense.maintenanceStart && parsedLicense.maintenanceEnd}
-								{parsedLicense.maintenanceStart} - {parsedLicense.maintenanceEnd}
-							{:else}
-								-
-							{/if}
+							{maintenanceRange}
 						</span>
 					</div>
+					{#if parsedLicense.isProfile}
+						<div class="summary-row">
+							<span class="summary-label">Maintenance End Date:</span>
+							<input
+								type="text"
+								class="company-input"
+								bind:value={maintenanceEndOverride}
+								placeholder="Maintenance end date"
+							/>
+						</div>
+					{/if}
 					<div class="summary-row">
 						<span class="summary-label">SolidCAM Version:</span>
 						<span class="summary-value">{parsedLicense.solidcamVersion || '-'}</span>

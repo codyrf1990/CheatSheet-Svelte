@@ -152,8 +152,8 @@
 	.panel-items {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.125rem;
-		padding: 0.0625rem;
+		gap: var(--space-0-5);
+		padding: var(--space-px);
 		list-style: none;
 		margin: 0;
 	}
@@ -175,7 +175,7 @@
 	@media (max-width: 640px) {
 		.panel-items {
 			grid-template-columns: 1fr;
-			gap: 0.075rem;
+			gap: var(--space-0);
 		}
 	}
 </style>

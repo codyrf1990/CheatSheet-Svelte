@@ -223,9 +223,10 @@
 
 <style>
 	.master-bit {
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 4px;
-		background: rgba(0, 0, 0, 0.25);
+		border: 1px solid var(--chip-border-color-strong);
+		border-radius: var(--radius-xs);
+		background: var(--chip-bg-strong);
+		box-shadow: var(--chip-shadow);
 		overflow: hidden;
 		width: 100%;
 		min-width: 0;
@@ -236,8 +237,8 @@
 		align-items: center;
 		gap: var(--space-1);
 		padding: var(--space-1) calc(var(--space-1) + var(--space-0));
-		background: rgba(255, 255, 255, 0.03);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		background: var(--chip-bg);
+		border-bottom: 1px solid var(--chip-border-color);
 	}
 
 	.master-label {
@@ -245,6 +246,8 @@
 		font-size: var(--text-xs);
 		font-weight: 600;
 		color: var(--color-solidcam-gold, #d4af37);
+		letter-spacing: 0.04em;
+		line-height: 1.2;
 		cursor: pointer;
 		transition: color 150ms ease;
 		white-space: nowrap;
@@ -265,7 +268,7 @@
 		padding: 0;
 		background: transparent;
 		border: none;
-		border-radius: 3px;
+		border-radius: var(--radius-2xs);
 		color: rgba(255, 255, 255, 0.5);
 		cursor: pointer;
 		transition: all 150ms ease;

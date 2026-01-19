@@ -118,7 +118,7 @@
 	}
 </script>
 
-<section class="maintenance-panel">
+<section class="maintenance-panel tile">
 	<div class="panel-body">
 		<!-- Maintenance SKUs Section -->
 		<div class="section">
@@ -179,15 +179,6 @@
 		flex: 0 0 auto;
 		display: flex;
 		flex-direction: column;
-		background: linear-gradient(135deg, rgba(28, 28, 28, 0.94) 0%, rgba(12, 12, 12, 0.92) 100%);
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-		border: 1px solid rgba(255, 255, 255, 0.04);
-		border-radius: 12px;
-		box-shadow:
-			0 25px 50px rgba(0, 0, 0, 0.4),
-			0 10px 20px rgba(0, 0, 0, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.03);
 	}
 
 	.panel-body {
@@ -217,17 +208,17 @@
 
 	.section-title {
 		font-size: var(--text-xs);
-		font-weight: 600;
+		font-weight: var(--tile-title-weight);
 		color: var(--color-solidcam-gold, #d4af37);
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: var(--tile-title-tracking);
 	}
 
 	.panel-items {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: var(--space-0-5);
-		padding: var(--space-0);
+		padding: var(--space-px);
 		list-style: none;
 		margin: 0;
 	}

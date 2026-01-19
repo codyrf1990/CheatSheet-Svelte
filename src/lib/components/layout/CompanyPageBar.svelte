@@ -460,20 +460,50 @@
 
 	<!-- Edit Controls -->
 	<div class="edit-controls">
-		<Button variant="gold" size="sm" onclick={() => (showAddSkuModal = true)}>+ SKU</Button>
-		<Button
-			variant={panelsStore.removeMode ? 'danger' : 'ghost'}
-			size="sm"
-			onclick={() => panelsStore.toggleRemoveMode()}
-		>
-			− SKU
-		</Button>
-		<Button variant={editMode ? 'primary' : 'ghost'} size="sm" onclick={onToggleEdit}>
-			{editMode ? 'Done' : 'Edit Order'}
-		</Button>
-		{#if editMode}
-			<Button variant="ghost" size="sm" onclick={() => (dialogType = 'reset-order')}>Reset</Button>
-		{/if}
+		<div class="action-cluster sku-cluster" role="group" aria-label="SKU actions">
+			<Button
+				variant="ghost"
+				size="sm"
+				class="cluster-btn cluster-btn--add"
+				onclick={() => (showAddSkuModal = true)}
+			>
+				<span class="cluster-icon">+</span>
+				<span class="cluster-text">SKU</span>
+			</Button>
+			<span class="cluster-sep" aria-hidden="true"></span>
+			<Button
+				variant="ghost"
+				size="sm"
+				class={`cluster-btn cluster-btn--remove ${panelsStore.removeMode ? 'is-active' : ''}`}
+				aria-pressed={panelsStore.removeMode}
+				onclick={() => panelsStore.toggleRemoveMode()}
+			>
+				<span class="cluster-icon">-</span>
+				<span class="cluster-text">SKU</span>
+			</Button>
+		</div>
+		<div class="action-cluster order-cluster" role="group" aria-label="Order actions">
+			<Button
+				variant="ghost"
+				size="sm"
+				class={`cluster-btn cluster-btn--order ${editMode ? 'is-active' : ''}`}
+				aria-pressed={editMode}
+				onclick={onToggleEdit}
+			>
+				{editMode ? 'Done' : 'Edit Order'}
+			</Button>
+			{#if editMode}
+				<span class="cluster-sep" aria-hidden="true"></span>
+				<Button
+					variant="ghost"
+					size="sm"
+					class="cluster-btn cluster-btn--reset"
+					onclick={() => (dialogType = 'reset-order')}
+				>
+					Reset
+				</Button>
+			{/if}
+		</div>
 	</div>
 </div>
 
@@ -992,6 +1022,94 @@
 		flex-shrink: 0;
 	}
 
+	.action-cluster {
+		display: flex;
+		align-items: center;
+		gap: 1px;
+		padding: 1px;
+		border-radius: 999px;
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.42));
+		border: 1px solid var(--chip-border-color);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.08),
+			0 8px 18px rgba(0, 0, 0, 0.35);
+	}
+
+	.action-cluster :global(.btn) {
+		min-height: 22px;
+		padding: 0.18rem 0.5rem;
+		font-size: 0.65rem;
+		border-radius: 999px;
+		gap: 0.3rem;
+		box-shadow: none;
+	}
+
+	.action-cluster :global(.btn-ghost) {
+		border: none;
+	}
+
+	.action-cluster :global(.btn-ghost:hover) {
+		border: none;
+	}
+
+	.action-cluster :global(.btn:hover) {
+		transform: translateY(-1px);
+		filter: brightness(1.03);
+	}
+
+	.action-cluster :global(.btn:active) {
+		transform: translateY(0);
+		filter: brightness(0.98);
+	}
+
+	.cluster-sep {
+		width: 1px;
+		height: 18px;
+		background: rgba(255, 255, 255, 0.12);
+	}
+
+	.cluster-icon {
+		font-weight: 700;
+		font-size: 0.8em;
+	}
+
+	.cluster-text {
+		font-size: 0.55rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.cluster-btn--add {
+		background: linear-gradient(135deg, #e2c15b 0%, #b4891c 100%);
+		color: #1a1a1a;
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+	}
+
+	.cluster-btn--remove {
+		background: rgba(255, 255, 255, 0.08);
+		color: rgba(255, 255, 255, 0.85);
+	}
+
+	.cluster-btn--remove.is-active {
+		background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+		color: #fff;
+	}
+
+	.cluster-btn--order {
+		background: rgba(255, 255, 255, 0.08);
+		color: rgba(255, 255, 255, 0.88);
+	}
+
+	.cluster-btn--order.is-active {
+		background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+		color: #1a1a1a;
+	}
+
+	.cluster-btn--reset {
+		background: rgba(255, 255, 255, 0.06);
+		color: rgba(255, 255, 255, 0.7);
+	}
+
 	/* Context Menu */
 	.context-menu {
 		position: fixed;
@@ -1177,10 +1295,19 @@
 			height: 12px;
 		}
 
-		.edit-controls :global(.btn) {
+		.action-cluster {
+			padding: 1px;
+		}
+
+		.action-cluster :global(.btn) {
 			min-height: 24px;
-			padding: 0.2rem 0.45rem;
-			font-size: 0.65rem;
+			padding: 0.18rem 0.4rem;
+			font-size: 0.56rem;
+		}
+
+		.cluster-text {
+			font-size: 0.5rem;
+			letter-spacing: 0.08em;
 		}
 	}
 

@@ -82,13 +82,16 @@
 		align-items: center;
 		gap: var(--space-0);
 		padding: var(--space-0) var(--space-0-5);
-		border-radius: 2px;
+		border-radius: var(--radius-2xs);
+		border: 1px solid transparent;
 		transition: background-color 150ms ease;
 		min-width: 0;
 	}
 
 	.sub-bit:hover {
-		background-color: rgba(255, 255, 255, 0.05);
+		background-color: var(--chip-bg-hover);
+		border-color: var(--chip-border-color);
+		box-shadow: var(--chip-shadow);
 	}
 
 	.sub-bit[draggable='true'] {
@@ -135,14 +138,15 @@
 
 	.bit-text {
 		font-size: var(--text-2xs);
-		color: rgba(255, 255, 255, 0.85);
+		color: var(--chip-text-color);
+		line-height: 1.2;
 		cursor: pointer;
 		transition: color 150ms ease;
 		word-break: break-word;
 	}
 
 	.bit-text:hover {
-		color: var(--color-solidcam-gold, #d4af37);
+		color: var(--chip-text-hover);
 	}
 
 	/* Narrow viewport compaction */

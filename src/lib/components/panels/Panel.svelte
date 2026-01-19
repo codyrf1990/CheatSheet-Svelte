@@ -37,7 +37,7 @@
 	}
 </script>
 
-<section class="panel" data-panel={id} data-panel-editable={editable ? 'true' : 'false'}>
+<section class="panel tile" data-panel={id} data-panel-editable={editable ? 'true' : 'false'}>
 	<div class="panel-head">
 		<button type="button" class="panel-title-btn" onclick={handleCollapseToggle}>
 			<svg
@@ -84,16 +84,6 @@
 
 <style>
 	.panel {
-		/* Smoked glass styling */
-		background: linear-gradient(135deg, rgba(28, 28, 28, 0.94) 0%, rgba(12, 12, 12, 0.92) 100%);
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-		border: 1px solid rgba(255, 255, 255, 0.04);
-		border-radius: 12px;
-		box-shadow:
-			0 25px 50px rgba(0, 0, 0, 0.4),
-			0 10px 20px rgba(0, 0, 0, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.03);
 		overflow: hidden;
 	}
 
@@ -102,8 +92,8 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.3rem 0.5rem;
-		background: rgba(255, 255, 255, 0.03);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		background: var(--tile-header-bg);
+		border-bottom: var(--tile-header-border);
 	}
 
 	.panel-title-btn {
@@ -129,9 +119,11 @@
 
 	.panel-title {
 		margin: 0;
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: rgba(255, 255, 255, 0.9);
+		font-size: var(--tile-title-size);
+		font-weight: var(--tile-title-weight);
+		letter-spacing: var(--tile-title-tracking);
+		text-transform: uppercase;
+		color: var(--tile-title-color);
 	}
 
 	.panel-controls {
@@ -206,7 +198,7 @@
 		}
 
 		.panel-title {
-			font-size: 0.75rem;
+			font-size: var(--text-xs);
 		}
 
 		.panel-body {
@@ -231,7 +223,7 @@
 		}
 
 		.panel-title {
-			font-size: 0.65rem;
+			font-size: var(--text-2xs);
 		}
 
 		.panel-body {
@@ -265,7 +257,7 @@
 		}
 
 		.panel-title {
-			font-size: 0.55rem;
+			font-size: var(--text-2xs);
 		}
 
 		.panel-body {

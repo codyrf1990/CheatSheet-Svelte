@@ -12,10 +12,43 @@
 	import { packagesStore } from '$stores/packages.svelte';
 	import { panelsStore } from '$stores/panels.svelte';
 	import { packages, panels } from '$data';
+	import { getPageNameForLicense } from '$lib/utils/licenseSelections';
 
 	// Derived sync state from store
 	let syncStatus = $derived(syncStore.status);
 	let syncUsername = $derived(syncStore.username);
+	let currentCompany = $derived(companiesStore.current);
+	let currentPage = $derived(companiesStore.currentPage);
+
+	let maintenanceRange = $derived.by(() => {
+		const company = currentCompany;
+		const page = currentPage;
+		if (!company || !page) return '';
+
+		const licenses = company.licenses ?? [];
+		if (licenses.length === 0) return '';
+
+		const pageName = page.name;
+		const matching = licenses.filter((license) => getPageNameForLicense(license) === pageName);
+
+		let latest = matching[0];
+		if (matching.length > 1) {
+			latest = matching.reduce((acc, license) =>
+				license.importedAt > acc.importedAt ? license : acc
+			);
+		} else if (!latest && licenses.length === 1) {
+			latest = licenses[0];
+		}
+
+		if (!latest) return '';
+
+		const start = latest.maintenanceStart?.trim() ?? '';
+		const end = latest.maintenanceEnd?.trim() ?? '';
+
+		if (!start && !end) return '';
+		if (start && end) return `${start} - ${end}`;
+		return start || end;
+	});
 
 	// Package edit mode state (lifted from PackageTable)
 	let packageEditMode = $state(false);
@@ -182,7 +215,7 @@
 	<div class="content-area">
 		<!-- Package Table (Main Content) -->
 		<section class="main-content">
-			<PackageTable {packages} editMode={packageEditMode} />
+			<PackageTable {packages} editMode={packageEditMode} {maintenanceRange} />
 		</section>
 
 		<!-- Sidebar (Panels + Calculator) -->

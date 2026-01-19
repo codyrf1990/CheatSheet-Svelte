@@ -106,7 +106,7 @@
 		height: 20px;
 		background: rgba(18, 18, 26, 0.8);
 		border: 1px solid rgba(255, 255, 255, 0.4);
-		border-radius: 2px;
+		border-radius: var(--radius-2xs);
 		transition: all 150ms ease;
 		flex-shrink: 0;
 	}
