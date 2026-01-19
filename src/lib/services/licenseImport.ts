@@ -187,13 +187,14 @@ export function importLicense(
 		}
 
 		// Profile Sim 5x Level logic (profiles only):
-		// | Sim 5x | Level       | Result                          |
+		// All Sim 5x levels get HSS bit + HSS-Maint, then:
+		// | Sim 5x | Level       | Additional                      |
 		// |--------|-------------|-------------------------------- |
 		// | 0      | Any         | None                            |
-		// | 1      | "3 Axis"    | HSS-Maint only                  |
-		// | 1      | "3/4 Axis"  | HSS-Maint + Sim4x-Maint         |
-		// | 1      | Blank       | All 5-axis bits + HSS           |
-		// | 1      | Unknown     | Restricted (no 5-axis)          |
+		// | 1      | "3 Axis"    | (HSS only)                      |
+		// | 1      | "3/4 Axis"  | Sim4x bit + Sim4x-Maint         |
+		// | 1      | Blank       | All 5-axis bits + Sim5x-Maint   |
+		// | 1      | Unknown     | (HSS only - restricted)         |
 		const hasSim5x = license.features.some(
 			(f) => f === 'Sim 5x' || f === 'Sim5x' || f === 'Simultaneous 5x' || f === 'Simultanous 5x'
 		);
@@ -219,6 +220,14 @@ export function importLicense(
 		};
 
 		if (hasSim5x) {
+			// All Sim 5x levels require HSS bit and HSS-Maint
+			if (!bitsByPackage['SC-Mill'].includes('HSS')) {
+				bitsByPackage['SC-Mill'].push('HSS');
+			}
+			if (!uniqueSkus.includes('HSS-Maint')) {
+				uniqueSkus.push('HSS-Maint');
+			}
+
 			// Normalize level value for comparison
 			const levelLower = sim5xLevel.toLowerCase();
 			const is3Axis = levelLower === '3 axis' || levelLower === '1' || levelLower === '3axis';
@@ -227,17 +236,11 @@ export function importLicense(
 			const isUnknown = !is3Axis && !is34Axis && !isBlank;
 
 			if (is3Axis || isUnknown) {
-				// Sim 5x = 1, Level "3 Axis" or "1": HSS-Maint only (no 5-axis bits added)
+				// Sim 5x = 1, Level "3 Axis" or "1": HSS only (no 5-axis bits)
 				removeSim5xBits(true);
-				if (!uniqueSkus.includes('HSS-Maint')) {
-					uniqueSkus.push('HSS-Maint');
-				}
 			} else if (is34Axis) {
-				// Sim 5x = 1, Level "3/4 Axis": HSS-Maint + Sim4x-Maint + Sim4x bit
+				// Sim 5x = 1, Level "3/4 Axis": HSS + Sim4x + Sim4x-Maint
 				removeSim5xBits();
-				if (!uniqueSkus.includes('HSS-Maint')) {
-					uniqueSkus.push('HSS-Maint');
-				}
 				if (!uniqueSkus.includes('Sim4x-Maint')) {
 					uniqueSkus.push('Sim4x-Maint');
 				}
@@ -261,9 +264,6 @@ export function importLicense(
 				// Add Sim5x-Maint for full 5-axis package
 				if (!uniqueSkus.includes('Sim5x-Maint')) {
 					uniqueSkus.push('Sim5x-Maint');
-				}
-				if (!uniqueSkus.includes('HSS-Maint')) {
-					uniqueSkus.push('HSS-Maint');
 				}
 			}
 		}

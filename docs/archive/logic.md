@@ -49,14 +49,17 @@ The profile dataset uses different naming for C-axes:
 
 **Applies to Profile-based dongles only.**
 
-| Sim 5x Bit | Sim 5x Level | Maps To | Notes |
-|------------|--------------|---------|-------|
+**All Sim 5x levels get:** HSS bit (SC-Mill) + HSS-Maint
+
+| Sim 5x Bit | Sim 5x Level | Additional | Notes |
+|------------|--------------|------------|-------|
 | 0 (Not Checked) | Any | None | Bit disabled — ignore level |
-| 1 (Checked) | "3 Axis" or "1" | HSS-Maint only | Restricted to 3-axis HSS |
-| 1 (Checked) | "3/4 Axis" | HSS-Maint + Sim4x-Maint | Allows 4-axis simultaneous |
-| 1 (Checked) | Blank / empty | All 5-axis bits + HSS | Unrestricted — they have it all |
+| 1 (Checked) | "3 Axis" or "1" | (HSS only) | Restricted to 3-axis HSS |
+| 1 (Checked) | "3/4 Axis" | Sim4x bit + Sim4x-Maint | Allows 4-axis simultaneous |
+| 1 (Checked) | Blank / empty | All 5-axis bits + Sim5x-Maint | Unrestricted — they have it all |
 
 **"All 5-axis bits" includes:**
+
 - Sim5x
 - Swarf machining
 - 5x Drill
@@ -64,10 +67,11 @@ The profile dataset uses different naming for C-axes:
 - Convert5X
 - Auto 3+2 Roughing
 
-**Maintenance SKU implications:**
-- Sim 5x Level blank with HSS → Sim5x-Maint + HSS-Maint
-- Sim 5x Level "3/4 Axis" → Sim4x-Maint + HSS-Maint
-- Sim 5x Level "3 Axis" → HSS-Maint only (no sim maint)
+**Maintenance SKU summary:**
+
+- Sim 5x Level blank → HSS-Maint + Sim5x-Maint
+- Sim 5x Level "3/4 Axis" → HSS-Maint + Sim4x-Maint
+- Sim 5x Level "3 Axis" → HSS-Maint only
 
 ---
 

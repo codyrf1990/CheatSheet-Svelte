@@ -220,13 +220,13 @@ Import from Salesforce dongle page text (Ctrl+A, Ctrl+C). Parser: `src/lib/utils
 
 1. **Auto-add Modeler & Machinist** - Always selected for profiles
 2. **C-axes mapping** - `"Simultaneous 4-axes(C axes)"` → C-axes (Wrap) in SC-Mill
-3. **Sim 5x Level logic** (profiles only):
+3. **Sim 5x Level logic** (profiles only) - All levels get HSS bit + HSS-Maint:
 
-| Sim 5x | Level       | Result                          |
+| Sim 5x | Level       | Additional                      |
 | ------ | ----------- | ------------------------------- |
 | 0      | Any         | None                            |
-| 1      | "3 Axis"    | HSS-Maint only                  |
-| 1      | "3/4 Axis"  | HSS-Maint + Sim4x-Maint         |
+| 1      | "3 Axis"    | (HSS only)                      |
+| 1      | "3/4 Axis"  | Sim4x bit + Sim4x-Maint         |
 | 1      | Blank       | All 5-axis bits + Sim5x-Maint   |
 
 ### Key Files
