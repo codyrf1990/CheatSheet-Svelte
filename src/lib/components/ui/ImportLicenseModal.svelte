@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { LicenseInfo, ImportResult } from '$lib/types';
 	import { parseSalesforceText } from '$lib/utils/salesforceParser';
+	import { getPageNameForLicense } from '$lib/utils/licenseSelections';
 	import { importLicense, needsCompanyNameInput } from '$lib/services/licenseImport';
 	import { toastStore } from '$lib/stores/toast.svelte';
 	import Modal from './Modal.svelte';
@@ -32,7 +33,9 @@
 		if (needsCompanyName && !companyNameOverride.trim()) return false;
 		return true;
 	});
-	let pageName = $derived(parsedLicense?.dongleNo || 'P1');
+	let pageName = $derived.by(() =>
+		parsedLicense ? getPageNameForLicense(parsedLicense) : 'P1'
+	);
 
 	// Reset state when modal opens
 	$effect(() => {

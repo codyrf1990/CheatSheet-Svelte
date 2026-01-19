@@ -54,10 +54,14 @@ function extractField(text: string, fieldName: string): string {
 	// Make field name flexible - allow any whitespace between words
 	const fieldParts = fieldName.trim().split(/\s+/);
 	const flexibleField = fieldParts.map(escapeRegex).join('\\s+');
-	// Match field name followed by tab/whitespace and capture value until next tab or newline
+	// Match field name followed by tab or 2+ spaces and capture value until next tab, 2+ spaces, or newline
 	// Use a more restrictive pattern to avoid capturing next field names when value is empty
-	// The value capture group allows empty (using *) and stops at tab or newline
-	const regex = new RegExp(flexibleField + '\\t([^\\n\\t]*)(?=\\t|\\n|$)', 'i');
+	// The value capture group allows empty (using *) and stops at a field separator
+	const separator = '(?:\\t|\\s{2,})';
+	const regex = new RegExp(
+		flexibleField + separator + '([^\\n\\t]*?)(?=\\t|\\s{2,}|\\n|$)',
+		'i'
+	);
 	const match = normalizedText.match(regex);
 	const value = match?.[1]?.trim() || '';
 
