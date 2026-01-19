@@ -139,6 +139,24 @@ function selectBits(packageCode: string, bits: string[]): number {
 }
 
 /**
+ * Remove multiple bits for a package
+ */
+function removeBits(packageCode: string, bits: string[]): number {
+	const state = getState(packageCode);
+	const beforeCount = state.selectedBits.length;
+
+	if (bits.length === 0) {
+		return 0;
+	}
+
+	const removeSet = new Set(bits);
+	state.selectedBits = state.selectedBits.filter((bit) => !removeSet.has(bit));
+	packageStates = { ...packageStates };
+
+	return beforeCount - state.selectedBits.length;
+}
+
+/**
  * Clear all selections for a package
  */
 function clearAll(packageCode: string): void {
@@ -296,6 +314,7 @@ export const packagesStore = {
 	toggleMasterBit,
 	selectAll,
 	selectBits,
+	removeBits,
 	clearAll,
 
 	// Custom bits

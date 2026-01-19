@@ -291,6 +291,28 @@ export function parseCheckedFeatures(text: string): string[] {
 }
 
 /**
+ * Parse explicitly Not Checked features from Salesforce text
+ */
+export function parseNotCheckedFeatures(text: string): string[] {
+	const features: string[] = [];
+	const normalizedText = normalizeWhitespace(text);
+
+	for (const feature of ALL_KNOWN_FEATURES) {
+		const featureParts = feature.trim().split(/\s+/);
+		const flexiblePattern = featureParts.map(escapeRegex).join('\\s+');
+		const regex = new RegExp(flexiblePattern + '\\s+Not\\s+Checked', 'i');
+
+		if (regex.test(normalizedText)) {
+			if (!features.includes(feature)) {
+				features.push(feature);
+			}
+		}
+	}
+
+	return features;
+}
+
+/**
  * Parse Salesforce dongle page text into LicenseInfo
  */
 export function parseSalesforceText(text: string): ParseResult {
@@ -308,6 +330,7 @@ export function parseSalesforceText(text: string): ParseResult {
 
 	// Parse features
 	const features = parseCheckedFeatures(text);
+	const notCheckedFeatures = parseNotCheckedFeatures(text);
 
 	// Build complete LicenseInfo
 	const license: LicenseInfo = {
@@ -327,6 +350,7 @@ export function parseSalesforceText(text: string): ParseResult {
 		maintenanceEnd: headerInfo.maintenanceEnd || '',
 		solidcamVersion: headerInfo.solidcamVersion || '',
 		features,
+		notCheckedFeatures,
 		importedAt: Date.now(),
 		sourceFileName: 'salesforce-paste'
 	};

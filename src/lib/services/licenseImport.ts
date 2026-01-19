@@ -143,17 +143,29 @@ export function importLicense(
 	const mappingResult = selections.mappingResult;
 	const bitsByPackage = selections.bitsByPackage;
 	const uniqueSkus = selections.skus;
+	const removedBitsByPackage = selections.removedBitsByPackage;
+	const removedSkus = selections.removedSkus;
 
-	// 7. Select bits in each package (union with existing)
+	// 7. Remove explicitly Not Checked bits
+	for (const [packageCode, bits] of Object.entries(removedBitsByPackage)) {
+		packagesStore.removeBits(packageCode, bits);
+	}
+
+	// 8. Select bits in each package (union with existing)
 	let totalBitsImported = 0;
 	for (const [packageCode, bits] of Object.entries(bitsByPackage)) {
 		const added = packagesStore.selectBits(packageCode, bits);
 		totalBitsImported += added;
 	}
 
-	// 8. Remove package-backed SKUs and add remaining maintenance SKUs
+	// 9. Remove package-backed SKUs and explicitly Not Checked SKUs, then add remaining maintenance SKUs
 	let skusImported = 0;
 	for (const sku of PACKAGE_BIT_SKUS) {
+		if (panelsStore.hasItem(MAINTENANCE_PANEL_ID, sku)) {
+			panelsStore.removeItem(MAINTENANCE_PANEL_ID, sku);
+		}
+	}
+	for (const sku of removedSkus) {
 		if (panelsStore.hasItem(MAINTENANCE_PANEL_ID, sku)) {
 			panelsStore.removeItem(MAINTENANCE_PANEL_ID, sku);
 		}
@@ -166,7 +178,7 @@ export function importLicense(
 		}
 	}
 
-	// 9. Handle network license SKU
+	// 10. Handle network license SKU
 	if (license.isNetworkLicense) {
 		if (!panelsStore.hasItem(MAINTENANCE_PANEL_ID, 'Lic-Net-Maint')) {
 			panelsStore.addItem(MAINTENANCE_PANEL_ID, 'Lic-Net-Maint');
@@ -174,10 +186,10 @@ export function importLicense(
 		}
 	}
 
-	// 10. Store license metadata on company
+	// 11. Store license metadata on company
 	companiesStore.setLicenseData(company.id, license);
 
-	// 11. Save page state
+	// 12. Save page state
 	const currentPage = companiesStore.currentPage;
 	if (currentPage) {
 		const newState = {

@@ -1,5 +1,7 @@
 import type { LicenseInfo } from '$lib/types';
 import {
+	FEATURE_MAP,
+	SKU_MAP,
 	mapFeatures,
 	groupByPackage,
 	getUniqueSkus,
@@ -24,6 +26,8 @@ export interface LicenseSelections {
 	mappingResult: MappingResult;
 	bitsByPackage: Record<string, string[]>;
 	skus: string[];
+	removedBitsByPackage: Record<string, string[]>;
+	removedSkus: string[];
 }
 
 /**
@@ -75,6 +79,43 @@ export function getLicenseSelections(license: LicenseInfo): LicenseSelections {
 	const mappingResult = mapFeatures(license.features);
 	const bitsByPackage = groupByPackage(mappingResult.mappedFeatures);
 	const uniqueSkus = getUniqueSkus(mappingResult.mappedSkus);
+	const notCheckedBits = new Set<string>();
+	const removedBitsByPackage: Record<string, string[]> = {};
+	const removedSkus: string[] = [];
+	const checkedBits = new Set(mappingResult.mappedFeatures.map((feature) => feature.bit));
+	const checkedSkus = new Set(mappingResult.mappedSkus.map((sku) => sku.sku));
+
+	if (license.notCheckedFeatures) {
+		for (const feature of license.notCheckedFeatures) {
+			const mapping = FEATURE_MAP[feature];
+			if (mapping) {
+				if (checkedBits.has(mapping.bit)) {
+					continue;
+				}
+				notCheckedBits.add(mapping.bit);
+				if (!removedBitsByPackage[mapping.package]) {
+					removedBitsByPackage[mapping.package] = [];
+				}
+				if (!removedBitsByPackage[mapping.package].includes(mapping.bit)) {
+					removedBitsByPackage[mapping.package].push(mapping.bit);
+				}
+				continue;
+			}
+
+			const sku = SKU_MAP[feature];
+			if (sku && !checkedSkus.has(sku) && !removedSkus.includes(sku)) {
+				removedSkus.push(sku);
+			}
+		}
+	}
+
+	for (const [pkg, bits] of Object.entries(bitsByPackage)) {
+		if (!removedBitsByPackage[pkg]) {
+			continue;
+		}
+		const removeSet = new Set(removedBitsByPackage[pkg]);
+		bitsByPackage[pkg] = bits.filter((bit) => !removeSet.has(bit));
+	}
 
 	// Profile dataset special handling
 	if (license.isProfile) {
@@ -161,6 +202,9 @@ export function getLicenseSelections(license: LicenseInfo): LicenseSelections {
 					bitsByPackage['SC-Mill-5Axis'] = [];
 				}
 				for (const bit of sim5xBits) {
+					if (notCheckedBits.has(bit)) {
+						continue;
+					}
 					if (!bitsByPackage['SC-Mill-5Axis'].includes(bit)) {
 						bitsByPackage['SC-Mill-5Axis'].push(bit);
 					}
@@ -172,9 +216,13 @@ export function getLicenseSelections(license: LicenseInfo): LicenseSelections {
 		}
 	}
 
+	const filteredSkus = uniqueSkus.filter((sku) => !removedSkus.includes(sku));
+
 	return {
 		mappingResult,
 		bitsByPackage,
-		skus: uniqueSkus
+		skus: filteredSkus,
+		removedBitsByPackage,
+		removedSkus
 	};
 }

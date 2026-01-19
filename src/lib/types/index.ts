@@ -136,6 +136,8 @@ export interface LicenseInfo {
 
 	// Extracted features (raw from PDF)
 	features: string[];
+	// Features explicitly marked as Not Checked in Salesforce text
+	notCheckedFeatures?: string[];
 
 	// Import metadata
 	importedAt: number; // Timestamp of import
