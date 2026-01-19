@@ -144,6 +144,10 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 
 	const isProfile = !!(profileNo || profileName);
 
+	// Extract Sim 5x Level for profile datasets
+	// Values: "3 Axis", "3/4 Axis", or blank
+	const sim5xLevel = extractField(text, 'Sim 5x Level') || extractField(text, 'Sim5xLevel') || '';
+
 	// Determine if this is a network license
 	const isNetwork = extractChecked(text, 'Net Dongle');
 
@@ -200,6 +204,7 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 		isNetworkLicense: isNetwork, // Only true if Net Dongle is checked (product keys are NOT always network)
 		isProfile,
 		profileNo,
+		sim5xLevel: sim5xLevel || undefined, // "3 Axis", "3/4 Axis", or undefined if blank
 		maintenanceType,
 		maintenanceStart,
 		maintenanceEnd,
@@ -261,6 +266,7 @@ export function parseSalesforceText(text: string): ParseResult {
 		isNetworkLicense: headerInfo.isNetworkLicense || false,
 		isProfile: headerInfo.isProfile || false,
 		profileNo: headerInfo.profileNo,
+		sim5xLevel: headerInfo.sim5xLevel,
 		maintenanceType: headerInfo.maintenanceType || '',
 		maintenanceStart: headerInfo.maintenanceStart || '',
 		maintenanceEnd: headerInfo.maintenanceEnd || '',

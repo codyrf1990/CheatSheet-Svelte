@@ -186,31 +186,84 @@ export function importLicense(
 			bitsByPackage['SC-Mill'].push('Machinist');
 		}
 
-		// Profile Sim 5x Level logic:
-		// Sim 5x checked + Sim 5x Level blank + HSS = "everything" (all SIM5X group bits)
+		// Profile Sim 5x Level logic (profiles only):
+		// | Sim 5x | Level       | Result                          |
+		// |--------|-------------|-------------------------------- |
+		// | 0      | Any         | None                            |
+		// | 1      | "3 Axis"    | HSS-Maint only                  |
+		// | 1      | "3/4 Axis"  | HSS-Maint + Sim4x-Maint         |
+		// | 1      | Blank       | All 5-axis bits + HSS           |
+		// | 1      | Unknown     | Restricted (no 5-axis)          |
 		const hasSim5x = license.features.some(
 			(f) => f === 'Sim 5x' || f === 'Sim5x' || f === 'Simultaneous 5x' || f === 'Simultanous 5x'
 		);
-		const hasHSS = license.features.includes('HSS');
-		// Sim 5x Level blank means no specific level feature was checked
-		const hasSimLevel = license.features.some((f) => f.includes('Sim 5x Level') || f.includes('Sim5xLevel'));
-
-		if (hasSim5x && hasHSS && !hasSimLevel) {
-			// Add all SIM5X group bits
-			if (!bitsByPackage['SC-Mill-5Axis']) {
-				bitsByPackage['SC-Mill-5Axis'] = [];
+		const sim5xLevel = license.sim5xLevel?.trim() || '';
+		const sim5xBits = [
+			'Sim5x',
+			'Swarf machining',
+			'5x Drill',
+			'Contour 5x',
+			'Convert5X',
+			'Auto 3+2 Roughing'
+		];
+		const removeSim5xBits = (removeSim4x = false): void => {
+			const existingBits = bitsByPackage['SC-Mill-5Axis'];
+			if (!existingBits) {
+				return;
 			}
-			const sim5xBits = [
-				'Sim5x',
-				'Swarf machining',
-				'5x Drill',
-				'Contour 5x',
-				'Convert5X',
-				'Auto 3+2 Roughing'
-			];
-			for (const bit of sim5xBits) {
-				if (!bitsByPackage['SC-Mill-5Axis'].includes(bit)) {
-					bitsByPackage['SC-Mill-5Axis'].push(bit);
+			const removeSet = new Set(sim5xBits);
+			if (removeSim4x) {
+				removeSet.add('Sim4x');
+			}
+			bitsByPackage['SC-Mill-5Axis'] = existingBits.filter((bit) => !removeSet.has(bit));
+		};
+
+		if (hasSim5x) {
+			// Normalize level value for comparison
+			const levelLower = sim5xLevel.toLowerCase();
+			const is3Axis = levelLower === '3 axis' || levelLower === '1' || levelLower === '3axis';
+			const is34Axis = levelLower === '3/4 axis' || levelLower === '3/4axis';
+			const isBlank = sim5xLevel === '';
+			const isUnknown = !is3Axis && !is34Axis && !isBlank;
+
+			if (is3Axis || isUnknown) {
+				// Sim 5x = 1, Level "3 Axis" or "1": HSS-Maint only (no 5-axis bits added)
+				removeSim5xBits(true);
+				if (!uniqueSkus.includes('HSS-Maint')) {
+					uniqueSkus.push('HSS-Maint');
+				}
+			} else if (is34Axis) {
+				// Sim 5x = 1, Level "3/4 Axis": HSS-Maint + Sim4x-Maint + Sim4x bit
+				removeSim5xBits();
+				if (!uniqueSkus.includes('HSS-Maint')) {
+					uniqueSkus.push('HSS-Maint');
+				}
+				if (!uniqueSkus.includes('Sim4x-Maint')) {
+					uniqueSkus.push('Sim4x-Maint');
+				}
+				// Also add Sim4x bit
+				if (!bitsByPackage['SC-Mill-5Axis']) {
+					bitsByPackage['SC-Mill-5Axis'] = [];
+				}
+				if (!bitsByPackage['SC-Mill-5Axis'].includes('Sim4x')) {
+					bitsByPackage['SC-Mill-5Axis'].push('Sim4x');
+				}
+			} else if (isBlank) {
+				// Sim 5x = 1, Level blank: All 5-axis bits + HSS + Sim5x-Maint
+				if (!bitsByPackage['SC-Mill-5Axis']) {
+					bitsByPackage['SC-Mill-5Axis'] = [];
+				}
+				for (const bit of sim5xBits) {
+					if (!bitsByPackage['SC-Mill-5Axis'].includes(bit)) {
+						bitsByPackage['SC-Mill-5Axis'].push(bit);
+					}
+				}
+				// Add Sim5x-Maint for full 5-axis package
+				if (!uniqueSkus.includes('Sim5x-Maint')) {
+					uniqueSkus.push('Sim5x-Maint');
+				}
+				if (!uniqueSkus.includes('HSS-Maint')) {
+					uniqueSkus.push('HSS-Maint');
 				}
 			}
 		}

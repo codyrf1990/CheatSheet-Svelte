@@ -126,6 +126,7 @@ export interface LicenseInfo {
 	isNetworkLicense: boolean; // Net Dongle checkbox
 	isProfile: boolean; // True if Profile format (has Profile No.)
 	profileNo?: string; // Profile number (e.g., "1", "2") for profile pages
+	sim5xLevel?: string; // Sim 5x Level value: "3 Axis", "3/4 Axis", or blank
 
 	// Maintenance
 	maintenanceType: string; // 'SC', 'SC+SW', etc.

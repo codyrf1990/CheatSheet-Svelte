@@ -201,3 +201,37 @@ solidcam-sync-username
 3. **Plugin order:** tailwindcss → sveltekit → pwa
 4. **Firebase:** Check `browser` before any Firebase calls (SSR safety)
 5. **Accessibility:** WCAG AA compliance, keyboard navigation, ARIA labels
+
+## License Import
+
+Import from Salesforce dongle page text (Ctrl+A, Ctrl+C). Parser: `src/lib/utils/salesforceParser.ts`
+
+### License Scenarios
+
+| Scenario               | Dongle No. | Net Dongle  | Page Name    |
+| ---------------------- | ---------- | ----------- | ------------ |
+| Hardware Dongle        | 5 digits   | Not Checked | `77518`      |
+| Network Dongle (NWD)   | 5 digits   | Checked     | `NWD 77518`  |
+| Network Product Key    | >5 digits  | Checked     | `NPK 7452`   |
+| Standalone Product Key | >5 digits  | Not Checked | `SPK 8575`   |
+| Profile Only           | Profile #  | NPK/NWD     | `P5801`      |
+
+### Profile Special Handling
+
+1. **Auto-add Modeler & Machinist** - Always selected for profiles
+2. **C-axes mapping** - `"Simultaneous 4-axes(C axes)"` → C-axes (Wrap) in SC-Mill
+3. **Sim 5x Level logic** (profiles only):
+
+| Sim 5x | Level       | Result                          |
+| ------ | ----------- | ------------------------------- |
+| 0      | Any         | None                            |
+| 1      | "3 Axis"    | HSS-Maint only                  |
+| 1      | "3/4 Axis"  | HSS-Maint + Sim4x-Maint         |
+| 1      | Blank       | All 5-axis bits + Sim5x-Maint   |
+
+### Key Files
+
+- `src/lib/utils/salesforceParser.ts` - Parse Salesforce text
+- `src/lib/utils/featureMapper.ts` - Map features to bits/SKUs
+- `src/lib/services/licenseImport.ts` - Import orchestration
+- `src/lib/components/ui/ImportLicenseModal.svelte` - UI
