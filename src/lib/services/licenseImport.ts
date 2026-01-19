@@ -20,6 +20,19 @@ import { packagesStore } from '$lib/stores/packages.svelte';
 import { panelsStore } from '$lib/stores/panels.svelte';
 
 const MAINTENANCE_PANEL_ID = 'maintenance-skus';
+const PACKAGE_BIT_SKUS = new Set([
+	'25M-Maint',
+	'EdgeBreak-Maint',
+	'HSM-Maint',
+	'HSS-Maint',
+	'iMach2D-Maint',
+	'iMach3D-Maint',
+	'MachSim-Maint',
+	'Multiaxis-Maint',
+	'Sim4x-Maint',
+	'Sim5x-Maint',
+	'Turn-Maint'
+]);
 
 /**
  * Generate a meaningful page name from license info
@@ -151,10 +164,16 @@ export function importLicense(
 	let targetPage: { id: string; name: string } | undefined = company.pages.find(p => p.name === pageName);
 
 	if (!targetPage) {
-		// Create a new page for this dongle
-		const newPage = companiesStore.createPage(pageName);
-		if (newPage) {
-			targetPage = newPage;
+		// For new companies, rename the default P1 page instead of creating a new one
+		if (isNewCompany && company.pages.length === 1 && company.pages[0].name === 'P1') {
+			companiesStore.renamePage(company.pages[0].id, pageName);
+			targetPage = { id: company.pages[0].id, name: pageName };
+		} else {
+			// Create a new page for this dongle
+			const newPage = companiesStore.createPage(pageName);
+			if (newPage) {
+				targetPage = newPage;
+			}
 		}
 	}
 
@@ -187,17 +206,23 @@ export function importLicense(
 		}
 
 		// Profile Sim 5x Level logic (profiles only):
-		// All Sim 5x levels get HSS bit + HSS-Maint, then:
+		// All Sim 5x levels get HSS bit, then:
 		// | Sim 5x | Level       | Additional                      |
 		// |--------|-------------|-------------------------------- |
 		// | 0      | Any         | None                            |
 		// | 1      | "3 Axis"    | (HSS only)                      |
-		// | 1      | "3/4 Axis"  | Sim4x bit + Sim4x-Maint         |
-		// | 1      | Blank       | All 5-axis bits + Sim5x-Maint   |
-		// | 1      | Unknown     | (HSS only - restricted)         |
-		const hasSim5x = license.features.some(
-			(f) => f === 'Sim 5x' || f === 'Sim5x' || f === 'Simultaneous 5x' || f === 'Simultanous 5x'
-		);
+		// | 1      | "3/4 Axis"  | Sim4x bit                       |
+		// | 1      | Blank/Unknown | All 5-axis bits + Sim4x bit    |
+		const hasSim5x = license.features.some((f) => {
+			// Normalize whitespace and compare case-insensitively
+			const normalized = f.replace(/\s+/g, ' ').trim().toLowerCase();
+			return (
+				normalized === 'sim 5x' ||
+				normalized === 'sim5x' ||
+				normalized === 'simultaneous 5x' ||
+				normalized === 'simultanous 5x'
+			);
+		});
 		const sim5xLevel = license.sim5xLevel?.trim() || '';
 		const sim5xBits = [
 			'Sim5x',
@@ -220,12 +245,9 @@ export function importLicense(
 		};
 
 		if (hasSim5x) {
-			// All Sim 5x levels require HSS bit and HSS-Maint
+			// All Sim 5x levels require HSS bit
 			if (!bitsByPackage['SC-Mill'].includes('HSS')) {
 				bitsByPackage['SC-Mill'].push('HSS');
-			}
-			if (!uniqueSkus.includes('HSS-Maint')) {
-				uniqueSkus.push('HSS-Maint');
 			}
 
 			// Normalize level value for comparison
@@ -234,16 +256,14 @@ export function importLicense(
 			const is34Axis = levelLower === '3/4 axis' || levelLower === '3/4axis';
 			const isBlank = sim5xLevel === '';
 			const isUnknown = !is3Axis && !is34Axis && !isBlank;
+			const isBlankOrUnknown = isBlank || isUnknown;
 
-			if (is3Axis || isUnknown) {
+			if (is3Axis) {
 				// Sim 5x = 1, Level "3 Axis" or "1": HSS only (no 5-axis bits)
 				removeSim5xBits(true);
 			} else if (is34Axis) {
-				// Sim 5x = 1, Level "3/4 Axis": HSS + Sim4x + Sim4x-Maint
+				// Sim 5x = 1, Level "3/4 Axis": HSS + Sim4x
 				removeSim5xBits();
-				if (!uniqueSkus.includes('Sim4x-Maint')) {
-					uniqueSkus.push('Sim4x-Maint');
-				}
 				// Also add Sim4x bit
 				if (!bitsByPackage['SC-Mill-5Axis']) {
 					bitsByPackage['SC-Mill-5Axis'] = [];
@@ -251,8 +271,8 @@ export function importLicense(
 				if (!bitsByPackage['SC-Mill-5Axis'].includes('Sim4x')) {
 					bitsByPackage['SC-Mill-5Axis'].push('Sim4x');
 				}
-			} else if (isBlank) {
-				// Sim 5x = 1, Level blank: All 5-axis bits + HSS + Sim5x-Maint
+			} else if (isBlankOrUnknown) {
+				// Sim 5x = 1, Level blank/unknown: All 5-axis bits + HSS + Sim4x
 				if (!bitsByPackage['SC-Mill-5Axis']) {
 					bitsByPackage['SC-Mill-5Axis'] = [];
 				}
@@ -261,9 +281,8 @@ export function importLicense(
 						bitsByPackage['SC-Mill-5Axis'].push(bit);
 					}
 				}
-				// Add Sim5x-Maint for full 5-axis package
-				if (!uniqueSkus.includes('Sim5x-Maint')) {
-					uniqueSkus.push('Sim5x-Maint');
+				if (!bitsByPackage['SC-Mill-5Axis'].includes('Sim4x')) {
+					bitsByPackage['SC-Mill-5Axis'].push('Sim4x');
 				}
 			}
 		}
@@ -276,9 +295,15 @@ export function importLicense(
 		totalBitsImported += added;
 	}
 
-	// 8. Add maintenance SKUs to panel (union with existing)
+	// 8. Remove package-backed SKUs and add remaining maintenance SKUs
 	let skusImported = 0;
-	for (const sku of uniqueSkus) {
+	for (const sku of PACKAGE_BIT_SKUS) {
+		if (panelsStore.hasItem(MAINTENANCE_PANEL_ID, sku)) {
+			panelsStore.removeItem(MAINTENANCE_PANEL_ID, sku);
+		}
+	}
+	const skusToAdd = uniqueSkus.filter((sku) => !PACKAGE_BIT_SKUS.has(sku));
+	for (const sku of skusToAdd) {
 		if (!panelsStore.hasItem(MAINTENANCE_PANEL_ID, sku)) {
 			panelsStore.addItem(MAINTENANCE_PANEL_ID, sku);
 			skusImported++;

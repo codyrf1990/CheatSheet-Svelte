@@ -37,15 +37,37 @@ function escapeRegex(str: string): string {
 }
 
 /**
+ * Normalize whitespace in text - converts non-breaking spaces and other Unicode
+ * whitespace to regular spaces for consistent matching
+ */
+function normalizeWhitespace(text: string): string {
+	return text.replace(/[\u00a0\u2000-\u200b\u202f\u205f\u3000]/g, ' ');
+}
+
+/**
  * Extract a header field value from Salesforce text
  * Matches "Field Name\tvalue" patterns (tab-separated)
  */
 function extractField(text: string, fieldName: string): string {
-	// Match field name followed by whitespace and value (until tab, 2+ spaces, newline, or end)
-	// Salesforce copy/paste uses tabs between fields: "Dongle No.\t77518\tMaintenance Type\tSC"
-	const regex = new RegExp(fieldName + '\\s+([^\\n\\t]+?)(?=\\t|\\s{2,}|\\n|$)', 'i');
-	const match = text.match(regex);
-	return match?.[1]?.trim() || '';
+	// Normalize whitespace for consistent matching
+	const normalizedText = normalizeWhitespace(text);
+	// Make field name flexible - allow any whitespace between words
+	const fieldParts = fieldName.trim().split(/\s+/);
+	const flexibleField = fieldParts.map(escapeRegex).join('\\s+');
+	// Match field name followed by tab/whitespace and capture value until next tab or newline
+	// Use a more restrictive pattern to avoid capturing next field names when value is empty
+	// The value capture group allows empty (using *) and stops at tab or newline
+	const regex = new RegExp(flexibleField + '\\t([^\\n\\t]*)(?=\\t|\\n|$)', 'i');
+	const match = normalizedText.match(regex);
+	const value = match?.[1]?.trim() || '';
+
+	// If the captured value looks like a field name (contains common Salesforce field patterns),
+	// it means the actual value was empty and we spilled into the next field
+	if (value && /^[A-Z][a-z].*(?:Checked|Type|No\.|Name|Date|Level|Version)/.test(value)) {
+		return ''; // Treat as empty - we captured a field name, not a value
+	}
+
+	return value;
 }
 
 /**
@@ -53,8 +75,12 @@ function extractField(text: string, fieldName: string): string {
  * Returns true if "Field Name    Checked" (not "Not Checked")
  */
 function extractChecked(text: string, fieldName: string): boolean {
-	const regex = new RegExp(fieldName + '\\s+Checked(?!\\s*Not)', 'i');
-	return regex.test(text);
+	const normalizedText = normalizeWhitespace(text);
+	// Make field name flexible - allow any whitespace between words
+	const fieldParts = fieldName.trim().split(/\s+/);
+	const flexibleField = fieldParts.map(escapeRegex).join('\\s+');
+	const regex = new RegExp(flexibleField + '\\s+Checked(?!\\s*Not)', 'i');
+	return regex.test(normalizedText);
 }
 
 /**
@@ -67,7 +93,9 @@ export function validateSalesforceText(text: string): ValidationResult {
 
 	// Must contain Dongle No. field OR Profile Name/No. (for profile-only pages)
 	const hasDongleNo = text.includes('Dongle No.');
-	const hasProfileInfo = text.includes('Profile Name') || text.includes('Profile No.');
+	// Check for explicit fields OR "Profile-XXXX" pattern (when Information section is collapsed)
+	const hasProfileInfo =
+		text.includes('Profile Name') || text.includes('Profile No.') || /Profile-\d+/.test(text);
 
 	if (!hasDongleNo && !hasProfileInfo) {
 		return {
@@ -106,8 +134,8 @@ function isProductKey(dongleNo: string): boolean {
  * Parse header information from Salesforce text
  */
 export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
-	const dongleNo = extractField(text, 'Dongle No\\.');
-	const serialNo = extractField(text, 'Serial No\\.');
+	const dongleNo = extractField(text, 'Dongle No.');
+	const serialNo = extractField(text, 'Serial No.');
 	const customer = extractField(text, 'Customer');
 	const dongleTypeRaw = extractField(text, 'Dongle Type');
 	const maintenanceType = extractField(text, 'Maintenance Type');
@@ -119,7 +147,7 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 	const solidcamVersion = extractField(text, 'SolidCAM Version');
 
 	// Extract profile info (for Profile pages)
-	let profileNo = extractField(text, 'Profile No\\.');
+	let profileNo = extractField(text, 'Profile No.');
 	let profileName = extractField(text, 'Profile Name');
 
 	// If no explicit Profile Name field, look for "Profile-XXXX" pattern at start of text
@@ -145,8 +173,14 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 	const isProfile = !!(profileNo || profileName);
 
 	// Extract Sim 5x Level for profile datasets
-	// Values: "3 Axis", "3/4 Axis", or blank
-	const sim5xLevel = extractField(text, 'Sim 5x Level') || extractField(text, 'Sim5xLevel') || '';
+	// Valid values: "3 Axis", "3/4 Axis", "1", or blank
+	// Any other value indicates parse error - default to blank
+	const sim5xLevelRaw =
+		extractField(text, 'Sim 5x Level') || extractField(text, 'Sim5xLevel') || '';
+	const validSim5xLevels = ['', '3 axis', '3/4 axis', '1', '3axis', '3/4axis'];
+	const sim5xLevel = validSim5xLevels.includes(sim5xLevelRaw.toLowerCase())
+		? sim5xLevelRaw
+		: ''; // Invalid value = treat as blank
 
 	// Determine if this is a network license
 	const isNetwork = extractChecked(text, 'Net Dongle');
@@ -177,9 +211,19 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 	// - Network Dongle (NWD): 5-digit dongle + network
 	// - Network Product Key (NPK): Long key + network
 	// - Standalone Product Key (SPK): Long key, no network
-	// - Profile: Has profile number (can be NPK or NWD underneath)
+	// - Profile: Has profile number (can be NPK or NWD underneath, never SPK or hardware)
 	let displayType = '';
-	if (isKey && isNetwork) {
+	if (isProfile) {
+		// Profile datasets are always network-based (NPK or NWD, never SPK or hardware)
+		if (isKey) {
+			displayType = 'Profile (NPK)';
+		} else if (isNetwork) {
+			displayType = 'Profile (NWD)';
+		} else {
+			// Can't determine underlying type, but it's still a network license
+			displayType = 'Profile (Network)';
+		}
+	} else if (isKey && isNetwork) {
 		// Long number + network = Network Product Key
 		displayType = 'Network Product Key';
 	} else if (isKey && !isNetwork) {
@@ -219,12 +263,19 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 export function parseCheckedFeatures(text: string): string[] {
 	const features: string[] = [];
 
+	// Normalize whitespace in text (non-breaking spaces, multiple spaces, etc.)
+	const normalizedText = normalizeWhitespace(text);
+
 	for (const feature of ALL_KNOWN_FEATURES) {
 		// Build regex: Feature name followed by whitespace and "Checked"
 		// Use negative lookahead to exclude "Not Checked"
-		const regex = new RegExp(escapeRegex(feature) + '\\s+Checked(?!\\s*Not)', 'i');
+		// Split feature name on spaces and join with \s+ to match any whitespace between words
+		// This handles cases like "Sim 5x" matching "Sim  5x" or "Sim\t5x"
+		const featureParts = feature.trim().split(/\s+/);
+		const flexiblePattern = featureParts.map(escapeRegex).join('\\s+');
+		const regex = new RegExp(flexiblePattern + '\\s+Checked(?!\\s*Not)', 'i');
 
-		if (regex.test(text)) {
+		if (regex.test(normalizedText)) {
 			// Avoid duplicates (some features have multiple spellings in ALL_KNOWN_FEATURES)
 			if (!features.includes(feature)) {
 				features.push(feature);
