@@ -35,7 +35,13 @@
 	let editingPageName = $state('');
 	let dropdownTriggerRef = $state<HTMLButtonElement | null>(null);
 	let dialogType = $state<
-		'new-company' | 'rename-company' | 'rename-page' | 'delete-company' | 'delete-page' | 'reset-order' | null
+		| 'new-company'
+		| 'rename-company'
+		| 'rename-page'
+		| 'delete-company'
+		| 'delete-page'
+		| 'reset-order'
+		| null
 	>(null);
 	let dialogTargetId = $state<string | null>(null);
 	let dialogTargetLabel = $state('');
@@ -67,7 +73,10 @@
 	});
 
 	let isConfirmDialog = $derived(
-		() => dialogType === 'delete-company' || dialogType === 'delete-page' || dialogType === 'reset-order'
+		() =>
+			dialogType === 'delete-company' ||
+			dialogType === 'delete-page' ||
+			dialogType === 'reset-order'
 	);
 	let dialogTitle = $derived(() => {
 		switch (dialogType) {
@@ -1077,37 +1086,6 @@
 		font-size: 0.55rem;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
-	}
-
-	.cluster-btn--add {
-		background: linear-gradient(135deg, #e2c15b 0%, #b4891c 100%);
-		color: #1a1a1a;
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
-	}
-
-	.cluster-btn--remove {
-		background: rgba(255, 255, 255, 0.08);
-		color: rgba(255, 255, 255, 0.85);
-	}
-
-	.cluster-btn--remove.is-active {
-		background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-		color: #fff;
-	}
-
-	.cluster-btn--order {
-		background: rgba(255, 255, 255, 0.08);
-		color: rgba(255, 255, 255, 0.88);
-	}
-
-	.cluster-btn--order.is-active {
-		background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
-		color: #1a1a1a;
-	}
-
-	.cluster-btn--reset {
-		background: rgba(255, 255, 255, 0.06);
-		color: rgba(255, 255, 255, 0.7);
 	}
 
 	/* Context Menu */

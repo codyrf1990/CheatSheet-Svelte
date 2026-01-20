@@ -74,13 +74,11 @@
 
 	// Drag and drop state for reordering
 	let draggedIndex = $state<number | null>(null);
-	let draggedBit = $state<string | null>(null);
 
 	function handleDragStart(e: DragEvent, index: number, bit: string) {
 		if (!editMode) return;
 		e.stopPropagation();
 		draggedIndex = index;
-		draggedBit = bit;
 		if (e.dataTransfer) {
 			e.dataTransfer.effectAllowed = 'move';
 			// Include bit name and source group for cross-group moves
@@ -112,7 +110,6 @@
 					// Cross-group move: from loose or another group to this group
 					packagesStore.moveBitToGroup(packageCode, data.bit, group.masterId);
 					draggedIndex = null;
-					draggedBit = null;
 					return;
 				}
 			} catch {
@@ -128,7 +125,6 @@
 			packagesStore.setOrder(packageCode, newOrder);
 		}
 		draggedIndex = null;
-		draggedBit = null;
 	}
 
 	// Handle drop on the sub-bits container itself
@@ -149,7 +145,6 @@
 			}
 		}
 		draggedIndex = null;
-		draggedBit = null;
 	}
 </script>
 

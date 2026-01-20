@@ -126,7 +126,6 @@ function selectAll(packageCode: string, allBits: string[]): void {
  */
 function selectBits(packageCode: string, bits: string[]): number {
 	const state = getState(packageCode);
-	const beforeCount = state.selectedBits.length;
 
 	// Add bits that aren't already selected (union)
 	const newBits = bits.filter((bit) => !state.selectedBits.includes(bit));

@@ -36,7 +36,8 @@ export default defineConfig({
 				]
 			},
 			workbox: {
-				globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,webmanifest}']
+				globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,webmanifest}'],
+				modifyURLPrefix: {}
 			}
 		})
 	]

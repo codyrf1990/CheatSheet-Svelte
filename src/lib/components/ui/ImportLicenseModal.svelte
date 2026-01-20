@@ -42,9 +42,7 @@
 		if (needsCompanyName && !companyNameOverride.trim()) return false;
 		return true;
 	});
-	let pageName = $derived.by(() =>
-		parsedLicense ? getPageNameForLicense(parsedLicense) : 'P1'
-	);
+	let pageName = $derived.by(() => (parsedLicense ? getPageNameForLicense(parsedLicense) : 'P1'));
 
 	// Reset state when modal opens
 	$effect(() => {
@@ -114,7 +112,7 @@
 				} else {
 					toastStore.error(importResult.errors?.[0] || 'Import failed');
 				}
-			} catch (error) {
+			} catch {
 				toastStore.error('Import failed');
 				modalState = 'preview';
 			}
@@ -158,7 +156,8 @@
 		<!-- Textarea for pasting Salesforce text -->
 		<div class="paste-section">
 			<p class="paste-instructions">
-				Open the dongle record in Salesforce, press <kbd>Ctrl+A</kbd> to select all, then <kbd>Ctrl+C</kbd> to copy. Paste below.
+				Open the dongle record in Salesforce, press <kbd>Ctrl+A</kbd> to select all, then
+				<kbd>Ctrl+C</kbd> to copy. Paste below.
 			</p>
 			<textarea
 				class="paste-textarea"
@@ -177,14 +176,12 @@ HSM           Checked    5-axes indexial  Not Checked"
 				<p class="error-message">{parseError}</p>
 			{/if}
 		</div>
-
 	{:else if modalState === 'parsing'}
 		<!-- Parsing indicator -->
 		<div class="loading-state">
 			<div class="spinner"></div>
 			<p>Parsing license data...</p>
 		</div>
-
 	{:else if modalState === 'preview'}
 		<!-- Preview of parsed data -->
 		<div class="preview-section">
@@ -251,7 +248,7 @@ HSM           Checked    5-axes indexial  Not Checked"
 					</button>
 					{#if showFeatures}
 						<ul class="features-list">
-							{#each parsedLicense.features as feature}
+							{#each parsedLicense.features as feature, index (index)}
 								<li>{feature}</li>
 							{/each}
 						</ul>
@@ -263,19 +260,21 @@ HSM           Checked    5-axes indexial  Not Checked"
 				</div>
 			{/if}
 		</div>
-
 	{:else if modalState === 'importing'}
 		<!-- Importing indicator -->
 		<div class="loading-state">
 			<div class="spinner"></div>
 			<p>Importing license...</p>
 		</div>
-
 	{:else if modalState === 'results'}
 		<!-- Import results -->
 		<div class="results-section">
 			{#if importResult}
-				<div class="result-card" class:success={importResult.success} class:error={!importResult.success}>
+				<div
+					class="result-card"
+					class:success={importResult.success}
+					class:error={!importResult.success}
+				>
 					<div class="result-icon">
 						{#if importResult.success}
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -315,7 +314,7 @@ HSM           Checked    5-axes indexial  Not Checked"
 					<div class="errors-section">
 						<h4>Errors</h4>
 						<ul class="errors-list">
-							{#each importResult.errors as error}
+							{#each importResult.errors as error, index (index)}
 								<li>{error}</li>
 							{/each}
 						</ul>

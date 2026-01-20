@@ -68,13 +68,11 @@
 
 	// Drag and drop state for reordering loose bits
 	let draggedIndex = $state<number | null>(null);
-	let draggedBit = $state<string | null>(null);
 
 	function handleDragStart(e: DragEvent, index: number, bit: string) {
 		if (!editMode) return;
 		e.stopPropagation();
 		draggedIndex = index;
-		draggedBit = bit;
 		if (e.dataTransfer) {
 			e.dataTransfer.effectAllowed = 'move';
 			// Include bit name and source group in drag data for cross-group moves
@@ -109,7 +107,6 @@
 						packagesStore.setLooseBitsOrder(pkg.code, currentOrder);
 					}
 					draggedIndex = null;
-					draggedBit = null;
 					return;
 				}
 			} catch {
@@ -125,7 +122,6 @@
 			packagesStore.setLooseBitsOrder(pkg.code, newOrder);
 		}
 		draggedIndex = null;
-		draggedBit = null;
 	}
 
 	// Handle drop on the loose bits container itself (not just on items)
@@ -151,7 +147,6 @@
 			}
 		}
 		draggedIndex = null;
-		draggedBit = null;
 	}
 </script>
 
