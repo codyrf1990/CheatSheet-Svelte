@@ -53,15 +53,15 @@ async function run(): Promise<void> {
 	const pageName = getPageNameForLicense(license);
 	const skusToAdd = selections.skus.filter((sku) => !PACKAGE_BIT_SKUS.has(sku));
 	const sim5xBits = selections.bitsByPackage['SC-Mill-5Axis'] ?? [];
-const hasSim5x = license.features.some((feature) => {
-	const normalized = feature.replace(/\s+/g, ' ').trim().toLowerCase();
-	return (
-		normalized === 'sim 5x' ||
-		normalized === 'sim5x' ||
-		normalized === 'simultaneous 5x' ||
-		normalized === 'simultanous 5x'
-	);
-});
+	const hasSim5x = license.features.some((feature) => {
+		const normalized = feature.replace(/\s+/g, ' ').trim().toLowerCase();
+		return (
+			normalized === 'sim 5x' ||
+			normalized === 'sim5x' ||
+			normalized === 'simultaneous 5x' ||
+			normalized === 'simultanous 5x'
+		);
+	});
 
 	console.log(`Customer: ${license.customer}`);
 	console.log(`Page name: ${pageName}`);

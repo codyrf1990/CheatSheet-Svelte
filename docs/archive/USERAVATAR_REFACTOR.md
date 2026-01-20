@@ -11,6 +11,7 @@
 **Principle**: Subtle sophistication - enhance without overwhelming.
 
 **Decisions locked**:
+
 - Breathing animation stays
 - Sign-out and settings buttons appear on hover (desktop)
 - On touch devices, tap to reveal actions
@@ -19,6 +20,7 @@
 - Background video plays by default
 
 **Files to modify**:
+
 1. `src/lib/components/layout/UserAvatar.svelte`
 2. `src/lib/stores/userPrefs.svelte.ts`
 3. `src/routes/+layout.svelte`
@@ -129,7 +131,8 @@
 }
 
 @keyframes containerPulse {
-	0%, 100% {
+	0%,
+	100% {
 		box-shadow:
 			0 4px 12px rgba(0, 0, 0, 0.15),
 			0 1px 3px rgba(0, 0, 0, 0.1),
@@ -238,7 +241,9 @@
 	align-items: center;
 	justify-content: center;
 	color: rgba(255, 255, 255, 0.7);
-	transition: color 200ms ease, transform 200ms ease;
+	transition:
+		color 200ms ease,
+		transform 200ms ease;
 }
 
 .status-connected .avatar-inner {
@@ -251,7 +256,8 @@
 }
 
 @keyframes avatarBreathe {
-	0%, 100% {
+	0%,
+	100% {
 		transform: scale(1);
 	}
 	50% {
@@ -437,36 +443,44 @@
 Add a settings button that appears alongside Sign out on hover. The settings panel is a small popover anchored to the settings button (not a full modal).
 
 **Behavior**:
+
 - Desktop: actions appear on hover, settings panel opens on click
 - Touch: tap avatar to reveal actions, tap settings to open panel
 - Close panel on outside click or Escape
 - Use `aria-expanded`, `aria-controls`, and `aria-label`
 
 **Implementation notes**:
+
 - Keep component public API unchanged (use `userPrefsStore` inside)
 - Add local state: `actionsVisible`, `settingsOpen`, `isTouch`
 - Detect touch with `window.matchMedia('(hover: none)')`
 - Add a document `pointerdown` listener to close the panel when clicking outside (cleanup on destroy)
 
 **Suggested structure**:
+
 ```svelte
 <div class="user-container" class:actions-visible={actionsVisible}>
-  ...
-  <div class="user-actions">
-    <button class="settings-button" aria-expanded={settingsOpen} aria-controls="user-settings-panel">
-      Settings
-    </button>
-    <button class="change-link" onclick={onLogout}>Sign out</button>
-  </div>
-  {#if settingsOpen}
-    <div id="user-settings-panel" class="settings-panel" role="dialog" aria-label="User settings">
-      <!-- Toggle goes here -->
-    </div>
-  {/if}
+	...
+	<div class="user-actions">
+		<button
+			class="settings-button"
+			aria-expanded={settingsOpen}
+			aria-controls="user-settings-panel"
+		>
+			Settings
+		</button>
+		<button class="change-link" onclick={onLogout}>Sign out</button>
+	</div>
+	{#if settingsOpen}
+		<div id="user-settings-panel" class="settings-panel" role="dialog" aria-label="User settings">
+			<!-- Toggle goes here -->
+		</div>
+	{/if}
 </div>
 ```
 
 **CSS**:
+
 - Mirror hover reveal behavior for `.settings-button` alongside `.change-link`
 - `.actions-visible` should also reveal actions (for touch)
 - Keep transitions on `opacity` and `transform` only
@@ -478,6 +492,7 @@ Add a settings button that appears alongside Sign out on hover. The settings pan
 **File**: `src/lib/stores/userPrefs.svelte.ts`
 
 Extend `UserPrefs` to include:
+
 ```typescript
 backgroundVideoPaused: boolean;
 ```
@@ -485,10 +500,11 @@ backgroundVideoPaused: boolean;
 Default: `false` (video plays by default).
 
 Add getters/setters:
+
 ```typescript
-function isBackgroundVideoPaused(): boolean
-function setBackgroundVideoPaused(paused: boolean): void
-function toggleBackgroundVideoPaused(): void
+function isBackgroundVideoPaused(): boolean;
+function setBackgroundVideoPaused(paused: boolean): void;
+function toggleBackgroundVideoPaused(): void;
 ```
 
 Make sure `loadPrefs()` and `save()` include this property.
@@ -500,23 +516,26 @@ Make sure `loadPrefs()` and `save()` include this property.
 **File**: `src/routes/+layout.svelte`
 
 The background video lives here. Add:
+
 - `bind:this` for the `<video>` element
 - `const backgroundVideoPaused = $derived(userPrefsStore.isBackgroundVideoPaused())`
 - `$effect` to `pause()`/`play()` when the preference changes
 
 **Important**:
+
 - `video.play()` returns a Promise; catch errors to avoid unhandled rejections
 - Keep `muted` for autoplay compatibility
 
 Example effect logic:
+
 ```typescript
 $effect(() => {
-  if (!videoRef) return;
-  if (backgroundVideoPaused) {
-    videoRef.pause();
-  } else {
-    videoRef.play().catch(() => {});
-  }
+	if (!videoRef) return;
+	if (backgroundVideoPaused) {
+		videoRef.pause();
+	} else {
+		videoRef.play().catch(() => {});
+	}
 });
 ```
 

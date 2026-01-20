@@ -14,16 +14,16 @@ Add an "Import License" option to the company context menu that parses **pasted 
 
 ## Key Decisions
 
-| Question | Decision |
-|----------|----------|
-| **Input method** | Text paste (Ctrl+A from Salesforce) - NOT PDF upload |
-| **Import count** | One dongle at a time |
-| **Parse trigger** | Click "Parse" button (not auto on paste) |
-| **Company name field** | Only editable if Customer field is missing |
-| **Page naming** | Dongle number (e.g., "77518") or last 4 of product key (e.g., "3a4b") |
-| **Existing company** | Merge to existing page if dongle found, else create new page |
-| **Multiple dongles** | Each dongle becomes a separate page within the company |
-| **Menu location** | Right-click company → "Import License" |
+| Question               | Decision                                                              |
+| ---------------------- | --------------------------------------------------------------------- |
+| **Input method**       | Text paste (Ctrl+A from Salesforce) - NOT PDF upload                  |
+| **Import count**       | One dongle at a time                                                  |
+| **Parse trigger**      | Click "Parse" button (not auto on paste)                              |
+| **Company name field** | Only editable if Customer field is missing                            |
+| **Page naming**        | Dongle number (e.g., "77518") or last 4 of product key (e.g., "3a4b") |
+| **Existing company**   | Merge to existing page if dongle found, else create new page          |
+| **Multiple dongles**   | Each dongle becomes a separate page within the company                |
+| **Menu location**      | Right-click company → "Import License"                                |
 
 ### Page Creation Logic
 
@@ -67,6 +67,7 @@ This is **100% reliable** - no image detection needed.
 When copying a dongle page, the text contains:
 
 ### Header Fields
+
 ```
 Dongle No.           77518
 Serial No.           4953CFDB
@@ -80,6 +81,7 @@ SolidCAM Version     2026
 ```
 
 ### Feature Checkboxes (SolidCAM Section)
+
 ```
 Hide Section - SolidCAMSolidCAM
 Modeler             Checked    C-axes (Wrap)           Checked
@@ -175,30 +177,30 @@ iMachining          Checked    5x Drill                Not Checked
 
 These SKUs appear in the Maintenance SKUs panel and should be checked when corresponding dongle bits are ON.
 
-| Maintenance SKU | Salesforce Feature | Notes |
-|-----------------|-------------------|-------|
-| 25M-Maint | Any bit from 25M group | Standalone 2.5D milling |
-| EdgeBreak-Maint | 5x Edge Breaking | Standalone Edge Breaking |
-| EdgeTrim-Maint | 5x Edge Trimming | Standalone Edge Trimming |
-| HSM-Maint | HSM | Standalone HSM |
-| HSS-Maint | HSS | Standalone HSS |
-| iMach2D-Maint | iMachining | Standalone iMachining 2D |
-| iMach3D-Maint | iMachining3D | Standalone iMachining 3D |
-| Lic-Net-Maint | Net Dongle = Checked | Network license |
-| MachSim-Maint | Machine Simulation | Standalone Machine Sim |
-| MTS-Maint | Multi Turret Sync | Includes Sim. Turning |
-| Multiaxis-Maint | Multi-Axis Roughing | Standalone Multiaxis |
-| Multiblade-Maint | MultiBlade 5x | Multiblade module |
-| Port-Maint | Port 5x | Port machining module |
-| Probe-Maint | Probe - Full | Solid Probe module |
-| Sim4x-Maint | Simultanous 4x | Standalone Sim 4-axis |
-| Sim5x-Maint | Simultanous 5x | Standalone Sim 5-axis |
-| SolidShop-Editor-Maint | Cimco | CIMCO Editor |
-| SolidShop-Sim-Maint | Editor Mode | SolidCAM for Operators |
-| Swiss-Maint | Swiss-Type | Swiss-Type turning |
-| Turn-Maint | SolidCAM Turning | Extra SKU for SC-Turn |
-| Vericut-Maint | Vericut | Vericut integration |
-| NPD-Maint | NO G-code = Checked | Non-posting dongle |
+| Maintenance SKU        | Salesforce Feature     | Notes                    |
+| ---------------------- | ---------------------- | ------------------------ |
+| 25M-Maint              | Any bit from 25M group | Standalone 2.5D milling  |
+| EdgeBreak-Maint        | 5x Edge Breaking       | Standalone Edge Breaking |
+| EdgeTrim-Maint         | 5x Edge Trimming       | Standalone Edge Trimming |
+| HSM-Maint              | HSM                    | Standalone HSM           |
+| HSS-Maint              | HSS                    | Standalone HSS           |
+| iMach2D-Maint          | iMachining             | Standalone iMachining 2D |
+| iMach3D-Maint          | iMachining3D           | Standalone iMachining 3D |
+| Lic-Net-Maint          | Net Dongle = Checked   | Network license          |
+| MachSim-Maint          | Machine Simulation     | Standalone Machine Sim   |
+| MTS-Maint              | Multi Turret Sync      | Includes Sim. Turning    |
+| Multiaxis-Maint        | Multi-Axis Roughing    | Standalone Multiaxis     |
+| Multiblade-Maint       | MultiBlade 5x          | Multiblade module        |
+| Port-Maint             | Port 5x                | Port machining module    |
+| Probe-Maint            | Probe - Full           | Solid Probe module       |
+| Sim4x-Maint            | Simultanous 4x         | Standalone Sim 4-axis    |
+| Sim5x-Maint            | Simultanous 5x         | Standalone Sim 5-axis    |
+| SolidShop-Editor-Maint | Cimco                  | CIMCO Editor             |
+| SolidShop-Sim-Maint    | Editor Mode            | SolidCAM for Operators   |
+| Swiss-Maint            | Swiss-Type             | Swiss-Type turning       |
+| Turn-Maint             | SolidCAM Turning       | Extra SKU for SC-Turn    |
+| Vericut-Maint          | Vericut                | Vericut integration      |
+| NPD-Maint              | NO G-code = Checked    | Non-posting dongle       |
 
 ---
 
@@ -207,6 +209,7 @@ These SKUs appear in the Maintenance SKUs panel and should be checked when corre
 These features have no corresponding bit or SKU and should be silently skipped:
 
 **Milling/General:**
+
 - SolidCAM 2.7D(CONSTANT Z)
 - Stl Support / STL Support
 - HSM Basic
@@ -215,19 +218,23 @@ These features have no corresponding bit or SKU and should be silently skipped:
 - Reduced HolesR
 
 **Turning:**
+
 - SolidCAM TurnMILL
 - SolidCAM TurnMill Level
 - SolidCAM Turn-Mill Options
 
 **5-Axis:**
+
 - Sim 5x Level (processed via special logic)
 - No HSS
 
 **Wire EDM:**
+
 - SolidCAM WireEDM 2 axes
 - SolidCAM WireEDM 2/4 axes
 
 **Integrations (not tracked):**
+
 - WinTool
 - TDM
 - Zoller integration
@@ -235,6 +242,7 @@ These features have no corresponding bit or SKU and should be silently skipped:
 - DNCTOOL For Dos
 
 **Other:**
+
 - GPX
 - Probe - Home define
 - Prismatic HSM
@@ -252,24 +260,24 @@ These features have no corresponding bit or SKU and should be silently skipped:
 
 ```typescript
 function parseHeaderInfo(text: string): LicenseInfo {
-  return {
-    dongleNo: extractField(text, 'Dongle No.'),
-    serialNo: extractField(text, 'Serial No.'),
-    customer: extractField(text, 'Customer'),
-    dongleType: extractField(text, 'Dongle Type'),
-    isNetwork: extractChecked(text, 'Net Dongle'),
-    maintenanceType: extractField(text, 'Maintenance Type'),
-    maintenanceStart: extractField(text, 'Maintenance Start Date'),
-    maintenanceEnd: extractField(text, 'Maintenance End Date'),
-    solidcamVersion: extractField(text, 'SolidCAM Version'),
-  };
+	return {
+		dongleNo: extractField(text, 'Dongle No.'),
+		serialNo: extractField(text, 'Serial No.'),
+		customer: extractField(text, 'Customer'),
+		dongleType: extractField(text, 'Dongle Type'),
+		isNetwork: extractChecked(text, 'Net Dongle'),
+		maintenanceType: extractField(text, 'Maintenance Type'),
+		maintenanceStart: extractField(text, 'Maintenance Start Date'),
+		maintenanceEnd: extractField(text, 'Maintenance End Date'),
+		solidcamVersion: extractField(text, 'SolidCAM Version')
+	};
 }
 
 function extractField(text: string, fieldName: string): string {
-  // Match "Field Name    value" pattern
-  const regex = new RegExp(fieldName + '\\s+([^\\n\\t]+)', 'i');
-  const match = text.match(regex);
-  return match?.[1]?.trim() || '';
+	// Match "Field Name    value" pattern
+	const regex = new RegExp(fieldName + '\\s+([^\\n\\t]+)', 'i');
+	const match = text.match(regex);
+	return match?.[1]?.trim() || '';
 }
 ```
 
@@ -277,27 +285,34 @@ function extractField(text: string, fieldName: string): string {
 
 ```typescript
 function parseCheckedFeatures(text: string): string[] {
-  const features: string[] = [];
+	const features: string[] = [];
 
-  // All known feature names
-  const knownFeatures = [
-    'Modeler', 'Machinist', 'SolidCAM Mill 2D', 'SolidCAM Mill 2.5D',
-    'SolidCAM Mill 3D', 'HSM', 'HSS', 'iMachining', 'iMachining3D',
-    // ... all features from FEATURE_MAP
-  ];
+	// All known feature names
+	const knownFeatures = [
+		'Modeler',
+		'Machinist',
+		'SolidCAM Mill 2D',
+		'SolidCAM Mill 2.5D',
+		'SolidCAM Mill 3D',
+		'HSM',
+		'HSS',
+		'iMachining',
+		'iMachining3D'
+		// ... all features from FEATURE_MAP
+	];
 
-  for (const feature of knownFeatures) {
-    // Look for "Feature    Checked" pattern (NOT "Not Checked")
-    const regex = new RegExp(
-      feature.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s+Checked(?!\\s*Not)',
-      'i'
-    );
-    if (regex.test(text)) {
-      features.push(feature);
-    }
-  }
+	for (const feature of knownFeatures) {
+		// Look for "Feature    Checked" pattern (NOT "Not Checked")
+		const regex = new RegExp(
+			feature.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s+Checked(?!\\s*Not)',
+			'i'
+		);
+		if (regex.test(text)) {
+			features.push(feature);
+		}
+	}
 
-  return features;
+	return features;
 }
 ```
 
@@ -305,22 +320,22 @@ function parseCheckedFeatures(text: string): string[] {
 
 ```typescript
 function validateSalesforceText(text: string): { valid: boolean; error?: string } {
-  // Must contain key Salesforce markers
-  if (!text.includes('Dongle No.')) {
-    return { valid: false, error: 'Not a valid Salesforce dongle page' };
-  }
+	// Must contain key Salesforce markers
+	if (!text.includes('Dongle No.')) {
+		return { valid: false, error: 'Not a valid Salesforce dongle page' };
+	}
 
-  // Must have SolidCAM section
-  if (!text.includes('SolidCAM') && !text.includes('Modeler')) {
-    return { valid: false, error: 'No SolidCAM features found' };
-  }
+	// Must have SolidCAM section
+	if (!text.includes('SolidCAM') && !text.includes('Modeler')) {
+		return { valid: false, error: 'No SolidCAM features found' };
+	}
 
-  // Must have at least one Checked/Not Checked
-  if (!text.includes('Checked')) {
-    return { valid: false, error: 'No checkbox states found' };
-  }
+	// Must have at least one Checked/Not Checked
+	if (!text.includes('Checked')) {
+		return { valid: false, error: 'No checkbox states found' };
+	}
 
-  return { valid: true };
+	return { valid: true };
 }
 ```
 
@@ -330,19 +345,19 @@ function validateSalesforceText(text: string): { valid: boolean; error?: string 
 
 ### Files to Modify
 
-| File | Changes |
-| ---- | ------- |
-| `src/lib/utils/salesforceParser.ts` | NEW - Parse Salesforce text |
-| `src/lib/services/licenseImport.ts` | Update to use text parsing |
+| File                                              | Changes                           |
+| ------------------------------------------------- | --------------------------------- |
+| `src/lib/utils/salesforceParser.ts`               | NEW - Parse Salesforce text       |
+| `src/lib/services/licenseImport.ts`               | Update to use text parsing        |
 | `src/lib/components/ui/ImportLicenseModal.svelte` | Replace file picker with textarea |
-| `src/lib/types/index.ts` | Update types if needed |
+| `src/lib/types/index.ts`                          | Update types if needed            |
 
 ### Files to Remove/Archive
 
-| File | Reason |
-| ---- | ------ |
+| File                         | Reason                         |
+| ---------------------------- | ------------------------------ |
 | `src/lib/utils/pdfParser.ts` | No longer needed (can archive) |
-| Analysis scripts (*.mjs) | No longer needed |
+| Analysis scripts (\*.mjs)    | No longer needed               |
 
 ---
 
@@ -370,6 +385,7 @@ paste → parsing → preview → importing → results
 ### State: parsing
 
 **UI:**
+
 - Spinner
 - "Parsing license data..."
 
@@ -403,12 +419,14 @@ paste → parsing → preview → importing → results
 ### State: importing
 
 **UI:**
+
 - Progress indicator
 - "Creating company..." / "Selecting bits..."
 
 ### State: results
 
 **UI:**
+
 - Success/failure summary
 - Company created/updated
 - Bits selected count
@@ -421,14 +439,14 @@ paste → parsing → preview → importing → results
 
 ## Key Differences from PDF Approach
 
-| Aspect | PDF Approach | Text Paste Approach |
-| ------ | ------------ | ------------------- |
-| Input | File picker, drag-drop | Textarea paste |
-| Parsing | Image detection (unreliable) | Text matching (100% reliable) |
-| Multiple imports | Batch file select | One at a time |
-| Complexity | High (pdf.js, image analysis) | Low (regex/string matching) |
-| Dependencies | pdfjs-dist | None |
-| Accuracy | ~60-70% | 100% |
+| Aspect           | PDF Approach                  | Text Paste Approach           |
+| ---------------- | ----------------------------- | ----------------------------- |
+| Input            | File picker, drag-drop        | Textarea paste                |
+| Parsing          | Image detection (unreliable)  | Text matching (100% reliable) |
+| Multiple imports | Batch file select             | One at a time                 |
+| Complexity       | High (pdf.js, image analysis) | Low (regex/string matching)   |
+| Dependencies     | pdfjs-dist                    | None                          |
+| Accuracy         | ~60-70%                       | 100%                          |
 
 ---
 
@@ -496,25 +514,25 @@ SolidCAM license PDFs are **flattened** - checkboxes are rendered as images, not
 
 **Files created:**
 
-| File | Purpose |
-| ---- | ------- |
+| File                                | Purpose                      |
+| ----------------------------------- | ---------------------------- |
 | `src/lib/utils/salesforceParser.ts` | Parse pasted Salesforce text |
 
 **Files modified:**
 
-| File | Changes |
-| ---- | ------- |
+| File                                              | Changes                                                      |
+| ------------------------------------------------- | ------------------------------------------------------------ |
 | `src/lib/components/ui/ImportLicenseModal.svelte` | Textarea-based UI with paste → parse → preview → import flow |
-| `src/lib/services/licenseImport.ts` | Uses salesforceParser, page-per-dongle logic |
+| `src/lib/services/licenseImport.ts`               | Uses salesforceParser, page-per-dongle logic                 |
 
 **Files removed:**
 
-| File | Reason |
-| ---- | ------ |
+| File                         | Reason                 |
+| ---------------------------- | ---------------------- |
 | `src/lib/utils/pdfParser.ts` | PDF approach abandoned |
-| `analyze-checkboxes.mjs` | PDF analysis script |
-| `check-pdf.mjs` | PDF analysis script |
-| `test-pdflib.mjs` | PDF analysis script |
+| `analyze-checkboxes.mjs`     | PDF analysis script    |
+| `check-pdf.mjs`              | PDF analysis script    |
+| `test-pdflib.mjs`            | PDF analysis script    |
 
 ---
 

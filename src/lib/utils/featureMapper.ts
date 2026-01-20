@@ -267,7 +267,11 @@ export function calculateImportStats(result: MappingResult): {
 	ignoredCount: number;
 } {
 	return {
-		totalFeatures: result.mappedFeatures.length + result.mappedSkus.length + result.unmappedFeatures.length + result.ignoredFeatures.length,
+		totalFeatures:
+			result.mappedFeatures.length +
+			result.mappedSkus.length +
+			result.unmappedFeatures.length +
+			result.ignoredFeatures.length,
 		mappedCount: result.mappedFeatures.length,
 		skuCount: result.mappedSkus.length,
 		unmappedCount: result.unmappedFeatures.length,

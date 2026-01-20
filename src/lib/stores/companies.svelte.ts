@@ -77,9 +77,7 @@ function deepCopy<T>(obj: T): T {
  * Old: { bits: [{text, checked}], groups: [{masterId, items: [{text, checked}]}] }
  * New: { selectedBits: string[], customBits: string[], order: string[], looseBitsOrder?: string[], groupMembership?: Record<string, string> }
  */
-function migratePackageState(
-	oldState: unknown
-): Record<string, PackageState> {
+function migratePackageState(oldState: unknown): Record<string, PackageState> {
 	if (!oldState || typeof oldState !== 'object') return {};
 
 	const result: Record<string, PackageState> = {};

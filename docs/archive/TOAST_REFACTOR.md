@@ -13,6 +13,7 @@
 **Principle**: "Less is more" - toasts should inform without demanding attention.
 
 **Files to modify**:
+
 1. `src/lib/components/ui/ToastContainer.svelte` - Main component
 2. `src/lib/stores/toast.svelte.ts` - Store logic
 
@@ -23,6 +24,7 @@
 **File**: `src/lib/components/ui/ToastContainer.svelte`
 
 **Current** (around line 60-70 in the template):
+
 ```svelte
 in:fly={{
 	x: prefersReducedMotion ? 0 : 120,
@@ -38,6 +40,7 @@ out:scale={{
 ```
 
 **Change to**:
+
 ```svelte
 in:fly={{
 	x: prefersReducedMotion ? 0 : 24,
@@ -53,15 +56,16 @@ out:fly={{
 ```
 
 **Rationale**:
+
 - Reduced travel distance (120px → 24px) for subtle appearance
 - Faster, snappier timing (400ms → 280ms)
 - Remove `backOut` bounce easing, use smooth `quintOut`
 - Exit slides slightly right instead of scaling (more natural)
 
 **Import change**: Add `quintIn` to imports if not present:
+
 ```svelte
-import { fly } from 'svelte/transition';
-import { quintOut, quintIn } from 'svelte/easing';
+import {fly} from 'svelte/transition'; import {(quintOut, quintIn)} from 'svelte/easing';
 ```
 
 Remove `backOut` and `scale` imports if no longer used.
@@ -73,11 +77,13 @@ Remove `backOut` and `scale` imports if no longer used.
 **File**: `src/lib/components/ui/ToastContainer.svelte`
 
 **Remove from template** (the `.toast-glow` div inside each toast):
+
 ```svelte
 <div class="toast-glow"></div>
 ```
 
 **Remove from styles** (entire block):
+
 ```css
 .toast-glow {
 	position: absolute;
@@ -117,6 +123,7 @@ Remove `backOut` and `scale` imports if no longer used.
 **Option A - Remove entirely (recommended)**:
 
 Remove the `::before` pseudo-element from `.toast-icon`:
+
 ```css
 /* DELETE this entire block */
 .toast-icon::before {
@@ -146,6 +153,7 @@ Remove the `::before` pseudo-element from `.toast-icon`:
 **Option B - Make very subtle (if pulse desired)**:
 
 Replace with single subtle pulse on entry only:
+
 ```css
 .toast-icon::before {
 	content: '';
@@ -171,6 +179,7 @@ Replace with single subtle pulse on entry only:
 **File**: `src/lib/components/ui/ToastContainer.svelte`
 
 **Change height from 3px to 2px**:
+
 ```css
 /* Current */
 .toast-progress {
@@ -222,6 +231,7 @@ Replace with single subtle pulse on entry only:
 **Problem**: Current code has inconsistent defaults. `success()` and `info()` pass `duration` directly (falls to addToast's 3000ms default), while `error()` and `warning()` use `??` for explicit defaults.
 
 **Current code (lines 84-87)**:
+
 ```typescript
 success: (message: string, duration?: number) => addToast(message, 'success', duration),        // ❌ falls to 3000
 error: (message: string, duration?: number) => addToast(message, 'error', duration ?? 5000),    // ✓ explicit
@@ -230,6 +240,7 @@ info: (message: string, duration?: number) => addToast(message, 'info', duration
 ```
 
 **Fix - update ALL methods to use nullish coalescing**:
+
 ```typescript
 success: (message: string, duration?: number) => addToast(message, 'success', duration ?? 4000),
 error: (message: string, duration?: number) => addToast(message, 'error', duration ?? 6000),
@@ -241,10 +252,10 @@ info: (message: string, duration?: number) => addToast(message, 'info', duration
 
 ```typescript
 // Current
-function addToast(message: string, type: ToastType = 'info', duration: number = 3000)
+function addToast(message: string, type: ToastType = 'info', duration: number = 3000);
 
 // Change to
-function addToast(message: string, type: ToastType = 'info', duration: number = 4000)
+function addToast(message: string, type: ToastType = 'info', duration: number = 4000);
 ```
 
 **Why both?** The `??` in store methods handles explicit calls. The `addToast` default is a safety net if called directly.
@@ -258,11 +269,13 @@ function addToast(message: string, type: ToastType = 'info', duration: number = 
 **File**: `src/lib/stores/toast.svelte.ts`
 
 **Add constant at top of file**:
+
 ```typescript
 const MAX_TOASTS = 3;
 ```
 
 **Modify `addToast` function** - add limit check before pushing:
+
 ```typescript
 function addToast(message: string, type: ToastType, duration: number) {
 	const id = crypto.randomUUID();
@@ -290,19 +303,37 @@ function addToast(message: string, type: ToastType, duration: number) {
 **File**: `src/lib/components/ui/ToastContainer.svelte`
 
 **Current icon backgrounds** (in CSS):
+
 ```css
-.toast-success .toast-icon { background: rgba(34, 197, 94, 0.2); }
-.toast-error .toast-icon { background: rgba(239, 68, 68, 0.2); }
-.toast-warning .toast-icon { background: rgba(249, 115, 22, 0.2); }
-.toast-info .toast-icon { background: rgba(212, 175, 55, 0.2); }
+.toast-success .toast-icon {
+	background: rgba(34, 197, 94, 0.2);
+}
+.toast-error .toast-icon {
+	background: rgba(239, 68, 68, 0.2);
+}
+.toast-warning .toast-icon {
+	background: rgba(249, 115, 22, 0.2);
+}
+.toast-info .toast-icon {
+	background: rgba(212, 175, 55, 0.2);
+}
 ```
 
 **Change to (reduce opacity)**:
+
 ```css
-.toast-success .toast-icon { background: rgba(34, 197, 94, 0.12); }
-.toast-error .toast-icon { background: rgba(239, 68, 68, 0.12); }
-.toast-warning .toast-icon { background: rgba(249, 115, 22, 0.12); }
-.toast-info .toast-icon { background: rgba(212, 175, 55, 0.12); }
+.toast-success .toast-icon {
+	background: rgba(34, 197, 94, 0.12);
+}
+.toast-error .toast-icon {
+	background: rgba(239, 68, 68, 0.12);
+}
+.toast-warning .toast-icon {
+	background: rgba(249, 115, 22, 0.12);
+}
+.toast-info .toast-icon {
+	background: rgba(212, 175, 55, 0.12);
+}
 ```
 
 ---
@@ -312,6 +343,7 @@ function addToast(message: string, type: ToastType, duration: number) {
 **File**: `src/lib/components/ui/ToastContainer.svelte`
 
 **Current shadow**:
+
 ```css
 .toast {
 	box-shadow:
@@ -322,6 +354,7 @@ function addToast(message: string, type: ToastType, duration: number) {
 ```
 
 **Change to (softer)**:
+
 ```css
 .toast {
 	box-shadow:
@@ -340,10 +373,15 @@ function addToast(message: string, type: ToastType, duration: number) {
 The progress bar animation is currently hardcoded to 5s. It should match the toast duration on each toast, including custom durations.
 
 **Current**:
+
 ```css
 @keyframes progressShrink {
-	from { transform: scaleX(1); }
-	to { transform: scaleX(0); }
+	from {
+		transform: scaleX(1);
+	}
+	to {
+		transform: scaleX(0);
+	}
 }
 
 .toast-progress-fill {
@@ -354,6 +392,7 @@ The progress bar animation is currently hardcoded to 5s. It should match the toa
 **Solution**: Use inline style to set animation duration dynamically.
 
 **In the template**, change the progress fill div:
+
 ```svelte
 <!-- Current -->
 <div class="toast-progress-fill toast-progress-{t.type}"></div>
@@ -366,6 +405,7 @@ The progress bar animation is currently hardcoded to 5s. It should match the toa
 ```
 
 **Update CSS** - remove hardcoded duration:
+
 ```css
 .toast-progress-fill {
 	/* Remove: animation: progressShrink 5s linear forwards; */
@@ -375,11 +415,20 @@ The progress bar animation is currently hardcoded to 5s. It should match the toa
 ```
 
 **Also fix class targeting**: the type class is on the fill element (e.g., `toast-progress-success`), so update the CSS selectors accordingly:
+
 ```css
-.toast-progress-success { /* ... */ }
-.toast-progress-error { /* ... */ }
-.toast-progress-warning { /* ... */ }
-.toast-progress-info { /* ... */ }
+.toast-progress-success {
+	/* ... */
+}
+.toast-progress-error {
+	/* ... */
+}
+.toast-progress-warning {
+	/* ... */
+}
+.toast-progress-info {
+	/* ... */
+}
 ```
 
 ---
@@ -389,6 +438,7 @@ The progress bar animation is currently hardcoded to 5s. It should match the toa
 **File**: `src/lib/components/ui/ToastContainer.svelte`
 
 **Current**:
+
 ```css
 .toast {
 	padding: 1rem 1.125rem;
@@ -397,6 +447,7 @@ The progress bar animation is currently hardcoded to 5s. It should match the toa
 ```
 
 **Change to (uniform, slightly smaller)**:
+
 ```css
 .toast {
 	padding: 0.875rem 1rem;
@@ -404,6 +455,7 @@ The progress bar animation is currently hardcoded to 5s. It should match the toa
 ```
 
 Also adjust progress bar position:
+
 ```css
 .toast-progress {
 	position: absolute;
@@ -421,6 +473,7 @@ Also adjust progress bar position:
 The timers already pause on hover/focus for WCAG timing. The progress bar animation should pause in the same conditions for visual consistency.
 
 **Add CSS**:
+
 ```css
 .toast:hover .toast-progress-fill,
 .toast:focus-within .toast-progress-fill {
@@ -441,19 +494,20 @@ When the user switches tabs, toasts should pause so they don't miss notification
 ```typescript
 // Pause all toasts when tab is hidden (2026 best practice)
 if (typeof document !== 'undefined') {
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      document.documentElement.classList.add('toast-paused');
-      toasts.forEach((t) => pause(t.id));
-    } else {
-      document.documentElement.classList.remove('toast-paused');
-      toasts.forEach((t) => resume(t.id));
-    }
-  });
+	document.addEventListener('visibilitychange', () => {
+		if (document.hidden) {
+			document.documentElement.classList.add('toast-paused');
+			toasts.forEach((t) => pause(t.id));
+		} else {
+			document.documentElement.classList.remove('toast-paused');
+			toasts.forEach((t) => resume(t.id));
+		}
+	});
 }
 ```
 
 **Add CSS** (in `ToastContainer.svelte`) to pause the progress bar when the tab is hidden:
+
 ```css
 .toast-paused .toast-progress-fill {
 	animation-play-state: paused;
@@ -499,7 +553,9 @@ Modern toast libraries use **interruptible** animations so existing toasts smoot
 .toast {
 	transform: translateX(24px);
 	opacity: 0;
-	transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 280ms ease-out;
+	transition:
+		transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+		opacity 280ms ease-out;
 }
 
 .toast.mounted {
@@ -542,10 +598,10 @@ After implementing all changes, verify:
 
 ## Files Summary
 
-| File                     | Changes                                                                                       |
-|--------------------------|-----------------------------------------------------------------------------------------------|
-| `ToastContainer.svelte`  | Animation (1,13), glow/pulse (2,3), progress (4,9,11), shadows (8), colors (7), padding (10)  |
-| `toast.svelte.ts`        | Durations fix (5), toast limit (6), tab visibility (12)                                       |
+| File                    | Changes                                                                                      |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| `ToastContainer.svelte` | Animation (1,13), glow/pulse (2,3), progress (4,9,11), shadows (8), colors (7), padding (10) |
+| `toast.svelte.ts`       | Durations fix (5), toast limit (6), tab visibility (12)                                      |
 
 ---
 

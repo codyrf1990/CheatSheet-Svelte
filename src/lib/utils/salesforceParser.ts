@@ -58,10 +58,7 @@ function extractField(text: string, fieldName: string): string {
 	// Use a more restrictive pattern to avoid capturing next field names when value is empty
 	// The value capture group allows empty (using *) and stops at a field separator
 	const separator = '(?:\\t|\\s{2,})';
-	const regex = new RegExp(
-		flexibleField + separator + '([^\\n\\t]*?)(?=\\t|\\s{2,}|\\n|$)',
-		'i'
-	);
+	const regex = new RegExp(flexibleField + separator + '([^\\n\\t]*?)(?=\\t|\\s{2,}|\\n|$)', 'i');
 	const match = normalizedText.match(regex);
 	const value = match?.[1]?.trim() || '';
 
@@ -182,9 +179,7 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 	const sim5xLevelRaw =
 		extractField(text, 'Sim 5x Level') || extractField(text, 'Sim5xLevel') || '';
 	const validSim5xLevels = ['', '3 axis', '3/4 axis', '1', '3axis', '3/4axis'];
-	const sim5xLevel = validSim5xLevels.includes(sim5xLevelRaw.toLowerCase())
-		? sim5xLevelRaw
-		: ''; // Invalid value = treat as blank
+	const sim5xLevel = validSim5xLevels.includes(sim5xLevelRaw.toLowerCase()) ? sim5xLevelRaw : ''; // Invalid value = treat as blank
 
 	// Determine if this is a network license
 	const isNetwork = extractChecked(text, 'Net Dongle');

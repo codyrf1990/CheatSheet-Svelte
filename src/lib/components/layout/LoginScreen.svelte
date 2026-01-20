@@ -168,7 +168,13 @@
 						class="submit-btn {loginStep === 'success' ? 'success' : ''}"
 					>
 						{#if loginStep === 'success'}
-							<svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+							<svg
+								class="success-icon"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="3"
+							>
 								<polyline points="20 6 9 17 4 12" />
 							</svg>
 							Ready!

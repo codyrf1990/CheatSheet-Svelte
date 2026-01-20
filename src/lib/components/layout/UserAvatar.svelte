@@ -115,12 +115,7 @@
 	</div>
 
 	{#if settingsOpen}
-		<div
-			id="user-settings-panel"
-			class="settings-panel"
-			role="dialog"
-			aria-label="User settings"
-		>
+		<div id="user-settings-panel" class="settings-panel" role="dialog" aria-label="User settings">
 			<div class="settings-header">Settings</div>
 			<label class="settings-toggle">
 				<span class="toggle-label">Pause background</span>

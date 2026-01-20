@@ -51,10 +51,13 @@ export function getImportPreview(license: LicenseInfo): {
 	// Check if page exists in existing company
 	let isNewPage = true;
 	if (existingCompany) {
-		const existingPage = existingCompany.pages.find(p => p.name === pageName);
+		const existingPage = existingCompany.pages.find((p) => p.name === pageName);
 		if (existingPage) {
 			isNewPage = false;
-		} else if (existingCompany.pages.length === 1 && existingCompany.pages[0].name === DEFAULT_PAGE_NAME) {
+		} else if (
+			existingCompany.pages.length === 1 &&
+			existingCompany.pages[0].name === DEFAULT_PAGE_NAME
+		) {
 			// We'll rename the default page instead of creating a new one
 			isNewPage = false;
 		}
@@ -81,10 +84,7 @@ export function getImportPreview(license: LicenseInfo): {
  * Import a single license into the system
  * Creates or updates company and page, selects bits, adds SKUs
  */
-export function importLicense(
-	license: LicenseInfo,
-	overrideCompanyName?: string
-): ImportResult {
+export function importLicense(license: LicenseInfo, overrideCompanyName?: string): ImportResult {
 	const companyName = overrideCompanyName || license.customer;
 	const errors: string[] = [];
 	const pageName = getPageNameForLicense(license);
@@ -112,7 +112,9 @@ export function importLicense(
 	companiesStore.switchTo(company.id);
 
 	// 3. Find or create page by dongle number
-	let targetPage: { id: string; name: string } | undefined = company.pages.find(p => p.name === pageName);
+	let targetPage: { id: string; name: string } | undefined = company.pages.find(
+		(p) => p.name === pageName
+	);
 
 	if (!targetPage) {
 		// Rename the default page instead of creating a second one when only P1 exists
