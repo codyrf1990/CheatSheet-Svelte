@@ -78,9 +78,9 @@
 
 	// CF Tools links array (matching Machine Research)
 	const cfToolsLinks = [
+		{ label: 'Cheat Sheet', href: 'https://cheatsheet.crf-tools.com/' },
 		{ label: 'TOS Tracker', href: 'https://tos-renewal-tracker.vercel.app/' },
 		{ label: 'Opp Tracker', href: 'https://opp-tracker.vercel.app/' },
-		{ label: 'Packages & Maintenance', href: 'https://codyrf1990.github.io/CheatSheet/' },
 		{ label: 'Machine Catalogue', href: 'https://codyrf1990.github.io/machine-catalog-standalone/' }
 	];
 
