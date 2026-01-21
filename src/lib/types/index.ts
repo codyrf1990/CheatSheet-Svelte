@@ -28,6 +28,15 @@ export interface PageState {
 	packages: Record<string, PackageState>;
 }
 
+export interface PageSystemData {
+	schemaVersion: number;
+	currentCompanyId: string | null;
+	companies: Company[];
+	favoriteCompanyIds: string[];
+	recentCompanyIds: string[];
+	updatedAt: number;
+}
+
 // Panel System
 export interface Panel {
 	id: string;
@@ -66,16 +75,24 @@ export interface PackageState {
 	groupMembership?: Record<string, string>;
 }
 
+export interface UserPrefsData {
+	customPanelItems: Record<string, string[]>;
+	customPackageBits: Record<string, string[]>;
+	packageBitOrders: Record<string, string[]>;
+	packageLooseBitOrders: Record<string, string[]>;
+	packageGroupMembership: Record<string, Record<string, string>>;
+}
+
 // Cloud Sync
 export interface CloudUserData {
 	username: string;
 	normalizedUsername: string;
 	schemaVersion: number;
 	updatedAt: Date;
-	pageSystem: {
-		companies: Company[];
-		currentCompanyId: string | null;
-	};
+	pageSystem?: PageSystemData | null;
+	pageSystemUpdatedAt?: number;
+	userPrefs?: UserPrefsData | null;
+	userPrefsUpdatedAt?: number;
 	client: string;
 }
 

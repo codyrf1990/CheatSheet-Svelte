@@ -18,9 +18,9 @@
 	let videoRef: HTMLVideoElement | null = $state(null);
 
 	onMount(async () => {
+		userPrefsStore.init();
 		companiesStore.load();
 		await syncStore.load();
-		userPrefsStore.init();
 		initialized = true;
 	});
 

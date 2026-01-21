@@ -12,6 +12,7 @@ interface UserPrefs {
 	customPanelItems: Record<string, string[]>; // panelId -> custom items
 	customPackageBits: Record<string, string[]>; // packageCode -> custom bits
 	backgroundVideoPaused: boolean; // Whether background video is paused (per device)
+	updatedAt: number; // Last syncable prefs update timestamp
 	// Global bit ordering (applies to all companies/pages)
 	packageBitOrders: Record<string, string[]>; // packageCode -> ordered bit names
 	packageLooseBitOrders: Record<string, string[]>; // packageCode -> ordered loose bits
@@ -24,6 +25,7 @@ function createDefaultPrefs(): UserPrefs {
 		customPanelItems: {},
 		customPackageBits: {},
 		backgroundVideoPaused: false, // Video plays by default
+		updatedAt: Date.now(),
 		packageBitOrders: {},
 		packageLooseBitOrders: {},
 		packageGroupMembership: {}
@@ -38,10 +40,15 @@ function loadPrefs(): UserPrefs {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
 			const parsed = JSON.parse(stored);
+			const updatedAt =
+				typeof parsed.updatedAt === 'number' && Number.isFinite(parsed.updatedAt)
+					? parsed.updatedAt
+					: Date.now();
 			return {
 				customPanelItems: parsed.customPanelItems || {},
 				customPackageBits: parsed.customPackageBits || {},
 				backgroundVideoPaused: parsed.backgroundVideoPaused ?? false,
+				updatedAt,
 				packageBitOrders: parsed.packageBitOrders || {},
 				packageLooseBitOrders: parsed.packageLooseBitOrders || {},
 				packageGroupMembership: parsed.packageGroupMembership || {}
@@ -57,6 +64,7 @@ function loadPrefs(): UserPrefs {
 // Reactive state
 let prefs = $state<UserPrefs>(createDefaultPrefs());
 let initialized = false;
+let changeHandler: ((data: ReturnType<typeof exportData>) => void) | null = null;
 
 /**
  * Initialize store (call from browser context)
@@ -79,6 +87,27 @@ function save(): void {
 	}
 }
 
+function emitChange(): void {
+	if (!changeHandler) return;
+	try {
+		changeHandler(exportData());
+	} catch (e) {
+		console.error('[UserPrefsStore] Change handler failed:', e);
+	}
+}
+
+function commitSyncable(): void {
+	prefs.updatedAt = Date.now();
+	prefs = { ...prefs };
+	save();
+	emitChange();
+}
+
+function commitLocalOnly(): void {
+	prefs = { ...prefs };
+	save();
+}
+
 /**
  * Get custom items for a panel
  */
@@ -96,8 +125,7 @@ function addCustomPanelItem(panelId: string, item: string): void {
 
 	if (!prefs.customPanelItems[panelId].includes(item)) {
 		prefs.customPanelItems[panelId] = [...prefs.customPanelItems[panelId], item];
-		prefs = { ...prefs }; // Trigger reactivity
-		save();
+		commitSyncable();
 	}
 }
 
@@ -108,8 +136,7 @@ function removeCustomPanelItem(panelId: string, item: string): void {
 	if (!prefs.customPanelItems[panelId]) return;
 
 	prefs.customPanelItems[panelId] = prefs.customPanelItems[panelId].filter((i) => i !== item);
-	prefs = { ...prefs };
-	save();
+	commitSyncable();
 }
 
 /**
@@ -129,8 +156,7 @@ function addCustomPackageBit(packageCode: string, bit: string): void {
 
 	if (!prefs.customPackageBits[packageCode].includes(bit)) {
 		prefs.customPackageBits[packageCode] = [...prefs.customPackageBits[packageCode], bit];
-		prefs = { ...prefs };
-		save();
+		commitSyncable();
 	}
 }
 
@@ -143,8 +169,7 @@ function removeCustomPackageBit(packageCode: string, bit: string): void {
 	prefs.customPackageBits[packageCode] = prefs.customPackageBits[packageCode].filter(
 		(b) => b !== bit
 	);
-	prefs = { ...prefs };
-	save();
+	commitSyncable();
 }
 
 /**
@@ -173,8 +198,7 @@ function isBackgroundVideoPaused(): boolean {
  */
 function setBackgroundVideoPaused(paused: boolean): void {
 	prefs.backgroundVideoPaused = paused;
-	prefs = { ...prefs };
-	save();
+	commitLocalOnly();
 }
 
 /**
@@ -198,8 +222,7 @@ function getPackageBitOrder(packageCode: string): string[] {
  */
 function setPackageBitOrder(packageCode: string, order: string[]): void {
 	prefs.packageBitOrders[packageCode] = [...order];
-	prefs = { ...prefs };
-	save();
+	commitSyncable();
 }
 
 /**
@@ -214,8 +237,7 @@ function getPackageLooseBitOrder(packageCode: string): string[] {
  */
 function setPackageLooseBitOrder(packageCode: string, order: string[]): void {
 	prefs.packageLooseBitOrders[packageCode] = [...order];
-	prefs = { ...prefs };
-	save();
+	commitSyncable();
 }
 
 /**
@@ -230,8 +252,7 @@ function getPackageGroupMembership(packageCode: string): Record<string, string> 
  */
 function setPackageGroupMembership(packageCode: string, membership: Record<string, string>): void {
 	prefs.packageGroupMembership[packageCode] = { ...membership };
-	prefs = { ...prefs };
-	save();
+	commitSyncable();
 }
 
 /**
@@ -241,8 +262,7 @@ function resetPackageOrder(packageCode: string): void {
 	delete prefs.packageBitOrders[packageCode];
 	delete prefs.packageLooseBitOrders[packageCode];
 	delete prefs.packageGroupMembership[packageCode];
-	prefs = { ...prefs };
-	save();
+	commitSyncable();
 }
 
 /**
@@ -252,14 +272,59 @@ function resetAllPackageOrders(): void {
 	prefs.packageBitOrders = {};
 	prefs.packageLooseBitOrders = {};
 	prefs.packageGroupMembership = {};
+	commitSyncable();
+}
+
+function exportData() {
+	return {
+		userPrefs: {
+			customPanelItems: prefs.customPanelItems,
+			customPackageBits: prefs.customPackageBits,
+			packageBitOrders: prefs.packageBitOrders,
+			packageLooseBitOrders: prefs.packageLooseBitOrders,
+			packageGroupMembership: prefs.packageGroupMembership
+		},
+		updatedAt: prefs.updatedAt
+	};
+}
+
+function importData(data: unknown, updatedAt?: number): boolean {
+	if (!data || typeof data !== 'object') {
+		console.warn('[UserPrefsStore] Import skipped: invalid data');
+		return false;
+	}
+
+	const payload = data as {
+		customPanelItems?: Record<string, string[]>;
+		customPackageBits?: Record<string, string[]>;
+		packageBitOrders?: Record<string, string[]>;
+		packageLooseBitOrders?: Record<string, string[]>;
+		packageGroupMembership?: Record<string, Record<string, string>>;
+	};
+
+	prefs.customPanelItems = payload.customPanelItems || {};
+	prefs.customPackageBits = payload.customPackageBits || {};
+	prefs.packageBitOrders = payload.packageBitOrders || {};
+	prefs.packageLooseBitOrders = payload.packageLooseBitOrders || {};
+	prefs.packageGroupMembership = payload.packageGroupMembership || {};
+	prefs.updatedAt =
+		typeof updatedAt === 'number' && Number.isFinite(updatedAt) ? updatedAt : Date.now();
 	prefs = { ...prefs };
 	save();
+	return true;
+}
+
+function setChangeHandler(handler: ((data: ReturnType<typeof exportData>) => void) | null): void {
+	changeHandler = handler;
 }
 
 export const userPrefsStore = {
 	// Getters
 	get all() {
 		return prefs;
+	},
+	get updatedAt() {
+		return prefs.updatedAt;
 	},
 
 	// Initialization
@@ -290,5 +355,10 @@ export const userPrefsStore = {
 	getPackageGroupMembership,
 	setPackageGroupMembership,
 	resetPackageOrder,
-	resetAllPackageOrders
+	resetAllPackageOrders,
+
+	// Sync helpers
+	exportData,
+	importData,
+	setChangeHandler
 };

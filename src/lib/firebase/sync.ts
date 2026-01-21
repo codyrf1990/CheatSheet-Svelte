@@ -5,16 +5,23 @@
 
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getDb } from './client';
-import type { CloudUserData } from '$types';
+import type { CloudUserData, PageSystemData, UserPrefsData } from '$types';
 
 const COLLECTION = 'users';
 const SCHEMA_VERSION = 1;
 const CLIENT_ID = 'solidcam-cheatsheet';
 const DEBOUNCE_MS = 900;
 
+export interface SyncPayload {
+	pageSystem: PageSystemData;
+	pageSystemUpdatedAt: number;
+	userPrefs?: UserPrefsData;
+	userPrefsUpdatedAt?: number;
+}
+
 // Debounce state
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
-let pendingData: unknown = null;
+let pendingData: SyncPayload | null = null;
 let pendingUsername: string | null = null;
 
 /**
@@ -51,6 +58,10 @@ export async function loadUserData(username: string): Promise<CloudUserData | nu
 			schemaVersion: data.schemaVersion || SCHEMA_VERSION,
 			updatedAt: data.updatedAt?.toDate() || new Date(),
 			pageSystem: data.pageSystem || null,
+			pageSystemUpdatedAt:
+				typeof data.pageSystemUpdatedAt === 'number' ? data.pageSystemUpdatedAt : 0,
+			userPrefs: data.userPrefs || null,
+			userPrefsUpdatedAt: typeof data.userPrefsUpdatedAt === 'number' ? data.userPrefsUpdatedAt : 0,
 			client: data.client || CLIENT_ID
 		} as CloudUserData;
 	} catch (err) {
@@ -64,7 +75,7 @@ export async function loadUserData(username: string): Promise<CloudUserData | nu
  */
 export async function saveUserDataImmediate(
 	username: string,
-	pageSystemData: unknown
+	payload: SyncPayload
 ): Promise<boolean> {
 	const db = getDb();
 	if (!db) {
@@ -76,18 +87,24 @@ export async function saveUserDataImmediate(
 	const docRef = doc(db, COLLECTION, normalizedUsername);
 
 	try {
-		await setDoc(
-			docRef,
-			{
-				username,
-				normalizedUsername,
-				schemaVersion: SCHEMA_VERSION,
-				updatedAt: serverTimestamp(),
-				pageSystem: pageSystemData,
-				client: CLIENT_ID
-			},
-			{ merge: true }
-		);
+		const data: Record<string, unknown> = {
+			username,
+			normalizedUsername,
+			schemaVersion: SCHEMA_VERSION,
+			updatedAt: serverTimestamp(),
+			pageSystem: payload.pageSystem,
+			pageSystemUpdatedAt: payload.pageSystemUpdatedAt,
+			client: CLIENT_ID
+		};
+
+		if (payload.userPrefs) {
+			data.userPrefs = payload.userPrefs;
+		}
+		if (typeof payload.userPrefsUpdatedAt === 'number') {
+			data.userPrefsUpdatedAt = payload.userPrefsUpdatedAt;
+		}
+
+		await setDoc(docRef, data, { merge: true });
 		return true;
 	} catch (err) {
 		console.error('[Sync] Failed to save user data:', err);
@@ -101,11 +118,11 @@ export async function saveUserDataImmediate(
  */
 export function queueSave(
 	username: string,
-	pageSystemData: unknown,
+	payload: SyncPayload,
 	onComplete?: (success: boolean, error?: Error) => void
 ): void {
 	// Store latest data
-	pendingData = pageSystemData;
+	pendingData = payload;
 	pendingUsername = username;
 
 	// Clear existing timeout

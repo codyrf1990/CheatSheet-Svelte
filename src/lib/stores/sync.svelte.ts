@@ -4,9 +4,10 @@
  */
 
 import { browser } from '$app/environment';
-import type { SyncStatus } from '$types';
+import type { SyncStatus, UserPrefsData } from '$types';
 import { loadUserData, queueSave, cancelPendingSave, flushPendingSave } from '$firebase';
 import { companiesStore, DEFAULT_COMPANY_NAME, DEFAULT_PAGE_NAME } from './companies.svelte';
+import { userPrefsStore } from './userPrefs.svelte';
 
 const SYNC_USERNAME_KEY = 'solidcam-sync-username';
 const REMEMBER_ME_KEY = 'solidcam-remember-me';
@@ -23,6 +24,10 @@ let error = $state<string | null>(null);
 let autoSyncEnabled = false;
 
 type LocalData = ReturnType<typeof companiesStore.exportData>;
+type UserPrefsExport = ReturnType<typeof userPrefsStore.exportData>;
+
+let cachedPageSystem: LocalData | null = null;
+let cachedPageSystemUpdatedAt = 0;
 
 function getLocalUpdatedAt(): number {
 	const companies = companiesStore.all;
@@ -33,6 +38,35 @@ function getLocalUpdatedAt(): number {
 		}
 	}
 	return latest;
+}
+
+function isDefaultUserPrefs(data: UserPrefsData): boolean {
+	if (!data || typeof data !== 'object') return true;
+	return (
+		Object.keys(data.customPanelItems || {}).length === 0 &&
+		Object.keys(data.customPackageBits || {}).length === 0 &&
+		Object.keys(data.packageBitOrders || {}).length === 0 &&
+		Object.keys(data.packageLooseBitOrders || {}).length === 0 &&
+		Object.keys(data.packageGroupMembership || {}).length === 0
+	);
+}
+
+function snapshotPageSystem(): void {
+	cachedPageSystem = companiesStore.exportData();
+	cachedPageSystemUpdatedAt = getLocalUpdatedAt();
+}
+
+function buildSyncPayload() {
+	if (!cachedPageSystem) {
+		snapshotPageSystem();
+	}
+	const prefs: UserPrefsExport = userPrefsStore.exportData();
+	return {
+		pageSystem: cachedPageSystem!,
+		pageSystemUpdatedAt: cachedPageSystemUpdatedAt,
+		userPrefs: prefs.userPrefs,
+		userPrefsUpdatedAt: prefs.updatedAt
+	};
 }
 
 function isDefaultLocalData(data: LocalData): boolean {
@@ -94,12 +128,13 @@ function normalizeUsername(name: string): string {
 /**
  * Handle local data changes - queue save to cloud
  */
-function handleDataChange(data: ReturnType<typeof companiesStore.exportData>): void {
+function queueCombinedSave(): void {
 	if (!autoSyncEnabled || !username) return;
 
 	status = 'syncing';
 
-	queueSave(username, data, (success, err) => {
+	const payload = buildSyncPayload();
+	queueSave(username, payload, (success, err) => {
 		if (success) {
 			lastSyncTime = Date.now();
 			status = 'connected';
@@ -112,13 +147,25 @@ function handleDataChange(data: ReturnType<typeof companiesStore.exportData>): v
 	});
 }
 
+function handlePageSystemChange(): void {
+	if (!autoSyncEnabled || !username) return;
+	snapshotPageSystem();
+	queueCombinedSave();
+}
+
+function handleUserPrefsChange(): void {
+	if (!autoSyncEnabled || !username) return;
+	queueCombinedSave();
+}
+
 /**
  * Start auto-sync - register change handler
  */
 function startAutoSync(): void {
 	if (autoSyncEnabled) return;
 	autoSyncEnabled = true;
-	companiesStore.setChangeHandler(handleDataChange);
+	companiesStore.setChangeHandler(handlePageSystemChange);
+	userPrefsStore.setChangeHandler(handleUserPrefsChange);
 }
 
 /**
@@ -127,6 +174,7 @@ function startAutoSync(): void {
 function stopAutoSync(): void {
 	autoSyncEnabled = false;
 	companiesStore.setChangeHandler(null);
+	userPrefsStore.setChangeHandler(null);
 	cancelPendingSave();
 }
 
@@ -151,22 +199,29 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 		// Try to load existing cloud data
 		const cloudData = await loadUserData(trimmedName);
 		const localData = companiesStore.exportData();
+		const localPrefsExport = userPrefsStore.exportData();
+		const localPrefs = localPrefsExport.userPrefs;
 		const localIsDefault = isDefaultLocalData(localData);
+		const localPrefsIsDefault = isDefaultUserPrefs(localPrefs);
 		const localUpdatedAt = getLocalUpdatedAt();
 		const cloudUpdatedAt = cloudData?.updatedAt?.getTime() || 0;
+		const cloudPageUpdatedAt =
+			typeof cloudData?.pageSystemUpdatedAt === 'number'
+				? cloudData.pageSystemUpdatedAt
+				: cloudUpdatedAt;
+		const localPrefsUpdatedAt = localPrefsExport.updatedAt;
+		const cloudPrefsUpdatedAt = cloudData?.userPrefsUpdatedAt || 0;
+
+		let shouldUpload = false;
 
 		if (cloudData?.pageSystem) {
-			if (!localIsDefault && localUpdatedAt > cloudUpdatedAt) {
+			if (!localIsDefault && localUpdatedAt > cloudPageUpdatedAt) {
 				// Local is newer - keep local and push to cloud
 				console.info('[SyncStore] Local data newer than cloud; uploading local changes.', {
 					localUpdatedAt,
-					cloudUpdatedAt
+					cloudUpdatedAt: cloudPageUpdatedAt
 				});
-				queueSave(trimmedName, localData, (success) => {
-					if (success) {
-						lastSyncTime = Date.now();
-					}
-				});
+				shouldUpload = true;
 			} else {
 				// Cloud is newer (or equal) - import it
 				companiesStore.importData(cloudData.pageSystem);
@@ -174,12 +229,33 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 			}
 		} else {
 			// No cloud data - push local data
-			queueSave(trimmedName, localData, (success) => {
+			if (!localIsDefault) {
+				shouldUpload = true;
+			}
+		}
+
+		if (cloudData?.userPrefs) {
+			if (!localPrefsIsDefault && localPrefsUpdatedAt > cloudPrefsUpdatedAt) {
+				shouldUpload = true;
+			} else {
+				userPrefsStore.importData(cloudData.userPrefs, cloudPrefsUpdatedAt);
+			}
+		} else if (!localPrefsIsDefault) {
+			shouldUpload = true;
+		}
+
+		if (shouldUpload) {
+			snapshotPageSystem();
+			const payload = buildSyncPayload();
+			queueSave(trimmedName, payload, (success) => {
 				if (success) {
 					lastSyncTime = Date.now();
 				}
 			});
 		}
+
+		// Refresh cached pageSystem snapshot after any imports/decisions
+		snapshotPageSystem();
 
 		// Set username and start auto-sync
 		username = trimmedName;
@@ -230,8 +306,9 @@ async function sync(): Promise<boolean> {
 	status = 'syncing';
 
 	try {
-		const data = companiesStore.exportData();
-		queueSave(username, data, (success, err) => {
+		snapshotPageSystem();
+		const payload = buildSyncPayload();
+		queueSave(username, payload, (success, err) => {
 			if (success) {
 				lastSyncTime = Date.now();
 				status = 'connected';
