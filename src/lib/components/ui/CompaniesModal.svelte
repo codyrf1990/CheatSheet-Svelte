@@ -31,10 +31,10 @@
 	let allCompanies = $derived(companiesStore.all);
 	let currentCompany = $derived(companiesStore.current);
 
-	// Filtered companies based on search
+	// Filtered companies based on search, sorted alphabetically
 	let filteredCompanies = $derived.by(() => {
-		if (!searchQuery.trim()) return allCompanies;
-		return companiesStore.search(searchQuery);
+		const companies = searchQuery.trim() ? companiesStore.search(searchQuery) : allCompanies;
+		return [...companies].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
 	});
 
 	function handleCompanySelect(companyId: string) {
