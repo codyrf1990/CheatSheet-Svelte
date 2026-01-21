@@ -12,6 +12,7 @@ import { userPrefsStore } from './userPrefs.svelte';
 const SYNC_USERNAME_KEY = 'solidcam-sync-username';
 const REMEMBER_ME_KEY = 'solidcam-remember-me';
 const LAST_USERNAME_KEY = 'solidcam-last-username';
+const LAST_CONNECTED_KEY = 'solidcam-last-connected-user';
 
 // Reactive state
 let username = $state<string | null>(null);
@@ -22,6 +23,7 @@ let error = $state<string | null>(null);
 
 // Auto-sync handler reference
 let autoSyncEnabled = false;
+let lastConnectedUsername: string | null = null;
 
 type LocalData = ReturnType<typeof companiesStore.exportData>;
 type UserPrefsExport = ReturnType<typeof userPrefsStore.exportData>;
@@ -191,9 +193,18 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 	}
 
 	const trimmedName = name.trim();
+	const normalizedName = normalizeUsername(trimmedName);
 	error = null;
 	status = 'connecting';
 	rememberMe = remember;
+
+	// Check if switching to a different user - reset syncable prefs to prevent cross-user pollution
+	const isSwitchingUsers =
+		lastConnectedUsername !== null && lastConnectedUsername !== normalizedName;
+	if (isSwitchingUsers) {
+		console.info('[SyncStore] Switching users, resetting local prefs to avoid cross-user data.');
+		userPrefsStore.resetSyncablePrefs();
+	}
 
 	try {
 		// Try to load existing cloud data
@@ -259,6 +270,7 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 
 		// Set username and start auto-sync
 		username = trimmedName;
+		lastConnectedUsername = normalizedName;
 		saveToLocalStorage();
 		startAutoSync();
 		status = 'connected';
@@ -337,6 +349,12 @@ async function load(): Promise<void> {
 		const storedRemember = localStorage.getItem(REMEMBER_ME_KEY);
 		rememberMe = storedRemember !== 'false'; // Default to true
 
+		// Restore last connected user for cross-user detection
+		const storedLastConnected = localStorage.getItem(LAST_CONNECTED_KEY);
+		if (storedLastConnected) {
+			lastConnectedUsername = storedLastConnected;
+		}
+
 		const storedUsername = localStorage.getItem(SYNC_USERNAME_KEY);
 		if (storedUsername) {
 			// Auto-connect with stored username
@@ -362,6 +380,11 @@ function saveToLocalStorage(): void {
 			localStorage.setItem(SYNC_USERNAME_KEY, username);
 		} else {
 			localStorage.removeItem(SYNC_USERNAME_KEY);
+		}
+
+		// Always persist last connected user for cross-user detection
+		if (lastConnectedUsername) {
+			localStorage.setItem(LAST_CONNECTED_KEY, lastConnectedUsername);
 		}
 	} catch (err) {
 		console.error('[SyncStore] Failed to save:', err);

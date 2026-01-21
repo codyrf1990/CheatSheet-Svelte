@@ -314,6 +314,21 @@ function importData(data: unknown, updatedAt?: number): boolean {
 	return true;
 }
 
+/**
+ * Reset syncable prefs to default (keeps device-local prefs like backgroundVideoPaused)
+ * Called when switching to a different user to prevent cross-user data pollution
+ */
+function resetSyncablePrefs(): void {
+	prefs.customPanelItems = {};
+	prefs.customPackageBits = {};
+	prefs.packageBitOrders = {};
+	prefs.packageLooseBitOrders = {};
+	prefs.packageGroupMembership = {};
+	prefs.updatedAt = 0; // Reset timestamp so cloud always wins
+	prefs = { ...prefs };
+	save();
+}
+
 function setChangeHandler(handler: ((data: ReturnType<typeof exportData>) => void) | null): void {
 	changeHandler = handler;
 }
@@ -360,5 +375,6 @@ export const userPrefsStore = {
 	// Sync helpers
 	exportData,
 	importData,
-	setChangeHandler
+	setChangeHandler,
+	resetSyncablePrefs
 };
