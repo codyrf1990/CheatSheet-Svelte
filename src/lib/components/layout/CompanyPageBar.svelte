@@ -4,6 +4,7 @@
 	import { syncStore } from '$stores/sync.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { AddSkuModal, Button, Input, Modal, ImportLicenseModal } from '$components/ui';
+	import { copyQBExportToClipboard } from '$lib/utils/quickbooksExport';
 
 	interface Props {
 		editMode?: boolean;
@@ -218,6 +219,34 @@
 
 	function handleImportLicense() {
 		showImportModal = true;
+		closeContextMenu();
+	}
+
+	async function handleCopyForQB() {
+		if (!currentCompany) {
+			toastStore.error('No company selected');
+			closeContextMenu();
+			return;
+		}
+
+		const page = companiesStore.currentPage;
+		if (!page) {
+			toastStore.error('No page selected');
+			closeContextMenu();
+			return;
+		}
+
+		try {
+			const result = await copyQBExportToClipboard(currentCompany, page);
+			if (result.warnings.length > 0) {
+				toastStore.warning(`Copied ${result.skuCount} SKUs (${result.warnings.length} warnings)`);
+			} else {
+				toastStore.success(`Copied ${result.skuCount} SKUs for QuickBooks`);
+			}
+		} catch {
+			toastStore.error('Failed to copy to clipboard');
+		}
+
 		closeContextMenu();
 	}
 
@@ -605,6 +634,7 @@
 			<button type="button" role="menuitem" onclick={handleRenameCompany}>Rename</button>
 			<button type="button" role="menuitem" onclick={handleDuplicateCompany}>Duplicate</button>
 			<button type="button" role="menuitem" onclick={handleImportLicense}>Import License</button>
+			<button type="button" role="menuitem" onclick={handleCopyForQB}>Copy for QB</button>
 			<button type="button" role="menuitem" class="danger" onclick={handleDeleteCompany}
 				>Delete</button
 			>
