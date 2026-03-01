@@ -25,3 +25,5 @@ vite.config.ts.timestamp-*
 
 # Local assets
 License\ PDF/
+*.xlsx
+*.xls
