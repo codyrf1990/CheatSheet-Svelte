@@ -23,6 +23,10 @@ The tool was partially built by a previous agent. It works for license import bu
 
 ## Phase 1 — Code Quality Fixes
 
+**Status: COMPLETE** (commit `827fd47`)
+
+All critical and high fixes applied. Build `pnpm check` and `pnpm lint` pass clean. `pnpm build` Vite compilation succeeds; Vercel adapter symlink fails due to Windows permissions (not a code issue).
+
 Fix before building anything new. These are foundation issues.
 
 ### Critical
@@ -46,6 +50,8 @@ Fix before building anything new. These are foundation issues.
 ---
 
 ## Phase 2 — Data Layer
+
+**Status: COMPLETE** (commit `42f98d3`)
 
 ### 2a. `src/lib/data/prerequisites.ts` (new file)
 
@@ -349,6 +355,8 @@ export interface PageState {
 
 ## Phase 3 — Build Mode
 
+**Status: COMPLETE** (commit `bc5489f`)
+
 ### Auto-detection
 
 - `companiesStore.create()` → sets new page `mode: 'build'` (default for all new pages)
@@ -380,6 +388,8 @@ get buildMode(): boolean  // reads from companiesStore.currentPageState.mode ===
 
 ## Phase 4 — Package-Level Toggles
 
+**Status: COMPLETE** (commit `75d3c80`)
+
 ### In `PackageRow.svelte`
 
 Add a package master toggle button to each row header. Behavior per package:
@@ -401,6 +411,8 @@ Uses `PACKAGE_TOGGLE_BITS` from `prerequisites.ts` to know what to select.
 ---
 
 ## Phase 5 — Prerequisite Gating (Build Mode Only)
+
+**Status: COMPLETE** (commit `bf0119b`)
 
 ### `src/lib/services/buildValidation.ts` (new file)
 
@@ -442,6 +454,8 @@ Rules:
 
 ## Phase 6 — SKU Panel Refactor
 
+**Status: COMPLETE** (commit `15e1db4`)
+
 ### New component: `src/lib/components/panels/NewSalePanel.svelte`
 
 - Derives a list of `SkuEntry[]` from current `packagesStore` selection state
@@ -470,6 +484,8 @@ In the sidebar (`+page.svelte` or a new `SkuSidebar.svelte` wrapper):
 ---
 
 ## Phase 7 — "What's Left to Sell"
+
+**Status: COMPLETE** (commit `4a6a160`)
 
 ### Trigger
 
