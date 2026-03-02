@@ -24,6 +24,7 @@ export interface Page {
 }
 
 export interface PageState {
+	mode?: 'build' | 'import';
 	panels: Record<string, PanelState>;
 	packages: Record<string, PackageState>;
 }
