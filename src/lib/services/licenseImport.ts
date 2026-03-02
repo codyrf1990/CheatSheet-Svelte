@@ -191,10 +191,11 @@ export function importLicense(license: LicenseInfo, overrideCompanyName?: string
 	// 11. Store license metadata on company
 	companiesStore.setLicenseData(company.id, license);
 
-	// 12. Save page state
+	// 12. Save page state with import mode (license import always sets import mode)
 	const currentPage = companiesStore.currentPage;
 	if (currentPage) {
 		const newState = {
+			mode: 'import' as const,
 			packages: packagesStore.getPageState(),
 			panels: panelsStore.getPageState()
 		};

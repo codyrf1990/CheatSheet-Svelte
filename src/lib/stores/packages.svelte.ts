@@ -6,6 +6,7 @@
 
 import type { PackageState, PageState } from '$types';
 import { userPrefsStore } from './userPrefs.svelte';
+import { companiesStore } from './companies.svelte';
 
 // Reactive state
 let packageStates = $state<Record<string, PackageState>>({});
@@ -300,6 +301,9 @@ export const packagesStore = {
 	// Getters
 	get all() {
 		return packageStates;
+	},
+	get buildMode(): boolean {
+		return (companiesStore.currentPageState?.mode ?? 'import') === 'build';
 	},
 
 	// State access

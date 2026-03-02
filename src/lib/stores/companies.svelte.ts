@@ -40,7 +40,7 @@ function generateId(prefix: string = 'page'): string {
  * Create empty page state
  */
 function createEmptyPageState(): PageState {
-	return { panels: {}, packages: {} };
+	return { mode: 'build', panels: {}, packages: {} };
 }
 
 /**

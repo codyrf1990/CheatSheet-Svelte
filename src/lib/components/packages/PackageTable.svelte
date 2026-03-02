@@ -1,6 +1,8 @@
 <script lang="ts">
-	import type { Package } from '$types';
+	import type { Package, PageState } from '$types';
 	import PackageRow from './PackageRow.svelte';
+	import { companiesStore } from '$stores/companies.svelte';
+	import { toastStore } from '$stores/toast.svelte';
 
 	interface Props {
 		packages: Package[];
@@ -9,6 +11,20 @@
 	}
 
 	let { packages, editMode = false, maintenanceRange = '' }: Props = $props();
+
+	let currentMode = $derived(companiesStore.currentPageState?.mode ?? 'import');
+
+	function toggleMode() {
+		const page = companiesStore.currentPage;
+		if (!page) return;
+		const newMode = currentMode === 'build' ? 'import' : 'build';
+		const newState: PageState = {
+			...page.state,
+			mode: newMode
+		};
+		companiesStore.savePageState(page.id, newState);
+		toastStore.info(`Switched to ${newMode === 'build' ? 'Build' : 'Import'} mode`);
+	}
 </script>
 
 <div class="package-table-container">
@@ -24,11 +40,20 @@
 					<th scope="col" class="col-bits">
 						<div class="bits-header">
 							<span>Included Bits</span>
-							{#if maintenanceRange}
-								<span class="maintenance-range" title="Maintenance dates">
-									{maintenanceRange}
-								</span>
-							{/if}
+							<div class="bits-header-actions">
+								<button
+									class="mode-badge {currentMode === 'build' ? 'mode-build' : 'mode-import'}"
+									onclick={toggleMode}
+									title="Click to toggle between Build and Import mode"
+								>
+									{currentMode === 'build' ? 'BUILD' : 'IMPORT'}
+								</button>
+								{#if maintenanceRange}
+									<span class="maintenance-range" title="Maintenance dates">
+										{maintenanceRange}
+									</span>
+								{/if}
+							</div>
 						</div>
 					</th>
 				</tr>
@@ -125,6 +150,41 @@
 		justify-content: space-between;
 		gap: var(--space-2);
 		flex-wrap: wrap;
+	}
+
+	.bits-header-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1);
+	}
+
+	.mode-badge {
+		font-size: 0.65rem;
+		font-weight: 700;
+		padding: 1px 8px;
+		border-radius: 999px;
+		cursor: pointer;
+		user-select: none;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		transition: all 150ms ease;
+		line-height: 1.4;
+	}
+
+	.mode-build {
+		background: rgba(113, 63, 18, 0.3);
+		color: #facc15;
+		border: 1px solid rgba(202, 138, 4, 0.4);
+	}
+
+	.mode-import {
+		background: rgba(39, 39, 42, 1);
+		color: rgba(161, 161, 170, 1);
+		border: 1px solid rgba(82, 82, 91, 0.4);
+	}
+
+	.mode-badge:hover {
+		filter: brightness(1.2);
 	}
 
 	.maintenance-range {
