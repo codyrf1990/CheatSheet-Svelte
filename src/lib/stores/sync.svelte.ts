@@ -203,6 +203,7 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 		lastConnectedUsername !== null && lastConnectedUsername !== normalizedName;
 	if (isSwitchingUsers) {
 		console.info('[SyncStore] Switching users, resetting local prefs to avoid cross-user data.');
+		stopAutoSync();
 		userPrefsStore.resetSyncablePrefs();
 	}
 

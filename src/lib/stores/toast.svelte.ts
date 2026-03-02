@@ -3,6 +3,7 @@
  * Adapted from TOS Parser Svelte
  */
 
+import { browser } from '$app/environment';
 import type { Toast, ToastType } from '$types';
 
 const MAX_TOASTS = 3;
@@ -101,17 +102,16 @@ export const toastStore = {
 };
 
 // Pause all toasts when tab is hidden (2026 best practice)
-// Guard prevents duplicate listeners during HMR
-let visibilityListenerAdded = false;
-if (typeof document !== 'undefined' && !visibilityListenerAdded) {
-	visibilityListenerAdded = true;
+// Uses browser guard for SSR safety; one-time setup outside reactive path
+if (browser) {
 	document.addEventListener('visibilitychange', () => {
 		if (document.hidden) {
 			document.documentElement.classList.add('toast-paused');
-			toasts.forEach((t) => pause(t.id));
+			// Read toasts snapshot directly — not inside a reactive context
+			for (const t of toasts) pause(t.id);
 		} else {
 			document.documentElement.classList.remove('toast-paused');
-			toasts.forEach((t) => resume(t.id));
+			for (const t of toasts) resume(t.id);
 		}
 	});
 }

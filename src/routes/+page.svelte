@@ -93,7 +93,6 @@
 
 	// Save changes back - debounced to batch rapid changes
 	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
-	let pendingSavePageId: string | null = null;
 
 	$effect(() => {
 		// These reads ARE tracked - effect runs when packages/panels change
@@ -101,27 +100,19 @@
 		void packagesStore.all;
 		void panelsStore.all;
 
-		// Capture the page ID NOW, not when timeout fires (prevents race condition)
-		const currentPage = companiesStore.currentPage;
-		if (!currentPage) return;
+		// Capture the page ID NOW in the closure, not when timeout fires
+		const capturedPageId = companiesStore.currentPage?.id;
+		if (!capturedPageId) return;
 
 		// Clear any pending save
 		if (saveTimeout) clearTimeout(saveTimeout);
 
-		// Track which page this save is for
-		pendingSavePageId = currentPage.id;
-
 		// Debounce: wait 150ms after last change before saving
 		saveTimeout = setTimeout(() => {
 			untrack(() => {
-				// Use the captured page ID, not current (may have switched)
-				if (!pendingSavePageId) return;
-
 				// Only save if we're still on the same page
 				const nowCurrentPage = companiesStore.currentPage;
-				if (!nowCurrentPage || nowCurrentPage.id !== pendingSavePageId) {
-					// Page changed - don't save stale state to new page
-					pendingSavePageId = null;
+				if (!nowCurrentPage || nowCurrentPage.id !== capturedPageId) {
 					return;
 				}
 
@@ -132,9 +123,8 @@
 
 				const previousState = companiesStore.currentPageState;
 				if (JSON.stringify(previousState) !== JSON.stringify(newState)) {
-					companiesStore.savePageState(pendingSavePageId, newState);
+					companiesStore.savePageState(capturedPageId, newState);
 				}
-				pendingSavePageId = null;
 			});
 		}, 150);
 
@@ -220,11 +210,13 @@
 
 		<!-- Sidebar (Panels + Calculator) -->
 		<aside class="sidebar">
-			<MaintenancePanel
-				maintenancePanel={panels.find((p) => p.id === 'maintenance-skus')!}
-				solidworksPanel={panels.find((p) => p.id === 'solidworks-maintenance')!}
-				editMode={packageEditMode}
-			/>
+			{#if panels.find((p) => p.id === 'maintenance-skus') && panels.find((p) => p.id === 'solidworks-maintenance')}
+				<MaintenancePanel
+					maintenancePanel={panels.find((p) => p.id === 'maintenance-skus')!}
+					solidworksPanel={panels.find((p) => p.id === 'solidworks-maintenance')!}
+					editMode={packageEditMode}
+				/>
+			{/if}
 			<Calculator />
 		</aside>
 	</div>

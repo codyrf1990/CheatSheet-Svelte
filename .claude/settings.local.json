@@ -1,0 +1,25 @@
+{
+	"permissions": {
+		"allow": [
+			"Bash(pnpm install:*)",
+			"Bash(pnpm add:*)",
+			"Bash(pnpm check:*)",
+			"Read(//home/cody/CheatSheet-Svelte/**)",
+			"Bash(done)",
+			"Read(//home/cody/CheatSheet/**)",
+			"Read(//home/cody/Projects/machine-db-project/machine-research-ui/**)",
+			"Bash(git add:*)",
+			"Bash(git push:*)",
+			"Bash(find:*)",
+			"Bash(pnpm lint:*)",
+			"Bash(vercel --version:*)",
+			"Bash(vercel whoami:*)",
+			"Bash(vercel login)",
+			"Bash(vercel --prod:*)",
+			"Bash(node -e:*)",
+			"WebFetch(domain:developers.openai.com)",
+			"Bash(npx prettier:*)",
+			"Bash(pnpm:*)"
+		]
+	}
+}

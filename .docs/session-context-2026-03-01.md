@@ -27,6 +27,7 @@ Three distinct modes — no user role enforcement, just different use cases:
 ### SKU Panel Toggle (not built yet)
 
 The right sidebar SKU panel needs a toggle:
+
 - **Default: New-sale SKUs** — package + module SKUs, clearly labeled, easy to copy.
 - **Toggle: Maintenance SKUs** — switches to maintenance codes for renewal estimates.
 
@@ -53,16 +54,19 @@ All rules are documented in `source-of-truth-matrix.md`. Key corrections made th
 ## File Cleanup Done This Session
 
 ### Deleted
+
 - `.docs/docs/cheatsheet-guardrails-tracker.md` — built with wrong context (HubSpot workflow, discounts, handoff). Superseded by source-of-truth-matrix.md.
 - `.docs/docs/pricing-matrix-2026-workbook-facts.md` — pricing now in source-of-truth-matrix.md. Workbook is the real source.
 
 ### Kept
+
 - `.docs/docs/source-of-truth-matrix.md` — THE reference for new build rules.
 - `.docs/docs/plan.md` — cloud sync plan (userPrefs). Separate topic, still valid.
 - `.docs/docs/archive/import-license-feature.md` — import feature reference. Accurate and needed.
 - `.docs/docs/archive/logic.md` — import logic (license scenarios, profile handling, page naming). Accurate and needed.
 
 ### Still Needs Cleanup (not done yet — ran out of context)
+
 - `.docs/docs/archive/TOAST_REFACTOR.md` — **DELETE. 100% implemented in code.**
 - `.docs/docs/archive/USERAVATAR_REFACTOR.md` — **DELETE. 100% implemented in code.**
 - `.docs/archive/MIGRATION-PLAN.md` — **DELETE. Migration complete.**
@@ -82,7 +86,9 @@ All rules are documented in `source-of-truth-matrix.md`. Key corrections made th
 ## What Is Confirmed Done In Code
 
 ### Toast system (ToastContainer.svelte + toast.svelte.ts)
+
 All 13 tasks from TOAST_REFACTOR.md are implemented:
+
 - Subtle fly animation (x:24px, 280ms, quintOut/quintIn)
 - No glow div, no icon pulse
 - 2px progress bar, muted opacity gradients
@@ -94,7 +100,9 @@ All 13 tasks from TOAST_REFACTOR.md are implemented:
 - animate:flip for smooth reordering
 
 ### UserAvatar (UserAvatar.svelte)
+
 All 11 tasks from USERAVATAR_REFACTOR.md are implemented:
+
 - Glass container with backdrop-filter
 - Status-aware container (connected/syncing/error/disconnected) with correct styles
 - Status-aware ring (faster spin on sync, paused on disconnect, red on error)
@@ -107,6 +115,7 @@ All 11 tasks from USERAVATAR_REFACTOR.md are implemented:
 - Full reduced motion support
 
 ### State persistence (Phase 0 of POLISH-PLAN)
+
 - `+page.svelte` loads both `packagesStore` and `panelsStore` from page state.
 - Saves back bidirectionally with debounce and race condition guard.
 - Done.

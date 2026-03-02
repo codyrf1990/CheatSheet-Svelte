@@ -55,11 +55,17 @@
 			await new Promise((r) => setTimeout(r, 400));
 			loginStep = 'syncing';
 
-			await syncStore.connect(username, rememberMe);
+			const success = await syncStore.connect(username, rememberMe);
 
-			// Show success state
-			loginStep = 'success';
-			await new Promise((r) => setTimeout(r, 800));
+			if (success) {
+				// Show success state
+				loginStep = 'success';
+				await new Promise((r) => setTimeout(r, 800));
+			} else {
+				// connect() returned false (validation error or load failure)
+				error = syncStore.error || 'Connection failed';
+				loginStep = 'idle';
+			}
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to connect';
 			loginStep = 'idle';

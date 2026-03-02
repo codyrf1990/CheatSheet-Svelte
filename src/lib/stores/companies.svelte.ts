@@ -5,6 +5,7 @@
  */
 
 import type { Company, Page, PageState, PackageState, LicenseInfo } from '$types';
+import { toastStore } from './toast.svelte';
 
 // localStorage keys (must match original for migration)
 const CURRENT_COMPANY_KEY = 'solidcam-current-company-id';
@@ -692,13 +693,9 @@ function save(): void {
 			err instanceof Error &&
 			(err.name === 'QuotaExceededError' || (err as { code?: number }).code === 22)
 		) {
-			alert(
-				'WARNING: Storage quota exceeded!\n\n' +
-					'Your changes could not be saved due to limited browser storage.\n\n' +
-					'To fix this:\n' +
-					'1. Delete some companies or pages\n' +
-					'2. Export your data first\n' +
-					'3. Clear browser cache for this site'
+			toastStore.error(
+				'Storage quota exceeded — delete some companies/pages or clear browser cache.',
+				8000
 			);
 		}
 	}

@@ -34,7 +34,9 @@
 	// Filtered companies based on search, sorted alphabetically
 	let filteredCompanies = $derived.by(() => {
 		const companies = searchQuery.trim() ? companiesStore.search(searchQuery) : allCompanies;
-		return [...companies].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+		return [...companies].sort((a, b) =>
+			a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+		);
 	});
 
 	function handleCompanySelect(companyId: string) {
