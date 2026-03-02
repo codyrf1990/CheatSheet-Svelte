@@ -5,7 +5,12 @@
 	import { PackageTable } from '$components/packages';
 	import { MaintenancePanel, NewSalePanel } from '$components/panels';
 	import { Calculator } from '$components/calculator';
-	import { SalesTaxModal, CurrentProductsModal, CompaniesModal } from '$components/ui';
+	import {
+		SalesTaxModal,
+		CurrentProductsModal,
+		CompaniesModal,
+		WhatLeftModal
+	} from '$components/ui';
 	import type { PageState } from '$types';
 	import { toastStore } from '$stores/toast.svelte';
 	import { syncStore } from '$stores/sync.svelte';
@@ -88,6 +93,7 @@
 	let showSalesTaxModal = $state(false);
 	let showProductsModal = $state(false);
 	let showCompaniesModal = $state(false);
+	let showWhatLeftModal = $state(false);
 
 	// CF Tools links array (matching Machine Research)
 	const cfToolsLinks = [
@@ -218,7 +224,12 @@
 	<div class="content-area">
 		<!-- Package Table (Main Content) -->
 		<section class="main-content">
-			<PackageTable {packages} editMode={packageEditMode} {maintenanceRange} />
+			<PackageTable
+				{packages}
+				editMode={packageEditMode}
+				{maintenanceRange}
+				onwhatleft={() => (showWhatLeftModal = true)}
+			/>
 		</section>
 
 		<!-- Sidebar (Panels + Calculator) -->
@@ -319,6 +330,7 @@
 <SalesTaxModal open={showSalesTaxModal} onclose={() => (showSalesTaxModal = false)} />
 <CurrentProductsModal open={showProductsModal} onclose={() => (showProductsModal = false)} />
 <CompaniesModal open={showCompaniesModal} onclose={() => (showCompaniesModal = false)} />
+<WhatLeftModal open={showWhatLeftModal} onclose={() => (showWhatLeftModal = false)} />
 
 <style>
 	.page-layout {

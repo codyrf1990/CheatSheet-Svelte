@@ -2,15 +2,17 @@
 	import type { Package, PageState } from '$types';
 	import PackageRow from './PackageRow.svelte';
 	import { companiesStore } from '$stores/companies.svelte';
+	import { packagesStore } from '$stores/packages.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 
 	interface Props {
 		packages: Package[];
 		editMode?: boolean;
 		maintenanceRange?: string;
+		onwhatleft?: () => void;
 	}
 
-	let { packages, editMode = false, maintenanceRange = '' }: Props = $props();
+	let { packages, editMode = false, maintenanceRange = '', onwhatleft }: Props = $props();
 
 	let currentMode = $derived(companiesStore.currentPageState?.mode ?? 'import');
 
@@ -25,6 +27,13 @@
 		companiesStore.savePageState(page.id, newState);
 		toastStore.info(`Switched to ${newMode === 'build' ? 'Build' : 'Import'} mode`);
 	}
+
+	// Show "What's Left" when in import mode or when any bits are selected
+	let showWhatLeft = $derived.by(() => {
+		if (currentMode === 'import') return true;
+		const states = packagesStore.all;
+		return Object.values(states).some((s) => s.selectedBits.length > 0);
+	});
 </script>
 
 <div class="package-table-container">
@@ -48,6 +57,15 @@
 								>
 									{currentMode === 'build' ? 'BUILD' : 'IMPORT'}
 								</button>
+								{#if showWhatLeft && onwhatleft}
+									<button
+										class="what-left-btn"
+										onclick={onwhatleft}
+										title="See what packages and modules are not yet selected"
+									>
+										What's Left
+									</button>
+								{/if}
 								{#if maintenanceRange}
 									<span class="maintenance-range" title="Maintenance dates">
 										{maintenanceRange}
@@ -185,6 +203,27 @@
 
 	.mode-badge:hover {
 		filter: brightness(1.2);
+	}
+
+	.what-left-btn {
+		font-size: 0.65rem;
+		font-weight: 600;
+		padding: 1px 8px;
+		border-radius: 999px;
+		cursor: pointer;
+		user-select: none;
+		letter-spacing: 0.03em;
+		line-height: 1.4;
+		background: rgba(74, 222, 128, 0.12);
+		color: #4ade80;
+		border: 1px solid rgba(74, 222, 128, 0.3);
+		transition: all 150ms ease;
+	}
+
+	.what-left-btn:hover {
+		background: rgba(74, 222, 128, 0.2);
+		border-color: rgba(74, 222, 128, 0.5);
+		filter: brightness(1.1);
 	}
 
 	.maintenance-range {
