@@ -110,8 +110,7 @@
 
 		// Additional modules — check which are not currently selected
 		const moduleItems: UpgradeItem[] = [];
-		const maintPanelState = panelsStore.getState('maintenance-skus');
-		const selectedMaintSkus = maintPanelState?.items ?? [];
+		const selectedMaintSkus = panelsStore.getItems('maintenance-skus');
 
 		for (const moduleSku of MODULE_SKUS) {
 			// If the module's maint SKU is selected in the panel, it's already owned

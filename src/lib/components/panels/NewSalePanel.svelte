@@ -55,12 +55,10 @@
 		}
 
 		// Check panel items for additional module SKUs
-		const maintPanelState = panelsStore.getState('maintenance-skus');
-		if (maintPanelState) {
-			for (const moduleSku of MODULE_SKUS) {
-				if (maintPanelState.items.includes(moduleSku.maintSku)) {
-					entries.push(moduleSku);
-				}
+		const maintItems = panelsStore.getItems('maintenance-skus');
+		for (const moduleSku of MODULE_SKUS) {
+			if (maintItems.includes(moduleSku.maintSku)) {
+				entries.push(moduleSku);
 			}
 		}
 
