@@ -13,6 +13,7 @@ export const BIT_DESCRIPTIONS: Record<string, string> = {
 	iMach3D: 'iMachining 3D — adaptive 3D roughing on top of HSM. Requires SC-Mill and iMach2D.',
 	// SC-Mill-5Axis
 	Sim4x: 'Simultaneous 4-axis — rotary and 4th-axis contouring. Requires SC-Mill.',
+	'Multiaxis Roughing': 'Multiaxis roughing — 5-axis stock removal with tilted tool to avoid collisions. Requires SC-Mill.',
 	// SC-Turn
 	'SC-Turn':
 		'Turning module — profile turning, grooving, threading, backspindle. Includes Mill-Turn when combined with SC-Mill.',
@@ -31,10 +32,12 @@ export const BIT_DESCRIPTIONS: Record<string, string> = {
 		'Port machining for engine heads and similar complex internal surfaces. Requires SC-Mill.',
 	// Additional modules — standalone (no prerequisite)
 	'SC-Probe': 'On-machine probing for setup, datum setting, and in-process measurement.',
+	'SC-Probe1': 'On-machine probing for tool and datum homing — measurement features not included.',
 	'SC-Vericut': 'Sends the NC program to Vericut for full machine simulation and verification.',
 	'iMachNX-Mod': 'iMachining technology available directly inside NX.',
 	'WC2-Mod': '2-axis wire EDM — contouring, taper cutting, and profiles.',
 	'SC-Wire': '4-axis wire EDM — adds upper/lower independent contour cutting.',
 	'SolidShop-Editor': 'CIMCO Editor for NC code editing, backplotting, and DNC communication.',
-	'SC-4Op': 'Operator-facing interface for running and managing SolidCAM jobs on the shop floor.'
+	'SC-4Op': 'Operator-facing interface for running and managing SolidCAM jobs on the shop floor.',
+	'SC-4Op-Sim': 'Simulation-only operator interface — run and visualize jobs without full NC output access.'
 };

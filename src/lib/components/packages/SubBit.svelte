@@ -72,7 +72,7 @@
 	{ondrop}
 >
 	<div class="bit-row">
-		<span class="checkbox-wrapper">
+		<span class="checkbox-wrapper" onclick={disabled ? handleToggle : undefined}>
 			<Checkbox checked={isSelected} onchange={handleToggle} {disabled} />
 		</span>
 		<span
