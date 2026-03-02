@@ -8,8 +8,12 @@
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { applyOrder } from '$lib/utils/order';
 	import { PACKAGE_TOGGLE_BITS, SC_TURN_LOCKED } from '$lib/data/prerequisites';
+	import { getDisabledBits } from '$lib/services/buildValidation';
 	import MasterBit from './MasterBit.svelte';
 	import LooseBit from './LooseBit.svelte';
+
+	// Compute disabled bits map from build validation
+	let disabledBits = $derived(getDisabledBits(packagesStore.all, packagesStore.buildMode));
 
 	interface Props {
 		pkg: Package;
@@ -300,7 +304,13 @@
 				{#if hasGroups}
 					<div class="groups-grid">
 						{#each pkg.groups as group (group.masterId)}
-							<MasterBit {group} packageCode={pkg.code} {editMode} />
+							<MasterBit
+								{group}
+								packageCode={pkg.code}
+								{editMode}
+								disabled={disabledBits.has(group.masterId)}
+								disabledReason={disabledBits.get(group.masterId) ?? ''}
+							/>
 						{/each}
 					</div>
 				{/if}
@@ -322,6 +332,8 @@
 									{editMode}
 									{removeMode}
 									isCustom={isCustomBit(bit)}
+									disabled={disabledBits.has(bit)}
+									disabledReason={disabledBits.get(bit) ?? ''}
 									draggable={editMode}
 									ondragstart={(e) => handleDragStart(e, index, bit)}
 									ondragover={handleDragOver}

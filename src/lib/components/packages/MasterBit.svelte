@@ -10,9 +10,17 @@
 		group: PackageGroup;
 		packageCode: string;
 		editMode?: boolean;
+		disabled?: boolean;
+		disabledReason?: string;
 	}
 
-	let { group, packageCode, editMode = false }: Props = $props();
+	let {
+		group,
+		packageCode,
+		editMode = false,
+		disabled = false,
+		disabledReason = ''
+	}: Props = $props();
 
 	// Local state for expand/collapse
 	let expanded = $state(true);
@@ -48,6 +56,10 @@
 
 	function handleMasterToggle() {
 		if (editMode) return;
+		if (disabled) {
+			toastStore.warning(disabledReason);
+			return;
+		}
 		packagesStore.toggleMasterBit(packageCode, group.masterId, effectiveBits());
 	}
 
@@ -148,12 +160,19 @@
 	}
 </script>
 
-<div class="master-bit" data-master={group.masterId} data-master-label={group.label}>
+<div
+	class="master-bit"
+	class:disabled-bit={disabled}
+	data-master={group.masterId}
+	data-master-label={group.label}
+	title={disabled ? disabledReason : ''}
+>
 	<div class="master-header">
 		<Checkbox
 			checked={masterState.checked}
 			indeterminate={masterState.indeterminate}
 			onchange={handleMasterToggle}
+			{disabled}
 		/>
 		<span
 			class="master-label"
@@ -225,6 +244,11 @@
 		overflow: hidden;
 		width: 100%;
 		min-width: 0;
+	}
+
+	.master-bit.disabled-bit {
+		opacity: 0.4;
+		cursor: not-allowed;
 	}
 
 	.master-header {

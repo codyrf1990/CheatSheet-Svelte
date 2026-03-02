@@ -8,6 +8,8 @@
 		packageCode: string;
 		masterId: string;
 		editMode?: boolean;
+		disabled?: boolean;
+		disabledReason?: string;
 		draggable?: boolean;
 		ondragstart?: (e: DragEvent) => void;
 		ondragover?: (e: DragEvent) => void;
@@ -19,6 +21,8 @@
 		packageCode,
 		masterId,
 		editMode = false,
+		disabled = false,
+		disabledReason = '',
 		draggable = false,
 		ondragstart,
 		ondragover,
@@ -29,6 +33,10 @@
 
 	function handleToggle() {
 		if (editMode) return;
+		if (disabled) {
+			toastStore.warning(disabledReason);
+			return;
+		}
 		packagesStore.toggleBit(packageCode, bit);
 	}
 
@@ -53,17 +61,19 @@
 <li
 	class="sub-bit"
 	class:edit-mode={editMode}
+	class:disabled-bit={disabled}
 	data-sortable-item
 	data-bit={bit}
 	data-parent={masterId}
+	title={disabled ? disabledReason : ''}
 	draggable={draggable && editMode}
 	{ondragstart}
 	{ondragover}
 	{ondrop}
 >
-	<label class="bit-label">
+	<div class="bit-row">
 		<span class="checkbox-wrapper">
-			<Checkbox checked={isSelected} onchange={handleToggle} />
+			<Checkbox checked={isSelected} onchange={handleToggle} {disabled} />
 		</span>
 		<span
 			class="bit-text"
@@ -73,7 +83,7 @@
 			onkeydown={handleKeydown}
 			data-copyable-bit>{bit}</span
 		>
-	</label>
+	</div>
 </li>
 
 <style>
@@ -94,6 +104,11 @@
 		box-shadow: var(--chip-shadow);
 	}
 
+	.sub-bit.disabled-bit {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
 	.sub-bit[draggable='true'] {
 		cursor: grab;
 		user-select: none;
@@ -103,13 +118,13 @@
 		cursor: grabbing;
 	}
 
-	.sub-bit[draggable='true'] .bit-label,
-	.sub-bit[draggable='true'] .bit-label .bit-text {
+	.sub-bit[draggable='true'] .bit-row,
+	.sub-bit[draggable='true'] .bit-row .bit-text {
 		cursor: grab;
 	}
 
-	.sub-bit[draggable='true']:active .bit-label,
-	.sub-bit[draggable='true']:active .bit-label .bit-text {
+	.sub-bit[draggable='true']:active .bit-row,
+	.sub-bit[draggable='true']:active .bit-row .bit-text {
 		cursor: grabbing;
 	}
 
@@ -118,7 +133,7 @@
 		outline-offset: -1px;
 	}
 
-	.sub-bit.edit-mode .bit-label {
+	.sub-bit.edit-mode .bit-row {
 		pointer-events: none;
 	}
 
@@ -127,12 +142,11 @@
 		align-items: center;
 	}
 
-	.bit-label {
+	.bit-row {
 		display: flex;
 		align-items: center;
 		gap: var(--space-0-5);
 		flex: 1;
-		cursor: pointer;
 		min-width: 0;
 	}
 
@@ -156,7 +170,7 @@
 			gap: var(--space-px);
 		}
 
-		.bit-label {
+		.bit-row {
 			gap: var(--space-0);
 		}
 
@@ -170,7 +184,7 @@
 			padding: var(--space-px) var(--space-0);
 		}
 
-		.bit-label {
+		.bit-row {
 			gap: var(--space-0);
 		}
 

@@ -10,6 +10,8 @@
 		editMode?: boolean;
 		removeMode?: boolean;
 		isCustom?: boolean;
+		disabled?: boolean;
+		disabledReason?: string;
 		draggable?: boolean;
 		ondragstart?: (e: DragEvent) => void;
 		ondragover?: (e: DragEvent) => void;
@@ -22,6 +24,8 @@
 		editMode = false,
 		removeMode = false,
 		isCustom = false,
+		disabled = false,
+		disabledReason = '',
 		draggable = false,
 		ondragstart,
 		ondragover,
@@ -32,6 +36,10 @@
 
 	function handleToggle() {
 		if (editMode) return;
+		if (disabled) {
+			toastStore.warning(disabledReason);
+			return;
+		}
 		packagesStore.toggleBit(packageCode, bit);
 	}
 
@@ -63,16 +71,18 @@
 	class:edit-mode={editMode}
 	class:custom={isCustom}
 	class:remove-mode={removeMode && isCustom}
+	class:disabled-bit={disabled}
 	data-sortable-item
 	data-bit={bit}
+	title={disabled ? disabledReason : ''}
 	draggable={draggable && editMode}
 	{ondragstart}
 	{ondragover}
 	{ondrop}
 >
-	<label class="bit-label">
+	<div class="bit-row">
 		<span class="checkbox-wrapper">
-			<Checkbox checked={isSelected} onchange={handleToggle} />
+			<Checkbox checked={isSelected} onchange={handleToggle} {disabled} />
 		</span>
 		<span
 			class="bit-text"
@@ -84,7 +94,7 @@
 			data-copyable-bit
 			>{#if isCustom}<span class="custom-indicator">+</span>{/if}{bit}</span
 		>
-	</label>
+	</div>
 	{#if removeMode && isCustom}
 		<button type="button" class="bit-remove-btn" onclick={handleRemove} aria-label="Remove {bit}">
 			&times;
@@ -110,6 +120,11 @@
 		border-color: var(--chip-border-color-strong);
 	}
 
+	.loose-bit.disabled-bit {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
 	.loose-bit[draggable='true'] {
 		cursor: grab;
 		user-select: none;
@@ -119,13 +134,13 @@
 		cursor: grabbing;
 	}
 
-	.loose-bit[draggable='true'] .bit-label,
-	.loose-bit[draggable='true'] .bit-label .bit-text {
+	.loose-bit[draggable='true'] .bit-row,
+	.loose-bit[draggable='true'] .bit-row .bit-text {
 		cursor: grab;
 	}
 
-	.loose-bit[draggable='true']:active .bit-label,
-	.loose-bit[draggable='true']:active .bit-label .bit-text {
+	.loose-bit[draggable='true']:active .bit-row,
+	.loose-bit[draggable='true']:active .bit-row .bit-text {
 		cursor: grabbing;
 	}
 
@@ -134,7 +149,7 @@
 		outline-offset: -1px;
 	}
 
-	.loose-bit.edit-mode .bit-label {
+	.loose-bit.edit-mode .bit-row {
 		pointer-events: none;
 	}
 
@@ -143,7 +158,7 @@
 		align-items: center;
 	}
 
-	.bit-label {
+	.bit-row {
 		display: flex;
 		align-items: center;
 		gap: var(--space-1);
@@ -205,7 +220,7 @@
 			gap: var(--space-0);
 		}
 
-		.bit-label {
+		.bit-row {
 			gap: var(--space-0-5);
 		}
 
@@ -225,7 +240,7 @@
 			padding: var(--space-px) var(--space-0);
 		}
 
-		.bit-label {
+		.bit-row {
 			gap: var(--space-0-5);
 		}
 
