@@ -135,12 +135,12 @@
 					return;
 				}
 
+				const previousState = companiesStore.currentPageState;
 				const newState: PageState = {
+					mode: previousState.mode,
 					packages: packagesStore.getPageState(),
 					panels: panelsStore.getPageState()
 				};
-
-				const previousState = companiesStore.currentPageState;
 				if (JSON.stringify(previousState) !== JSON.stringify(newState)) {
 					companiesStore.savePageState(capturedPageId, newState);
 				}
@@ -151,6 +151,24 @@
 		return () => {
 			if (saveTimeout) clearTimeout(saveTimeout);
 		};
+	});
+
+	// Mill Turn toast — lives here (single instance) not in PackageRow (which renders 5 times)
+	let hasMillBits = $derived((packagesStore.all['SC-Mill']?.selectedBits?.length ?? 0) > 0);
+	let hasTurnBits = $derived((packagesStore.all['SC-Turn']?.selectedBits?.length ?? 0) > 0);
+	let millTurnCombo = $derived(hasMillBits && hasTurnBits);
+	let prevMillTurnCombo = false;
+	$effect(() => {
+		const current = millTurnCombo;
+		untrack(() => {
+			if (current && !prevMillTurnCombo) {
+				toastStore.info(
+					'Mill-Turn capability is automatically included with this combination.',
+					5000
+				);
+			}
+			prevMillTurnCombo = current;
+		});
 	});
 
 	async function handleLogout() {

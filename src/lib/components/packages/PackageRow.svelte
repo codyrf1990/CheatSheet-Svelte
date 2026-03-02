@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import type { Package } from '$types';
 	import { Checkbox } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
@@ -192,34 +191,6 @@
 		draggedIndex = null;
 	}
 
-	// Mill Turn toast: fire when SC-Mill + SC-Turn both active
-	let hasAnyMillBits = $derived.by(() => {
-		const state = packagesStore.getStateReadOnly('SC-Mill');
-		return (state.selectedBits?.length ?? 0) > 0;
-	});
-
-	let hasAnyTurnBits = $derived.by(() => {
-		const state = packagesStore.getStateReadOnly('SC-Turn');
-		return (state.selectedBits?.length ?? 0) > 0;
-	});
-
-	let millTurnCombo = $derived(hasAnyMillBits && hasAnyTurnBits);
-
-	// Track previous state to only fire toast on transition
-	let prevMillTurnCombo = false;
-	$effect(() => {
-		const current = millTurnCombo;
-		untrack(() => {
-			if (current && !prevMillTurnCombo) {
-				toastStore.info(
-					'Mill-Turn capability is automatically included with this combination.',
-					5000
-				);
-			}
-			prevMillTurnCombo = current;
-		});
-	});
-
 	// Handle drop on the loose bits container itself (not just on items)
 	function handleLooseBitsContainerDrop(e: DragEvent) {
 		if (!editMode) return;
@@ -279,7 +250,7 @@
 				<div class="loose-bits-section">
 					<ul class="loose-bits">
 						<li class="loose-bit">
-							<label class="bit-label">
+							<div class="bit-label">
 								<span class="checkbox-wrapper">
 									<Checkbox checked={scTurnSelected} onchange={handleSCTurnToggle} />
 								</span>
@@ -296,7 +267,7 @@
 									}}
 									data-copyable-bit>SC-Turn Module</span
 								>
-							</label>
+							</div>
 						</li>
 					</ul>
 				</div>

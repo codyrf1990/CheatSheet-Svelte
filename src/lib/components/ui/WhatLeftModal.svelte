@@ -33,10 +33,10 @@
 		// Package bit groups
 		const packageOrder: { code: string; label: string }[] = [
 			{ code: 'SC-Mill', label: 'SC-Mill' },
-			{ code: 'SC-Turn', label: 'SC-Turn' },
 			{ code: 'SC-Mill-Adv', label: 'SC-Mill-Adv' },
 			{ code: 'SC-Mill-3D', label: 'SC-Mill-3D' },
-			{ code: 'SC-Mill-5Axis', label: 'SC-Mill-5Axis' }
+			{ code: 'SC-Mill-5Axis', label: 'SC-Mill-5Axis' },
+			{ code: 'SC-Turn', label: 'SC-Turn' }
 		];
 
 		for (const { code, label } of packageOrder) {

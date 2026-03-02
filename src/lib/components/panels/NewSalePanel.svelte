@@ -4,6 +4,7 @@
 	import { SKU_LOOKUP, MODULE_SKUS, type SkuEntry } from '$lib/data/skuData';
 	import { PACKAGE_TOGGLE_BITS } from '$lib/data/prerequisites';
 	import { panelsStore } from '$stores/panels.svelte';
+	import { packages as packageDefs } from '$data';
 
 	// Derive SKU entries from current package selections
 	let skuEntries = $derived.by(() => {
@@ -33,18 +34,21 @@
 				}
 			}
 
-			// Check group selections
+			// Check group selections — only add group SKU when group bits are actually selected
 			if (toggleDef.groups) {
+				const pkgDef = packageDefs.find((p) => p.code === pkgCode);
 				for (const groupId of toggleDef.groups) {
 					const key = `${pkgCode}::${groupId}`;
-					// Check if any bits in the group are selected
 					const groupEntry = SKU_LOOKUP[key];
-					if (groupEntry) {
-						// For groups, check if any of the group's sub-bits are selected
-						const groupBitsSelected = state.selectedBits.length > 0;
-						if (groupBitsSelected && !entries.includes(groupEntry)) {
-							entries.push(groupEntry);
-						}
+					if (!groupEntry) continue;
+
+					const group = pkgDef?.groups?.find((g) => g.masterId === groupId);
+					const groupBitsSelected = group
+						? group.bits.some((b) => state.selectedBits.includes(b))
+						: false;
+
+					if (groupBitsSelected && !entries.includes(groupEntry)) {
+						entries.push(groupEntry);
 					}
 				}
 			}
