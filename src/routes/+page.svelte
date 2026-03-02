@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { browser } from '$app/environment';
 	import { Header, CompanyPageBar } from '$components/layout';
 	import { PackageTable } from '$components/packages';
-	import { MaintenancePanel } from '$components/panels';
+	import { MaintenancePanel, NewSalePanel } from '$components/panels';
 	import { Calculator } from '$components/calculator';
 	import { SalesTaxModal, CurrentProductsModal, CompaniesModal } from '$components/ui';
 	import type { PageState } from '$types';
@@ -62,6 +63,18 @@
 		panelsStore.resetAllOrders();
 		packageEditMode = false;
 	}
+
+	// Sidebar SKU tab state (persisted)
+	type SkuTab = 'new-sale' | 'maintenance';
+	let skuTab = $state<SkuTab>(
+		browser
+			? ((localStorage.getItem('solidcam-sku-tab') as SkuTab) ?? 'maintenance')
+			: 'maintenance'
+	);
+
+	$effect(() => {
+		if (browser) localStorage.setItem('solidcam-sku-tab', skuTab);
+	});
 
 	// Operations dropdown state
 	let showOperations = $state(false);
@@ -210,7 +223,30 @@
 
 		<!-- Sidebar (Panels + Calculator) -->
 		<aside class="sidebar">
-			{#if panels.find((p) => p.id === 'maintenance-skus') && panels.find((p) => p.id === 'solidworks-maintenance')}
+			<div class="sku-tab-toggle" role="tablist" aria-label="SKU panel view">
+				<button
+					class="sku-tab"
+					class:active={skuTab === 'new-sale'}
+					role="tab"
+					aria-selected={skuTab === 'new-sale'}
+					onclick={() => (skuTab = 'new-sale')}
+				>
+					New Sale
+				</button>
+				<button
+					class="sku-tab"
+					class:active={skuTab === 'maintenance'}
+					role="tab"
+					aria-selected={skuTab === 'maintenance'}
+					onclick={() => (skuTab = 'maintenance')}
+				>
+					Maintenance
+				</button>
+			</div>
+
+			{#if skuTab === 'new-sale'}
+				<NewSalePanel />
+			{:else if panels.find((p) => p.id === 'maintenance-skus') && panels.find((p) => p.id === 'solidworks-maintenance')}
 				<MaintenancePanel
 					maintenancePanel={panels.find((p) => p.id === 'maintenance-skus')!}
 					solidworksPanel={panels.find((p) => p.id === 'solidworks-maintenance')!}
@@ -313,6 +349,40 @@
 		gap: var(--space-1);
 		min-width: 0;
 		min-height: 0;
+	}
+
+	/* SKU tab toggle */
+	.sku-tab-toggle {
+		display: flex;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: var(--radius-xs);
+		overflow: hidden;
+		flex-shrink: 0;
+	}
+
+	.sku-tab {
+		flex: 1;
+		padding: var(--space-0-5) var(--space-1);
+		font-size: var(--text-2xs);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		background: transparent;
+		border: none;
+		color: rgba(255, 255, 255, 0.45);
+		cursor: pointer;
+		transition: all 150ms ease;
+	}
+
+	.sku-tab:hover {
+		color: rgba(255, 255, 255, 0.7);
+		background: rgba(255, 255, 255, 0.05);
+	}
+
+	.sku-tab.active {
+		color: var(--color-solidcam-gold, #d4af37);
+		background: rgba(212, 175, 55, 0.12);
+		box-shadow: inset 0 -2px 0 var(--color-solidcam-gold, #d4af37);
 	}
 
 	/* Dropdown menus - positioned absolutely on page */
