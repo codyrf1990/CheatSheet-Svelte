@@ -1,10 +1,13 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { Package } from '$types';
+	import { Checkbox } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
 	import { panelsStore } from '$stores/panels.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { applyOrder } from '$lib/utils/order';
+	import { PACKAGE_TOGGLE_BITS, SC_TURN_LOCKED } from '$lib/data/prerequisites';
 	import MasterBit from './MasterBit.svelte';
 	import LooseBit from './LooseBit.svelte';
 
@@ -14,6 +17,67 @@
 	}
 
 	let { pkg, editMode = false }: Props = $props();
+
+	// Package master toggle state
+	let packageToggleDef = $derived(PACKAGE_TOGGLE_BITS[pkg.code]);
+
+	let packageToggleState = $derived.by(() => {
+		if (!packageToggleDef) return { checked: false, indeterminate: false };
+		const allBits: string[] = [];
+		// Collect group bits
+		if (packageToggleDef.groups && pkg.groups) {
+			for (const groupId of packageToggleDef.groups) {
+				const group = pkg.groups.find((g) => g.masterId === groupId);
+				if (group) allBits.push(...group.bits);
+			}
+		}
+		// Collect loose bits
+		if (packageToggleDef.looseBits) allBits.push(...packageToggleDef.looseBits);
+
+		const state = packagesStore.getStateReadOnly(pkg.code);
+		const selectedCount = allBits.filter((b) => state.selectedBits.includes(b)).length;
+		if (selectedCount === 0) return { checked: false, indeterminate: false };
+		if (selectedCount === allBits.length) return { checked: true, indeterminate: false };
+		return { checked: false, indeterminate: true };
+	});
+
+	function handlePackageToggle() {
+		if (editMode || !packageToggleDef) return;
+		const allBits: string[] = [];
+		if (packageToggleDef.groups && pkg.groups) {
+			for (const groupId of packageToggleDef.groups) {
+				const group = pkg.groups.find((g) => g.masterId === groupId);
+				if (group) allBits.push(...group.bits);
+			}
+		}
+		if (packageToggleDef.looseBits) allBits.push(...packageToggleDef.looseBits);
+
+		const state = packagesStore.getStateReadOnly(pkg.code);
+		const allSelected = allBits.every((b) => state.selectedBits.includes(b));
+		if (allSelected) {
+			packagesStore.removeBits(pkg.code, allBits);
+		} else {
+			packagesStore.selectBits(pkg.code, allBits);
+		}
+	}
+
+	// SC-Turn: combined display check
+	let isSCTurn = $derived(pkg.code === 'SC-Turn');
+
+	let scTurnSelected = $derived.by(() => {
+		if (!isSCTurn) return false;
+		const state = packagesStore.getStateReadOnly(pkg.code);
+		return SC_TURN_LOCKED.every((b) => state.selectedBits.includes(b));
+	});
+
+	function handleSCTurnToggle() {
+		if (editMode) return;
+		if (scTurnSelected) {
+			packagesStore.removeBits(pkg.code, SC_TURN_LOCKED);
+		} else {
+			packagesStore.selectBits(pkg.code, SC_TURN_LOCKED);
+		}
+	}
 
 	// Use global remove mode from store
 	let removeMode = $derived(panelsStore.removeMode);
@@ -124,6 +188,34 @@
 		draggedIndex = null;
 	}
 
+	// Mill Turn toast: fire when SC-Mill + SC-Turn both active
+	let hasAnyMillBits = $derived.by(() => {
+		const state = packagesStore.getStateReadOnly('SC-Mill');
+		return (state.selectedBits?.length ?? 0) > 0;
+	});
+
+	let hasAnyTurnBits = $derived.by(() => {
+		const state = packagesStore.getStateReadOnly('SC-Turn');
+		return (state.selectedBits?.length ?? 0) > 0;
+	});
+
+	let millTurnCombo = $derived(hasAnyMillBits && hasAnyTurnBits);
+
+	// Track previous state to only fire toast on transition
+	let prevMillTurnCombo = false;
+	$effect(() => {
+		const current = millTurnCombo;
+		untrack(() => {
+			if (current && !prevMillTurnCombo) {
+				toastStore.info(
+					'Mill-Turn capability is automatically included with this combination.',
+					5000
+				);
+			}
+			prevMillTurnCombo = current;
+		});
+	});
+
 	// Handle drop on the loose bits container itself (not just on items)
 	function handleLooseBitsContainerDrop(e: DragEvent) {
 		if (!editMode) return;
@@ -152,10 +244,24 @@
 
 <tr class="package-row" data-package={pkg.code}>
 	<td class="pkg-cell">
-		<button type="button" class="code-btn package-code" onclick={handleCodeCopy}>
-			{pkg.code}
-		</button>
-		<span class="package-description">{pkg.description}</span>
+		<div class="pkg-header">
+			{#if packageToggleDef}
+				<span class="pkg-toggle">
+					<Checkbox
+						checked={packageToggleState.checked}
+						indeterminate={packageToggleState.indeterminate}
+						onchange={handlePackageToggle}
+						aria-label="Toggle all {pkg.code} bits"
+					/>
+				</span>
+			{/if}
+			<div>
+				<button type="button" class="code-btn package-code" onclick={handleCodeCopy}>
+					{pkg.code}
+				</button>
+				<span class="package-description">{pkg.description}</span>
+			</div>
+		</div>
 	</td>
 	<td class="maint-cell">
 		<button type="button" class="code-btn maint-code" onclick={handleMaintCopy}>
@@ -164,42 +270,70 @@
 	</td>
 	<td class="bits-cell">
 		<div class="bits-container" data-package-bits={pkg.code}>
-			{#if hasGroups}
-				<div class="groups-grid">
-					{#each pkg.groups as group (group.masterId)}
-						<MasterBit {group} packageCode={pkg.code} {editMode} />
-					{/each}
-				</div>
-			{/if}
-			{#if hasLooseBits || editMode}
-				<div
-					class="loose-bits-section"
-					class:has-groups={hasGroups}
-					class:edit-mode={editMode}
-					role="group"
-					aria-label="Loose bits drop zone"
-					ondragover={handleDragOver}
-					ondrop={handleLooseBitsContainerDrop}
-				>
-					<ul class="loose-bits" data-sortable-group={pkg.code}>
-						{#each allLooseBits() as bit, index (bit)}
-							<LooseBit
-								{bit}
-								packageCode={pkg.code}
-								{editMode}
-								{removeMode}
-								isCustom={isCustomBit(bit)}
-								draggable={editMode}
-								ondragstart={(e) => handleDragStart(e, index, bit)}
-								ondragover={handleDragOver}
-								ondrop={(e) => handleDrop(e, index)}
-							/>
-						{/each}
+			{#if isSCTurn}
+				<!-- SC-Turn: combined display — both bits toggle as one unit -->
+				<div class="loose-bits-section">
+					<ul class="loose-bits">
+						<li class="loose-bit">
+							<label class="bit-label">
+								<span class="checkbox-wrapper">
+									<Checkbox checked={scTurnSelected} onchange={handleSCTurnToggle} />
+								</span>
+								<span
+									class="bit-text"
+									role="button"
+									tabindex="0"
+									onclick={handleCodeCopy}
+									onkeydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											e.preventDefault();
+											handleCodeCopy();
+										}
+									}}
+									data-copyable-bit>SC-Turn Module</span
+								>
+							</label>
+						</li>
 					</ul>
-					{#if editMode && allLooseBits().length === 0}
-						<span class="drop-hint">Drop items here</span>
-					{/if}
 				</div>
+			{:else}
+				{#if hasGroups}
+					<div class="groups-grid">
+						{#each pkg.groups as group (group.masterId)}
+							<MasterBit {group} packageCode={pkg.code} {editMode} />
+						{/each}
+					</div>
+				{/if}
+				{#if hasLooseBits || editMode}
+					<div
+						class="loose-bits-section"
+						class:has-groups={hasGroups}
+						class:edit-mode={editMode}
+						role="group"
+						aria-label="Loose bits drop zone"
+						ondragover={handleDragOver}
+						ondrop={handleLooseBitsContainerDrop}
+					>
+						<ul class="loose-bits" data-sortable-group={pkg.code}>
+							{#each allLooseBits() as bit, index (bit)}
+								<LooseBit
+									{bit}
+									packageCode={pkg.code}
+									{editMode}
+									{removeMode}
+									isCustom={isCustomBit(bit)}
+									draggable={editMode}
+									ondragstart={(e) => handleDragStart(e, index, bit)}
+									ondragover={handleDragOver}
+									ondrop={(e) => handleDrop(e, index)}
+								/>
+							{/each}
+						</ul>
+						{#if editMode && allLooseBits().length === 0}
+							<span class="drop-hint">Drop items here</span>
+						{/if}
+					</div>
+				{/if}
 			{/if}
 		</div>
 	</td>
@@ -218,6 +352,44 @@
 		padding: 0.3rem 0.4rem;
 		vertical-align: top;
 		overflow: hidden;
+	}
+
+	.pkg-header {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--space-0-5);
+	}
+
+	.pkg-toggle {
+		display: flex;
+		align-items: center;
+		padding-top: 1px;
+		flex-shrink: 0;
+	}
+
+	.checkbox-wrapper {
+		display: flex;
+		align-items: center;
+	}
+
+	.bit-label {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1);
+		flex: 1;
+		cursor: pointer;
+	}
+
+	.bit-text {
+		font-size: var(--text-xs);
+		color: var(--chip-text-color);
+		line-height: 1.2;
+		cursor: pointer;
+		transition: color 150ms ease;
+	}
+
+	.bit-text:hover {
+		color: var(--chip-text-hover);
 	}
 
 	.code-btn {
