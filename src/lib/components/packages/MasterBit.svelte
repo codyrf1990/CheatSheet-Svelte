@@ -26,7 +26,7 @@
 	let expanded = $state(true);
 
 	// Compute effective bits considering groupMembership overrides (global)
-	let effectiveBits = $derived(() => {
+	let effectiveBits = $derived.by(() => {
 		const membership = packagesStore.getGroupMembership(packageCode);
 
 		// Start with static bits that haven't been moved elsewhere
@@ -46,13 +46,13 @@
 	});
 
 	// Apply stored order to effective bits (global order)
-	let orderedBits = $derived(() => {
+	let orderedBits = $derived.by(() => {
 		const storedOrder = packagesStore.getOrder(packageCode);
-		return applyOrder(effectiveBits(), storedOrder);
+		return applyOrder(effectiveBits, storedOrder);
 	});
 
 	// Derived state from store - use effective bits for checkbox state
-	let masterState = $derived(packagesStore.getMasterBitState(packageCode, effectiveBits()));
+	let masterState = $derived(packagesStore.getMasterBitState(packageCode, effectiveBits));
 
 	function handleMasterToggle() {
 		if (editMode) return;
@@ -60,7 +60,7 @@
 			toastStore.warning(disabledReason);
 			return;
 		}
-		packagesStore.toggleMasterBit(packageCode, group.masterId, effectiveBits());
+		packagesStore.toggleMasterBit(packageCode, group.masterId, effectiveBits);
 	}
 
 	function handleExpandToggle() {
@@ -131,7 +131,7 @@
 
 		// Normal reorder within this group
 		if (draggedIndex !== null && draggedIndex !== dropIndex) {
-			const newOrder = [...orderedBits()];
+			const newOrder = [...orderedBits];
 			const [removed] = newOrder.splice(draggedIndex, 1);
 			newOrder.splice(dropIndex, 0, removed);
 			packagesStore.setOrder(packageCode, newOrder);
@@ -216,7 +216,7 @@
 			ondragover={handleDragOver}
 			ondrop={handleContainerDrop}
 		>
-			{#each orderedBits() as bit, index (bit)}
+			{#each orderedBits as bit, index (bit)}
 				<SubBit
 					{bit}
 					{packageCode}
@@ -228,7 +228,7 @@
 					ondrop={(e) => handleDrop(e, index)}
 				/>
 			{/each}
-			{#if editMode && orderedBits().length === 0}
+			{#if editMode && orderedBits.length === 0}
 				<li class="drop-hint">Drop items here</li>
 			{/if}
 		</ul>

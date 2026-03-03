@@ -70,7 +70,8 @@
 		disablepictureinpicture
 		class="absolute left-1/2 top-1/2 min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover"
 	>
-		<source src="/video/Particle.mp4" type="video/mp4" />
+		<source src="/video/Particle.webm" type="video/webm" />
+		<source src="/video/Particle-opt.mp4" type="video/mp4" />
 	</video>
 </div>
 

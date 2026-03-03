@@ -17,12 +17,12 @@
 	let addDialogOpen = $state(false);
 	let addDialogValue = $state('');
 
-	let addDialogTitle = $derived(() => `Add ${panel.title}`);
-	let addDialogLabel = $derived(() => `${panel.title} item`);
-	let addDialogValid = $derived(() => addDialogValue.trim().length > 0);
+	let addDialogTitle = $derived(`Add ${panel.title}`);
+	let addDialogLabel = $derived(`${panel.title} item`);
+	let addDialogValid = $derived(addDialogValue.trim().length > 0);
 
 	// Always show panel's base items - store tracks checked/removed state separately
-	let items = $derived(() => panel.items);
+	let items = $derived(panel.items);
 
 	// Drag and drop state
 	let draggedIndex = $state<number | null>(null);
@@ -64,7 +64,7 @@
 		e.preventDefault();
 
 		if (draggedIndex !== dropIndex) {
-			const currentItems = items();
+			const currentItems = items;
 			const newOrder = [...currentItems];
 			const [removed] = newOrder.splice(draggedIndex, 1);
 			newOrder.splice(dropIndex, 0, removed);
@@ -90,7 +90,7 @@
 	}
 
 	function handleAddDialogKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' && addDialogValid()) {
+		if (e.key === 'Enter' && addDialogValid) {
 			e.preventDefault();
 			submitAddDialog();
 		}
@@ -106,7 +106,7 @@
 	onToggleRemove={handleToggleRemove}
 >
 	<ul class="panel-items" data-sortable-group={panel.id} ondragend={handleDragEnd}>
-		{#each items() as item, index (item)}
+		{#each items as item, index (item)}
 			<PanelItem
 				{item}
 				checked={panelsStore.hasItem(panel.id, item)}
@@ -126,7 +126,7 @@
 {#snippet addDialogFooter()}
 	<div class="dialog-actions">
 		<Button variant="ghost" size="sm" onclick={closeAddDialog}>Cancel</Button>
-		<Button variant="gold" size="sm" onclick={submitAddDialog} disabled={!addDialogValid()}>
+		<Button variant="gold" size="sm" onclick={submitAddDialog} disabled={!addDialogValid}>
 			Add
 		</Button>
 	</div>
@@ -135,13 +135,13 @@
 <Modal
 	open={addDialogOpen}
 	onclose={closeAddDialog}
-	title={addDialogTitle()}
+	title={addDialogTitle}
 	footer={addDialogFooter}
 >
 	<div class="dialog-form">
 		<Input
-			label={addDialogLabel()}
-			placeholder={addDialogLabel()}
+			label={addDialogLabel}
+			placeholder={addDialogLabel}
 			bind:value={addDialogValue}
 			onkeydown={handleAddDialogKeydown}
 		/>

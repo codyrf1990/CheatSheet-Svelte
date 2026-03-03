@@ -88,7 +88,7 @@
 	let hasGroups = $derived(pkg.groups && pkg.groups.length > 0);
 
 	// Merge static loose bits with custom bits and moved bits, then apply stored order (global)
-	let allLooseBits = $derived(() => {
+	let allLooseBits = $derived.by(() => {
 		const staticBits = pkg.looseBits || [];
 		const customBits = userPrefsStore.getCustomPackageBits(pkg.code);
 		const membership = packagesStore.getGroupMembership(pkg.code);
@@ -109,7 +109,7 @@
 		return applyOrder(allBits, packagesStore.getLooseBitsOrder(pkg.code));
 	});
 
-	let hasLooseBits = $derived(allLooseBits().length > 0);
+	let hasLooseBits = $derived(allLooseBits.length > 0);
 
 	function isCustomBit(bit: string): boolean {
 		return userPrefsStore.isCustomPackageBit(pkg.code, bit);
@@ -168,7 +168,7 @@
 					// Cross-group move: from a MasterBit group to loose bits
 					packagesStore.moveBitToGroup(pkg.code, data.bit, 'loose');
 					// Add to end of loose bits order
-					const currentOrder = [...allLooseBits()];
+					const currentOrder = [...allLooseBits];
 					if (!currentOrder.includes(data.bit)) {
 						currentOrder.push(data.bit);
 						packagesStore.setLooseBitsOrder(pkg.code, currentOrder);
@@ -183,7 +183,7 @@
 
 		// Normal reorder within loose bits
 		if (draggedIndex !== null && draggedIndex !== dropIndex) {
-			const newOrder = [...allLooseBits()];
+			const newOrder = [...allLooseBits];
 			const [removed] = newOrder.splice(draggedIndex, 1);
 			newOrder.splice(dropIndex, 0, removed);
 			packagesStore.setLooseBitsOrder(pkg.code, newOrder);
@@ -203,7 +203,7 @@
 				if (data.bit && data.sourceGroup && data.sourceGroup !== 'loose') {
 					// Cross-group move: from a MasterBit group to loose bits
 					packagesStore.moveBitToGroup(pkg.code, data.bit, 'loose');
-					const currentOrder = [...allLooseBits()];
+					const currentOrder = [...allLooseBits];
 					if (!currentOrder.includes(data.bit)) {
 						currentOrder.push(data.bit);
 						packagesStore.setLooseBitsOrder(pkg.code, currentOrder);
@@ -296,7 +296,7 @@
 						ondrop={handleLooseBitsContainerDrop}
 					>
 						<ul class="loose-bits" data-sortable-group={pkg.code}>
-							{#each allLooseBits() as bit, index (bit)}
+							{#each allLooseBits as bit, index (bit)}
 								<LooseBit
 									{bit}
 									packageCode={pkg.code}
@@ -312,7 +312,7 @@
 								/>
 							{/each}
 						</ul>
-						{#if editMode && allLooseBits().length === 0}
+						{#if editMode && allLooseBits.length === 0}
 							<span class="drop-hint">Drop items here</span>
 						{/if}
 					</div>

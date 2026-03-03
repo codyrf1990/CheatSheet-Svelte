@@ -17,7 +17,7 @@
 	let removeMode = $derived(panelsStore.removeMode);
 
 	// Merge static items with custom items, then apply stored order
-	let maintenanceItems = $derived(() => {
+	let maintenanceItems = $derived.by(() => {
 		const staticItems = maintenancePanel.items;
 		const customItems = userPrefsStore.getCustomPanelItems(maintenancePanel.id);
 		const allItems = [...staticItems, ...customItems.filter((c) => !staticItems.includes(c))];
@@ -25,7 +25,7 @@
 		return applyOrder(allItems, storedOrder);
 	});
 
-	let solidworksItems = $derived(() => {
+	let solidworksItems = $derived.by(() => {
 		const staticItems = solidworksPanel.items;
 		const customItems = userPrefsStore.getCustomPanelItems(solidworksPanel.id);
 		const allItems = [...staticItems, ...customItems.filter((c) => !staticItems.includes(c))];
@@ -76,7 +76,7 @@
 		e.preventDefault();
 
 		if (maintDraggedIndex !== dropIndex) {
-			const newOrder = [...maintenanceItems()];
+			const newOrder = [...maintenanceItems];
 			const [removed] = newOrder.splice(maintDraggedIndex, 1);
 			newOrder.splice(dropIndex, 0, removed);
 			panelsStore.setItemsOrder(maintenancePanel.id, newOrder);
@@ -109,7 +109,7 @@
 		e.preventDefault();
 
 		if (swDraggedIndex !== dropIndex) {
-			const newOrder = [...solidworksItems()];
+			const newOrder = [...solidworksItems];
 			const [removed] = newOrder.splice(swDraggedIndex, 1);
 			newOrder.splice(dropIndex, 0, removed);
 			panelsStore.setItemsOrder(solidworksPanel.id, newOrder);
@@ -126,7 +126,7 @@
 				<span class="section-title">Maintenance SKUs</span>
 			</div>
 			<ul class="panel-items">
-				{#each maintenanceItems() as item, index (item)}
+				{#each maintenanceItems as item, index (item)}
 					<PanelItem
 						{item}
 						checked={panelsStore.hasItem(maintenancePanel.id, item)}
@@ -152,7 +152,7 @@
 				<span class="section-title">SolidWorks SKUs</span>
 			</div>
 			<ul class="panel-items">
-				{#each solidworksItems() as item, index (item)}
+				{#each solidworksItems as item, index (item)}
 					<PanelItem
 						{item}
 						checked={panelsStore.hasItem(solidworksPanel.id, item)}

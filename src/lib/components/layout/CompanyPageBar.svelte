@@ -57,13 +57,13 @@
 	);
 
 	// Filtered companies based on search
-	let filteredCompanies = $derived(() => {
+	let filteredCompanies = $derived.by(() => {
 		if (!searchQuery.trim()) return [];
 		return companiesStore.search(searchQuery);
 	});
 
 	// Status indicator
-	let statusIndicator = $derived(() => {
+	let statusIndicator = $derived.by(() => {
 		switch (syncStatus) {
 			case 'connected':
 				return { symbol: '●', color: 'var(--color-success, #22c55e)', title: 'Synced' };
@@ -77,12 +77,11 @@
 	});
 
 	let isConfirmDialog = $derived(
-		() =>
-			dialogType === 'delete-company' ||
-			dialogType === 'delete-page' ||
-			dialogType === 'reset-order'
+		dialogType === 'delete-company' ||
+		dialogType === 'delete-page' ||
+		dialogType === 'reset-order'
 	);
-	let dialogTitle = $derived(() => {
+	let dialogTitle = $derived.by(() => {
 		switch (dialogType) {
 			case 'new-company':
 				return 'New Company';
@@ -100,7 +99,7 @@
 				return '';
 		}
 	});
-	let dialogActionLabel = $derived(() => {
+	let dialogActionLabel = $derived.by(() => {
 		switch (dialogType) {
 			case 'new-company':
 				return 'Create';
@@ -116,7 +115,7 @@
 				return '';
 		}
 	});
-	let dialogInputLabel = $derived(() => {
+	let dialogInputLabel = $derived.by(() => {
 		switch (dialogType) {
 			case 'new-company':
 			case 'rename-company':
@@ -127,7 +126,7 @@
 				return '';
 		}
 	});
-	let dialogMessage = $derived(() => {
+	let dialogMessage = $derived.by(() => {
 		if (dialogType === 'delete-company') {
 			return `Delete "${dialogTargetLabel}"? This cannot be undone.`;
 		}
@@ -139,7 +138,7 @@
 		}
 		return '';
 	});
-	let dialogInputValid = $derived(() => dialogInput.trim().length > 0);
+	let dialogInputValid = $derived(dialogInput.trim().length > 0);
 
 	function toggleDropdown(e: MouseEvent) {
 		e.stopPropagation();
@@ -429,7 +428,7 @@
 	}
 
 	function handleDialogInputKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' && dialogInputValid()) {
+		if (e.key === 'Enter' && dialogInputValid) {
 			e.preventDefault();
 			handleDialogSubmit();
 		}
@@ -484,8 +483,8 @@
 			<span class="company-name">{currentCompany?.name || 'No Company'}</span>
 			<span
 				class="status-dot"
-				style="color: {statusIndicator().color}"
-				title={statusIndicator().title}>{statusIndicator().symbol}</span
+				style="color: {statusIndicator.color}"
+				title={statusIndicator.title}>{statusIndicator.symbol}</span
 			>
 			<svg class="chevron" class:open={dropdownOpen} viewBox="0 0 20 20" fill="currentColor">
 				<path
@@ -579,9 +578,9 @@
 		<div class="dropdown-list">
 			{#if searchQuery.trim()}
 				<div class="dropdown-section">
-					<div class="section-title">Results ({filteredCompanies().length})</div>
-					{#if filteredCompanies().length > 0}
-						{#each filteredCompanies() as company (company.id)}
+					<div class="section-title">Results ({filteredCompanies.length})</div>
+					{#if filteredCompanies.length > 0}
+						{#each filteredCompanies as company (company.id)}
 							<button
 								type="button"
 								role="option"
@@ -705,26 +704,26 @@
 {#snippet dialogFooter()}
 	<div class="dialog-actions">
 		<Button variant="ghost" size="sm" onclick={closeDialog}>Cancel</Button>
-		{#if isConfirmDialog()}
+		{#if isConfirmDialog}
 			<Button variant="danger" size="sm" onclick={handleDialogSubmit}>
-				{dialogActionLabel()}
+				{dialogActionLabel}
 			</Button>
 		{:else}
-			<Button variant="gold" size="sm" onclick={handleDialogSubmit} disabled={!dialogInputValid()}>
-				{dialogActionLabel()}
+			<Button variant="gold" size="sm" onclick={handleDialogSubmit} disabled={!dialogInputValid}>
+				{dialogActionLabel}
 			</Button>
 		{/if}
 	</div>
 {/snippet}
 
-<Modal open={dialogType !== null} onclose={closeDialog} title={dialogTitle()} footer={dialogFooter}>
-	{#if isConfirmDialog()}
-		<p class="dialog-message">{dialogMessage()}</p>
+<Modal open={dialogType !== null} onclose={closeDialog} title={dialogTitle} footer={dialogFooter}>
+	{#if isConfirmDialog}
+		<p class="dialog-message">{dialogMessage}</p>
 	{:else}
 		<div class="dialog-form">
 			<Input
-				label={dialogInputLabel()}
-				placeholder={dialogInputLabel()}
+				label={dialogInputLabel}
+				placeholder={dialogInputLabel}
 				bind:value={dialogInput}
 				onkeydown={handleDialogInputKeydown}
 			/>

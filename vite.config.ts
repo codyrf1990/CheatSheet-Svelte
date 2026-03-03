@@ -10,12 +10,16 @@ export default defineConfig({
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
 			manifest: {
+				id: '/',
+				start_url: '/',
+				scope: '/',
 				name: 'SolidCAM CheatSheet',
 				short_name: 'CheatSheet',
 				description: 'SolidCAM Package/Panel selection tool',
 				theme_color: '#0a0a0f',
 				background_color: '#0a0a0f',
 				display: 'standalone',
+				orientation: 'any',
 				icons: [
 					{
 						src: 'pwa-192x192.png',
@@ -36,8 +40,7 @@ export default defineConfig({
 				]
 			},
 			workbox: {
-				globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,webmanifest}'],
-				modifyURLPrefix: {}
+				globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,woff2,webmanifest}']
 			}
 		})
 	]
