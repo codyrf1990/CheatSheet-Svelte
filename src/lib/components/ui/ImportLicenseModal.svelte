@@ -44,7 +44,7 @@
 	});
 	let pageName = $derived.by(() => (parsedLicense ? getPageNameForLicense(parsedLicense) : 'P1'));
 
-	// Reset state when modal opens
+	// Reset state when modal opens or closes
 	$effect(() => {
 		if (open) {
 			modalState = 'paste';
@@ -55,6 +55,12 @@
 			maintenanceEndOverride = '';
 			importResult = null;
 			showFeatures = false;
+		} else {
+			// Also reset on close so stale state (e.g. stuck spinner) doesn't linger
+			modalState = 'paste';
+			parsedLicense = null;
+			parseError = null;
+			importResult = null;
 		}
 	});
 

@@ -87,11 +87,9 @@ export function getLicenseSelections(license: LicenseInfo): LicenseSelections {
 
 	if (license.notCheckedFeatures) {
 		for (const feature of license.notCheckedFeatures) {
+			// Handle bit removal via FEATURE_MAP
 			const mapping = FEATURE_MAP[feature];
-			if (mapping) {
-				if (checkedBits.has(mapping.bit)) {
-					continue;
-				}
+			if (mapping && !checkedBits.has(mapping.bit)) {
 				notCheckedBits.add(mapping.bit);
 				if (!removedBitsByPackage[mapping.package]) {
 					removedBitsByPackage[mapping.package] = [];
@@ -99,9 +97,9 @@ export function getLicenseSelections(license: LicenseInfo): LicenseSelections {
 				if (!removedBitsByPackage[mapping.package].includes(mapping.bit)) {
 					removedBitsByPackage[mapping.package].push(mapping.bit);
 				}
-				continue;
 			}
 
+			// Always also check SKU_MAP — a feature can have both a bit AND a maintenance SKU
 			const sku = SKU_MAP[feature];
 			if (sku && !checkedSkus.has(sku) && !removedSkus.includes(sku)) {
 				removedSkus.push(sku);

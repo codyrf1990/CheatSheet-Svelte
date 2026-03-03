@@ -75,6 +75,11 @@
 
 	function handleSCTurnToggle() {
 		if (editMode) return;
+		const disabledBit = SC_TURN_LOCKED.find((b) => disabledBits.has(b));
+		if (disabledBit) {
+			toastStore.warning(disabledBits.get(disabledBit) ?? '');
+			return;
+		}
 		if (scTurnSelected) {
 			packagesStore.removeBits(pkg.code, SC_TURN_LOCKED);
 		} else {
@@ -305,7 +310,7 @@
 									isCustom={isCustomBit(bit)}
 									disabled={disabledBits.has(bit)}
 									disabledReason={disabledBits.get(bit) ?? ''}
-									draggable={editMode}
+									draggable={editMode && !disabledBits.has(bit)}
 									ondragstart={(e) => handleDragStart(e, index, bit)}
 									ondragover={handleDragOver}
 									ondrop={(e) => handleDrop(e, index)}
