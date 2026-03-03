@@ -222,6 +222,8 @@
 					{packageCode}
 					masterId={group.masterId}
 					{editMode}
+					{disabled}
+					{disabledReason}
 					draggable={editMode}
 					ondragstart={(e) => handleDragStart(e, index, bit)}
 					ondragover={handleDragOver}

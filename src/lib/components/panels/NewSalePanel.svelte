@@ -240,7 +240,7 @@
 	.sku-price-group {
 		display: flex;
 		align-items: center;
-		gap: var(--space-1-5);
+		gap: var(--space-2);
 	}
 
 	.sku-price {
