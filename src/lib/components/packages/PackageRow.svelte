@@ -24,6 +24,25 @@
 	// Package master toggle state
 	let packageToggleDef = $derived(PACKAGE_TOGGLE_BITS[pkg.code]);
 
+	// Package is disabled if any of its group masterIds or loose bits are gated
+	let isPackageDisabled = $derived.by(() => {
+		if (!packageToggleDef) return false;
+		if (packageToggleDef.groups?.some((g) => disabledBits.has(g))) return true;
+		if (packageToggleDef.looseBits?.some((b) => disabledBits.has(b))) return true;
+		return false;
+	});
+
+	let packageDisabledReason = $derived.by(() => {
+		if (!packageToggleDef) return '';
+		for (const g of packageToggleDef.groups ?? []) {
+			if (disabledBits.has(g)) return disabledBits.get(g) ?? '';
+		}
+		for (const b of packageToggleDef.looseBits ?? []) {
+			if (disabledBits.has(b)) return disabledBits.get(b) ?? '';
+		}
+		return '';
+	});
+
 	let packageToggleState = $derived.by(() => {
 		if (!packageToggleDef) return { checked: false, indeterminate: false };
 		const allBits: string[] = [];
@@ -46,6 +65,10 @@
 
 	function handlePackageToggle() {
 		if (editMode || !packageToggleDef) return;
+		if (isPackageDisabled) {
+			toastStore.warning(packageDisabledReason);
+			return;
+		}
 		const allBits: string[] = [];
 		if (packageToggleDef.groups && pkg.groups) {
 			for (const groupId of packageToggleDef.groups) {
@@ -231,6 +254,7 @@
 						checked={packageToggleState.checked}
 						indeterminate={packageToggleState.indeterminate}
 						onchange={handlePackageToggle}
+						disabled={isPackageDisabled}
 						aria-label="Toggle all {pkg.code} bits"
 					/>
 				</span>
@@ -257,7 +281,7 @@
 						<li class="loose-bit">
 							<div class="bit-label">
 								<span class="checkbox-wrapper">
-									<Checkbox checked={scTurnSelected} onchange={handleSCTurnToggle} />
+									<Checkbox checked={scTurnSelected} onchange={handleSCTurnToggle} disabled={!!SC_TURN_LOCKED.find((b) => disabledBits.has(b))} />
 								</span>
 								<span
 									class="bit-text"
@@ -270,7 +294,7 @@
 											handleCodeCopy();
 										}
 									}}
-									data-copyable-bit>SC-Turn Module</span
+									data-copyable-bit>Turning + Backspindle</span
 								>
 							</div>
 						</li>
