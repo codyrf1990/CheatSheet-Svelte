@@ -35,6 +35,9 @@
 	let editingPageId = $state<string | null>(null);
 	let editingPageName = $state('');
 	let dropdownTriggerRef = $state<HTMLButtonElement | null>(null);
+	let showActionsMenu = $state(false);
+	let actionsMenuPosition = $state({ top: 0, right: 0 });
+	let kebabTriggerRef = $state<HTMLButtonElement | null>(null);
 	let dialogType = $state<
 		| 'new-company'
 		| 'rename-company'
@@ -156,6 +159,40 @@
 	function closeDropdown() {
 		dropdownOpen = false;
 		searchQuery = '';
+	}
+
+	function toggleActionsMenu(e: MouseEvent) {
+		e.stopPropagation();
+		showActionsMenu = !showActionsMenu;
+		if (showActionsMenu) {
+			const button = e.currentTarget as HTMLElement;
+			const rect = button.getBoundingClientRect();
+			actionsMenuPosition = { top: rect.bottom + 8, right: window.innerWidth - rect.right };
+		}
+	}
+
+	function closeActionsMenu() {
+		showActionsMenu = false;
+	}
+
+	function handleAddSku() {
+		showAddSkuModal = true;
+		closeActionsMenu();
+	}
+
+	function handleRemoveSku() {
+		panelsStore.toggleRemoveMode();
+		closeActionsMenu();
+	}
+
+	function handleToggleEditOrder() {
+		onToggleEdit?.();
+		closeActionsMenu();
+	}
+
+	function handleResetOrderMenu() {
+		dialogType = 'reset-order';
+		closeActionsMenu();
 	}
 
 	function handleCompanySelect(companyId: string) {
@@ -407,6 +444,9 @@
 		if (!target.closest('.context-menu') && contextMenu) {
 			closeContextMenu();
 		}
+		if (!target.closest('.kebab-wrapper') && !target.closest('.actions-menu') && showActionsMenu) {
+			closeActionsMenu();
+		}
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -416,9 +456,12 @@
 			closeDropdown();
 			dropdownTriggerRef?.focus();
 		}
-
 		if (contextMenu) {
 			closeContextMenu();
+		}
+		if (showActionsMenu) {
+			closeActionsMenu();
+			kebabTriggerRef?.focus();
 		}
 	}
 </script>
@@ -496,52 +539,20 @@
 		</button>
 	</div>
 
-	<!-- Edit Controls -->
-	<div class="edit-controls">
-		<div class="action-cluster sku-cluster" role="group" aria-label="SKU actions">
-			<Button
-				variant="ghost"
-				size="sm"
-				class="cluster-btn cluster-btn--add"
-				onclick={() => (showAddSkuModal = true)}
-			>
-				<span class="cluster-icon">+</span>
-				<span class="cluster-text">SKU</span>
-			</Button>
-			<span class="cluster-sep" aria-hidden="true"></span>
-			<Button
-				variant="ghost"
-				size="sm"
-				class={`cluster-btn cluster-btn--remove ${panelsStore.removeMode ? 'is-active' : ''}`}
-				aria-pressed={panelsStore.removeMode}
-				onclick={() => panelsStore.toggleRemoveMode()}
-			>
-				<span class="cluster-icon">-</span>
-				<span class="cluster-text">SKU</span>
-			</Button>
-		</div>
-		<div class="action-cluster order-cluster" role="group" aria-label="Order actions">
-			<Button
-				variant="ghost"
-				size="sm"
-				class={`cluster-btn cluster-btn--order ${editMode ? 'is-active' : ''}`}
-				aria-pressed={editMode}
-				onclick={onToggleEdit}
-			>
-				{editMode ? 'Done' : 'Edit Order'}
-			</Button>
-			{#if editMode}
-				<span class="cluster-sep" aria-hidden="true"></span>
-				<Button
-					variant="ghost"
-					size="sm"
-					class="cluster-btn cluster-btn--reset"
-					onclick={() => (dialogType = 'reset-order')}
-				>
-					Reset
-				</Button>
-			{/if}
-		</div>
+	<!-- Actions Kebab -->
+	<div class="kebab-wrapper">
+		<button
+			type="button"
+			class="kebab-trigger"
+			class:is-open={showActionsMenu}
+			class:is-edit-mode={editMode}
+			bind:this={kebabTriggerRef}
+			onclick={editMode ? onToggleEdit : toggleActionsMenu}
+			aria-expanded={editMode ? undefined : showActionsMenu}
+			aria-haspopup={editMode ? undefined : 'menu'}
+			aria-label={editMode ? 'Done editing' : 'More actions'}
+			title={editMode ? 'Done editing' : undefined}
+		>{editMode ? '✓' : '⋮'}</button>
 	</div>
 </div>
 
@@ -619,6 +630,44 @@
 				View All ({allCompanies.length})
 			</button>
 		</div>
+	</div>
+{/if}
+
+<!-- Actions Menu -->
+{#if showActionsMenu}
+	<div
+		class="actions-menu"
+		role="menu"
+		aria-label="Edit actions"
+		style="top: {actionsMenuPosition.top}px; right: {actionsMenuPosition.right}px;"
+	>
+		<button type="button" role="menuitem" onclick={handleAddSku}>
+			<span class="menu-icon">+</span> SKU
+		</button>
+		<button
+			type="button"
+			role="menuitem"
+			class:active={panelsStore.removeMode}
+			onclick={handleRemoveSku}
+		>
+			<span class="menu-icon">−</span> SKU
+			{#if panelsStore.removeMode}<span class="menu-check">✓</span>{/if}
+		</button>
+		<button
+			type="button"
+			role="menuitem"
+			class:active={editMode}
+			onclick={handleToggleEditOrder}
+		>
+			{editMode ? 'Done Editing' : 'Edit Order'}
+			{#if editMode}<span class="menu-check">✓</span>{/if}
+		</button>
+		{#if editMode}
+			<hr class="menu-divider" />
+			<button type="button" role="menuitem" onclick={handleResetOrderMenu}>
+				Reset Order
+			</button>
+		{/if}
 	</div>
 {/if}
 
@@ -1052,70 +1101,111 @@
 		outline: none;
 	}
 
-	/* Edit Controls */
-	.edit-controls {
-		display: flex;
-		align-items: center;
-		gap: var(--space-1);
+	/* Kebab trigger */
+	.kebab-wrapper {
+		position: relative;
 		z-index: 1;
 		flex-shrink: 0;
 	}
 
-	.action-cluster {
+	.kebab-trigger {
 		display: flex;
 		align-items: center;
-		gap: 1px;
-		padding: 1px;
-		border-radius: 999px;
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.42));
-		border: 1px solid var(--chip-border-color);
+		justify-content: center;
+		width: 26px;
+		height: 26px;
+		padding: 0;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 8px;
+		color: rgba(255, 255, 255, 0.6);
+		font-size: 1.1rem;
+		line-height: 1;
+		cursor: pointer;
+		transition: all 150ms ease;
+	}
+
+	.kebab-trigger:hover {
+		background: rgba(255, 255, 255, 0.1);
+		border-color: rgba(255, 255, 255, 0.15);
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	.kebab-trigger.is-open {
+		background: rgba(212, 175, 55, 0.15);
+		border-color: rgba(212, 175, 55, 0.3);
+		color: var(--color-solidcam-gold, #d4af37);
+	}
+
+	.kebab-trigger.is-edit-mode {
+		background: rgba(74, 222, 128, 0.15);
+		border-color: rgba(74, 222, 128, 0.4);
+		color: #4ade80;
+		font-size: 0.85rem;
+	}
+
+	.kebab-trigger.is-edit-mode:hover {
+		background: rgba(74, 222, 128, 0.25);
+		border-color: rgba(74, 222, 128, 0.6);
+		color: #86efac;
+	}
+
+	/* Actions dropdown menu */
+	.actions-menu {
+		position: fixed;
+		min-width: 148px;
+		background: linear-gradient(145deg, rgba(32, 32, 38, 0.98), rgba(24, 24, 30, 0.98));
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 10px;
 		box-shadow:
-			inset 0 1px 0 rgba(255, 255, 255, 0.08),
-			0 8px 18px rgba(0, 0, 0, 0.35);
+			0 12px 40px rgba(0, 0, 0, 0.5),
+			0 4px 12px rgba(0, 0, 0, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.05);
+		backdrop-filter: blur(16px);
+		z-index: 2000;
+		overflow: hidden;
+		animation: contextMenuFadeIn 150ms ease;
 	}
 
-	.action-cluster :global(.btn) {
-		min-height: 22px;
-		padding: 0.18rem 0.5rem;
-		font-size: 0.65rem;
-		border-radius: 999px;
-		gap: 0.3rem;
-		box-shadow: none;
-	}
-
-	.action-cluster :global(.btn-ghost) {
+	.actions-menu button {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.5rem 0.875rem;
+		background: transparent;
 		border: none;
+		color: rgba(255, 255, 255, 0.8);
+		font-size: var(--text-sm);
+		text-align: left;
+		cursor: pointer;
+		transition: all 150ms ease;
 	}
 
-	.action-cluster :global(.btn-ghost:hover) {
-		border: none;
+	.actions-menu button:hover {
+		background: rgba(255, 255, 255, 0.08);
+		padding-left: 1.125rem;
+		color: #f5f5f5;
 	}
 
-	.action-cluster :global(.btn:hover) {
-		transform: translateY(-1px);
-		filter: brightness(1.03);
+	.actions-menu button.active {
+		color: var(--color-solidcam-gold, #d4af37);
 	}
 
-	.action-cluster :global(.btn:active) {
-		transform: translateY(0);
-		filter: brightness(0.98);
+	.actions-menu button:not(:last-child) {
+		border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 	}
 
-	.cluster-sep {
-		width: 1px;
-		height: 18px;
-		background: rgba(255, 255, 255, 0.12);
-	}
-
-	.cluster-icon {
+	.menu-icon {
 		font-weight: 700;
-		font-size: 0.8em;
+		width: 12px;
+		text-align: center;
+		flex-shrink: 0;
 	}
 
-	.cluster-text {
-		font-size: 0.55rem;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
+	.menu-check {
+		margin-left: auto;
+		font-size: var(--text-xs);
 	}
 
 	/* Context Menu */
@@ -1303,20 +1393,6 @@
 			height: 12px;
 		}
 
-		.action-cluster {
-			padding: 1px;
-		}
-
-		.action-cluster :global(.btn) {
-			min-height: 24px;
-			padding: 0.18rem 0.4rem;
-			font-size: 0.56rem;
-		}
-
-		.cluster-text {
-			font-size: 0.5rem;
-			letter-spacing: 0.08em;
-		}
 	}
 
 	/* Reduced motion */

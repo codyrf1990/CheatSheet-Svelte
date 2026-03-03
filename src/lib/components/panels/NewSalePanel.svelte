@@ -6,50 +6,64 @@
 	import { panelsStore } from '$stores/panels.svelte';
 	import { packages as packageDefs } from '$data';
 
-	// Derive SKU entries from current package selections
-	let skuEntries = $derived.by(() => {
-		const entries: SkuEntry[] = [];
+	interface SaleLine {
+		entry: SkuEntry;
+		subEntries?: SkuEntry[];
+	}
+
+	// Derive sale lines from current package selections
+	let saleLines = $derived.by(() => {
+		const lines: SaleLine[] = [];
 		const states = packagesStore.all;
 
 		for (const [pkgCode, toggleDef] of Object.entries(PACKAGE_TOGGLE_BITS)) {
 			const state = states[pkgCode];
 			if (!state || state.selectedBits.length === 0) continue;
 
-			// Collect all bits defined by the package toggle
+			const pkgDef = packageDefs.find((p) => p.code === pkgCode);
 			const allToggleBits: string[] = [...(toggleDef.looseBits ?? [])];
-
-			// Check if all bits for the package are selected -> use package SKU
 			const allSelected = allToggleBits.every((b) => state.selectedBits.includes(b));
 
-			const packageSkuKey = `${pkgCode}::PACKAGE`;
-			if (allSelected && allToggleBits.length > 1 && SKU_LOOKUP[packageSkuKey]) {
-				entries.push(SKU_LOOKUP[packageSkuKey]);
-			} else {
-				// Show individual bit SKUs
-				for (const bit of state.selectedBits) {
-					const key = `${pkgCode}::${bit}`;
-					if (SKU_LOOKUP[key]) {
-						entries.push(SKU_LOOKUP[key]);
-					}
-				}
+			// Packages with groups (SC-Mill, SC-Mill-5Axis) are only "full" when groups are also selected
+			const groupsFullyRepresented =
+				!toggleDef.groups ||
+				toggleDef.groups.every((groupId) => {
+					const group = pkgDef?.groups?.find((g) => g.masterId === groupId);
+					return group ? group.bits.some((b) => state.selectedBits.includes(b)) : false;
+				});
+
+			const packageSku = SKU_LOOKUP[`${pkgCode}::PACKAGE`];
+
+			// CASE A: Full package — show package SKU with sub-entries breakdown
+			if (packageSku && allSelected && groupsFullyRepresented) {
+				const groupSKUs: SkuEntry[] = (toggleDef.groups ?? [])
+					.map((groupId) => SKU_LOOKUP[`${pkgCode}::${groupId}`])
+					.filter(Boolean) as SkuEntry[];
+				const looseBitSKUs: SkuEntry[] = allToggleBits
+					.map((bit) => SKU_LOOKUP[`${pkgCode}::${bit}`])
+					.filter(Boolean) as SkuEntry[];
+
+				lines.push({ entry: packageSku, subEntries: [...groupSKUs, ...looseBitSKUs] });
+				continue; // Skip group check — prevents SC-Mill-5Axis double-counting
 			}
 
-			// Check group selections — only add group SKU when group bits are actually selected
-			if (toggleDef.groups) {
-				const pkgDef = packageDefs.find((p) => p.code === pkgCode);
-				for (const groupId of toggleDef.groups) {
-					const key = `${pkgCode}::${groupId}`;
-					const groupEntry = SKU_LOOKUP[key];
-					if (!groupEntry) continue;
+			// CASE B: Partial selection — show individual bit SKUs
+			for (const bit of state.selectedBits) {
+				const key = `${pkgCode}::${bit}`;
+				if (SKU_LOOKUP[key]) lines.push({ entry: SKU_LOOKUP[key] });
+			}
 
-					const group = pkgDef?.groups?.find((g) => g.masterId === groupId);
-					const groupBitsSelected = group
-						? group.bits.some((b) => state.selectedBits.includes(b))
-						: false;
-
-					if (groupBitsSelected && !entries.includes(groupEntry)) {
-						entries.push(groupEntry);
-					}
+			// CASE C: Group SKU (only when CASE A not used)
+			for (const groupId of toggleDef.groups ?? []) {
+				const key = `${pkgCode}::${groupId}`;
+				const groupEntry = SKU_LOOKUP[key];
+				if (!groupEntry) continue;
+				const group = pkgDef?.groups?.find((g) => g.masterId === groupId);
+				const groupBitsSelected = group
+					? group.bits.some((b) => state.selectedBits.includes(b))
+					: false;
+				if (groupBitsSelected && !lines.some((l) => l.entry === groupEntry)) {
+					lines.push({ entry: groupEntry });
 				}
 			}
 		}
@@ -58,20 +72,20 @@
 		const maintItems = panelsStore.getItems('maintenance-skus');
 		for (const moduleSku of MODULE_SKUS) {
 			if (maintItems.includes(moduleSku.maintSku)) {
-				entries.push(moduleSku);
+				lines.push({ entry: moduleSku });
 			}
 		}
 
 		// Deduplicate by SKU code
 		const seen = new Set<string>();
-		return entries.filter((e) => {
-			if (seen.has(e.sku)) return false;
-			seen.add(e.sku);
+		return lines.filter((l) => {
+			if (seen.has(l.entry.sku)) return false;
+			seen.add(l.entry.sku);
 			return true;
 		});
 	});
 
-	let total = $derived(skuEntries.reduce((sum, e) => sum + e.price, 0));
+	let total = $derived(saleLines.reduce((sum, l) => sum + l.entry.price, 0));
 
 	function formatPrice(price: number): string {
 		return '$' + price.toLocaleString('en-US');
@@ -89,21 +103,49 @@
 
 <section class="new-sale-panel tile">
 	<div class="panel-body">
-		{#if skuEntries.length === 0}
+		{#if saleLines.length === 0}
 			<div class="empty-state">No items selected</div>
 		{:else}
 			<ul class="sku-list">
-				{#each skuEntries as entry (entry.sku)}
-					<li class="sku-row">
-						<button
-							type="button"
-							class="sku-code"
-							onclick={() => handleCopySku(entry.sku)}
-							title="Click to copy {entry.sku}"
-						>
-							{entry.sku}
-						</button>
-						<span class="sku-price">{formatPrice(entry.price)}</span>
+				{#each saleLines as line (line.entry.sku)}
+					{@const savings = line.subEntries
+						? line.subEntries.reduce((s, e) => s + e.price, 0) - line.entry.price
+						: 0}
+					<li class="sku-row" class:has-sub={line.subEntries?.length}>
+						<div class="sku-main-row">
+							<button
+								type="button"
+								class="sku-code"
+								class:is-package={line.subEntries?.length}
+								onclick={() => handleCopySku(line.entry.sku)}
+								title="Click to copy {line.entry.sku}"
+							>
+								{line.entry.sku}
+							</button>
+							<div class="sku-price-group">
+								{#if savings > 0}
+									<span class="sku-savings">Save {formatPrice(savings)}</span>
+								{/if}
+								<span class="sku-price">{formatPrice(line.entry.price)}</span>
+							</div>
+						</div>
+						{#if line.subEntries?.length}
+							<ul class="sku-sub-list" aria-label="Included in {line.entry.sku}">
+								{#each line.subEntries as sub (sub.sku)}
+									<li class="sku-sub-row">
+										<button
+											type="button"
+											class="sku-code sku-code--sub"
+											onclick={() => handleCopySku(sub.sku)}
+											title="Click to copy {sub.sku} (reference price)"
+										>
+											{sub.sku}
+										</button>
+										<span class="sku-price sku-price--sub">{formatPrice(sub.price)}</span>
+									</li>
+								{/each}
+							</ul>
+						{/if}
 					</li>
 				{/each}
 			</ul>
@@ -146,6 +188,23 @@
 	}
 
 	.sku-row {
+		border-radius: var(--radius-2xs);
+		transition: background-color 150ms ease;
+	}
+
+	.sku-row:hover {
+		background: var(--chip-bg-hover);
+	}
+
+	.sku-row.has-sub {
+		padding: 0;
+	}
+
+	.sku-row.has-sub:hover {
+		background: transparent;
+	}
+
+	.sku-main-row {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -153,10 +212,6 @@
 		padding: var(--space-0) var(--space-0-5);
 		border-radius: var(--radius-2xs);
 		transition: background-color 150ms ease;
-	}
-
-	.sku-row:hover {
-		background: var(--chip-bg-hover);
 	}
 
 	.sku-code {
@@ -178,11 +233,72 @@
 		border-color: var(--chip-border-color-strong);
 	}
 
+	.sku-code.is-package {
+		border-left: 2px solid rgba(212, 175, 55, 0.5);
+	}
+
+	.sku-price-group {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1-5);
+	}
+
 	.sku-price {
 		font-family: 'JetBrains Mono', monospace;
 		font-size: var(--text-xs);
 		color: rgba(255, 255, 255, 0.7);
 		white-space: nowrap;
+	}
+
+	.sku-savings {
+		font-family: 'JetBrains Mono', monospace;
+		font-size: var(--text-2xs);
+		color: #4ade80;
+		opacity: 0.85;
+		white-space: nowrap;
+	}
+
+	.sku-sub-list {
+		list-style: none;
+		margin: 0 0 var(--space-0-5) var(--space-2);
+		padding: 0 0 0 var(--space-3);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-0-5);
+		border-left: 1px solid rgba(255, 255, 255, 0.06);
+	}
+
+	.sku-sub-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-1);
+		padding: var(--space-0) var(--space-0-5);
+		border-radius: var(--radius-2xs);
+		transition: background-color 150ms ease;
+	}
+
+	.sku-sub-row:hover {
+		background: var(--chip-bg-hover);
+	}
+
+	.sku-code--sub {
+		font-size: var(--text-2xs);
+		opacity: 0.6;
+		border-color: rgba(255, 255, 255, 0.06);
+		background: transparent;
+	}
+
+	.sku-code--sub:hover {
+		opacity: 1;
+		color: var(--chip-text-hover);
+		border-color: var(--chip-border-color-strong);
+	}
+
+	.sku-price--sub {
+		font-size: var(--text-2xs);
+		color: rgba(255, 255, 255, 0.35);
+		font-style: italic;
 	}
 
 	.total-row {

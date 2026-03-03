@@ -13,15 +13,15 @@ async function login(page: Page, username?: string) {
 	await expect(page.getByRole('heading', { name: 'Packages & Maintenance Cheat Sheet' })).toBeVisible({ timeout: 15000 });
 }
 
+type Toast = { type: string; message: string };
+
 /** Read toast messages directly from the store — bypasses DOM timing issues. */
-async function getToasts(page: Page) {
+async function getToasts(page: Page): Promise<Toast[]> {
 	return page.evaluate(async () => {
-		const mod = await import('/src/lib/stores/toast.svelte.ts');
-		return mod.toastStore.all.map((t: { type: string; message: string }) => ({
-			type: t.type,
-			message: t.message
-		}));
-	});
+		// @ts-expect-error – browser runtime import; path is resolved by Vite, not tsc
+		const mod: { toastStore: { all: { type: string; message: string }[] } } = await import('/src/lib/stores/toast.svelte.ts');
+		return mod.toastStore.all.map((t) => ({ type: t.type, message: t.message }));
+	}) as Promise<Toast[]>;
 }
 
 /** Trigger our outer .checkbox-wrapper onclick on a disabled bit. */
@@ -233,7 +233,7 @@ test.describe('Build Mode', () => {
 
 		await expect(page.getByRole('button', { name: 'SC-HSS' })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'SC-25M' })).toBeVisible();
-		await expect(page.getByText('$5,248')).toBeVisible(); // $1,380 + $3,868
+		await expect(page.getByText('$3,868')).toBeVisible(); // SC-Mill package price
 	});
 
 	test('SC-Turn adds SC-Turn SKU and updates total', async ({ page }) => {
@@ -242,7 +242,7 @@ test.describe('Build Mode', () => {
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Turn bits' }).click();
 
 		await expect(page.getByTitle('Click to copy SC-Turn')).toBeVisible();
-		await expect(page.getByText('$7,548')).toBeVisible(); // $5,248 + $2,300
+		await expect(page.getByText('$6,168')).toBeVisible(); // $3,868 + $2,300
 	});
 
 	// -------------------------------------------------------------------------

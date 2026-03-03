@@ -60,6 +60,13 @@
 		}
 	}
 
+	function handleWrapperKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			handleToggle();
+		}
+	}
+
 	function handleRemove() {
 		// Remove custom bits from global user prefs
 		userPrefsStore.removeCustomPackageBit(packageCode, bit);
@@ -81,7 +88,12 @@
 	{ondrop}
 >
 	<div class="bit-row">
-		<span class="checkbox-wrapper" onclick={disabled ? handleToggle : undefined}>
+		<span
+			class="checkbox-wrapper"
+			{...(disabled ? { role: 'button', tabindex: 0 } : {})}
+			onclick={disabled ? handleToggle : undefined}
+			onkeydown={disabled ? handleWrapperKeydown : undefined}
+		>
 			<Checkbox checked={isSelected} onchange={handleToggle} {disabled} />
 		</span>
 		<span

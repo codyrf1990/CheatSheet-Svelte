@@ -8,12 +8,19 @@ export interface SkuEntry {
 
 // Keyed by packageCode::groupOrBit identifier
 export const SKU_LOOKUP: Record<string, SkuEntry> = {
+	'SC-Mill::PACKAGE': {
+		sku: 'SC-Mill',
+		label: 'SolidCAM Milling (package)',
+		price: 3868,
+		maintSku: 'SC-Mill-Maint',
+		maintPrice: 648
+	},
 	'SC-Mill::sc-mill-25m': {
 		sku: 'SC-25M',
-		label: 'SC-Mill (25M + AFRM)',
-		price: 3868,
+		label: '2.5D Milling + AFRM',
+		price: 3588,
 		maintSku: '25M-Maint',
-		maintPrice: 648
+		maintPrice: 468
 	},
 	'SC-Mill::HSS': {
 		sku: 'SC-HSS',

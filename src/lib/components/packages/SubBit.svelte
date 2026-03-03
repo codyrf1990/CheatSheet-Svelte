@@ -56,6 +56,13 @@
 			handleCopy();
 		}
 	}
+
+	function handleWrapperKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			handleToggle();
+		}
+	}
 </script>
 
 <li
@@ -72,7 +79,12 @@
 	{ondrop}
 >
 	<div class="bit-row">
-		<span class="checkbox-wrapper" onclick={disabled ? handleToggle : undefined}>
+		<span
+			class="checkbox-wrapper"
+			{...(disabled ? { role: 'button', tabindex: 0 } : {})}
+			onclick={disabled ? handleToggle : undefined}
+			onkeydown={disabled ? handleWrapperKeydown : undefined}
+		>
 			<Checkbox checked={isSelected} onchange={handleToggle} {disabled} />
 		</span>
 		<span
