@@ -5,7 +5,7 @@
 
 import { browser } from '$app/environment';
 import type { SyncStatus, UserPrefsData } from '$types';
-import { loadUserData, queueSave, cancelPendingSave, flushPendingSave } from '$firebase';
+import { loadUserData, queueSave, cancelPendingSave, flushPendingSave, normalizeUsername } from '$firebase';
 import { companiesStore, DEFAULT_COMPANY_NAME, DEFAULT_PAGE_NAME } from './companies.svelte';
 import { userPrefsStore } from './userPrefs.svelte';
 
@@ -16,7 +16,7 @@ const LAST_CONNECTED_KEY = 'solidcam-last-connected-user';
 
 // Reactive state
 let username = $state<string | null>(null);
-let rememberMe = $state<boolean>(true);
+let rememberMe = $state<boolean>(false);
 let status = $state<SyncStatus>('disconnected');
 let lastSyncTime = $state<number | null>(null);
 let error = $state<string | null>(null);
@@ -24,6 +24,9 @@ let error = $state<string | null>(null);
 // Auto-sync handler reference
 let autoSyncEnabled = false;
 let lastConnectedUsername: string | null = null;
+
+// Generation counter for concurrent connect() race guard
+let connectGeneration = 0;
 
 type LocalData = ReturnType<typeof companiesStore.exportData>;
 type UserPrefsExport = ReturnType<typeof userPrefsStore.exportData>;
@@ -121,13 +124,6 @@ function validateUsername(name: string): boolean {
 }
 
 /**
- * Normalize username for storage/comparison
- */
-function normalizeUsername(name: string): string {
-	return name.toLowerCase().trim().replace(/\s+/g, '-');
-}
-
-/**
  * Handle local data changes - queue save to cloud
  */
 function queueCombinedSave(): void {
@@ -141,10 +137,13 @@ function queueCombinedSave(): void {
 			lastSyncTime = Date.now();
 			status = 'connected';
 			error = null;
-		} else {
+		} else if (err) {
 			status = 'error';
-			error = err?.message || 'Sync failed';
+			error = err.message || 'Sync failed';
 			console.error('[SyncStore] Auto-sync failed:', err);
+		} else {
+			// Clean cancel (user switched accounts) — not an error
+			status = 'connected';
 		}
 	});
 }
@@ -192,6 +191,7 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 		return false;
 	}
 
+	const myGeneration = ++connectGeneration;
 	const trimmedName = name.trim();
 	const normalizedName = normalizeUsername(trimmedName);
 	error = null;
@@ -210,6 +210,10 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 	try {
 		// Try to load existing cloud data
 		const cloudData = await loadUserData(trimmedName);
+
+		// Bail if a newer connect() call has superseded this one
+		if (myGeneration !== connectGeneration) return false;
+
 		const localData = companiesStore.exportData();
 		const localPrefsExport = userPrefsStore.exportData();
 		const localPrefs = localPrefsExport.userPrefs;
@@ -227,32 +231,38 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 		let shouldUpload = false;
 
 		if (cloudData?.pageSystem) {
-			if (!localIsDefault && localUpdatedAt > cloudPageUpdatedAt) {
-				// Local is newer - keep local and push to cloud
+			if (!isSwitchingUsers && !localIsDefault && localUpdatedAt > cloudPageUpdatedAt) {
+				// Same user reconnecting with newer local changes - push to cloud
 				console.info('[SyncStore] Local data newer than cloud; uploading local changes.', {
 					localUpdatedAt,
 					cloudUpdatedAt: cloudPageUpdatedAt
 				});
 				shouldUpload = true;
 			} else {
-				// Cloud is newer (or equal) - import it
+				// Cloud takes priority: it's newer, equal, or we're switching users (never overwrite
+				// another user's cloud data with a different user's local state)
 				companiesStore.importData(cloudData.pageSystem);
 				lastSyncTime = cloudUpdatedAt || Date.now();
 			}
 		} else {
-			// No cloud data - push local data
-			if (!localIsDefault) {
+			// No cloud data for this user
+			if (!isSwitchingUsers && !localIsDefault) {
+				// Same user, has local data, no cloud yet → upload to establish cloud record
 				shouldUpload = true;
+			} else if (isSwitchingUsers) {
+				// Switching to a user with no cloud data → clear local state so the previous
+				// user's companies don't bleed into this account
+				companiesStore.deleteAll();
 			}
 		}
 
 		if (cloudData?.userPrefs) {
-			if (!localPrefsIsDefault && localPrefsUpdatedAt > cloudPrefsUpdatedAt) {
+			if (!isSwitchingUsers && !localPrefsIsDefault && localPrefsUpdatedAt > cloudPrefsUpdatedAt) {
 				shouldUpload = true;
 			} else {
 				userPrefsStore.importData(cloudData.userPrefs, cloudPrefsUpdatedAt);
 			}
-		} else if (!localPrefsIsDefault) {
+		} else if (!isSwitchingUsers && !localPrefsIsDefault) {
 			shouldUpload = true;
 		}
 
@@ -268,6 +278,9 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 
 		// Refresh cached pageSystem snapshot after any imports/decisions
 		snapshotPageSystem();
+
+		// Final stale check before committing state
+		if (myGeneration !== connectGeneration) return false;
 
 		// Set username and start auto-sync
 		username = trimmedName;
@@ -348,7 +361,7 @@ async function load(): Promise<void> {
 	try {
 		// Load remember me preference
 		const storedRemember = localStorage.getItem(REMEMBER_ME_KEY);
-		rememberMe = storedRemember !== 'false'; // Default to true
+		rememberMe = storedRemember === 'true'; // Default to false
 
 		// Restore last connected user for cross-user detection
 		const storedLastConnected = localStorage.getItem(LAST_CONNECTED_KEY);
@@ -431,6 +444,10 @@ export const syncStore = {
 	sync,
 	validateUsername,
 	normalizeUsername,
+	async flushPending(): Promise<boolean> {
+		if (!username) return true;
+		return flushPendingSave();
+	},
 
 	// Persistence
 	load

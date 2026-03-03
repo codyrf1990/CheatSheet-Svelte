@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Internal sales tool — username-keyed docs, no Firebase Auth.
+    // Access restricted by API key secrecy (Vite VITE_FIREBASE_* env vars).
+    // TODO: add Firebase Auth and restrict to company email when/if needed:
+    //   allow read, write: if request.auth.token.email.matches('.*@yourcompany\\.com');
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if request.resource.data.keys().hasAll(['username', 'normalizedUsername', 'schemaVersion'])
+                   && request.resource.data.username is string
+                   && request.resource.data.username.size() <= 50;
+    }
+  }
+}

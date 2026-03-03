@@ -23,6 +23,7 @@ export interface SyncPayload {
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 let pendingData: SyncPayload | null = null;
 let pendingUsername: string | null = null;
+let pendingCallback: ((success: boolean, error?: Error) => void) | null = null;
 
 /**
  * Normalize username for document ID
@@ -121,9 +122,10 @@ export function queueSave(
 	payload: SyncPayload,
 	onComplete?: (success: boolean, error?: Error) => void
 ): void {
-	// Store latest data
+	// Store latest data and callback
 	pendingData = payload;
 	pendingUsername = username;
+	pendingCallback = onComplete ?? null;
 
 	// Clear existing timeout
 	if (saveTimeout) {
@@ -136,17 +138,19 @@ export function queueSave(
 
 		const dataToSave = pendingData;
 		const usernameToSave = pendingUsername;
+		const cb = pendingCallback;
 
 		// Clear pending state
 		pendingData = null;
 		pendingUsername = null;
+		pendingCallback = null;
 		saveTimeout = null;
 
 		try {
 			const success = await saveUserDataImmediate(usernameToSave, dataToSave);
-			onComplete?.(success);
+			cb?.(success);
 		} catch (err) {
-			onComplete?.(false, err as Error);
+			cb?.(false, err as Error);
 		}
 	}, DEBOUNCE_MS);
 }
@@ -159,8 +163,12 @@ export function cancelPendingSave(): void {
 		clearTimeout(saveTimeout);
 		saveTimeout = null;
 	}
+	// Fire callback as a clean cancel (no error) so callers can reset status
+	const cb = pendingCallback;
+	pendingCallback = null;
 	pendingData = null;
 	pendingUsername = null;
+	cb?.(false);
 }
 
 /**
@@ -179,14 +187,19 @@ export async function flushPendingSave(): Promise<boolean> {
 
 	const dataToSave = pendingData;
 	const usernameToSave = pendingUsername;
+	const cb = pendingCallback;
 
-	// Clear pending state
+	// Clear pending state before async work to prevent double-fire
+	pendingCallback = null;
 	pendingData = null;
 	pendingUsername = null;
 
 	try {
-		return await saveUserDataImmediate(usernameToSave, dataToSave);
-	} catch {
+		const success = await saveUserDataImmediate(usernameToSave, dataToSave);
+		cb?.(success);
+		return success;
+	} catch (err) {
+		cb?.(false, err as Error);
 		return false;
 	}
 }

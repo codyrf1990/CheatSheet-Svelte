@@ -1,3 +1,7 @@
+---
+share_link: https://share.note.sx/g1lcuxr1#EM37KhJ8uDO4yK79VXc01kcTHVaBaNCBmNarty5oKEg
+share_updated: 2026-03-02T09:43:16-06:00
+---
 # CheatSheet Source of Truth — Build Rules & SKU Reference
 
 Last updated: 2026-03-02
@@ -272,3 +276,4 @@ NPD-Maint, SolidShop-Sim-Maint, and SW-Recap are **valid estimate codes** — no
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-03-01 | Initial version — package structure, prerequisites, SKU reference from pricing matrix workbook.                                                                                                                                                                                                                                                                                                                                                                     |
 | 2026-03-02 | Split additional modules into milling-specific (require SC-Mill) and standalone. Added UI behavior rules section: mode badge, checkbox/name fix, disabled visuals, What's Left to Sell spec. Updated SC-Turn to combined display, added Mill Turn toast, added 25M pricing-matrix-matched display, added toast messages to hard blocks table. Added page mode behavior rules. Expanded scope boundary. Fixed section numbering (was missing section 8, jumped 7→9). |
+|            |                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |

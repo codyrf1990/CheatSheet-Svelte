@@ -17,11 +17,20 @@
 	let initialized = $state(false);
 	let videoRef: HTMLVideoElement | null = $state(null);
 
-	onMount(async () => {
-		userPrefsStore.init();
-		companiesStore.load();
-		await syncStore.load();
-		initialized = true;
+	onMount(() => {
+		(async () => {
+			userPrefsStore.init();
+			companiesStore.load();
+			await syncStore.load();
+			initialized = true;
+		})();
+
+		// Flush pending debounced save when tab is hidden (covers mobile/Safari tab-close too)
+		const onHide = () => {
+			if (document.visibilityState === 'hidden') syncStore.flushPending();
+		};
+		document.addEventListener('visibilitychange', onHide);
+		return () => document.removeEventListener('visibilitychange', onHide);
 	});
 
 	const isLoggedIn = $derived(syncStore.isLoggedIn);
