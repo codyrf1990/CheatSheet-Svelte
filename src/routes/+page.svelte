@@ -269,7 +269,7 @@
 						aria-selected={skuTab === 'new-sale'}
 						onclick={() => (skuTab = 'new-sale')}
 					>
-						{userPrefsStore.skuTabMode === 'ms' ? 'Maintenance' : 'New Sale'}
+						{userPrefsStore.skuTabMode === 'ms' ? 'Maint Price' : 'New Sale'}
 					</button>
 					<button
 						class="sku-tab"
@@ -278,7 +278,7 @@
 						aria-selected={skuTab === 'maintenance'}
 						onclick={() => (skuTab = 'maintenance')}
 					>
-						Maintenance
+						{userPrefsStore.skuTabMode === 'ms' ? 'Maint SKUs' : 'SKUs'}
 					</button>
 				</div>
 				<button

@@ -93,24 +93,24 @@
 <style>
 	.toast-container {
 		position: fixed;
-		bottom: 1.5rem;
-		right: 1.5rem;
+		bottom: 1rem;
+		right: 1rem;
 		z-index: 10000;
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
-		max-width: 400px;
+		gap: 0.375rem;
+		max-width: 260px;
 	}
 
 	.toast {
 		position: relative;
 		display: flex;
 		align-items: center;
-		gap: 0.875rem;
-		padding: 0.875rem 1rem;
+		gap: 0.5rem;
+		padding: 0.45rem 0.625rem;
 		background: linear-gradient(145deg, rgba(32, 32, 38, 0.98), rgba(24, 24, 30, 0.98));
 		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 14px;
+		border-radius: 10px;
 		box-shadow:
 			0 8px 24px rgba(0, 0, 0, 0.35),
 			0 2px 8px rgba(0, 0, 0, 0.2),
@@ -125,15 +125,15 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 28px;
-		height: 28px;
+		width: 20px;
+		height: 20px;
 		border-radius: 50%;
 		flex-shrink: 0;
 	}
 
 	.toast-icon svg {
-		width: 16px;
-		height: 16px;
+		width: 12px;
+		height: 12px;
 	}
 
 	/* Type-specific icon colors */
@@ -159,17 +159,17 @@
 
 	.toast-message {
 		flex: 1;
-		font-size: 0.9rem;
+		font-size: 0.75rem;
 		color: rgba(255, 255, 255, 0.9);
-		line-height: 1.4;
+		line-height: 1.3;
 	}
 
 	.toast-close {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 24px;
-		height: 24px;
+		width: 18px;
+		height: 18px;
 		padding: 0;
 		background: transparent;
 		border: none;
@@ -181,8 +181,8 @@
 	}
 
 	.toast-close svg {
-		width: 14px;
-		height: 14px;
+		width: 11px;
+		height: 11px;
 	}
 
 	.toast-close:hover {

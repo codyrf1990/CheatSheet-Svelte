@@ -12,11 +12,6 @@
 		subEntries?: SkuEntry[];
 	}
 
-	interface MaintLine {
-		maintSku: string;
-		label: string;
-		maintPrice: number;
-	}
 
 	// Derive sale lines from current package selections
 	let saleLines = $derived.by(() => {
@@ -94,32 +89,8 @@
 
 	let total = $derived(saleLines.reduce((sum, l) => sum + l.entry.price, 0));
 
-	// MS mode: derive maint lines from the maintenance-skus panel
-	let maintLines = $derived.by((): MaintLine[] => {
-		const maintItems = panelsStore.getItems('maintenance-skus');
-		const lines: MaintLine[] = [];
-		const seen = new Set<string>();
-
-		for (const code of maintItems) {
-			if (seen.has(code)) continue;
-			seen.add(code);
-
-			// Search MODULE_SKUS first, then SKU_LOOKUP values
-			const entry =
-				MODULE_SKUS.find((e) => e.maintSku === code) ??
-				Object.values(SKU_LOOKUP).find((e) => e.maintSku === code);
-
-			if (entry) {
-				lines.push({ maintSku: code, label: entry.label, maintPrice: entry.maintPrice });
-			} else {
-				lines.push({ maintSku: code, label: code, maintPrice: 0 });
-			}
-		}
-
-		return lines;
-	});
-
-	let maintTotal = $derived(maintLines.reduce((sum, l) => sum + l.maintPrice, 0));
+	// MS mode: same structure as sale lines but using maintPrice/maintSku fields
+	let maintTotal = $derived(saleLines.reduce((sum, l) => sum + l.entry.maintPrice, 0));
 
 	function formatPrice(price: number): string {
 		return '$' + price.toLocaleString('en-US');
@@ -138,24 +109,50 @@
 <section class="new-sale-panel tile">
 	<div class="panel-body">
 		{#if userPrefsStore.skuTabMode === 'ms'}
-			<!-- MS mode: show maintenance pricing -->
-			{#if maintLines.length === 0}
-				<div class="empty-state">Add maint SKUs to the maintenance panel to see pricing.</div>
+			<!-- MS mode: same items as BDM but show maintSku + maintPrice -->
+			{#if saleLines.length === 0}
+				<div class="empty-state">Select bits from the table to see pricing.</div>
 			{:else}
 				<ul class="sku-list">
-					{#each maintLines as line (line.maintSku)}
-						<li class="sku-row">
+					{#each saleLines as line (line.entry.sku)}
+						{@const savings = line.subEntries
+							? line.subEntries.reduce((s, e) => s + e.maintPrice, 0) - line.entry.maintPrice
+							: 0}
+						<li class="sku-row" class:has-sub={line.subEntries?.length}>
 							<div class="sku-main-row">
 								<button
 									type="button"
 									class="sku-code"
-									onclick={() => handleCopySku(line.maintSku)}
-									title="Click to copy {line.maintSku}"
+									class:is-package={line.subEntries?.length}
+									onclick={() => handleCopySku(line.entry.maintSku)}
+									title="Click to copy {line.entry.maintSku}"
 								>
-									{line.maintSku}
+									{line.entry.maintSku}
 								</button>
-								<span class="sku-price">{formatPrice(line.maintPrice)}</span>
+								<div class="sku-price-group">
+									{#if savings > 0}
+										<span class="sku-savings">Save {formatPrice(savings)}</span>
+									{/if}
+									<span class="sku-price">{formatPrice(line.entry.maintPrice)}</span>
+								</div>
 							</div>
+							{#if line.subEntries?.length}
+								<ul class="sku-sub-list" aria-label="Included in {line.entry.maintSku}">
+									{#each line.subEntries as sub (sub.sku)}
+										<li class="sku-sub-row">
+											<button
+												type="button"
+												class="sku-code sku-code--sub"
+												onclick={() => handleCopySku(sub.maintSku)}
+												title="Click to copy {sub.maintSku}"
+											>
+												{sub.maintSku}
+											</button>
+											<span class="sku-price sku-price--sub">{formatPrice(sub.maintPrice)}</span>
+										</li>
+									{/each}
+								</ul>
+							{/if}
 						</li>
 					{/each}
 				</ul>

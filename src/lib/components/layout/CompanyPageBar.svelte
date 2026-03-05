@@ -596,10 +596,11 @@
 			class:is-edit-mode={editMode}
 			bind:this={kebabTriggerRef}
 			onclick={editMode ? onToggleEdit : toggleActionsMenu}
+			oncontextmenu={editMode ? (e) => { e.preventDefault(); toggleActionsMenu(e); } : undefined}
 			aria-expanded={editMode ? undefined : showActionsMenu}
 			aria-haspopup={editMode ? undefined : 'menu'}
-			aria-label={editMode ? 'Done editing' : 'More actions'}
-			title={editMode ? 'Done editing' : undefined}
+			aria-label={editMode ? 'Done editing (right-click for menu)' : 'More actions'}
+			title={editMode ? 'Click to finish · Right-click for menu' : undefined}
 		>{editMode ? '✓' : '⋮'}</button>
 	</div>
 </div>
