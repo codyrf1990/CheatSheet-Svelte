@@ -18,8 +18,20 @@ import {
 import { companiesStore, DEFAULT_PAGE_NAME } from '$lib/stores/companies.svelte';
 import { packagesStore } from '$lib/stores/packages.svelte';
 import { panelsStore } from '$lib/stores/panels.svelte';
+import { SKU_LOOKUP } from '$lib/data/skuData';
+import { PACKAGE_TOGGLE_BITS } from '$lib/data/prerequisites';
+import { packages as packageDefs } from '$lib/data';
 
 const MAINTENANCE_PANEL_ID = 'maintenance-skus';
+
+/** Check if a group has at least one selected bit */
+function isGroupSelectedInBits(packageCode: string, groupId: string, bits: string[]): boolean {
+	const pkg = packageDefs.find((p) => p.code === packageCode);
+	if (!pkg) return false;
+	const group = pkg.groups?.find((g) => g.masterId === groupId);
+	if (!group) return false;
+	return group.bits.some((bit) => bits.includes(bit));
+}
 
 /**
  * Check if a license needs manual company name input
@@ -130,9 +142,13 @@ export function importLicense(license: LicenseInfo, overrideCompanyName?: string
 		}
 	}
 
-	// 4. Switch to the target page
+	// 4. Switch to the target page and store full license key
 	if (targetPage) {
 		companiesStore.switchToPage(targetPage.id);
+		const fullKey = license.productKey?.trim() || license.dongleNo?.trim() || '';
+		if (fullKey) {
+			companiesStore.setPageLicenseKey(targetPage.id, fullKey);
+		}
 	}
 
 	// 5. Load the page's state into stores
@@ -162,6 +178,7 @@ export function importLicense(license: LicenseInfo, overrideCompanyName?: string
 
 	// 9. Remove package-backed SKUs and explicitly Not Checked SKUs, then add remaining maintenance SKUs
 	let skusImported = 0;
+	const importedSkuList: string[] = [];
 	for (const sku of PACKAGE_BIT_SKUS) {
 		if (panelsStore.hasItem(MAINTENANCE_PANEL_ID, sku)) {
 			panelsStore.removeItem(MAINTENANCE_PANEL_ID, sku);
@@ -177,21 +194,56 @@ export function importLicense(license: LicenseInfo, overrideCompanyName?: string
 		if (!panelsStore.hasItem(MAINTENANCE_PANEL_ID, sku)) {
 			panelsStore.addItem(MAINTENANCE_PANEL_ID, sku);
 			skusImported++;
+			importedSkuList.push(sku);
 		}
 	}
 
-	// 10. Handle network license SKU
+	// 10. Package-level maint SKUs — add when package is fully selected
+	const PACKAGE_CODES = ['SC-Mill', 'SC-Mill-Adv', 'SC-Mill-3D', 'SC-Mill-5Axis', 'SC-Turn'] as const;
+	for (const code of PACKAGE_CODES) {
+		const pkgEntry = SKU_LOOKUP[`${code}::PACKAGE`];
+		if (!pkgEntry?.maintSku) continue;
+
+		const selectedBitsForPkg = bitsByPackage[code] ?? [];
+		if (selectedBitsForPkg.length === 0) continue;
+
+		const toggleDef = PACKAGE_TOGGLE_BITS[code];
+		if (!toggleDef) continue;
+
+		let isFullySelected: boolean;
+		if (code === 'SC-Turn') {
+			// SC-Turn: qualifying bit is SolidCAM Turning (Backspindle is optional hardware)
+			isFullySelected = selectedBitsForPkg.includes('SolidCAM Turning');
+		} else {
+			const allGroupsSelected = (toggleDef.groups ?? []).every((g) =>
+				isGroupSelectedInBits(code, g, selectedBitsForPkg)
+			);
+			const allLooseSelected = (toggleDef.looseBits ?? []).every((b) =>
+				selectedBitsForPkg.includes(b)
+			);
+			isFullySelected = allGroupsSelected && allLooseSelected;
+		}
+
+		if (isFullySelected && !panelsStore.hasItem(MAINTENANCE_PANEL_ID, pkgEntry.maintSku)) {
+			panelsStore.addItem(MAINTENANCE_PANEL_ID, pkgEntry.maintSku);
+			skusImported++;
+			importedSkuList.push(pkgEntry.maintSku);
+		}
+	}
+
+	// 11. Handle network license SKU
 	if (license.isNetworkLicense) {
 		if (!panelsStore.hasItem(MAINTENANCE_PANEL_ID, 'Lic-Net-Maint')) {
 			panelsStore.addItem(MAINTENANCE_PANEL_ID, 'Lic-Net-Maint');
 			skusImported++;
+			importedSkuList.push('Lic-Net-Maint');
 		}
 	}
 
-	// 11. Store license metadata on company
+	// 12. Store license metadata on company
 	companiesStore.setLicenseData(company.id, license);
 
-	// 12. Save page state with import mode (license import always sets import mode)
+	// 13. Save page state with import mode (license import always sets import mode)
 	const currentPage = companiesStore.currentPage;
 	if (currentPage) {
 		const newState = {
@@ -210,6 +262,7 @@ export function importLicense(license: LicenseInfo, overrideCompanyName?: string
 		featuresImported: totalBitsImported,
 		featuresSkipped: mappingResult.unmappedFeatures.length + mappingResult.ignoredFeatures.length,
 		skusImported,
+		importedSkuList: importedSkuList.length > 0 ? importedSkuList : undefined,
 		errors: errors.length > 0 ? errors : undefined
 	};
 }

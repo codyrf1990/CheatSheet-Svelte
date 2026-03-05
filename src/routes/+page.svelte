@@ -19,6 +19,7 @@
 	import { panelsStore } from '$stores/panels.svelte';
 	import { packages, panels } from '$data';
 	import { getPageNameForLicense } from '$lib/utils/licenseSelections';
+	import { userPrefsStore } from '$stores/userPrefs.svelte';
 
 	// Derived sync state from store
 	let syncStatus = $derived(syncStore.status);
@@ -54,6 +55,13 @@
 		if (!start && !end) return '';
 		if (start && end) return `${start} - ${end}`;
 		return start || end;
+	});
+
+	// When build mode is active, force BDM (new sale) tab mode
+	$effect(() => {
+		if (packagesStore.buildMode) {
+			userPrefsStore.setSkuTabMode('bdm');
+		}
 	});
 
 	// Package edit mode state (lifted from PackageTable)
@@ -252,24 +260,38 @@
 
 		<!-- Sidebar (Panels + Calculator) -->
 		<aside class="sidebar">
-			<div class="sku-tab-toggle" role="tablist" aria-label="SKU panel view">
+			<div class="sku-tab-row">
+				<div class="sku-tab-toggle" role="tablist" aria-label="SKU panel view">
+					<button
+						class="sku-tab"
+						class:active={skuTab === 'new-sale'}
+						role="tab"
+						aria-selected={skuTab === 'new-sale'}
+						onclick={() => (skuTab = 'new-sale')}
+					>
+						{userPrefsStore.skuTabMode === 'ms' ? 'Maintenance' : 'New Sale'}
+					</button>
+					<button
+						class="sku-tab"
+						class:active={skuTab === 'maintenance'}
+						role="tab"
+						aria-selected={skuTab === 'maintenance'}
+						onclick={() => (skuTab = 'maintenance')}
+					>
+						Maintenance
+					</button>
+				</div>
 				<button
-					class="sku-tab"
-					class:active={skuTab === 'new-sale'}
-					role="tab"
-					aria-selected={skuTab === 'new-sale'}
-					onclick={() => (skuTab = 'new-sale')}
+					class="mode-toggle"
+					class:ms-active={userPrefsStore.skuTabMode === 'ms'}
+					onclick={() =>
+						userPrefsStore.setSkuTabMode(userPrefsStore.skuTabMode === 'ms' ? 'bdm' : 'ms')}
+					title={userPrefsStore.skuTabMode === 'ms'
+						? 'Switch to BDM mode (new sale prices)'
+						: 'Switch to MS mode (maintenance prices)'}
+					aria-label={userPrefsStore.skuTabMode === 'ms' ? 'BDM mode' : 'MS mode'}
 				>
-					New Sale
-				</button>
-				<button
-					class="sku-tab"
-					class:active={skuTab === 'maintenance'}
-					role="tab"
-					aria-selected={skuTab === 'maintenance'}
-					onclick={() => (skuTab = 'maintenance')}
-				>
-					Maintenance
+					{userPrefsStore.skuTabMode === 'ms' ? 'BDM' : 'MS'}
 				</button>
 			</div>
 
@@ -381,13 +403,50 @@
 		min-height: 0;
 	}
 
+	/* SKU tab row (toggle + mode button) */
+	.sku-tab-row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-0-5);
+		flex-shrink: 0;
+	}
+
 	/* SKU tab toggle */
 	.sku-tab-toggle {
 		display: flex;
+		flex: 1;
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: var(--radius-xs);
 		overflow: hidden;
+	}
+
+	.mode-toggle {
+		font-size: var(--text-2xs);
+		font-weight: 700;
+		padding: var(--space-0-5) var(--space-1);
+		background: rgba(255, 255, 255, 0.06);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: var(--radius-xs);
+		color: rgba(255, 255, 255, 0.5);
+		cursor: pointer;
+		transition: all 150ms ease;
+		white-space: nowrap;
 		flex-shrink: 0;
+	}
+
+	.mode-toggle:hover {
+		background: rgba(255, 255, 255, 0.1);
+		color: rgba(255, 255, 255, 0.8);
+	}
+
+	.mode-toggle.ms-active {
+		background: rgba(59, 130, 246, 0.15);
+		border-color: rgba(59, 130, 246, 0.3);
+		color: #3b82f6;
+	}
+
+	.mode-toggle.ms-active:hover {
+		background: rgba(59, 130, 246, 0.25);
 	}
 
 	.sku-tab {

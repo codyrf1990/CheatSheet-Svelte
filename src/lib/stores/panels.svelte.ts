@@ -159,6 +159,7 @@ function restoreItems(panelId: string): void {
  * Load state from page state (from companies store)
  */
 function loadFromPageState(pageState: PageState): void {
+	removeMode = false;
 	if (pageState?.panels) {
 		// Deep copy to prevent mutations
 		panelStates = JSON.parse(JSON.stringify(pageState.panels));

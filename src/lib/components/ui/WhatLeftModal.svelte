@@ -65,6 +65,28 @@
 				continue;
 			}
 
+			// Determine if ALL toggleable groups/bits are unselected (bundle pricing applies)
+			const allToggleGroups = toggleDef.groups ?? [];
+			const allToggleBits = toggleDef.looseBits ?? [];
+			const noneSelected =
+				allToggleGroups.every((g) => !isGroupSelected(code, g, selectedBits)) &&
+				allToggleBits.every((b) => !selectedBits.includes(b));
+
+			if (noneSelected) {
+				const pkgEntry = SKU_LOOKUP[`${code}::PACKAGE`];
+				if (pkgEntry) {
+					items.push({
+						name: pkgEntry.label,
+						sku: pkgEntry.sku,
+						price: pkgEntry.price,
+						description: ''
+					});
+					groups.push({ label, items });
+					continue;
+				}
+				// No PACKAGE entry — fall through to individual items
+			}
+
 			// Check groups (e.g., 25M, SIM5X)
 			if (toggleDef.groups) {
 				for (const groupId of toggleDef.groups) {
@@ -72,10 +94,7 @@
 					const entry = SKU_LOOKUP[key];
 					if (!entry) continue;
 
-					// Check if any group bits are selected — if not, the group is unselected
-					// We need to know all group bits. Look them up from packages data.
-					const groupNotSelected =
-						selectedBits.length === 0 || !isGroupSelected(code, groupId, selectedBits);
+					const groupNotSelected = !isGroupSelected(code, groupId, selectedBits);
 					if (groupNotSelected) {
 						items.push({
 							name: entry.label,
@@ -105,7 +124,9 @@
 				}
 			}
 
-			if (items.length > 0) groups.push({ label, items });
+			// Use "Complete {code}" label when some bits are already selected (partial package)
+			const groupLabel = noneSelected ? label : `Complete ${code}`;
+			if (items.length > 0) groups.push({ label: groupLabel, items });
 		}
 
 		// Additional modules — check which are not currently selected

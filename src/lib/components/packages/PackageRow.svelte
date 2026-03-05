@@ -516,9 +516,17 @@
 		gap: var(--space-1);
 	}
 
-	/* Hide Package column on narrow screens */
+	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.pkg-cell {
+			padding: 0.25rem 0.2rem;
+		}
+
+		.package-code {
+			font-size: var(--text-sm);
+		}
+
+		.package-description {
 			display: none;
 		}
 

@@ -2,7 +2,7 @@
 	import type { LicenseInfo, ImportResult } from '$lib/types';
 	import { parseSalesforceText } from '$lib/utils/salesforceParser';
 	import { getPageNameForLicense } from '$lib/utils/licenseSelections';
-	import { importLicense, needsCompanyNameInput } from '$lib/services/licenseImport';
+	import { importLicense, needsCompanyNameInput, getImportPreview } from '$lib/services/licenseImport';
 	import { toastStore } from '$lib/stores/toast.svelte';
 	import Modal from './Modal.svelte';
 	import Button from './Button.svelte';
@@ -25,6 +25,7 @@
 	let maintenanceEndOverride = $state('');
 	let importResult = $state<ImportResult | null>(null);
 	let showFeatures = $state(false);
+	let showSkus = $state(false);
 
 	// Derived
 	let canParse = $derived(pastedText.trim().length > 0);
@@ -43,6 +44,7 @@
 		return true;
 	});
 	let pageName = $derived.by(() => (parsedLicense ? getPageNameForLicense(parsedLicense) : 'P1'));
+	let preview = $derived.by(() => (parsedLicense ? getImportPreview(parsedLicense) : null));
 
 	// Reset state when modal opens or closes
 	$effect(() => {
@@ -55,6 +57,7 @@
 			maintenanceEndOverride = '';
 			importResult = null;
 			showFeatures = false;
+			showSkus = false;
 		} else {
 			// Also reset on close so stale state (e.g. stuck spinner) doesn't linger
 			modalState = 'paste';
@@ -261,6 +264,12 @@ HSM           Checked    5-axes indexial  Not Checked"
 					{/if}
 				</div>
 
+				{#if preview && !preview.isNewPage}
+					<div class="duplicate-warning">
+						Page "{pageName}" already exists — this import will update it.
+					</div>
+				{/if}
+
 				<div class="page-info">
 					<p>Will create/update page: <strong>{pageName}</strong></p>
 				</div>
@@ -313,6 +322,26 @@ HSM           Checked    5-axes indexial  Not Checked"
 							<span class="stat-value">{importResult.isNewCompany ? 'New' : 'Updated'}</span>
 							<span class="stat-label">Company</span>
 						</div>
+					</div>
+				{/if}
+
+				{#if importResult.importedSkuList?.length}
+					<div class="skus-section">
+						<button
+							class="features-toggle"
+							onclick={() => (showSkus = !showSkus)}
+							type="button"
+						>
+							<span class="features-count">{importResult.importedSkuList.length} SKUs imported</span>
+							<span class="toggle-icon">{showSkus ? '\u25BC' : '\u25B6'}</span>
+						</button>
+						{#if showSkus}
+							<ul class="features-list">
+								{#each importResult.importedSkuList as sku, index (index)}
+									<li>{sku}</li>
+								{/each}
+							</ul>
+						{/if}
 					</div>
 				{/if}
 
@@ -549,6 +578,16 @@ HSM           Checked    5-axes indexial  Not Checked"
 		color: var(--color-solidcam-gold);
 	}
 
+	/* Duplicate page warning */
+	.duplicate-warning {
+		padding: var(--space-3);
+		background: rgba(245, 158, 11, 0.1);
+		border: 1px solid rgba(245, 158, 11, 0.3);
+		border-radius: 8px;
+		color: #fbbf24;
+		font-size: var(--text-sm);
+	}
+
 	/* Results section */
 	.results-section {
 		display: flex;
@@ -626,6 +665,12 @@ HSM           Checked    5-axes indexial  Not Checked"
 		font-size: var(--text-sm);
 		color: rgba(255, 255, 255, 0.6);
 		margin-top: var(--space-1);
+	}
+
+	.skus-section {
+		padding: var(--space-3);
+		background: rgba(0, 0, 0, 0.2);
+		border-radius: 8px;
 	}
 
 	.errors-section {

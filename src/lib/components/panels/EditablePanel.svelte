@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Panel as PanelType } from '$types';
 	import { panelsStore } from '$stores/panels.svelte';
+	import { toastStore } from '$stores/toast.svelte';
 	import { Button, Input, Modal } from '$components/ui';
 	import Panel from './Panel.svelte';
 	import PanelItem from './PanelItem.svelte';
@@ -85,6 +86,10 @@
 	function submitAddDialog() {
 		const text = addDialogValue.trim();
 		if (!text) return;
+		if (panelsStore.hasItem(panel.id, text)) {
+			toastStore.warning(`"${text}" is already in the list`);
+			return;
+		}
 		panelsStore.addItem(panel.id, text);
 		closeAddDialog();
 	}

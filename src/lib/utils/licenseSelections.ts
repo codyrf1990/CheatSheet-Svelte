@@ -211,6 +211,18 @@ export function getLicenseSelections(license: LicenseInfo): LicenseSelections {
 					bitsByPackage['SC-Mill-5Axis'].push('Sim4x');
 				}
 			}
+
+			// Mirror bit-level Sim5x restrictions with maint SKU removals
+			if (is3Axis) {
+				// HSS only — remove both Sim5x-Maint and Sim4x-Maint
+				for (const s of ['Sim5x-Maint', 'Sim4x-Maint']) {
+					if (!removedSkus.includes(s)) removedSkus.push(s);
+				}
+			} else if (is34Axis) {
+				// HSS + Sim4x — remove Sim5x-Maint only
+				if (!removedSkus.includes('Sim5x-Maint')) removedSkus.push('Sim5x-Maint');
+			}
+			// isBlankOrUnknown: keep all maint SKUs
 		}
 	}
 

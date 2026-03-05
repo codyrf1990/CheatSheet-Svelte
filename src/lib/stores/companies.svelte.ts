@@ -228,6 +228,7 @@ function ensureIntegrity(): void {
 		company.pages = company.pages.map((page) => ({
 			id: page.id || generateId('page'),
 			name: page.name || DEFAULT_PAGE_NAME,
+			licenseKey: page.licenseKey,
 			state: page.state || createEmptyPageState()
 		}));
 
@@ -548,6 +549,17 @@ function resetPages(): void {
 
 // ============ State Operations ============
 
+function setPageLicenseKey(pageId: string, key: string): void {
+	const company = getCurrentCompany();
+	if (!company) return;
+	const page = company.pages.find((p) => p.id === pageId);
+	if (!page) return;
+	page.licenseKey = key;
+	company.updatedAt = Date.now();
+	companies = [...companies];
+	save();
+}
+
 function savePageState(pageId: string, state: PageState): void {
 	const company = getCurrentCompany();
 	if (!company) return;
@@ -803,6 +815,7 @@ export const companiesStore = {
 	copyPage,
 	switchToPage,
 	resetPages,
+	setPageLicenseKey,
 
 	// State operations
 	savePageState,

@@ -5,6 +5,7 @@
 	import { toastStore } from '$stores/toast.svelte';
 	import { AddSkuModal, Button, Input, Modal, ImportLicenseModal } from '$components/ui';
 	import { copyQBExportToClipboard } from '$lib/utils/quickbooksExport';
+	import { userPrefsStore } from '$stores/userPrefs.svelte';
 
 	interface Props {
 		editMode?: boolean;
@@ -35,6 +36,7 @@
 	let editingPageId = $state<string | null>(null);
 	let editingPageName = $state('');
 	let dropdownTriggerRef = $state<HTMLButtonElement | null>(null);
+	let searchInputRef = $state<HTMLInputElement | null>(null);
 	let showActionsMenu = $state(false);
 	let actionsMenuPosition = $state({ top: 0, right: 0 });
 	let kebabTriggerRef = $state<HTMLButtonElement | null>(null);
@@ -45,6 +47,7 @@
 		| 'delete-company'
 		| 'delete-page'
 		| 'reset-order'
+		| 'set-rep-name'
 		| null
 	>(null);
 	let dialogTargetId = $state<string | null>(null);
@@ -55,6 +58,12 @@
 	let contextMenu = $state<{ x: number; y: number; type: 'company' | 'page'; id?: string } | null>(
 		null
 	);
+
+	// Page referenced by the current context menu (for licenseKey access)
+	let contextMenuPage = $derived.by(() => {
+		if (!contextMenu || contextMenu.type !== 'page' || !contextMenu.id) return null;
+		return currentCompany?.pages.find((p) => p.id === contextMenu!.id) ?? null;
+	});
 
 	// Filtered companies based on search
 	let filteredCompanies = $derived.by(() => {
@@ -95,6 +104,8 @@
 				return 'Delete Page';
 			case 'reset-order':
 				return 'Reset Order';
+			case 'set-rep-name':
+				return 'Set Rep Name';
 			default:
 				return '';
 		}
@@ -111,6 +122,8 @@
 				return 'Delete';
 			case 'reset-order':
 				return 'Reset';
+			case 'set-rep-name':
+				return 'Save';
 			default:
 				return '';
 		}
@@ -122,6 +135,8 @@
 				return 'Company name';
 			case 'rename-page':
 				return 'Page name';
+			case 'set-rep-name':
+				return 'Rep name';
 			default:
 				return '';
 		}
@@ -138,7 +153,7 @@
 		}
 		return '';
 	});
-	let dialogInputValid = $derived(dialogInput.trim().length > 0);
+	let dialogInputValid = $derived(dialogType === 'set-rep-name' || dialogInput.trim().length > 0);
 
 	function toggleDropdown(e: MouseEvent) {
 		e.stopPropagation();
@@ -215,6 +230,7 @@
 	function handleNewPage() {
 		const page = companiesStore.createPage();
 		if (page) {
+			companiesStore.switchToPage(page.id);
 			toastStore.success('Page created');
 		}
 	}
@@ -255,6 +271,12 @@
 
 	function handleImportLicense() {
 		showImportModal = true;
+		closeContextMenu();
+	}
+
+	function handleSetRepName() {
+		dialogType = 'set-rep-name';
+		dialogInput = userPrefsStore.getRepName();
 		closeContextMenu();
 	}
 
@@ -325,6 +347,18 @@
 		const page = companiesStore.copyPage(pageId);
 		if (page) {
 			toastStore.success('Page copied');
+		}
+		closeContextMenu();
+	}
+
+	async function handleCopyKey() {
+		const page = contextMenuPage;
+		if (!page?.licenseKey) return;
+		try {
+			await navigator.clipboard.writeText(page.licenseKey);
+			toastStore.success('Copied');
+		} catch {
+			toastStore.error('Failed to copy');
 		}
 		closeContextMenu();
 	}
@@ -424,6 +458,13 @@
 			onResetOrder?.();
 			toastStore.success('Order reset');
 			closeDialog();
+			return;
+		}
+
+		if (dialogType === 'set-rep-name') {
+			userPrefsStore.setRepName(dialogInput.trim());
+			toastStore.success('Rep name saved');
+			closeDialog();
 		}
 	}
 
@@ -433,6 +474,13 @@
 			handleDialogSubmit();
 		}
 	}
+
+	// Auto-focus search input when dropdown opens
+	$effect(() => {
+		if (dropdownOpen && searchInputRef) {
+			searchInputRef.focus();
+		}
+	});
 
 	// Close dropdown/context when clicking outside
 	function handleWindowClick(e: MouseEvent) {
@@ -522,6 +570,7 @@
 						onclick={() => handlePageSelect(page.id)}
 						ondblclick={() => handlePageDoubleClick(page.id, page.name)}
 						oncontextmenu={(e) => handlePageContextMenu(e, page.id)}
+						title="Double-click to rename"
 					>
 						{page.name}
 					</button>
@@ -569,6 +618,7 @@
 				type="search"
 				placeholder="Search companies..."
 				bind:value={searchQuery}
+				bind:this={searchInputRef}
 				class="search-input"
 				aria-label="Search companies"
 			/>
@@ -683,6 +733,7 @@
 			<button type="button" role="menuitem" onclick={handleDuplicateCompany}>Duplicate</button>
 			<button type="button" role="menuitem" onclick={handleImportLicense}>Import License</button>
 			<button type="button" role="menuitem" onclick={handleCopyForQB}>Copy for QB</button>
+			<button type="button" role="menuitem" onclick={handleSetRepName}>Set Rep Name</button>
 			<button type="button" role="menuitem" class="danger" onclick={handleDeleteCompany}
 				>Delete</button
 			>
@@ -695,6 +746,9 @@
 		{:else}
 			<button type="button" role="menuitem" onclick={handleRenamePage}>Rename</button>
 			<button type="button" role="menuitem" onclick={handleCopyPage}>Copy</button>
+			{#if contextMenuPage?.licenseKey}
+				<button type="button" role="menuitem" onclick={handleCopyKey}>Copy Key</button>
+			{/if}
 			<button type="button" role="menuitem" class="danger" onclick={handleDeletePage}>Delete</button
 			>
 		{/if}

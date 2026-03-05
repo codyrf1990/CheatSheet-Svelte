@@ -12,11 +12,13 @@ interface UserPrefs {
 	customPanelItems: Record<string, string[]>; // panelId -> custom items
 	customPackageBits: Record<string, string[]>; // packageCode -> custom bits
 	backgroundVideoPaused: boolean; // Whether background video is paused (per device)
+	repName: string; // Sales rep name for QuickBooks export
 	updatedAt: number; // Last syncable prefs update timestamp
 	// Global bit ordering (applies to all companies/pages)
 	packageBitOrders: Record<string, string[]>; // packageCode -> ordered bit names
 	packageLooseBitOrders: Record<string, string[]>; // packageCode -> ordered loose bits
 	packageGroupMembership: Record<string, Record<string, string>>; // packageCode -> (bit -> groupId)
+	skuTabMode: 'bdm' | 'ms'; // Local-only: BDM (new sale prices) vs MS (maintenance prices)
 }
 
 // Default state
@@ -25,6 +27,8 @@ function createDefaultPrefs(): UserPrefs {
 		customPanelItems: {},
 		customPackageBits: {},
 		backgroundVideoPaused: false, // Video plays by default
+		repName: '',
+		skuTabMode: 'bdm',
 		updatedAt: Date.now(),
 		packageBitOrders: {},
 		packageLooseBitOrders: {},
@@ -48,6 +52,8 @@ function loadPrefs(): UserPrefs {
 				customPanelItems: parsed.customPanelItems || {},
 				customPackageBits: parsed.customPackageBits || {},
 				backgroundVideoPaused: parsed.backgroundVideoPaused ?? false,
+				repName: parsed.repName || '',
+				skuTabMode: parsed.skuTabMode || 'bdm',
 				updatedAt,
 				packageBitOrders: parsed.packageBitOrders || {},
 				packageLooseBitOrders: parsed.packageLooseBitOrders || {},
@@ -208,6 +214,30 @@ function toggleBackgroundVideoPaused(): void {
 	setBackgroundVideoPaused(!prefs.backgroundVideoPaused);
 }
 
+// ============ Rep Name ============
+
+/**
+ * Get rep name
+ */
+function getRepName(): string {
+	return prefs.repName;
+}
+
+/**
+ * Set rep name
+ */
+function setRepName(name: string): void {
+	prefs.repName = name;
+	commitLocalOnly();
+}
+
+// ============ SKU Tab Mode ============
+
+function setSkuTabMode(mode: 'bdm' | 'ms'): void {
+	prefs.skuTabMode = mode;
+	commitLocalOnly();
+}
+
 // ============ Global Package Bit Ordering ============
 
 /**
@@ -361,6 +391,16 @@ export const userPrefsStore = {
 	isBackgroundVideoPaused,
 	setBackgroundVideoPaused,
 	toggleBackgroundVideoPaused,
+
+	// Rep name
+	getRepName,
+	setRepName,
+
+	// SKU tab mode
+	get skuTabMode() {
+		return prefs.skuTabMode;
+	},
+	setSkuTabMode,
 
 	// Global package ordering
 	getPackageBitOrder,

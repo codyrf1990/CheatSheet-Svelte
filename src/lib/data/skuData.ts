@@ -29,6 +29,13 @@ export const SKU_LOOKUP: Record<string, SkuEntry> = {
 		maintSku: 'HSS-Maint',
 		maintPrice: 180
 	},
+	'SC-Turn::PACKAGE': {
+		sku: 'SC-Turn',
+		label: 'SolidCAM Turning (package)',
+		price: 2300,
+		maintSku: 'SC-Turn-Maint',
+		maintPrice: 300
+	},
 	'SC-Turn::SolidCAM Turning': {
 		sku: 'SC-Turn',
 		label: 'SC-Turn',

@@ -2,6 +2,7 @@
 	import type { PackageGroup } from '$types';
 	import { Checkbox } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
+	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { applyOrder } from '$lib/utils/order';
 	import SubBit from './SubBit.svelte';
@@ -50,6 +51,9 @@
 		const storedOrder = packagesStore.getOrder(packageCode);
 		return applyOrder(effectiveBits, storedOrder);
 	});
+
+	// Custom bits for this package
+	let customBits = $derived(userPrefsStore.getCustomPackageBits(packageCode));
 
 	// Derived state from store - use effective bits for checkbox state
 	let masterState = $derived(packagesStore.getMasterBitState(packageCode, effectiveBits));
@@ -222,6 +226,7 @@
 					{packageCode}
 					masterId={group.masterId}
 					{editMode}
+					isCustom={customBits.includes(bit)}
 					{disabled}
 					{disabledReason}
 					draggable={editMode}

@@ -416,10 +416,14 @@
 				onclick={handleDisplayClick}
 				ondblclick={handleDisplayDoubleClick}
 				aria-label="Display: {displayText}. Click to copy discount, double-click to copy full value"
+				title="Click to copy discount value • Double-click to copy full value"
 				aria-live="polite"
 			>
 				{displayText}
 			</button>
+			{#if state.error}
+				<p class="error-hint">Press AC to clear</p>
+			{/if}
 			<div class="calculator-buttons">
 				<button type="button" class="calc-btn clear" onclick={handleClear} aria-label="All clear"
 					>AC</button
@@ -570,6 +574,14 @@
 	.calculator-display:hover {
 		background: rgba(0, 0, 0, 0.5);
 		border-color: rgba(212, 175, 55, 0.3);
+	}
+
+	.error-hint {
+		margin: 0;
+		padding: 0.125rem 0;
+		font-size: 0.65rem;
+		color: rgba(255, 102, 102, 0.7);
+		text-align: center;
 	}
 
 	.calculator-buttons {

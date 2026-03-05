@@ -6,6 +6,7 @@
 import type { Company, Page, Package } from '$types';
 import { panelsStore } from '$stores/panels.svelte';
 import { packagesStore } from '$stores/packages.svelte';
+import { userPrefsStore } from '$stores/userPrefs.svelte';
 import { packages } from '$data';
 
 /**
@@ -231,9 +232,13 @@ export function generateQBExportText(company: Company, page: Page): ExportResult
 	);
 
 	// Build the output text
+	const repName = userPrefsStore.getRepName();
 	let text = 'QUICKBOOKS ESTIMATE\n';
 	text += `Customer: ${company.name}\n`;
 	text += `Page: ${page.name}\n`;
+	if (repName) {
+		text += `Rep: ${repName}\n`;
+	}
 	text += '\n';
 	text += 'LINE ITEMS:\n';
 	text += lineItems.join('\n');

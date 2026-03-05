@@ -8,6 +8,7 @@
 		packageCode: string;
 		masterId: string;
 		editMode?: boolean;
+		isCustom?: boolean;
 		disabled?: boolean;
 		disabledReason?: string;
 		draggable?: boolean;
@@ -21,6 +22,7 @@
 		packageCode,
 		masterId,
 		editMode = false,
+		isCustom = false,
 		disabled = false,
 		disabledReason = '',
 		draggable = false,
@@ -68,6 +70,7 @@
 <li
 	class="sub-bit"
 	class:edit-mode={editMode}
+	class:custom={isCustom}
 	class:disabled-bit={disabled}
 	data-sortable-item
 	data-bit={bit}
@@ -89,11 +92,12 @@
 		</span>
 		<span
 			class="bit-text"
+			class:custom={isCustom}
 			role="button"
 			tabindex="0"
 			onclick={handleCopy}
 			onkeydown={handleKeydown}
-			data-copyable-bit>{bit}</span
+			data-copyable-bit>{#if isCustom}<span class="custom-indicator">+</span>{/if}{bit}</span
 		>
 	</div>
 </li>
@@ -173,6 +177,20 @@
 
 	.bit-text:hover {
 		color: var(--chip-text-hover);
+	}
+
+	.bit-text.custom {
+		color: var(--color-solidcam-gold, #d4af37);
+	}
+
+	.custom-indicator {
+		font-weight: 600;
+		margin-right: 2px;
+	}
+
+	.sub-bit.custom {
+		border-color: rgba(212, 175, 55, 0.3);
+		background: rgba(212, 175, 55, 0.08);
 	}
 
 	/* Narrow viewport compaction */

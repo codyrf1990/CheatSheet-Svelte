@@ -20,6 +20,7 @@ export interface Company {
 export interface Page {
 	id: string;
 	name: string;
+	licenseKey?: string;
 	state: PageState;
 }
 
@@ -170,6 +171,7 @@ export interface ImportResult {
 	featuresImported: number;
 	featuresSkipped: number; // Features not in our packages
 	skusImported: number; // Maintenance SKUs added to panel
+	importedSkuList?: string[]; // List of SKU codes that were added
 	errors?: string[];
 }
 
