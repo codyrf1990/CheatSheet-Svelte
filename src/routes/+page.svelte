@@ -315,6 +315,9 @@
 		<aside class="sidebar">
 			<div class="quote-tile tile">
 				<div class="quote-header tile-header">
+					<span class="quote-mode-label" class:quote-label-ms={effectiveSkuTabMode === 'ms'}>
+						{effectiveSkuTabMode === 'bdm' ? 'New Sale' : 'Maint Price'}
+					</span>
 					<div class="mode-pill" role="group" aria-label="View mode">
 						<button
 							class="mode-pill-btn"
@@ -333,9 +336,6 @@
 							title={buildMode ? 'MS unavailable in Build Mode' : 'MS mode — maintenance prices'}
 						>MS</button>
 					</div>
-					<span class="quote-mode-label">
-						{effectiveSkuTabMode === 'bdm' ? 'New Sale' : 'Maint Price'}
-					</span>
 				</div>
 				<NewSalePanel skuMode={effectiveSkuTabMode} />
 			</div>
@@ -525,11 +525,16 @@
 	}
 
 	.quote-mode-label {
-		font-size: var(--text-2xs);
+		flex: 1;
+		font-size: var(--text-xs);
 		font-weight: 700;
-		color: rgba(255, 255, 255, 0.4);
+		color: var(--color-solidcam-gold, #d4af37);
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
+	}
+
+	.quote-label-ms {
+		color: #60a5fa;
 	}
 
 	/* Mode pill — BDM | MS segmented control */

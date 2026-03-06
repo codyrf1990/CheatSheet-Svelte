@@ -1,5 +1,5 @@
 # Ideas & Backlog
-
+NEW Idea add aautomatic recgonition of a solidowrks license file and auto import thatas well as we can set info gates if we need extra info will supply pdf of each type of license
 ## Bugs
 
 - [ ] **Sim5x false positive** — Sim5x bit gets checked when customer only has HSS + Sim4x. Should only check Sim5x if the license explicitly says "Sim 5x". |Sim 5x Bit|Sim 5x Level|Maps To|Notes|

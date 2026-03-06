@@ -13,9 +13,13 @@
 - `skuData.ts`: added `SC-Mill::PACKAGE` entry; fixed SC-25M pricing
 - SC-Turn label renamed: "SC-Turn Module" → "Turning + Backspindle"
 
+Under BDM its Should have the new sale tab where i t fiunctuioned like before. The MS mode it should be the same idea but use the maint prices for m the prcing matrix spreadhseet. It should show new sale and what that page would cost and same idea for maintenance speacialiost. in the skus area under bdm it should show the standard skus/. under skus for MS it should show maint skus. 
+
+
 ### 2. CompanyPageBar kebab menu (`2a21271`)
 - Replaced 3-button cluster (+ SKU / - SKU / Edit Order) with a single ⋮ kebab menu
-- Kebab turns into a green ✓ Done button while edit mode is active
+- Kebab turns into a green ✓ Done button while edit mode is active this is good but while its green and before we confirm we should still be able to right click to bring up that menue to be able to edit the order etc
+
 
 ### 3. Production hardening (`2c5cc0a`)
 - **Critical Svelte 5 fix**: All `$derived(() => {...})` → `$derived.by(() => {...})` (was causing silent bugs)
@@ -28,7 +32,9 @@
 - ImportLicenseModal resets state on close (not just on open) — fixed stuck spinner on re-open
 - Disabled LooseBits excluded from drag in edit mode
 - License import: features with both a bit AND a maint SKU now correctly remove both
-- Toast `visibilitychange` listener guarded against stacking on HMR re-execution
+- Toast `visibilitychange` listener guarded against stacking on HMR re-execution 
+
+I want to make the toaasts smaller and more compact. 
 
 ### 5. Build mode gating (`1bb052f` + `f4311ea`)
 - `disabled`/`disabledReason` now propagates from `PackageRow` → `MasterBit` → `SubBit`
