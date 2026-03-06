@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { toastStore } from '$stores/toast.svelte';
 	import { panelsStore } from '$stores/panels.svelte';
+	import { Checkbox } from '$components/ui';
 	import { BDM_SECTIONS } from '$lib/data/bdmData';
 
 	const BDM_PANEL_ID = 'bdm-skus';
 
-	// Track which sections are expanded (all start collapsed)
 	let expanded = $state<Record<string, boolean>>({
 		license: false,
 		packages: true,
@@ -40,7 +40,7 @@
 	}
 </script>
 
-<section class="bdm-panel tile">
+<section class="bdm-panel">
 	<div class="panel-body">
 		{#each BDM_SECTIONS as section (section.id)}
 			<div class="bdm-section">
@@ -69,25 +69,21 @@
 					<ul class="item-list">
 						{#each section.items as item (item.sku + item.label)}
 							<li class="bdm-item">
-								<label class="item-check-label">
-									<input
-										type="checkbox"
-										class="item-check"
+								<span class="item-check">
+									<Checkbox
 										checked={panelsStore.hasItem(BDM_PANEL_ID, item.sku)}
 										onchange={() => panelsStore.toggleItem(BDM_PANEL_ID, item.sku)}
 									/>
-								</label>
-								<div class="item-main">
-									<button
-										type="button"
-										class="sku-chip"
-										onclick={() => copySku(item.sku)}
-										title="Click to copy {item.sku}"
-									>
-										{item.sku}
-									</button>
-									<span class="item-label">{item.label}</span>
-								</div>
+								</span>
+								<button
+									type="button"
+									class="sku-chip"
+									onclick={() => copySku(item.sku)}
+									title="Click to copy {item.sku}"
+								>
+									{item.sku}
+								</button>
+								<span class="item-label">{item.label}</span>
 								<div class="item-pricing">
 									<span class="item-price">{formatPrice(item.price, item.priceNote)}</span>
 									{#if item.maint}
@@ -108,7 +104,6 @@
 
 <style>
 	.bdm-panel {
-		flex: 0 0 auto;
 		display: flex;
 		flex-direction: column;
 	}
@@ -116,13 +111,15 @@
 	.panel-body {
 		display: flex;
 		flex-direction: column;
-		padding: var(--space-0-5) var(--space-1);
-		gap: 2px;
+		padding: var(--space-1) var(--space-2);
 	}
 
 	.bdm-section {
-		border-radius: var(--radius-xs);
-		overflow: hidden;
+		margin-bottom: var(--space-2);
+	}
+
+	.bdm-section:last-child {
+		margin-bottom: 0;
 	}
 
 	.section-header {
@@ -130,26 +127,22 @@
 		align-items: center;
 		gap: var(--space-0-5);
 		width: 100%;
-		padding: var(--space-0-5) var(--space-1);
+		padding: var(--space-0) var(--space-0-5);
+		margin-bottom: var(--space-0-5);
 		background: transparent;
 		border: none;
-		border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+		border-bottom: 1px solid rgba(212, 175, 55, 0.2);
 		cursor: pointer;
 		text-align: left;
-		transition: background 150ms ease;
-	}
-
-	.section-header:hover {
-		background: rgba(212, 175, 55, 0.06);
 	}
 
 	.section-title {
 		flex: 1;
-		font-size: var(--text-2xs);
-		font-weight: 700;
+		font-size: var(--text-xs);
+		font-weight: var(--tile-title-weight);
 		color: var(--color-solidcam-gold, #d4af37);
 		text-transform: uppercase;
-		letter-spacing: 0.06em;
+		letter-spacing: var(--tile-title-tracking);
 	}
 
 	.section-count {
@@ -174,76 +167,59 @@
 	.item-list {
 		list-style: none;
 		margin: 0;
-		padding: var(--space-0-5) 0;
+		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: 1px;
 	}
 
 	.bdm-item {
 		display: flex;
 		align-items: center;
-		gap: var(--space-0-5);
-		padding: 1px var(--space-0-5);
+		gap: var(--space-0);
+		padding: var(--space-px) var(--space-0);
 		border-radius: var(--radius-2xs);
 		transition: background 150ms ease;
 	}
 
 	.bdm-item:hover {
-		background: rgba(255, 255, 255, 0.03);
-	}
-
-	.item-check-label {
-		display: flex;
-		align-items: center;
-		flex-shrink: 0;
-		cursor: pointer;
+		background: var(--chip-bg-hover);
 	}
 
 	.item-check {
-		width: 11px;
-		height: 11px;
-		accent-color: var(--color-solidcam-gold, #d4af37);
-		cursor: pointer;
-		margin: 0;
-		flex-shrink: 0;
-	}
-
-	.item-main {
 		display: flex;
 		align-items: center;
-		gap: var(--space-0-5);
-		min-width: 0;
-		flex: 1;
+		flex-shrink: 0;
 	}
 
 	.sku-chip {
 		font-family: 'JetBrains Mono', monospace;
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		color: var(--chip-text-color);
 		background: var(--chip-bg);
 		border: 1px solid var(--chip-border-color);
+		box-shadow: var(--chip-shadow);
 		border-radius: var(--radius-2xs);
-		padding: 0 var(--space-0-5);
+		padding: var(--space-0) var(--space-0-5);
 		cursor: pointer;
 		transition: all 150ms ease;
 		white-space: nowrap;
 		flex-shrink: 0;
-		line-height: 1.5;
+		line-height: 1.2;
 	}
 
 	.sku-chip:hover {
 		color: var(--chip-text-hover);
-		border-color: var(--chip-border-color-strong);
 	}
 
 	.item-label {
 		font-size: var(--text-2xs);
-		color: rgba(255, 255, 255, 0.45);
+		color: rgba(255, 255, 255, 0.4);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		min-width: 0;
+		flex: 1;
 	}
 
 	.item-pricing {
@@ -257,14 +233,14 @@
 	.item-price {
 		font-family: 'JetBrains Mono', monospace;
 		font-size: var(--text-2xs);
-		color: rgba(255, 255, 255, 0.7);
+		color: rgba(255, 255, 255, 0.65);
 		white-space: nowrap;
 	}
 
 	.item-maint {
 		font-family: 'JetBrains Mono', monospace;
 		font-size: 0.55rem;
-		color: rgba(255, 255, 255, 0.3);
+		color: rgba(255, 255, 255, 0.28);
 		white-space: nowrap;
 	}
 
@@ -272,9 +248,18 @@
 		font-size: 0.55rem;
 		color: rgba(255, 255, 255, 0.35);
 		font-style: italic;
-		padding: var(--space-0-5) var(--space-1);
-		margin: 0;
+		padding: var(--space-0-5) var(--space-0-5);
+		margin: var(--space-0-5) 0 0;
 		line-height: 1.4;
 		border-top: 1px solid rgba(255, 255, 255, 0.06);
+	}
+
+	@media (max-width: 768px) {
+		.section-title {
+			font-size: var(--text-2xs);
+		}
+		.sku-chip {
+			font-size: var(--text-2xs);
+		}
 	}
 </style>
