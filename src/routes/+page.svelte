@@ -261,6 +261,24 @@
 		<!-- Sidebar (Panels + Calculator) -->
 		<aside class="sidebar">
 			<div class="sku-tab-row">
+				<!-- Mode pill: BDM | MS -->
+				<div class="mode-pill" role="group" aria-label="View mode">
+					<button
+						class="mode-pill-btn"
+						class:mode-pill-active-bdm={userPrefsStore.skuTabMode === 'bdm'}
+						onclick={() => userPrefsStore.setSkuTabMode('bdm')}
+						aria-pressed={userPrefsStore.skuTabMode === 'bdm'}
+						title="BDM mode — new sale prices"
+					>BDM</button>
+					<button
+						class="mode-pill-btn"
+						class:mode-pill-active-ms={userPrefsStore.skuTabMode === 'ms'}
+						onclick={() => userPrefsStore.setSkuTabMode('ms')}
+						aria-pressed={userPrefsStore.skuTabMode === 'ms'}
+						title="MS mode — maintenance prices"
+					>MS</button>
+				</div>
+
 				<div class="sku-tab-toggle" role="tablist" aria-label="SKU panel view">
 					<button
 						class="sku-tab"
@@ -281,18 +299,6 @@
 						{userPrefsStore.skuTabMode === 'ms' ? 'Maint SKUs' : 'SKUs'}
 					</button>
 				</div>
-				<button
-					class="mode-toggle"
-					class:ms-active={userPrefsStore.skuTabMode === 'ms'}
-					onclick={() =>
-						userPrefsStore.setSkuTabMode(userPrefsStore.skuTabMode === 'ms' ? 'bdm' : 'ms')}
-					title={userPrefsStore.skuTabMode === 'ms'
-						? 'Switch to BDM mode (new sale prices)'
-						: 'Switch to MS mode (maintenance prices)'}
-					aria-label={userPrefsStore.skuTabMode === 'ms' ? 'BDM mode' : 'MS mode'}
-				>
-					{userPrefsStore.skuTabMode === 'ms' ? 'BDM' : 'MS'}
-				</button>
 			</div>
 
 			{#if skuTab === 'new-sale'}
@@ -420,32 +426,51 @@
 		overflow: hidden;
 	}
 
-	.mode-toggle {
+	/* Mode pill — BDM | MS segmented control */
+	.mode-pill {
+		display: flex;
+		flex-shrink: 0;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: var(--radius-xs);
+		overflow: hidden;
+	}
+
+	.mode-pill-btn {
 		font-size: var(--text-2xs);
 		font-weight: 700;
 		padding: var(--space-0-5) var(--space-1);
-		background: rgba(255, 255, 255, 0.06);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: var(--radius-xs);
-		color: rgba(255, 255, 255, 0.5);
+		background: transparent;
+		border: none;
+		color: rgba(255, 255, 255, 0.35);
 		cursor: pointer;
 		transition: all 150ms ease;
-		white-space: nowrap;
-		flex-shrink: 0;
+		letter-spacing: 0.04em;
 	}
 
-	.mode-toggle:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: rgba(255, 255, 255, 0.8);
+	.mode-pill-btn:hover {
+		color: rgba(255, 255, 255, 0.65);
+		background: rgba(255, 255, 255, 0.06);
 	}
 
-	.mode-toggle.ms-active {
-		background: rgba(59, 130, 246, 0.15);
-		border-color: rgba(59, 130, 246, 0.3);
-		color: #3b82f6;
+	/* BDM active — gold */
+	.mode-pill-active-bdm {
+		background: rgba(212, 175, 55, 0.18);
+		color: var(--color-solidcam-gold, #d4af37);
+		box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.3);
 	}
 
-	.mode-toggle.ms-active:hover {
+	.mode-pill-active-bdm:hover {
+		background: rgba(212, 175, 55, 0.24);
+	}
+
+	/* MS active — blue */
+	.mode-pill-active-ms {
+		background: rgba(59, 130, 246, 0.18);
+		color: #60a5fa;
+		box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.3);
+	}
+
+	.mode-pill-active-ms:hover {
 		background: rgba(59, 130, 246, 0.25);
 	}
 
