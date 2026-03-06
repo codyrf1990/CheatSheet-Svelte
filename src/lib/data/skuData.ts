@@ -153,13 +153,6 @@ export const MODULE_SKUS: SkuEntry[] = [
 		maintPrice: 450
 	},
 	{
-		sku: 'SC-Probe1',
-		label: 'Solid Probe (Home Only)',
-		price: 1150,
-		maintSku: 'Probe-Maint',
-		maintPrice: 150
-	},
-	{
 		sku: 'SC-Vericut',
 		label: 'Vericut Integration',
 		price: 1150,
@@ -172,13 +165,6 @@ export const MODULE_SKUS: SkuEntry[] = [
 		price: 7268,
 		maintSku: 'iMachNX-Maint',
 		maintPrice: 948
-	},
-	{
-		sku: 'WC2-Mod',
-		label: 'Wire EDM — 2 Axis',
-		price: 2668,
-		maintSku: 'WC2-Maint',
-		maintPrice: 348
 	},
 	{
 		sku: 'SC-Wire',
@@ -252,9 +238,9 @@ export const MAINT_TO_BDM: Record<string, string> = {
 	'Probe-Maint': 'SC-Probe',
 	'Vericut-Maint': 'SC-Vericut',
 	'iMachNX-Maint': 'iMachNX-Mod',
-	'WC2-Maint': 'WC2-Mod',
 	'Wire-Maint': 'SC-Wire',
 	'SolidShop-Editor-Maint': 'SolidShop-Editor',
+	'SolidShop-Sim-Maint': 'SolidShop-Sim',
 	'SC-4Op-Maint': 'SC-4Op',
 	'SC-4Op-Sim-Maint': 'SC-4Op-Sim',
 	'Swiss-Maint': 'SC-Swiss',
@@ -267,6 +253,5 @@ export const MAINT_TO_BDM: Record<string, string> = {
 	'SW-Std-Maint': 'SW-Std',
 	'SW-Std-Net-Maint': 'SW-Std-Net',
 	'SW-Pro-Maint': 'SW-Pro',
-	'SW-Pro-Net-Maint': 'SW-Pro-Net',
-	'SW-Info-Maint': 'SW-Info'
+	'SW-Pro-Net-Maint': 'SW-Pro-Net'
 };

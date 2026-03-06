@@ -13,10 +13,8 @@ export const REQUIRES_SC_MILL_MODULES = new Set(['SC-EdgeTrim', 'SC-Multiblade',
 // Standalone additional modules — no base package required
 export const STANDALONE_MODULE_SKUS = new Set([
 	'SC-Probe',
-	'SC-Probe1',
 	'SC-Vericut',
 	'iMachNX-Mod',
-	'WC2-Mod',
 	'SC-Wire',
 	'SolidShop-Editor',
 	'SC-4Op',

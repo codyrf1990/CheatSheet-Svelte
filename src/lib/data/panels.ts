@@ -17,6 +17,7 @@ export const panels: Panel[] = [
 			'HSS-Maint',
 			'iMach2D-Maint',
 			'iMach3D-Maint',
+			'iMachNX-Maint',
 			'Lic-Net-Maint',
 			'MachSim-Maint',
 			'MTS-Maint',
@@ -25,6 +26,8 @@ export const panels: Panel[] = [
 			'NPD-Maint',
 			'Port-Maint',
 			'Probe-Maint',
+			'SC-4Op-Maint',
+			'SC-4Op-Sim-Maint',
 			'SC-Mill-3D-Maint',
 			'SC-Mill-5Axis-Maint',
 			'SC-Mill-Adv-Maint',
@@ -36,7 +39,8 @@ export const panels: Panel[] = [
 			'SolidShop-Sim-Maint',
 			'Swiss-Maint',
 			'Turn-Maint',
-			'Vericut-Maint'
+			'Vericut-Maint',
+			'Wire-Maint'
 		]
 	},
 	{

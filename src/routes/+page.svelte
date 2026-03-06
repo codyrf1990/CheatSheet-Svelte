@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import { Header, CompanyPageBar } from '$components/layout';
 	import { PackageTable } from '$components/packages';
-	import { MaintenancePanel, NewSalePanel } from '$components/panels';
+	import { BDMPanel, MaintenancePanel, NewSalePanel } from '$components/panels';
 	import { Calculator } from '$components/calculator';
 	import {
 		SalesTaxModal,
@@ -310,6 +310,8 @@
 
 			{#if skuTab === 'new-sale'}
 				<NewSalePanel />
+			{:else if effectiveSkuTabMode === 'bdm'}
+				<BDMPanel />
 			{:else if panels.find((p) => p.id === 'maintenance-skus') && panels.find((p) => p.id === 'solidworks-maintenance')}
 				<MaintenancePanel
 					maintenancePanel={panels.find((p) => p.id === 'maintenance-skus')!}
