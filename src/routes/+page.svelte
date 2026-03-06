@@ -256,6 +256,9 @@
 			<!-- SKU panel under table -->
 			<div class="sku-under-wrapper tile">
 				<div class="sku-collapse-bar tile-header">
+					<span class="sku-panel-label" class:sku-panel-label-ms={effectiveSkuTabMode === 'ms'}>
+						{effectiveSkuTabMode === 'bdm' ? 'BDM SKUs' : 'Maint SKUs'}
+					</span>
 					<div class="mode-pill" role="group" aria-label="View mode">
 						<button
 							class="mode-pill-btn"
@@ -274,9 +277,6 @@
 							title={buildMode ? 'MS unavailable in Build Mode' : 'MS mode — maintenance prices'}
 						>MS</button>
 					</div>
-					<span class="sku-panel-label">
-						{effectiveSkuTabMode === 'bdm' ? 'BDM SKUs' : 'Maint SKUs'}
-					</span>
 					<button
 						type="button"
 						class="sku-collapse-btn"
@@ -466,11 +466,15 @@
 
 	.sku-panel-label {
 		flex: 1;
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		font-weight: 700;
-		color: rgba(255, 255, 255, 0.4);
+		color: var(--color-solidcam-gold, #d4af37);
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
+	}
+
+	.sku-panel-label-ms {
+		color: #60a5fa;
 	}
 
 	.sku-collapse-btn {

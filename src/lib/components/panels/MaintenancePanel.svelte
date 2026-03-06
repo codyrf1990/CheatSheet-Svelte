@@ -129,9 +129,6 @@
 	<div class="panel-body">
 		<!-- Maintenance SKUs Section -->
 		<div class="section">
-			<div class="section-header">
-				<span class="section-title">Maintenance SKUs</span>
-			</div>
 			<ul class="panel-items">
 				{#each maintenanceItems as item, index (item)}
 					<PanelItem
