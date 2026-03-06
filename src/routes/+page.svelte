@@ -254,8 +254,8 @@
 			/>
 
 			<!-- SKU panel under table -->
-			<div class="sku-under-wrapper">
-				<div class="sku-collapse-bar">
+			<div class="sku-under-wrapper tile">
+				<div class="sku-collapse-bar tile-header">
 					<div class="mode-pill" role="group" aria-label="View mode">
 						<button
 							class="mode-pill-btn"
@@ -313,26 +313,32 @@
 
 		<!-- Sidebar (Quoting + Calculator) -->
 		<aside class="sidebar">
-			<!-- Mode pill -->
-			<div class="mode-pill" role="group" aria-label="View mode">
-				<button
-					class="mode-pill-btn"
-					class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
-					onclick={() => userPrefsStore.setSkuTabMode('bdm')}
-					aria-pressed={effectiveSkuTabMode === 'bdm'}
-					title="BDM mode — new sale prices"
-				>BDM</button>
-				<button
-					class="mode-pill-btn"
-					class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
-					onclick={() => userPrefsStore.setSkuTabMode('ms')}
-					disabled={buildMode}
-					aria-disabled={buildMode}
-					aria-pressed={effectiveSkuTabMode === 'ms'}
-					title={buildMode ? 'MS unavailable in Build Mode' : 'MS mode — maintenance prices'}
-				>MS</button>
+			<div class="quote-tile tile">
+				<div class="quote-header tile-header">
+					<div class="mode-pill" role="group" aria-label="View mode">
+						<button
+							class="mode-pill-btn"
+							class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
+							onclick={() => userPrefsStore.setSkuTabMode('bdm')}
+							aria-pressed={effectiveSkuTabMode === 'bdm'}
+							title="BDM mode — new sale prices"
+						>BDM</button>
+						<button
+							class="mode-pill-btn"
+							class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
+							onclick={() => userPrefsStore.setSkuTabMode('ms')}
+							disabled={buildMode}
+							aria-disabled={buildMode}
+							aria-pressed={effectiveSkuTabMode === 'ms'}
+							title={buildMode ? 'MS unavailable in Build Mode' : 'MS mode — maintenance prices'}
+						>MS</button>
+					</div>
+					<span class="quote-mode-label">
+						{effectiveSkuTabMode === 'bdm' ? 'New Sale' : 'Maint Price'}
+					</span>
+				</div>
+				<NewSalePanel skuMode={effectiveSkuTabMode} />
 			</div>
-			<NewSalePanel skuMode={effectiveSkuTabMode} />
 			<Calculator />
 		</aside>
 	</div>
@@ -439,7 +445,16 @@
 	.sku-under-wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 0;
+		overflow: hidden;
+	}
+
+	/* Inner panels share the outer tile — strip their own tile styling */
+	.sku-under-wrapper :global(.bdm-panel),
+	.sku-under-wrapper :global(.maintenance-panel) {
+		background: transparent;
+		border: none;
+		box-shadow: none;
+		border-radius: 0;
 	}
 
 	.sku-collapse-bar {
@@ -447,9 +462,6 @@
 		align-items: center;
 		gap: var(--space-0-5);
 		padding: var(--space-0-5) var(--space-1);
-		background: rgba(255, 255, 255, 0.03);
-		border: 1px solid rgba(255, 255, 255, 0.07);
-		border-radius: var(--radius-xs) var(--radius-xs) 0 0;
 	}
 
 	.sku-panel-label {
@@ -488,6 +500,36 @@
 
 	.collapse-chevron.open {
 		transform: rotate(180deg);
+	}
+
+	/* Sidebar quote tile */
+	.quote-tile {
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	/* NewSalePanel shares the outer tile */
+	.quote-tile :global(.new-sale-panel) {
+		background: transparent;
+		border: none;
+		box-shadow: none;
+		border-radius: 0;
+	}
+
+	.quote-header {
+		display: flex;
+		align-items: center;
+		gap: var(--space-0-5);
+		padding: var(--space-0-5) var(--space-1);
+	}
+
+	.quote-mode-label {
+		font-size: var(--text-2xs);
+		font-weight: 700;
+		color: rgba(255, 255, 255, 0.4);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
 	}
 
 	/* Mode pill — BDM | MS segmented control */
