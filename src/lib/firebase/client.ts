@@ -5,13 +5,7 @@
 
 import { browser } from '$app/environment';
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
-import {
-	initializeFirestore,
-	getFirestore,
-	persistentLocalCache,
-	persistentMultipleTabManager,
-	type Firestore
-} from 'firebase/firestore';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 
 // Singleton instances
 let app: FirebaseApp | null = null;
@@ -61,18 +55,7 @@ export function getDb(): Firestore | null {
 	if (!db) {
 		const firebaseApp = getApp();
 		if (!firebaseApp) return null;
-
-		try {
-			db = initializeFirestore(firebaseApp, {
-				localCache: persistentLocalCache({
-					tabManager: persistentMultipleTabManager()
-				})
-			});
-		} catch {
-			// Firestore may already be initialized with different settings
-			// This can happen in dev with HMR - fall back to getting existing instance
-			db = getFirestore(firebaseApp);
-		}
+		db = getFirestore(firebaseApp);
 	}
 
 	return db;

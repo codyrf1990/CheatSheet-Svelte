@@ -291,10 +291,15 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 
 		return true;
 	} catch (err) {
+		// Cloud unavailable — establish local-only session so the app always enters
+		console.warn('[SyncStore] Cloud read failed, entering local-only mode:', err);
+		error = err instanceof Error ? err.message : 'Cloud sync unavailable';
 		status = 'error';
-		error = err instanceof Error ? err.message : 'Connection failed';
-		console.error('[SyncStore] Connect failed:', err);
-		return false;
+		// Set username so user enters the app; do NOT start auto-sync writes
+		username = trimmedName;
+		lastConnectedUsername = normalizedName;
+		saveToLocalStorage();
+		return true;
 	}
 }
 

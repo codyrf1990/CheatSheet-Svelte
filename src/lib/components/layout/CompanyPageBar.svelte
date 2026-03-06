@@ -228,9 +228,8 @@
 	}
 
 	function handleNewPage() {
-		const page = companiesStore.createPage();
+		const page = companiesStore.createPage(undefined, true);
 		if (page) {
-			companiesStore.switchToPage(page.id);
 			toastStore.success('Page created');
 		}
 	}

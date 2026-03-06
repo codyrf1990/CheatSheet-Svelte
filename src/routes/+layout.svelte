@@ -21,7 +21,12 @@
 		(async () => {
 			userPrefsStore.init();
 			companiesStore.load();
-			await syncStore.load();
+			// Race against a 10s timeout — if Firebase IndexedDB lock is stale
+			// (e.g. after a browser crash) we still show the login screen promptly.
+			await Promise.race([
+				syncStore.load(),
+				new Promise<void>((resolve) => setTimeout(resolve, 3_000))
+			]);
 			initialized = true;
 		})();
 

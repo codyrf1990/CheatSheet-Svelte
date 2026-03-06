@@ -303,7 +303,7 @@ export const packagesStore = {
 		return packageStates;
 	},
 	get buildMode(): boolean {
-		return (companiesStore.currentPageState?.mode ?? 'import') === 'build';
+		return companiesStore.currentPageMode === 'build';
 	},
 
 	// State access

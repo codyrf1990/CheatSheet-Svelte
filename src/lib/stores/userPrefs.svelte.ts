@@ -234,6 +234,7 @@ function setRepName(name: string): void {
 // ============ SKU Tab Mode ============
 
 function setSkuTabMode(mode: 'bdm' | 'ms'): void {
+	if (prefs.skuTabMode === mode) return;
 	prefs.skuTabMode = mode;
 	commitLocalOnly();
 }

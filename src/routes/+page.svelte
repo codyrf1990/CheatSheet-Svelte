@@ -57,12 +57,10 @@
 		return start || end;
 	});
 
-	// When build mode is active, force BDM (new sale) tab mode
-	$effect(() => {
-		if (packagesStore.buildMode) {
-			userPrefsStore.setSkuTabMode('bdm');
-		}
-	});
+	// Build mode derived — lightweight, no deep copy
+	let buildMode = $derived(packagesStore.buildMode);
+	// In build mode, BDM is always the effective pricing mode; stored pref is not mutated
+	let effectiveSkuTabMode = $derived(buildMode ? 'bdm' : userPrefsStore.skuTabMode);
 
 	// Package edit mode state (lifted from PackageTable)
 	let packageEditMode = $state(false);
@@ -111,11 +109,17 @@
 		{ label: 'Machine Catalogue', href: 'https://codyrf1990.github.io/machine-catalog-standalone/' }
 	];
 
-	// Sync page state to packagesStore when company/page changes
+	// React to page identity only — avoids deep subscription to every nested property
+	let currentPageId = $derived(companiesStore.currentPage?.id);
+
 	$effect(() => {
-		const pageState = companiesStore.currentPageState;
-		packagesStore.loadFromPageState(pageState);
-		panelsStore.loadFromPageState(pageState);
+		const pageId = currentPageId; // reactive: re-runs when page changes
+		if (!pageId) return;
+		untrack(() => {
+			const snapshot = companiesStore.getPageStateSnapshot();
+			packagesStore.loadFromPageState(snapshot);
+			panelsStore.loadFromPageState(snapshot);
+		});
 	});
 
 	// Save changes back - debounced to batch rapid changes
@@ -143,12 +147,13 @@
 					return;
 				}
 
-				const previousState = companiesStore.currentPageState;
+				const currentMode = companiesStore.currentPageMode;
 				const newState: PageState = {
-					mode: previousState.mode,
+					mode: currentMode,
 					packages: packagesStore.getPageState(),
 					panels: panelsStore.getPageState()
 				};
+				const previousState = companiesStore.getPageStateSnapshot();
 				if (JSON.stringify(previousState) !== JSON.stringify(newState)) {
 					companiesStore.savePageState(capturedPageId, newState);
 				}
@@ -265,17 +270,19 @@
 				<div class="mode-pill" role="group" aria-label="View mode">
 					<button
 						class="mode-pill-btn"
-						class:mode-pill-active-bdm={userPrefsStore.skuTabMode === 'bdm'}
+						class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
 						onclick={() => userPrefsStore.setSkuTabMode('bdm')}
-						aria-pressed={userPrefsStore.skuTabMode === 'bdm'}
+						aria-pressed={effectiveSkuTabMode === 'bdm'}
 						title="BDM mode — new sale prices"
 					>BDM</button>
 					<button
 						class="mode-pill-btn"
-						class:mode-pill-active-ms={userPrefsStore.skuTabMode === 'ms'}
+						class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
 						onclick={() => userPrefsStore.setSkuTabMode('ms')}
-						aria-pressed={userPrefsStore.skuTabMode === 'ms'}
-						title="MS mode — maintenance prices"
+						disabled={buildMode}
+						aria-disabled={buildMode}
+						aria-pressed={effectiveSkuTabMode === 'ms'}
+						title={buildMode ? 'MS unavailable in Build Mode' : 'MS mode — maintenance prices'}
 					>MS</button>
 				</div>
 
@@ -287,7 +294,7 @@
 						aria-selected={skuTab === 'new-sale'}
 						onclick={() => (skuTab = 'new-sale')}
 					>
-						{userPrefsStore.skuTabMode === 'ms' ? 'Maint Price' : 'New Sale'}
+						{effectiveSkuTabMode === 'ms' ? 'Maint Price' : 'New Sale'}
 					</button>
 					<button
 						class="sku-tab"
@@ -296,7 +303,7 @@
 						aria-selected={skuTab === 'maintenance'}
 						onclick={() => (skuTab = 'maintenance')}
 					>
-						{userPrefsStore.skuTabMode === 'ms' ? 'Maint SKUs' : 'SKUs'}
+						{effectiveSkuTabMode === 'ms' ? 'Maint SKUs' : 'SKUs'}
 					</button>
 				</div>
 			</div>
@@ -459,6 +466,7 @@
 		box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.3);
 	}
 
+	/* svelte-ignore css_unused_selector */
 	.mode-pill-active-bdm:hover {
 		background: rgba(212, 175, 55, 0.24);
 	}
@@ -470,6 +478,7 @@
 		box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.3);
 	}
 
+	/* svelte-ignore css_unused_selector */
 	.mode-pill-active-ms:hover {
 		background: rgba(59, 130, 246, 0.25);
 	}

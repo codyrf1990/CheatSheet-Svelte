@@ -44,7 +44,8 @@ test.describe('Build Mode', () => {
 		await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
 		// Unique username means no Firestore data → guaranteed fresh state
 		await login(page);
-		// Fresh users start in BUILD mode by default
+		// Fresh pages now default to import mode — explicitly switch to build mode for these tests
+		await page.getByRole('button', { name: 'IMPORT' }).click();
 		await expect(page.getByRole('button', { name: 'BUILD' })).toBeVisible();
 	});
 

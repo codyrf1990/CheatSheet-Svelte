@@ -1,4 +1,12 @@
 rules_version = '2';
+// ─── V1 COMPATIBILITY NOTES ─────────────────────────────────────────────────
+// firebase.json only deploys Firestore rules — no "hosting" key — so an
+// accidental `firebase deploy` only pushes these rules, never a web build.
+//
+// The write rule below requires keys: username, normalizedUsername, schemaVersion.
+// V1 client (src/lib/firebase/client.ts) writes all three via queueSave(), so
+// any accidental deploy of these rules is safe for both V1 and V2 clients.
+// ────────────────────────────────────────────────────────────────────────────
 service cloud.firestore {
   match /databases/{database}/documents {
     // Internal sales tool — username-keyed docs, no Firebase Auth.

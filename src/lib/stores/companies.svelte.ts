@@ -40,7 +40,7 @@ function generateId(prefix: string = 'page'): string {
  * Create empty page state
  */
 function createEmptyPageState(): PageState {
-	return { mode: 'build', panels: {}, packages: {} };
+	return { mode: 'import', panels: {}, packages: {} };
 }
 
 /**
@@ -224,12 +224,14 @@ function ensureIntegrity(): void {
 			company.currentPageId = company.pages[0].id;
 		}
 
-		// Validate pages
+		// Validate pages — backfill missing mode to 'import' (explicit 'build' preserved)
 		company.pages = company.pages.map((page) => ({
 			id: page.id || generateId('page'),
 			name: page.name || DEFAULT_PAGE_NAME,
 			licenseKey: page.licenseKey,
-			state: page.state || createEmptyPageState()
+			state: page.state
+				? { ...page.state, mode: page.state.mode ?? 'import' }
+				: createEmptyPageState()
 		}));
 
 		return company;
@@ -434,7 +436,7 @@ function setLicenseData(companyId: string, licenseData: LicenseInfo): boolean {
 
 // ============ Page Operations ============
 
-function createPage(name?: string): Page | null {
+function createPage(name?: string, switchImmediately = false): Page | null {
 	const company = getCurrentCompany();
 	if (!company) return null;
 
@@ -446,8 +448,11 @@ function createPage(name?: string): Page | null {
 	};
 
 	company.pages = [...company.pages, page];
+	if (switchImmediately) {
+		company.currentPageId = page.id;
+	}
 	company.updatedAt = Date.now();
-	companies = [...companies]; // Trigger reactivity
+	companies = [...companies]; // Single reactive update
 	save();
 	return page;
 }
@@ -751,6 +756,12 @@ function importData(data: unknown): boolean {
 				// Migrate old package format to new format
 				page.state.packages = migratePackageState(page.state.packages);
 			}
+			// Backfill missing mode to 'import'
+			if (!page.state) {
+				page.state = createEmptyPageState();
+			} else if (!page.state.mode) {
+				page.state.mode = 'import';
+			}
 		}
 	}
 
@@ -782,6 +793,15 @@ export const companiesStore = {
 		return getCurrentPage();
 	},
 	get currentPageState(): PageState {
+		const page = getCurrentPage();
+		return page?.state ? deepCopy(page.state) : createEmptyPageState();
+	},
+	// Lightweight getter — reads only the mode string, no deep copy. Safe inside $derived.
+	get currentPageMode(): 'build' | 'import' {
+		return getCurrentPage()?.state?.mode ?? 'import';
+	},
+	// Explicit snapshot for persistence/non-reactive use only. Not for use inside $derived/$effect.
+	getPageStateSnapshot(): PageState {
 		const page = getCurrentPage();
 		return page?.state ? deepCopy(page.state) : createEmptyPageState();
 	},
