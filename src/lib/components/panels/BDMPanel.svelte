@@ -39,6 +39,15 @@
 		}
 	}
 
+	let anyExpanded = $derived(Object.values(expanded).some(Boolean));
+
+	function collapseAll() {
+		for (const key of Object.keys(expanded)) expanded[key] = false;
+		if (browser) {
+			try { localStorage.setItem(STORAGE_KEY, JSON.stringify(expanded)); } catch {}
+		}
+	}
+
 	async function copySku(sku: string) {
 		try {
 			await navigator.clipboard.writeText(sku);
@@ -58,6 +67,13 @@
 
 <section class="bdm-panel">
 	<div class="panel-body">
+		{#if anyExpanded}
+			<div class="panel-actions">
+				<button type="button" class="collapse-all-btn" onclick={collapseAll}>
+					Collapse All
+				</button>
+			</div>
+		{/if}
 		{#each BDM_SECTIONS as section (section.id)}
 			<div class="bdm-section">
 				<button
@@ -128,6 +144,28 @@
 		display: flex;
 		flex-direction: column;
 		padding: var(--space-1) var(--space-2);
+	}
+
+	.panel-actions {
+		display: flex;
+		justify-content: flex-end;
+		padding: 0 var(--space-0-5) var(--space-0-5);
+	}
+
+	.collapse-all-btn {
+		font-size: var(--text-2xs);
+		color: rgba(255, 255, 255, 0.35);
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		padding: 0;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		transition: color 150ms ease;
+	}
+
+	.collapse-all-btn:hover {
+		color: rgba(255, 255, 255, 0.7);
 	}
 
 	.bdm-section {
