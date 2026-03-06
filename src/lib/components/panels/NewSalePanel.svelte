@@ -2,10 +2,22 @@
 	import { packagesStore } from '$stores/packages.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { SKU_LOOKUP, MODULE_SKUS, type SkuEntry } from '$lib/data/skuData';
+	import { BDM_SECTIONS, type BDMItem } from '$lib/data/bdmData';
 	import { PACKAGE_TOGGLE_BITS } from '$lib/data/prerequisites';
 	import { panelsStore } from '$stores/panels.svelte';
 	import { packages as packageDefs } from '$data';
-	import { userPrefsStore } from '$stores/userPrefs.svelte';
+	interface Props {
+		skuMode?: 'bdm' | 'ms';
+	}
+	let { skuMode = 'bdm' }: Props = $props();
+
+	// Flat BDM SKU lookup keyed by sku code
+	const bdmSkuLookup: Record<string, BDMItem> = {};
+	for (const section of BDM_SECTIONS) {
+		for (const item of section.items) {
+			bdmSkuLookup[item.sku] = item;
+		}
+	}
 
 	interface SaleLine {
 		entry: SkuEntry;
@@ -70,11 +82,31 @@
 			}
 		}
 
-		// Check panel items for additional module SKUs
-		const maintItems = panelsStore.getItems('maintenance-skus');
-		for (const moduleSku of MODULE_SKUS) {
-			if (maintItems.includes(moduleSku.maintSku)) {
-				lines.push({ entry: moduleSku });
+		// Mode-specific standalone additions
+		if (skuMode === 'ms') {
+			// MS mode: maint panel checkboxes → maintenance module lines
+			const maintItems = panelsStore.getItems('maintenance-skus');
+			for (const moduleSku of MODULE_SKUS) {
+				if (maintItems.includes(moduleSku.maintSku)) {
+					lines.push({ entry: moduleSku });
+				}
+			}
+		} else {
+			// BDM mode: BDM panel checkboxes → BDM sale lines
+			const bdmSelected = panelsStore.getItems('bdm-skus');
+			for (const sku of bdmSelected) {
+				const bdmItem = bdmSkuLookup[sku];
+				if (bdmItem && bdmItem.price !== null) {
+					lines.push({
+						entry: {
+							sku: bdmItem.sku,
+							label: bdmItem.label,
+							price: bdmItem.price,
+							maintSku: bdmItem.sku,
+							maintPrice: bdmItem.maint ?? 0
+						}
+					});
+				}
 			}
 		}
 
@@ -108,7 +140,7 @@
 
 <section class="new-sale-panel tile">
 	<div class="panel-body">
-		{#if userPrefsStore.skuTabMode === 'ms'}
+		{#if skuMode === 'ms'}
 			<!-- MS mode: same items as BDM but show maintSku + maintPrice -->
 			{#if saleLines.length === 0}
 				<div class="empty-state">Select bits from the table to see pricing.</div>

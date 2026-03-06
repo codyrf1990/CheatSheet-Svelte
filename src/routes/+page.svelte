@@ -75,17 +75,8 @@
 		packageEditMode = false;
 	}
 
-	// Sidebar SKU tab state (persisted)
-	type SkuTab = 'new-sale' | 'maintenance';
-	let skuTab = $state<SkuTab>(
-		browser
-			? ((localStorage.getItem('solidcam-sku-tab') as SkuTab) ?? 'maintenance')
-			: 'maintenance'
-	);
-
-	$effect(() => {
-		if (browser) localStorage.setItem('solidcam-sku-tab', skuTab);
-	});
+	// Collapsible SKU panel state (under table)
+	let skuPanelOpen = $state(true);
 
 	// Operations dropdown state
 	let showOperations = $state(false);
@@ -253,7 +244,7 @@
 
 	<!-- Main Content Area -->
 	<div class="content-area">
-		<!-- Package Table (Main Content) -->
+		<!-- Package Table + SKU Panel (main column) -->
 		<section class="main-content">
 			<PackageTable
 				{packages}
@@ -261,65 +252,87 @@
 				{maintenanceRange}
 				onwhatleft={() => (showWhatLeftModal = true)}
 			/>
+
+			<!-- SKU panel under table -->
+			<div class="sku-under-wrapper">
+				<div class="sku-collapse-bar">
+					<div class="mode-pill" role="group" aria-label="View mode">
+						<button
+							class="mode-pill-btn"
+							class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
+							onclick={() => userPrefsStore.setSkuTabMode('bdm')}
+							aria-pressed={effectiveSkuTabMode === 'bdm'}
+							title="BDM mode — new sale prices"
+						>BDM</button>
+						<button
+							class="mode-pill-btn"
+							class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
+							onclick={() => userPrefsStore.setSkuTabMode('ms')}
+							disabled={buildMode}
+							aria-disabled={buildMode}
+							aria-pressed={effectiveSkuTabMode === 'ms'}
+							title={buildMode ? 'MS unavailable in Build Mode' : 'MS mode — maintenance prices'}
+						>MS</button>
+					</div>
+					<span class="sku-panel-label">
+						{effectiveSkuTabMode === 'bdm' ? 'BDM SKUs' : 'Maint SKUs'}
+					</span>
+					<button
+						type="button"
+						class="sku-collapse-btn"
+						onclick={() => (skuPanelOpen = !skuPanelOpen)}
+						aria-label={skuPanelOpen ? 'Collapse SKU panel' : 'Expand SKU panel'}
+					>
+						<svg
+							class="collapse-chevron"
+							class:open={skuPanelOpen}
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							aria-hidden="true"
+						>
+							<path d="M19 9l-7 7-7-7" />
+						</svg>
+					</button>
+				</div>
+				{#if skuPanelOpen}
+					{#if effectiveSkuTabMode === 'bdm'}
+						<BDMPanel />
+					{:else if panels.find((p) => p.id === 'maintenance-skus') && panels.find((p) => p.id === 'solidworks-maintenance')}
+						<MaintenancePanel
+							maintenancePanel={panels.find((p) => p.id === 'maintenance-skus')!}
+							solidworksPanel={panels.find((p) => p.id === 'solidworks-maintenance')!}
+							editMode={packageEditMode}
+							skuMode={effectiveSkuTabMode}
+						/>
+					{/if}
+				{/if}
+			</div>
 		</section>
 
-		<!-- Sidebar (Panels + Calculator) -->
+		<!-- Sidebar (Quoting + Calculator) -->
 		<aside class="sidebar">
-			<div class="sku-tab-row">
-				<!-- Mode pill: BDM | MS -->
-				<div class="mode-pill" role="group" aria-label="View mode">
-					<button
-						class="mode-pill-btn"
-						class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
-						onclick={() => userPrefsStore.setSkuTabMode('bdm')}
-						aria-pressed={effectiveSkuTabMode === 'bdm'}
-						title="BDM mode — new sale prices"
-					>BDM</button>
-					<button
-						class="mode-pill-btn"
-						class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
-						onclick={() => userPrefsStore.setSkuTabMode('ms')}
-						disabled={buildMode}
-						aria-disabled={buildMode}
-						aria-pressed={effectiveSkuTabMode === 'ms'}
-						title={buildMode ? 'MS unavailable in Build Mode' : 'MS mode — maintenance prices'}
-					>MS</button>
-				</div>
-
-				<div class="sku-tab-toggle" role="tablist" aria-label="SKU panel view">
-					<button
-						class="sku-tab"
-						class:active={skuTab === 'new-sale'}
-						role="tab"
-						aria-selected={skuTab === 'new-sale'}
-						onclick={() => (skuTab = 'new-sale')}
-					>
-						{effectiveSkuTabMode === 'ms' ? 'Maint Price' : 'New Sale'}
-					</button>
-					<button
-						class="sku-tab"
-						class:active={skuTab === 'maintenance'}
-						role="tab"
-						aria-selected={skuTab === 'maintenance'}
-						onclick={() => (skuTab = 'maintenance')}
-					>
-						{effectiveSkuTabMode === 'ms' ? 'Maint SKUs' : 'SKUs'}
-					</button>
-				</div>
+			<!-- Mode pill -->
+			<div class="mode-pill" role="group" aria-label="View mode">
+				<button
+					class="mode-pill-btn"
+					class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
+					onclick={() => userPrefsStore.setSkuTabMode('bdm')}
+					aria-pressed={effectiveSkuTabMode === 'bdm'}
+					title="BDM mode — new sale prices"
+				>BDM</button>
+				<button
+					class="mode-pill-btn"
+					class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
+					onclick={() => userPrefsStore.setSkuTabMode('ms')}
+					disabled={buildMode}
+					aria-disabled={buildMode}
+					aria-pressed={effectiveSkuTabMode === 'ms'}
+					title={buildMode ? 'MS unavailable in Build Mode' : 'MS mode — maintenance prices'}
+				>MS</button>
 			</div>
-
-			{#if skuTab === 'new-sale'}
-				<NewSalePanel />
-			{:else if effectiveSkuTabMode === 'bdm'}
-				<BDMPanel />
-			{:else if panels.find((p) => p.id === 'maintenance-skus') && panels.find((p) => p.id === 'solidworks-maintenance')}
-				<MaintenancePanel
-					maintenancePanel={panels.find((p) => p.id === 'maintenance-skus')!}
-					solidworksPanel={panels.find((p) => p.id === 'solidworks-maintenance')!}
-					editMode={packageEditMode}
-					skuMode={effectiveSkuTabMode}
-				/>
-			{/if}
+			<NewSalePanel skuMode={effectiveSkuTabMode} />
 			<Calculator />
 		</aside>
 	</div>
@@ -409,6 +422,9 @@
 
 	.main-content {
 		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
 	}
 
 	.sidebar {
@@ -419,21 +435,59 @@
 		min-height: 0;
 	}
 
-	/* SKU tab row (toggle + mode button) */
-	.sku-tab-row {
+	/* Under-table SKU panel */
+	.sku-under-wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.sku-collapse-bar {
 		display: flex;
 		align-items: center;
 		gap: var(--space-0-5);
-		flex-shrink: 0;
+		padding: var(--space-0-5) var(--space-1);
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid rgba(255, 255, 255, 0.07);
+		border-radius: var(--radius-xs) var(--radius-xs) 0 0;
 	}
 
-	/* SKU tab toggle */
-	.sku-tab-toggle {
-		display: flex;
+	.sku-panel-label {
 		flex: 1;
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: var(--radius-xs);
-		overflow: hidden;
+		font-size: var(--text-2xs);
+		font-weight: 700;
+		color: rgba(255, 255, 255, 0.4);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+
+	.sku-collapse-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 20px;
+		height: 20px;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		color: rgba(255, 255, 255, 0.3);
+		flex-shrink: 0;
+		transition: color 150ms ease;
+	}
+
+	.sku-collapse-btn:hover {
+		color: rgba(255, 255, 255, 0.6);
+	}
+
+	.collapse-chevron {
+		width: 12px;
+		height: 12px;
+		transform: rotate(0deg);
+		transition: transform 200ms ease;
+	}
+
+	.collapse-chevron.open {
+		transform: rotate(180deg);
 	}
 
 	/* Mode pill — BDM | MS segmented control */
@@ -484,31 +538,6 @@
 	/* svelte-ignore css_unused_selector */
 	.mode-pill-active-ms:hover {
 		background: rgba(59, 130, 246, 0.25);
-	}
-
-	.sku-tab {
-		flex: 1;
-		padding: var(--space-0-5) var(--space-1);
-		font-size: var(--text-2xs);
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		background: transparent;
-		border: none;
-		color: rgba(255, 255, 255, 0.45);
-		cursor: pointer;
-		transition: all 150ms ease;
-	}
-
-	.sku-tab:hover {
-		color: rgba(255, 255, 255, 0.7);
-		background: rgba(255, 255, 255, 0.05);
-	}
-
-	.sku-tab.active {
-		color: var(--color-solidcam-gold, #d4af37);
-		background: rgba(212, 175, 55, 0.12);
-		box-shadow: inset 0 -2px 0 var(--color-solidcam-gold, #d4af37);
 	}
 
 	/* Dropdown menus - positioned absolutely on page */

@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { toastStore } from '$stores/toast.svelte';
+	import { panelsStore } from '$stores/panels.svelte';
 	import { BDM_SECTIONS } from '$lib/data/bdmData';
+
+	const BDM_PANEL_ID = 'bdm-skus';
 
 	// Track which sections are expanded (all start collapsed)
 	let expanded = $state<Record<string, boolean>>({
@@ -66,6 +69,14 @@
 					<ul class="item-list">
 						{#each section.items as item (item.sku + item.label)}
 							<li class="bdm-item">
+								<label class="item-check-label">
+									<input
+										type="checkbox"
+										class="item-check"
+										checked={panelsStore.hasItem(BDM_PANEL_ID, item.sku)}
+										onchange={() => panelsStore.toggleItem(BDM_PANEL_ID, item.sku)}
+									/>
+								</label>
 								<div class="item-main">
 									<button
 										type="button"
@@ -172,7 +183,6 @@
 	.bdm-item {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
 		gap: var(--space-0-5);
 		padding: 1px var(--space-0-5);
 		border-radius: var(--radius-2xs);
@@ -181,6 +191,22 @@
 
 	.bdm-item:hover {
 		background: rgba(255, 255, 255, 0.03);
+	}
+
+	.item-check-label {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+		cursor: pointer;
+	}
+
+	.item-check {
+		width: 11px;
+		height: 11px;
+		accent-color: var(--color-solidcam-gold, #d4af37);
+		cursor: pointer;
+		margin: 0;
+		flex-shrink: 0;
 	}
 
 	.item-main {
