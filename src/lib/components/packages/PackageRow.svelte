@@ -268,9 +268,22 @@
 		</div>
 	</td>
 	<td class="maint-cell">
-		<button type="button" class="code-btn maint-code" onclick={handleMaintCopy}>
-			{pkg.maintenance}
-		</button>
+		<div class="maint-cell-inner">
+			{#if packageToggleDef}
+				<span class="pkg-toggle pkg-toggle-narrow">
+					<Checkbox
+						checked={packageToggleState.checked}
+						indeterminate={packageToggleState.indeterminate}
+						onchange={handlePackageToggle}
+						disabled={isPackageDisabled}
+						aria-label="Toggle all {pkg.code} bits"
+					/>
+				</span>
+			{/if}
+			<button type="button" class="code-btn maint-code" onclick={handleMaintCopy}>
+				{pkg.maintenance}
+			</button>
+		</div>
 	</td>
 	<td class="bits-cell">
 		<div class="bits-container" data-package-bits={pkg.code}>
@@ -441,6 +454,17 @@
 		overflow: hidden;
 	}
 
+	.maint-cell-inner {
+		display: flex;
+		align-items: center;
+		gap: var(--space-0-5);
+	}
+
+	/* Narrow-viewport checkbox: hidden until pkg column disappears */
+	.pkg-toggle-narrow {
+		display: none;
+	}
+
 	.maint-code {
 		font-family: 'JetBrains Mono', monospace;
 		font-size: var(--text-sm);
@@ -519,15 +543,14 @@
 	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.pkg-cell {
-			padding: 0.25rem 0.2rem;
-		}
-
-		.package-code {
-			font-size: var(--text-sm);
-		}
-
-		.package-description {
 			display: none;
+		}
+
+		/* Checkbox migrates to maint column when pkg column hides */
+		.pkg-toggle-narrow {
+			display: flex;
+			align-items: center;
+			flex-shrink: 0;
 		}
 
 		.maint-cell {

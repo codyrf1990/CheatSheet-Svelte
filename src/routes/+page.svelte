@@ -315,6 +315,7 @@
 					maintenancePanel={panels.find((p) => p.id === 'maintenance-skus')!}
 					solidworksPanel={panels.find((p) => p.id === 'solidworks-maintenance')!}
 					editMode={packageEditMode}
+					skuMode={effectiveSkuTabMode}
 				/>
 			{/if}
 			<Calculator />
@@ -383,7 +384,7 @@
 <SalesTaxModal open={showSalesTaxModal} onclose={() => (showSalesTaxModal = false)} />
 <CurrentProductsModal open={showProductsModal} onclose={() => (showProductsModal = false)} />
 <CompaniesModal open={showCompaniesModal} onclose={() => (showCompaniesModal = false)} />
-<WhatLeftModal open={showWhatLeftModal} onclose={() => (showWhatLeftModal = false)} />
+<WhatLeftModal open={showWhatLeftModal} onclose={() => (showWhatLeftModal = false)} skuMode={effectiveSkuTabMode} />
 
 <style>
 	.page-layout {

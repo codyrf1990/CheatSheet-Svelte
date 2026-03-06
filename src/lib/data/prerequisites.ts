@@ -20,7 +20,9 @@ export const STANDALONE_MODULE_SKUS = new Set([
 	'SC-Wire',
 	'SolidShop-Editor',
 	'SC-4Op',
-	'SC-4Op-Sim'
+	'SC-4Op-Sim',
+	'SC-Swiss',
+	'SC-MTS'
 ]);
 
 // 25M group is all-or-nothing in build mode

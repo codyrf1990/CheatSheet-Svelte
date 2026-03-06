@@ -3,15 +3,22 @@
 	import { panelsStore } from '$stores/panels.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { applyOrder } from '$lib/utils/order';
+	import { MAINT_TO_BDM } from '$lib/data/skuData';
 	import PanelItem from './PanelItem.svelte';
 
 	interface Props {
 		maintenancePanel: PanelType;
 		solidworksPanel: PanelType;
 		editMode?: boolean;
+		skuMode?: 'bdm' | 'ms';
 	}
 
-	let { maintenancePanel, solidworksPanel, editMode = false }: Props = $props();
+	let { maintenancePanel, solidworksPanel, editMode = false, skuMode = 'ms' }: Props = $props();
+
+	function displayCode(maintCode: string): string {
+		if (skuMode === 'bdm') return MAINT_TO_BDM[maintCode] ?? maintCode;
+		return maintCode;
+	}
 
 	// Use global remove mode from store
 	let removeMode = $derived(panelsStore.removeMode);
@@ -128,7 +135,7 @@
 			<ul class="panel-items">
 				{#each maintenanceItems as item, index (item)}
 					<PanelItem
-						{item}
+						item={displayCode(item)}
 						checked={panelsStore.hasItem(maintenancePanel.id, item)}
 						showCheckbox={true}
 						{editMode}
@@ -154,7 +161,7 @@
 			<ul class="panel-items">
 				{#each solidworksItems as item, index (item)}
 					<PanelItem
-						{item}
+						item={displayCode(item)}
 						checked={panelsStore.hasItem(solidworksPanel.id, item)}
 						showCheckbox={true}
 						{editMode}

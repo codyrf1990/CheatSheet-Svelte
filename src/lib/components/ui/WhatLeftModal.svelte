@@ -10,14 +10,17 @@
 	interface Props {
 		open: boolean;
 		onclose: () => void;
+		skuMode?: 'bdm' | 'ms';
 	}
 
-	let { open, onclose }: Props = $props();
+	let { open, onclose, skuMode = 'bdm' }: Props = $props();
 
 	interface UpgradeItem {
 		name: string;
 		sku: string;
 		price: number;
+		maintSku: string;
+		maintPrice: number;
 		description: string;
 	}
 
@@ -57,6 +60,8 @@
 							name: 'SC-Turn Module',
 							sku: entry.sku,
 							price: entry.price,
+							maintSku: entry.maintSku,
+							maintPrice: entry.maintPrice,
 							description: BIT_DESCRIPTIONS['SC-Turn'] ?? ''
 						});
 					}
@@ -79,6 +84,8 @@
 						name: pkgEntry.label,
 						sku: pkgEntry.sku,
 						price: pkgEntry.price,
+						maintSku: pkgEntry.maintSku,
+						maintPrice: pkgEntry.maintPrice,
 						description: ''
 					});
 					groups.push({ label, items });
@@ -100,6 +107,8 @@
 							name: entry.label,
 							sku: entry.sku,
 							price: entry.price,
+							maintSku: entry.maintSku,
+							maintPrice: entry.maintPrice,
 							description: BIT_DESCRIPTIONS[groupId] ?? BIT_DESCRIPTIONS[code] ?? ''
 						});
 					}
@@ -119,6 +128,8 @@
 						name: entry.label,
 						sku: entry.sku,
 						price: entry.price,
+						maintSku: entry.maintSku,
+						maintPrice: entry.maintPrice,
 						description: BIT_DESCRIPTIONS[bit] ?? ''
 					});
 				}
@@ -144,6 +155,8 @@
 				name: moduleSku.label,
 				sku: moduleSku.sku,
 				price: moduleSku.price,
+				maintSku: moduleSku.maintSku,
+				maintPrice: moduleSku.maintPrice,
 				description: desc
 			});
 		}
@@ -166,16 +179,28 @@
 		return group.bits.some((bit) => selectedBits.includes(bit));
 	}
 
+	async function handleCopySku(sku: string) {
+		try {
+			await navigator.clipboard.writeText(sku);
+			// silent copy — no toast in modal
+		} catch {
+			// ignore
+		}
+	}
+
 	function formatPrice(price: number): string {
 		return '$' + price.toLocaleString('en-US');
 	}
 
 	let totalUpgrade = $derived(
-		upgradeGroups.reduce((sum, g) => sum + g.items.reduce((s, i) => s + i.price, 0), 0)
+		upgradeGroups.reduce(
+			(sum, g) => sum + g.items.reduce((s, i) => s + (skuMode === 'ms' ? i.maintPrice : i.price), 0),
+			0
+		)
 	);
 </script>
 
-<Modal {open} {onclose} title="What's Left to Sell" size="wide">
+<Modal {open} {onclose} title="What's Left — {skuMode === 'ms' ? 'MS' : 'BDM'}" size="wide">
 	{#if upgradeGroups.length === 0}
 		<div class="empty-state">
 			<p>All available packages and modules are already selected.</p>
@@ -191,8 +216,8 @@
 								<div class="item-header">
 									<span class="item-name">{item.name}</span>
 									<div class="item-meta">
-										<code class="item-sku">{item.sku}</code>
-										<span class="item-price">{formatPrice(item.price)}</span>
+										<button type="button" class="item-sku" onclick={() => handleCopySku(skuMode === 'ms' ? item.maintSku : item.sku)} title="Click to copy">{skuMode === 'ms' ? item.maintSku : item.sku}</button>
+										<span class="item-price">{formatPrice(skuMode === 'ms' ? item.maintPrice : item.price)}</span>
 									</div>
 								</div>
 								{#if item.description}
@@ -285,6 +310,13 @@
 		border-radius: 4px;
 		font-size: 0.6875rem;
 		font-family: 'JetBrains Mono', monospace;
+		border: none;
+		cursor: pointer;
+		transition: background 150ms ease;
+	}
+
+	.item-sku:hover {
+		background: rgba(200, 16, 46, 0.4);
 	}
 
 	.item-price {

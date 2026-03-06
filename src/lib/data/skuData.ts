@@ -207,5 +207,66 @@ export const MODULE_SKUS: SkuEntry[] = [
 		price: 1000,
 		maintSku: 'SC-4Op-Sim-Maint',
 		maintPrice: 150
+	},
+	{
+		sku: 'SC-Swiss',
+		label: 'Swiss Machining',
+		price: 2760,
+		maintSku: 'Swiss-Maint',
+		maintPrice: 360
+	},
+	{
+		sku: 'SC-MTS',
+		label: 'Multi-Turret Sync',
+		price: 3450,
+		maintSku: 'MTS-Maint',
+		maintPrice: 450
 	}
 ];
+
+// Reverse lookup: maintenance SKU → BDM sale SKU
+// Used to display BDM codes in the maintenance panel when in BDM mode
+export const MAINT_TO_BDM: Record<string, string> = {
+	// Packages
+	'SC-Mill-Maint': 'SC-Mill',
+	'SC-Mill-Adv-Maint': 'SC-Mill-Adv',
+	'SC-Mill-3D-Maint': 'SC-Mill-3D',
+	'SC-Mill-5Axis-Maint': 'SC-Mill-5Axis',
+	'SC-Turn-Maint': 'SC-Turn',
+	'Turn-Maint': 'SC-Turn',
+	// Milling bits
+	'25M-Maint': 'SC-25M',
+	'HSS-Maint': 'SC-HSS',
+	'HSM-Maint': 'SC-HSM',
+	'iMach2D-Maint': 'SC-iMach2D',
+	'iMach3D-Maint': 'SC-iMach3D',
+	'Sim4x-Maint': 'SC-Sim4x',
+	'Sim5x-Maint': 'SC-Sim5x',
+	'Multiaxis-Maint': 'SC-Multiaxis',
+	'EdgeBreak-Maint': 'SC-EdgeBreak',
+	'MachSim-Maint': 'SC-MachSim',
+	// Modules
+	'EdgeTrim-Maint': 'SC-EdgeTrim',
+	'Multiblade-Maint': 'SC-Multiblade',
+	'Port-Maint': 'SC-Port',
+	'Probe-Maint': 'SC-Probe',
+	'Vericut-Maint': 'SC-Vericut',
+	'iMachNX-Maint': 'iMachNX-Mod',
+	'WC2-Maint': 'WC2-Mod',
+	'Wire-Maint': 'SC-Wire',
+	'SolidShop-Editor-Maint': 'SolidShop-Editor',
+	'SC-4Op-Maint': 'SC-4Op',
+	'SC-4Op-Sim-Maint': 'SC-4Op-Sim',
+	'Swiss-Maint': 'SC-Swiss',
+	'MTS-Maint': 'SC-MTS',
+	// Network license
+	'Lic-Net-Maint': 'Lic-Net',
+	// SolidWorks
+	'SW-P-Maint': 'SW-P',
+	'SW-PA-Maint': 'SW-PA',
+	'SW-Std-Maint': 'SW-Std',
+	'SW-Std-Net-Maint': 'SW-Std-Net',
+	'SW-Pro-Maint': 'SW-Pro',
+	'SW-Pro-Net-Maint': 'SW-Pro-Net',
+	'SW-Info-Maint': 'SW-Info'
+};

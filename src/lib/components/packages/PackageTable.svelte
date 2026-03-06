@@ -2,7 +2,6 @@
 	import type { Package, PageState } from '$types';
 	import PackageRow from './PackageRow.svelte';
 	import { companiesStore } from '$stores/companies.svelte';
-	import { packagesStore } from '$stores/packages.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 
 	interface Props {
@@ -28,12 +27,7 @@
 		toastStore.info(`Switched to ${newMode === 'build' ? 'Build' : 'Import'} mode`);
 	}
 
-	// Show "What's Left" when in import mode or when any bits are selected
-	let showWhatLeft = $derived.by(() => {
-		if (currentMode === 'import') return true;
-		const states = packagesStore.all;
-		return Object.values(states).some((s) => s.selectedBits.length > 0);
-	});
+
 </script>
 
 <div class="package-table-container">
@@ -48,7 +42,8 @@
 					<th scope="col" class="col-maint">Maintenance</th>
 					<th scope="col" class="col-bits">
 						<div class="bits-header">
-							<span>Included Bits</span>
+							<div></div>
+							<span class="bits-label">Included Modules</span>
 							<div class="bits-header-actions">
 								<button
 									class="mode-badge {currentMode === 'build' ? 'mode-build' : 'mode-import'}"
@@ -57,7 +52,7 @@
 								>
 									{currentMode === 'build' ? 'BUILD' : 'IMPORT'}
 								</button>
-								{#if showWhatLeft && onwhatleft}
+								{#if onwhatleft}
 									<button
 										class="what-left-btn"
 										onclick={onwhatleft}
@@ -164,41 +159,46 @@
 
 	.bits-header {
 		display: flex;
+		flex-direction: column;
 		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-2);
-		flex-wrap: wrap;
+		gap: 4px;
+	}
+
+	.bits-label {
+		text-align: center;
 	}
 
 	.bits-header-actions {
 		display: flex;
 		align-items: center;
-		gap: var(--space-1);
+		justify-content: center;
+		gap: 5px;
+		flex-wrap: wrap;
 	}
 
 	.mode-badge {
-		font-size: 0.65rem;
-		font-weight: 700;
-		padding: 1px 8px;
-		border-radius: 999px;
+		font-size: 0.6rem;
+		font-weight: 800;
+		padding: 2px 7px;
+		border-radius: 4px;
 		cursor: pointer;
 		user-select: none;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.08em;
 		transition: all 150ms ease;
-		line-height: 1.4;
+		line-height: 1.3;
 	}
 
 	.mode-build {
-		background: rgba(113, 63, 18, 0.3);
-		color: #facc15;
-		border: 1px solid rgba(202, 138, 4, 0.4);
+		background: rgba(212, 175, 55, 0.18);
+		color: #d4af37;
+		border: 1px solid rgba(212, 175, 55, 0.4);
 	}
 
 	.mode-import {
-		background: rgba(39, 39, 42, 1);
-		color: rgba(161, 161, 170, 1);
-		border: 1px solid rgba(82, 82, 91, 0.4);
+		background: rgba(255, 255, 255, 0.05);
+		color: rgba(255, 255, 255, 0.45);
+		border: 1px solid rgba(255, 255, 255, 0.12);
 	}
 
 	.mode-badge:hover {
@@ -206,17 +206,18 @@
 	}
 
 	.what-left-btn {
-		font-size: 0.65rem;
-		font-weight: 600;
-		padding: 1px 8px;
-		border-radius: 999px;
+		font-size: 0.6rem;
+		font-weight: 700;
+		padding: 2px 7px;
+		border-radius: 4px;
 		cursor: pointer;
 		user-select: none;
-		letter-spacing: 0.03em;
-		line-height: 1.4;
-		background: rgba(74, 222, 128, 0.12);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		line-height: 1.3;
+		background: rgba(74, 222, 128, 0.1);
 		color: #4ade80;
-		border: 1px solid rgba(74, 222, 128, 0.3);
+		border: 1px solid rgba(74, 222, 128, 0.25);
 		transition: all 150ms ease;
 	}
 
@@ -227,15 +228,16 @@
 	}
 
 	.maintenance-range {
-		padding: 2px 10px;
-		border-radius: 999px;
-		background: rgba(0, 0, 0, 0.18);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		font-size: var(--text-xs);
+		padding: 2px 7px;
+		border-radius: 4px;
+		background: rgba(255, 255, 255, 0.06);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		font-size: 0.6rem;
 		font-weight: 600;
 		text-transform: none;
-		letter-spacing: 0.04em;
-		color: rgba(255, 255, 255, 0.95);
+		letter-spacing: 0.02em;
+		color: rgba(255, 255, 255, 0.7);
+		white-space: nowrap;
 	}
 
 	/* Hide Package column on narrow screens */
