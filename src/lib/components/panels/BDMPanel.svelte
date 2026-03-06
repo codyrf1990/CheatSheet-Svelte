@@ -1,15 +1,17 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { toastStore } from '$stores/toast.svelte';
 	import { panelsStore } from '$stores/panels.svelte';
 	import { Checkbox } from '$components/ui';
 	import { BDM_SECTIONS } from '$lib/data/bdmData';
 
 	const BDM_PANEL_ID = 'bdm-skus';
+	const STORAGE_KEY = 'solidcam-bdm-sections';
 
-	let expanded = $state<Record<string, boolean>>({
+	const defaults: Record<string, boolean> = {
 		license: false,
-		packages: true,
-		milling: true,
+		packages: false,
+		milling: false,
 		turning: false,
 		addons: false,
 		wire: false,
@@ -17,10 +19,24 @@
 		bundles: false,
 		training: false,
 		solidshop: false
-	});
+	};
+
+	function loadExpanded(): Record<string, boolean> {
+		if (!browser) return { ...defaults };
+		try {
+			const stored = localStorage.getItem(STORAGE_KEY);
+			if (stored) return { ...defaults, ...JSON.parse(stored) };
+		} catch {}
+		return { ...defaults };
+	}
+
+	let expanded = $state<Record<string, boolean>>(loadExpanded());
 
 	function toggle(id: string) {
 		expanded[id] = !expanded[id];
+		if (browser) {
+			try { localStorage.setItem(STORAGE_KEY, JSON.stringify(expanded)); } catch {}
+		}
 	}
 
 	async function copySku(sku: string) {

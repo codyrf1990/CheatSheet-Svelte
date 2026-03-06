@@ -190,11 +190,11 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
-		padding: var(--space-1) var(--space-2);
+		padding: var(--space-0-5) var(--space-1);
 	}
 
 	.section {
-		margin-bottom: var(--space-2);
+		margin-bottom: var(--space-1);
 	}
 
 	.section:last-child {
@@ -221,7 +221,7 @@
 	.panel-items {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: var(--space-0-5);
+		gap: var(--space-px);
 		padding: var(--space-px);
 		list-style: none;
 		margin: 0;
