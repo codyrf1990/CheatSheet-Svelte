@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { browser } from '$app/environment';
 	import { Header, CompanyPageBar } from '$components/layout';
 	import { PackageTable } from '$components/packages';
 	import { BDMPanel, MaintenancePanel, NewSalePanel } from '$components/panels';
@@ -261,15 +260,15 @@
 							class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
 							onclick={() => userPrefsStore.setSkuTabMode('bdm')}
 							aria-pressed={effectiveSkuTabMode === 'bdm'}
-							title="BDM mode — new sale prices"
-						>BDM</button>
+							title="BDM mode — new sale prices">BDM</button
+						>
 						<button
 							class="mode-pill-btn"
 							class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
 							onclick={() => userPrefsStore.setSkuTabMode('ms')}
 							aria-pressed={effectiveSkuTabMode === 'ms'}
-							title="MS mode — maintenance prices"
-						>MS</button>
+							title="MS mode — maintenance prices">MS</button
+						>
 					</div>
 					<button
 						type="button"
@@ -318,15 +317,15 @@
 							class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
 							onclick={() => userPrefsStore.setSkuTabMode('bdm')}
 							aria-pressed={effectiveSkuTabMode === 'bdm'}
-							title="BDM mode — new sale prices"
-						>BDM</button>
+							title="BDM mode — new sale prices">BDM</button
+						>
 						<button
 							class="mode-pill-btn"
 							class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
 							onclick={() => userPrefsStore.setSkuTabMode('ms')}
 							aria-pressed={effectiveSkuTabMode === 'ms'}
-							title="MS mode — maintenance prices"
-						>MS</button>
+							title="MS mode — maintenance prices">MS</button
+						>
 					</div>
 				</div>
 				<NewSalePanel skuMode={effectiveSkuTabMode} />
@@ -397,7 +396,11 @@
 <SalesTaxModal open={showSalesTaxModal} onclose={() => (showSalesTaxModal = false)} />
 <CurrentProductsModal open={showProductsModal} onclose={() => (showProductsModal = false)} />
 <CompaniesModal open={showCompaniesModal} onclose={() => (showCompaniesModal = false)} />
-<WhatLeftModal open={showWhatLeftModal} onclose={() => (showWhatLeftModal = false)} skuMode={effectiveSkuTabMode} />
+<WhatLeftModal
+	open={showWhatLeftModal}
+	onclose={() => (showWhatLeftModal = false)}
+	skuMode={effectiveSkuTabMode}
+/>
 
 <style>
 	.page-layout {

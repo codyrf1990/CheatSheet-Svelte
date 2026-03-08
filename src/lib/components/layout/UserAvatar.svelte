@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { SyncStatus } from '$types';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
@@ -19,7 +18,7 @@
 	let containerRef: HTMLDivElement | null = $state(null);
 
 	// Detect touch devices
-	onMount(() => {
+	$effect(() => {
 		if (browser) {
 			isTouch = window.matchMedia('(hover: none)').matches;
 		}

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
@@ -7,7 +6,7 @@
 
 	let prefersReducedMotion = $state(false);
 
-	onMount(() => {
+	$effect(() => {
 		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 		prefersReducedMotion = mediaQuery.matches;
 

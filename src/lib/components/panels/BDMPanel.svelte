@@ -26,7 +26,9 @@
 		try {
 			const stored = localStorage.getItem(STORAGE_KEY);
 			if (stored) return { ...defaults, ...JSON.parse(stored) };
-		} catch {}
+		} catch {
+			/* localStorage unavailable — non-critical */
+		}
 		return { ...defaults };
 	}
 
@@ -35,7 +37,11 @@
 	function toggle(id: string) {
 		expanded[id] = !expanded[id];
 		if (browser) {
-			try { localStorage.setItem(STORAGE_KEY, JSON.stringify(expanded)); } catch {}
+			try {
+				localStorage.setItem(STORAGE_KEY, JSON.stringify(expanded));
+			} catch {
+				/* localStorage unavailable — non-critical */
+			}
 		}
 	}
 
@@ -44,7 +50,11 @@
 	function collapseAll() {
 		for (const key of Object.keys(expanded)) expanded[key] = false;
 		if (browser) {
-			try { localStorage.setItem(STORAGE_KEY, JSON.stringify(expanded)); } catch {}
+			try {
+				localStorage.setItem(STORAGE_KEY, JSON.stringify(expanded));
+			} catch {
+				/* localStorage unavailable — non-critical */
+			}
 		}
 	}
 
@@ -69,9 +79,7 @@
 	<div class="panel-body">
 		{#if anyExpanded}
 			<div class="panel-actions">
-				<button type="button" class="collapse-all-btn" onclick={collapseAll}>
-					Collapse All
-				</button>
+				<button type="button" class="collapse-all-btn" onclick={collapseAll}> Collapse All </button>
 			</div>
 		{/if}
 		{#each BDM_SECTIONS as section (section.id)}

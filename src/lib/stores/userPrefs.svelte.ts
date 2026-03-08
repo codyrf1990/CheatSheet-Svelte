@@ -49,15 +49,15 @@ function loadPrefs(): UserPrefs {
 					? parsed.updatedAt
 					: Date.now();
 			return {
-				customPanelItems: parsed.customPanelItems || {},
-				customPackageBits: parsed.customPackageBits || {},
+				customPanelItems: parsed.customPanelItems ?? {},
+				customPackageBits: parsed.customPackageBits ?? {},
 				backgroundVideoPaused: parsed.backgroundVideoPaused ?? false,
 				repName: parsed.repName || '',
 				skuTabMode: parsed.skuTabMode || 'bdm',
 				updatedAt,
-				packageBitOrders: parsed.packageBitOrders || {},
-				packageLooseBitOrders: parsed.packageLooseBitOrders || {},
-				packageGroupMembership: parsed.packageGroupMembership || {}
+				packageBitOrders: parsed.packageBitOrders ?? {},
+				packageLooseBitOrders: parsed.packageLooseBitOrders ?? {},
+				packageGroupMembership: parsed.packageGroupMembership ?? {}
 			};
 		}
 	} catch (e) {
@@ -333,11 +333,11 @@ function importData(data: unknown, updatedAt?: number): boolean {
 		packageGroupMembership?: Record<string, Record<string, string>>;
 	};
 
-	prefs.customPanelItems = payload.customPanelItems || {};
-	prefs.customPackageBits = payload.customPackageBits || {};
-	prefs.packageBitOrders = payload.packageBitOrders || {};
-	prefs.packageLooseBitOrders = payload.packageLooseBitOrders || {};
-	prefs.packageGroupMembership = payload.packageGroupMembership || {};
+	prefs.customPanelItems = payload.customPanelItems ?? {};
+	prefs.customPackageBits = payload.customPackageBits ?? {};
+	prefs.packageBitOrders = payload.packageBitOrders ?? {};
+	prefs.packageLooseBitOrders = payload.packageLooseBitOrders ?? {};
+	prefs.packageGroupMembership = payload.packageGroupMembership ?? {};
 	prefs.updatedAt =
 		typeof updatedAt === 'number' && Number.isFinite(updatedAt) ? updatedAt : Date.now();
 	prefs = { ...prefs };

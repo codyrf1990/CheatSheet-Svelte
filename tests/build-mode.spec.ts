@@ -10,7 +10,9 @@ async function login(page: Page, username?: string) {
 	await page.goto('/');
 	await page.getByRole('textbox').fill(user);
 	await page.getByRole('button', { name: 'Start' }).click();
-	await expect(page.getByRole('heading', { name: 'Packages & Maintenance Cheat Sheet' })).toBeVisible({ timeout: 15000 });
+	await expect(
+		page.getByRole('heading', { name: 'Packages & Maintenance Cheat Sheet' })
+	).toBeVisible({ timeout: 15000 });
 }
 
 type Toast = { type: string; message: string };
@@ -18,10 +20,15 @@ type Toast = { type: string; message: string };
 /** Read toast messages directly from the store — bypasses DOM timing issues. */
 async function getToasts(page: Page): Promise<Toast[]> {
 	return page.evaluate(async () => {
-		// @ts-expect-error – browser runtime import; path is resolved by Vite, not tsc
-		const mod: { toastStore: { all: { type: string; message: string }[] } } = await import('/src/lib/stores/toast.svelte.ts');
-		return mod.toastStore.all.map((t) => ({ type: t.type, message: t.message }));
-	}) as Promise<Toast[]>;
+		const path = '/src/lib/stores/toast.svelte.ts';
+		const mod = (await Function('p', 'return import(p)')(path)) as {
+			toastStore: { all: { type: string; message: string }[] };
+		};
+		return mod.toastStore.all.map((t: { type: string; message: string }) => ({
+			type: t.type,
+			message: t.message
+		}));
+	});
 }
 
 /** Trigger our outer .checkbox-wrapper onclick on a disabled bit. */
@@ -61,7 +68,7 @@ test.describe('Build Mode', () => {
 		}
 
 		// Upgrades button not shown yet
-		await expect(page.getByRole('button', { name: "Upgrades" })).not.toBeVisible();
+		await expect(page.getByRole('button', { name: 'Upgrades' })).not.toBeVisible();
 	});
 
 	// -------------------------------------------------------------------------
@@ -72,8 +79,14 @@ test.describe('Build Mode', () => {
 
 		// All 25M sub-bits checked
 		for (const name of [
-			'Modeler', 'Machinist', 'SolidCAM Mill 2D', 'SolidCAM Mill 2.5D',
-			'SC Mill 3D', 'C-axes (Wrap)', '4-axes Indexial', '5-axes Indexial'
+			'Modeler',
+			'Machinist',
+			'SolidCAM Mill 2D',
+			'SolidCAM Mill 2.5D',
+			'SC Mill 3D',
+			'C-axes (Wrap)',
+			'4-axes Indexial',
+			'5-axes Indexial'
 		]) {
 			const li = page.locator('li', { hasText: name }).first();
 			await expect(li.locator('input[type="checkbox"]')).toBeChecked();
@@ -84,7 +97,7 @@ test.describe('Build Mode', () => {
 		await expect(hssLi.locator('input[type="checkbox"]')).toBeChecked();
 
 		// Upgrades button now visible
-		await expect(page.getByRole('button', { name: "Upgrades" })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Upgrades' })).toBeVisible();
 	});
 
 	// -------------------------------------------------------------------------
@@ -244,12 +257,12 @@ test.describe('Build Mode', () => {
 	// -------------------------------------------------------------------------
 	// 10. Upgrades modal
 	// -------------------------------------------------------------------------
-	test("Upgrades modal shows correct sections and descriptions", async ({ page }) => {
+	test('Upgrades modal shows correct sections and descriptions', async ({ page }) => {
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Mill bits' }).click();
-		await page.getByRole('button', { name: "Upgrades" }).click();
+		await page.getByRole('button', { name: 'Upgrades' }).click();
 
 		// Modal open
-		await expect(page.getByRole('heading', { name: "Upgrades — BDM" })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Upgrades — BDM' })).toBeVisible();
 
 		// Correct section headings in order
 		const sections = page.locator('h4.group-title').filter({ hasText: /SC-MILL|ADDITIONAL/i });
@@ -265,6 +278,6 @@ test.describe('Build Mode', () => {
 
 		// Close modal
 		await page.getByRole('button', { name: 'Close' }).click();
-		await expect(page.getByRole('heading', { name: "Upgrades — BDM" })).not.toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Upgrades — BDM' })).not.toBeVisible();
 	});
 });

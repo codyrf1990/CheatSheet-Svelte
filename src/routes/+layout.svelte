@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { onMount } from 'svelte';
+	import { untrack } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import { ToastContainer, Skeleton } from '$components/ui';
@@ -17,18 +17,20 @@
 	let initialized = $state(false);
 	let videoRef: HTMLVideoElement | null = $state(null);
 
-	onMount(() => {
-		(async () => {
-			userPrefsStore.init();
-			companiesStore.load();
-			// Race against a 10s timeout — if Firebase IndexedDB lock is stale
-			// (e.g. after a browser crash) we still show the login screen promptly.
-			await Promise.race([
-				syncStore.load(),
-				new Promise<void>((resolve) => setTimeout(resolve, 3_000))
-			]);
-			initialized = true;
-		})();
+	$effect(() => {
+		untrack(() => {
+			(async () => {
+				userPrefsStore.init();
+				companiesStore.load();
+				// Race against a 3s timeout — if Firebase IndexedDB lock is stale
+				// (e.g. after a browser crash) we still show the login screen promptly.
+				await Promise.race([
+					syncStore.load(),
+					new Promise<void>((resolve) => setTimeout(resolve, 3_000))
+				]);
+				initialized = true;
+			})();
+		});
 
 		// Flush pending debounced save when tab is hidden (covers mobile/Safari tab-close too)
 		const onHide = () => {
