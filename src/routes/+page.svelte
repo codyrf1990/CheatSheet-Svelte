@@ -57,10 +57,7 @@
 		return start || end;
 	});
 
-	// Build mode derived — lightweight, no deep copy
-	let buildMode = $derived(packagesStore.buildMode);
-	// In build mode, BDM is always the effective pricing mode; stored pref is not mutated
-	let effectiveSkuTabMode = $derived(buildMode ? 'bdm' : userPrefsStore.skuTabMode);
+	let effectiveSkuTabMode = $derived(userPrefsStore.skuTabMode);
 
 	// Package edit mode state (lifted from PackageTable)
 	let packageEditMode = $state(false);
@@ -138,9 +135,7 @@
 					return;
 				}
 
-				const currentMode = companiesStore.currentPageMode;
 				const newState: PageState = {
-					mode: currentMode,
 					packages: packagesStore.getPageState(),
 					panels: panelsStore.getPageState()
 				};
@@ -271,10 +266,8 @@
 							class="mode-pill-btn"
 							class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
 							onclick={() => userPrefsStore.setSkuTabMode('ms')}
-							disabled={buildMode}
-							aria-disabled={buildMode}
 							aria-pressed={effectiveSkuTabMode === 'ms'}
-							title={buildMode ? 'MS unavailable in Build Mode' : 'MS mode — maintenance prices'}
+							title="MS mode — maintenance prices"
 						>MS</button>
 					</div>
 					<button
@@ -330,10 +323,8 @@
 							class="mode-pill-btn"
 							class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
 							onclick={() => userPrefsStore.setSkuTabMode('ms')}
-							disabled={buildMode}
-							aria-disabled={buildMode}
 							aria-pressed={effectiveSkuTabMode === 'ms'}
-							title={buildMode ? 'MS unavailable in Build Mode' : 'MS mode — maintenance prices'}
+							title="MS mode — maintenance prices"
 						>MS</button>
 					</div>
 				</div>

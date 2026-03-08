@@ -64,17 +64,6 @@ test.describe('Fresh-login stability', () => {
 		expect(depthErrors, `Depth errors found: ${depthErrors.join('\n')}`).toHaveLength(0);
 	});
 
-	test('fresh page defaults to import mode (IMPORT button visible)', async ({ page }) => {
-		await clearStorageAndLogin(page);
-
-		// Mode toggle shows current mode — IMPORT means the page is in import mode
-		await expect(page.getByRole('button', { name: 'IMPORT' })).toBeVisible();
-	});
-
-	test('fresh page does NOT start in build mode (BUILD button not visible)', async ({ page }) => {
-		await clearStorageAndLogin(page);
-		await expect(page.getByRole('button', { name: 'BUILD' })).not.toBeVisible();
-	});
 });
 
 // ---------------------------------------------------------------------------
@@ -108,106 +97,8 @@ test.describe('Add-page stability', () => {
 		await expect(lastTab).toHaveAttribute('aria-selected', 'true', { timeout: 3_000 });
 	});
 
-	test('new page starts in import mode', async ({ page }) => {
-		await login(page);
-		await page.getByRole('button', { name: 'Add new page' }).click();
-
-		// After adding, we should be on the new page in import mode
-		await expect(page.getByRole('button', { name: 'IMPORT' })).toBeVisible({ timeout: 3_000 });
-	});
 });
 
-// ---------------------------------------------------------------------------
-// 3. Persisted build-mode compatibility
-// ---------------------------------------------------------------------------
-
-test.describe('Build-mode persistence', () => {
-	test('page persisted with mode:build stays in build mode after reload', async ({ page }) => {
-		await login(page);
-
-		// Switch to build mode
-		await page.getByRole('button', { name: 'IMPORT' }).click();
-		await expect(page.getByRole('button', { name: 'BUILD' })).toBeVisible();
-
-		// Reload the page (stays logged in via localStorage)
-		await page.reload();
-		await expect(
-			page.getByRole('heading', { name: 'Packages & Maintenance Cheat Sheet' })
-		).toBeVisible({ timeout: 15_000 });
-
-		// Should still be in build mode
-		await expect(page.getByRole('button', { name: 'BUILD' })).toBeVisible();
-	});
-});
-
-// ---------------------------------------------------------------------------
-// 4. BDM/MS mode gating in build mode
-// ---------------------------------------------------------------------------
-
-test.describe('BDM/MS mode gating', () => {
-	test('MS button is disabled in build mode', async ({ page }) => {
-		await login(page);
-
-		// Switch to build mode
-		await page.getByRole('button', { name: 'IMPORT' }).click();
-		await expect(page.getByRole('button', { name: 'BUILD' })).toBeVisible();
-
-		// MS button should be disabled
-		const msButton = page.getByRole('button', { name: /MS/ });
-		await expect(msButton).toBeDisabled();
-	});
-
-	test('BDM is the effective mode in build mode regardless of saved pref', async ({ page }) => {
-		await login(page);
-
-		// First set saved pref to MS
-		await page.getByRole('button', { name: /MS/ }).click();
-
-		// Switch to build mode
-		await page.getByRole('button', { name: 'IMPORT' }).click();
-		await expect(page.getByRole('button', { name: 'BUILD' })).toBeVisible();
-
-		// BDM button should appear active (gold highlight class is present)
-		const bdmButton = page.getByRole('button', { name: /BDM/ });
-		await expect(bdmButton).toBeVisible();
-		// MS button disabled in build mode
-		await expect(page.getByRole('button', { name: /MS/ })).toBeDisabled();
-	});
-
-	test('MS button re-enables after switching back to import mode', async ({ page }) => {
-		await login(page);
-
-		// Switch to build mode then back to import
-		await page.getByRole('button', { name: 'IMPORT' }).click();
-		await expect(page.getByRole('button', { name: 'BUILD' })).toBeVisible();
-		await page.getByRole('button', { name: 'BUILD' }).click();
-		await expect(page.getByRole('button', { name: 'IMPORT' })).toBeVisible();
-
-		// MS button should be enabled again
-		await expect(page.getByRole('button', { name: /MS/ })).toBeEnabled();
-	});
-
-	test('stored MS pref is restored after leaving build mode', async ({ page }) => {
-		await login(page);
-
-		// Set pref to MS
-		await page.getByRole('button', { name: /MS/ }).click();
-
-		// Switch to build mode
-		await page.getByRole('button', { name: 'IMPORT' }).click();
-		await expect(page.getByRole('button', { name: 'BUILD' })).toBeVisible();
-
-		// Switch back to import mode
-		await page.getByRole('button', { name: 'BUILD' }).click();
-		await expect(page.getByRole('button', { name: 'IMPORT' })).toBeVisible();
-
-		// MS button should be active again (pref was preserved, not mutated)
-		const msButton = page.getByRole('button', { name: /MS/ });
-		await expect(msButton).toBeEnabled();
-		// Verify MS is the active mode by checking the SKU tab label changed
-		await expect(page.getByRole('tab', { name: 'Maint Price' })).toBeVisible();
-	});
-});
 
 // ---------------------------------------------------------------------------
 // 5. Local-first sync fallback

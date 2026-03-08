@@ -40,7 +40,7 @@ function generateId(prefix: string = 'page'): string {
  * Create empty page state
  */
 function createEmptyPageState(): PageState {
-	return { mode: 'import', panels: {}, packages: {} };
+	return { panels: {}, packages: {} };
 }
 
 /**
@@ -224,14 +224,12 @@ function ensureIntegrity(): void {
 			company.currentPageId = company.pages[0].id;
 		}
 
-		// Validate pages — backfill missing mode to 'import' (explicit 'build' preserved)
+		// Validate pages
 		company.pages = company.pages.map((page) => ({
 			id: page.id || generateId('page'),
 			name: page.name || DEFAULT_PAGE_NAME,
 			licenseKey: page.licenseKey,
-			state: page.state
-				? { ...page.state, mode: page.state.mode ?? 'import' }
-				: createEmptyPageState()
+			state: page.state ?? createEmptyPageState()
 		}));
 
 		return company;
@@ -756,11 +754,8 @@ function importData(data: unknown): boolean {
 				// Migrate old package format to new format
 				page.state.packages = migratePackageState(page.state.packages);
 			}
-			// Backfill missing mode to 'import'
 			if (!page.state) {
 				page.state = createEmptyPageState();
-			} else if (!page.state.mode) {
-				page.state.mode = 'import';
 			}
 		}
 	}
@@ -795,10 +790,6 @@ export const companiesStore = {
 	get currentPageState(): PageState {
 		const page = getCurrentPage();
 		return page?.state ? deepCopy(page.state) : createEmptyPageState();
-	},
-	// Lightweight getter — reads only the mode string, no deep copy. Safe inside $derived.
-	get currentPageMode(): 'build' | 'import' {
-		return getCurrentPage()?.state?.mode ?? 'import';
 	},
 	// Explicit snapshot for persistence/non-reactive use only. Not for use inside $derived/$effect.
 	getPageStateSnapshot(): PageState {

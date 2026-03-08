@@ -1,8 +1,6 @@
 <script lang="ts">
-	import type { Package, PageState } from '$types';
+	import type { Package } from '$types';
 	import PackageRow from './PackageRow.svelte';
-	import { companiesStore } from '$stores/companies.svelte';
-	import { toastStore } from '$stores/toast.svelte';
 
 	interface Props {
 		packages: Package[];
@@ -12,22 +10,6 @@
 	}
 
 	let { packages, editMode = false, maintenanceRange = '', onwhatleft }: Props = $props();
-
-	let currentMode = $derived(companiesStore.currentPageState?.mode ?? 'import');
-
-	function toggleMode() {
-		const page = companiesStore.currentPage;
-		if (!page) return;
-		const newMode = currentMode === 'build' ? 'import' : 'build';
-		const newState: PageState = {
-			...page.state,
-			mode: newMode
-		};
-		companiesStore.savePageState(page.id, newState);
-		toastStore.info(`Switched to ${newMode === 'build' ? 'Build' : 'Import'} mode`);
-	}
-
-
 </script>
 
 <div class="package-table-container">
@@ -45,13 +27,6 @@
 							<div></div>
 							<span class="bits-label">Included Modules</span>
 							<div class="bits-header-actions">
-								<button
-									class="mode-badge {currentMode === 'build' ? 'mode-build' : 'mode-import'}"
-									onclick={toggleMode}
-									title="Click to toggle between Build and Import mode"
-								>
-									{currentMode === 'build' ? 'BUILD' : 'IMPORT'}
-								</button>
 								{#if onwhatleft}
 									<button
 										class="what-left-btn"
@@ -174,35 +149,6 @@
 		justify-content: center;
 		gap: 5px;
 		flex-wrap: wrap;
-	}
-
-	.mode-badge {
-		font-size: 0.6rem;
-		font-weight: 800;
-		padding: 2px 7px;
-		border-radius: 4px;
-		cursor: pointer;
-		user-select: none;
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		transition: all 150ms ease;
-		line-height: 1.3;
-	}
-
-	.mode-build {
-		background: rgba(212, 175, 55, 0.18);
-		color: #d4af37;
-		border: 1px solid rgba(212, 175, 55, 0.4);
-	}
-
-	.mode-import {
-		background: rgba(255, 255, 255, 0.05);
-		color: rgba(255, 255, 255, 0.45);
-		border: 1px solid rgba(255, 255, 255, 0.12);
-	}
-
-	.mode-badge:hover {
-		filter: brightness(1.2);
 	}
 
 	.what-left-btn {

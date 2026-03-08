@@ -43,10 +43,8 @@ test.describe('Build Mode', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
 		// Unique username means no Firestore data → guaranteed fresh state
+		// Default skuTabMode is 'bdm' which enables validation (build behavior)
 		await login(page);
-		// Fresh pages now default to import mode — explicitly switch to build mode for these tests
-		await page.getByRole('button', { name: 'IMPORT' }).click();
-		await expect(page.getByRole('button', { name: 'BUILD' })).toBeVisible();
 	});
 
 	// -------------------------------------------------------------------------
@@ -206,21 +204,20 @@ test.describe('Build Mode', () => {
 	});
 
 	// -------------------------------------------------------------------------
-	// 8. BUILD → IMPORT mode toggle removes prerequisite gates
+	// 8. MS mode disables prerequisite gating
 	// -------------------------------------------------------------------------
-	test('IMPORT mode disables prerequisite gating', async ({ page }) => {
-		// In BUILD mode, iMach2D is gated (SC-Mill not selected)
+	test('MS mode disables prerequisite gating', async ({ page }) => {
+		// In BDM mode (default), iMach2D is gated (SC-Mill not selected)
 		const iMach2DLi = page.locator('li', { hasText: 'iMach2D' }).first();
 		await expect(iMach2DLi.locator('input[type="checkbox"]')).toBeDisabled();
 
-		// Switch to IMPORT
-		await page.getByRole('button', { name: 'BUILD' }).click();
-		await expect(page.getByRole('button', { name: 'IMPORT' })).toBeVisible();
+		// Switch to MS via pill button
+		await page.getByRole('button', { name: /MS/ }).first().click();
 
 		// iMach2D now enabled despite SC-Mill not selected
 		await expect(iMach2DLi.locator('input[type="checkbox"]')).toBeEnabled();
 
-		// iMach3D also enabled in IMPORT mode
+		// iMach3D also enabled in MS mode
 		const iMach3DLi = page.locator('li', { hasText: 'iMach3D' }).first();
 		await expect(iMach3DLi.locator('input[type="checkbox"]')).toBeEnabled();
 	});
@@ -229,7 +226,6 @@ test.describe('Build Mode', () => {
 	// 9. New Sale panel SKU totals
 	// -------------------------------------------------------------------------
 	test('New Sale panel shows correct SKUs and total after SC-Mill selected', async ({ page }) => {
-		await page.getByRole('tab', { name: 'New Sale' }).click();
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Mill bits' }).click();
 
 		await expect(page.getByRole('button', { name: 'SC-HSS' })).toBeVisible();
@@ -238,7 +234,6 @@ test.describe('Build Mode', () => {
 	});
 
 	test('SC-Turn adds SC-Turn SKU and updates total', async ({ page }) => {
-		await page.getByRole('tab', { name: 'New Sale' }).click();
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Mill bits' }).click();
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Turn bits' }).click();
 
