@@ -6,7 +6,6 @@
 	import { AddSkuModal, Button, Input, Modal, ImportLicenseModal } from '$components/ui';
 	import { copyQBExportToClipboard } from '$lib/utils/quickbooksExport';
 
-
 	interface Props {
 		editMode?: boolean;
 		onToggleEdit?: () => void;
@@ -85,9 +84,7 @@
 	});
 
 	let isConfirmDialog = $derived(
-		dialogType === 'delete-company' ||
-		dialogType === 'delete-page' ||
-		dialogType === 'reset-order'
+		dialogType === 'delete-company' || dialogType === 'delete-page' || dialogType === 'reset-order'
 	);
 	let dialogTitle = $derived.by(() => {
 		switch (dialogType) {
@@ -458,7 +455,6 @@
 			closeDialog();
 			return;
 		}
-
 	}
 
 	function handleDialogInputKeydown(e: KeyboardEvent) {
@@ -525,7 +521,9 @@
 			<span
 				class="status-dot"
 				style="color: {statusIndicator.color}"
-				title={statusIndicator.title}>{statusIndicator.symbol}</span
+				title={statusIndicator.title}
+				role="status"
+				aria-live="polite">{statusIndicator.symbol}</span
 			>
 			<svg class="chevron" class:open={dropdownOpen} viewBox="0 0 20 20" fill="currentColor">
 				<path
@@ -554,19 +552,31 @@
 						autofocus
 					/>
 				{:else}
-					<button
-						type="button"
-						role="tab"
-						class="page-tab"
-						class:active={page.id === currentCompany.currentPageId}
-						aria-selected={page.id === currentCompany.currentPageId}
-						onclick={() => handlePageSelect(page.id)}
-						ondblclick={() => handlePageDoubleClick(page.id, page.name)}
-						oncontextmenu={(e) => handlePageContextMenu(e, page.id)}
-						title="Double-click to rename"
-					>
-						{page.name}
-					</button>
+					<div class="page-tab-group">
+						<button
+							type="button"
+							role="tab"
+							class="page-tab"
+							class:active={page.id === currentCompany.currentPageId}
+							aria-selected={page.id === currentCompany.currentPageId}
+							onclick={() => handlePageSelect(page.id)}
+							ondblclick={() => handlePageDoubleClick(page.id, page.name)}
+							oncontextmenu={(e) => handlePageContextMenu(e, page.id)}
+							title="Double-click to rename"
+						>
+							{page.name}
+						</button>
+						<button
+							type="button"
+							class="page-tab-menu-btn"
+							tabindex={-1}
+							aria-label="Options for {page.name}"
+							onclick={(e) => {
+								e.stopPropagation();
+								handlePageContextMenu(e, page.id);
+							}}>⋮</button
+						>
+					</div>
 				{/if}
 			{/each}
 		{/if}
@@ -589,12 +599,19 @@
 			class:is-edit-mode={editMode}
 			bind:this={kebabTriggerRef}
 			onclick={editMode ? onToggleEdit : toggleActionsMenu}
-			oncontextmenu={editMode ? (e) => { e.preventDefault(); toggleActionsMenu(e); } : undefined}
+			oncontextmenu={editMode
+				? (e) => {
+						e.preventDefault();
+						toggleActionsMenu(e);
+					}
+				: undefined}
 			aria-expanded={editMode ? undefined : showActionsMenu}
 			aria-haspopup={editMode ? undefined : 'menu'}
+			aria-pressed={editMode ? true : undefined}
 			aria-label={editMode ? 'Done editing (right-click for menu)' : 'More actions'}
 			title={editMode ? 'Click to finish · Right-click for menu' : undefined}
-		>{editMode ? '✓' : '⋮'}</button>
+			>{editMode ? '✓' : '⋮'}</button
+		>
 	</div>
 </div>
 
@@ -696,20 +713,13 @@
 			<span class="menu-icon">−</span> SKU
 			{#if panelsStore.removeMode}<span class="menu-check">✓</span>{/if}
 		</button>
-		<button
-			type="button"
-			role="menuitem"
-			class:active={editMode}
-			onclick={handleToggleEditOrder}
-		>
+		<button type="button" role="menuitem" class:active={editMode} onclick={handleToggleEditOrder}>
 			{editMode ? 'Done Editing' : 'Edit Order'}
 			{#if editMode}<span class="menu-check">✓</span>{/if}
 		</button>
 		{#if editMode}
 			<hr class="menu-divider" />
-			<button type="button" role="menuitem" onclick={handleResetOrderMenu}>
-				Reset Order
-			</button>
+			<button type="button" role="menuitem" onclick={handleResetOrderMenu}> Reset Order </button>
 		{/if}
 	</div>
 {/if}
@@ -741,7 +751,9 @@
 			<button type="button" role="menuitem" onclick={handleDuplicatePage}>Duplicate</button>
 			<button type="button" role="menuitem" onclick={handleCopyPageName}>Copy Page Name</button>
 			{#if contextMenuPage?.licenseKey}
-				<button type="button" role="menuitem" onclick={handleCopyLicenseKey}>Copy License Key</button>
+				<button type="button" role="menuitem" onclick={handleCopyLicenseKey}
+					>Copy License Key</button
+				>
 			{/if}
 			<button type="button" role="menuitem" class="danger" onclick={handleDeletePage}>Delete</button
 			>
@@ -1122,6 +1134,42 @@
 		box-shadow: 0 0 12px rgba(212, 175, 55, 0.1);
 	}
 
+	.page-tab-group {
+		display: flex;
+		align-items: center;
+		position: relative;
+	}
+
+	.page-tab-menu-btn {
+		opacity: 0;
+		padding: 0.1rem 0.15rem;
+		margin-left: -0.15rem;
+		font-size: 0.7em;
+		line-height: 1;
+		color: rgba(255, 255, 255, 0.4);
+		background: none;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: opacity 150ms ease;
+	}
+
+	.page-tab-group:hover .page-tab-menu-btn,
+	.page-tab-group:focus-within .page-tab-menu-btn {
+		opacity: 0.6;
+	}
+
+	.page-tab-menu-btn:hover {
+		opacity: 1 !important;
+		color: var(--color-solidcam-gold, #d4af37);
+	}
+
+	@media (hover: none) {
+		.page-tab-menu-btn {
+			opacity: 0.5;
+		}
+	}
+
 	.page-tab.add-tab {
 		color: rgba(255, 255, 255, 0.4);
 		font-size: var(--text-lg);
@@ -1439,7 +1487,6 @@
 		.divider {
 			height: 12px;
 		}
-
 	}
 
 	/* Reduced motion */

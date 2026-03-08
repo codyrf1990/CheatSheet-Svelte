@@ -5,6 +5,7 @@ export { default as Checkbox } from './Checkbox.svelte';
 export { default as CompaniesModal } from './CompaniesModal.svelte';
 export { default as CurrentProductsModal } from './CurrentProductsModal.svelte';
 export { default as Input } from './Input.svelte';
+export { default as MenuPrimitive } from './MenuPrimitive.svelte';
 export { default as Modal } from './Modal.svelte';
 export { default as SalesTaxModal } from './SalesTaxModal.svelte';
 export { default as Skeleton } from './Skeleton.svelte';
