@@ -29,14 +29,21 @@ function getState(panelId: string): PanelState {
 	}
 	// Normalize old data that may be missing arrays
 	const state = panelStates[panelId];
+	let didNormalize = false;
 	if (!Array.isArray(state.items)) {
 		state.items = [];
+		didNormalize = true;
 	}
 	if (!Array.isArray(state.removedItems)) {
 		state.removedItems = [];
+		didNormalize = true;
 	}
 	if (!Array.isArray(state.itemsOrder)) {
 		state.itemsOrder = [];
+		didNormalize = true;
+	}
+	if (didNormalize) {
+		panelStates = { ...panelStates };
 	}
 	return state;
 }

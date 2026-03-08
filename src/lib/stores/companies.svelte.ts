@@ -684,6 +684,7 @@ function load(): void {
 		save();
 	} catch (err) {
 		console.error('[CompaniesStore] Failed to load:', err);
+		toastStore.warning('Could not load saved data. Starting fresh.', 6000);
 		// Fallback: Create empty company
 		companies = [buildDefaultCompany(DEFAULT_COMPANY_NAME)];
 		currentCompanyId = companies[0].id;
@@ -712,6 +713,8 @@ function save(): void {
 				'Storage quota exceeded — delete some companies/pages or clear browser cache.',
 				8000
 			);
+		} else {
+			toastStore.warning('Failed to save changes to local storage.', 5000);
 		}
 	}
 }

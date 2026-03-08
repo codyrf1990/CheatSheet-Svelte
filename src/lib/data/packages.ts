@@ -32,6 +32,10 @@ export const packages: Package[] = [
 		],
 		looseBits: ['HSS']
 	},
+	// SC-Turn has two context-dependent SKUs:
+	// - SC-Turn-Maint → BDM (new sale) mode
+	// - Turn-Maint → MS (maintenance specialist) mode
+	// Both are correct. See skuData.ts MAINT_TO_BDM for the mapping.
 	{
 		code: 'SC-Turn',
 		maintenance: 'SC-Turn-Maint',

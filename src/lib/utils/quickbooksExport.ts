@@ -33,34 +33,14 @@ const BIT_TO_SKU: Record<string, string> = {
 };
 
 /**
- * Bits that are part of a "master group" - when ALL selected, use package SKU
+ * Bits that are part of a "master group" - when ALL selected, use package SKU.
+ * Derived from packages.ts group definitions to stay in sync automatically.
  */
-const MASTER_GROUP_BITS: Record<string, string[]> = {
-	'SC-Mill': [
-		'Modeler',
-		'Machinist',
-		'SolidCAM Mill 2D',
-		'Profile/Pocket 2.5D Rest Material',
-		'SolidCAM Mill 2.5D',
-		'Pocket Recognition',
-		'Chamfer Recognition',
-		'Hole+Drill Recognition',
-		'SC Mill 3D',
-		'C-axes (Wrap)',
-		'4-axes Indexial',
-		'5-axes Indexial',
-		'Multi-Depth Drill'
-	],
-	'SC-Mill-5Axis': [
-		'Sim5x',
-		'Swarf machining',
-		'5x Drill',
-		'Contour 5x',
-		'Convert5X',
-		'Auto 3+2 Roughing',
-		'Screw Machining (Rotary)'
-	]
-};
+const MASTER_GROUP_BITS: Record<string, string[]> = Object.fromEntries(
+	packages
+		.filter((pkg) => pkg.groups && pkg.groups.length > 0)
+		.map((pkg) => [pkg.code, pkg.groups!.flatMap((g) => g.bits)])
+);
 
 /**
  * SKU ordering priority (lower = earlier in list)
