@@ -4,7 +4,7 @@
  */
 
 import { browser } from '$app/environment';
-import type { SyncStatus, UserPrefsData } from '$types';
+import type { SyncStatus, UserPrefsData, LicenseInfo } from '$types';
 import {
 	loadUserData,
 	queueSave,
@@ -117,6 +117,67 @@ function isDefaultLocalData(data: LocalData): boolean {
 	const panels = page.state?.panels ?? {};
 	const packages = page.state?.packages ?? {};
 	return Object.keys(panels).length === 0 && Object.keys(packages).length === 0;
+}
+
+/**
+ * Deduplicate licenses from two arrays, keeping all unique entries.
+ * Uses dongleNo + importedAt as composite key.
+ */
+function unionLicenses(a: LicenseInfo[] | undefined, b: LicenseInfo[] | undefined): LicenseInfo[] {
+	const all = [...(a || []), ...(b || [])];
+	const seen = new Set<string>();
+	return all.filter((lic) => {
+		const key = `${lic.dongleNo}::${lic.importedAt}`;
+		if (seen.has(key)) return false;
+		seen.add(key);
+		return true;
+	});
+}
+
+/**
+ * Merge local and cloud company data per-company instead of full overwrite.
+ * - Per-company: newer updatedAt wins for pages/state
+ * - Licenses: always unioned (never dropped)
+ * - Companies only on one side: kept
+ * - Favorites: unioned
+ */
+function mergeCompanyData(local: LocalData, cloud: LocalData): LocalData {
+	const localMap = new Map(local.companies.map((c) => [c.id, c]));
+	const cloudMap = new Map(cloud.companies.map((c) => [c.id, c]));
+	const allIds = new Set([...localMap.keys(), ...cloudMap.keys()]);
+
+	const merged = [];
+	for (const id of allIds) {
+		const lc = localMap.get(id);
+		const cc = cloudMap.get(id);
+
+		if (lc && !cc) {
+			merged.push(lc);
+		} else if (cc && !lc) {
+			merged.push(cc);
+		} else if (lc && cc) {
+			// Newer updatedAt wins for pages/state, licenses always unioned
+			const winner = (lc.updatedAt ?? 0) >= (cc.updatedAt ?? 0) ? { ...lc } : { ...cc };
+			winner.licenses = unionLicenses(lc.licenses, cc.licenses);
+			merged.push(winner);
+		}
+	}
+
+	// Union favorites (both sides), prefer local for UX state
+	const favSet = new Set([
+		...(local.favoriteCompanyIds || []),
+		...(cloud.favoriteCompanyIds || [])
+	]);
+	const existingIds = new Set(merged.map((c) => c.id));
+
+	return {
+		schemaVersion: local.schemaVersion ?? 1,
+		currentCompanyId: local.currentCompanyId,
+		companies: merged,
+		favoriteCompanyIds: [...favSet].filter((id) => existingIds.has(id)),
+		recentCompanyIds: local.recentCompanyIds || [],
+		updatedAt: Date.now()
+	};
 }
 
 /**
@@ -243,18 +304,16 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 		let shouldUpload = false;
 
 		if (cloudData?.pageSystem) {
-			if (!isSwitchingUsers && !localIsDefault && localUpdatedAt > cloudPageUpdatedAt) {
-				// Same user reconnecting with newer local changes - push to cloud
-				console.info('[SyncStore] Local data newer than cloud; uploading local changes.', {
-					localUpdatedAt,
-					cloudUpdatedAt: cloudPageUpdatedAt
-				});
-				shouldUpload = true;
-			} else {
-				// Cloud takes priority: it's newer, equal, or we're switching users (never overwrite
-				// another user's cloud data with a different user's local state)
+			if (isSwitchingUsers || localIsDefault) {
+				// Switching users or local is empty → take cloud as-is
 				companiesStore.importData(cloudData.pageSystem);
 				lastSyncTime = cloudUpdatedAt || Date.now();
+			} else {
+				// Same user, both sides have data → merge per-company
+				const merged = mergeCompanyData(localData, cloudData.pageSystem as LocalData);
+				companiesStore.importData(merged);
+				shouldUpload = true; // Push merged result so both browsers converge
+				console.info('[SyncStore] Merged local + cloud data per-company.');
 			}
 		} else {
 			// No cloud data for this user
