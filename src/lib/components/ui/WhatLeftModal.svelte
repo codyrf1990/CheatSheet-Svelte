@@ -200,7 +200,7 @@
 	);
 </script>
 
-<Modal {open} {onclose} title="What's Left — {skuMode === 'ms' ? 'MS' : 'BDM'}" size="wide">
+<Modal {open} {onclose} title="Upgrades — {skuMode === 'ms' ? 'MS' : 'BDM'}" size="wide">
 	{#if upgradeGroups.length === 0}
 		<div class="empty-state">
 			<p>All available packages and modules are already selected.</p>
@@ -230,7 +230,7 @@
 			{/each}
 
 			<div class="total-bar">
-				<span class="total-label">Total Upgrade Value</span>
+				<span class="total-label">Total Upgrades</span>
 				<span class="total-price">{formatPrice(totalUpgrade)}</span>
 			</div>
 		</div>

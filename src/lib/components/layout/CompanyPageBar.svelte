@@ -5,7 +5,7 @@
 	import { toastStore } from '$stores/toast.svelte';
 	import { AddSkuModal, Button, Input, Modal, ImportLicenseModal } from '$components/ui';
 	import { copyQBExportToClipboard } from '$lib/utils/quickbooksExport';
-	import { userPrefsStore } from '$stores/userPrefs.svelte';
+
 
 	interface Props {
 		editMode?: boolean;
@@ -47,7 +47,6 @@
 		| 'delete-company'
 		| 'delete-page'
 		| 'reset-order'
-		| 'set-rep-name'
 		| null
 	>(null);
 	let dialogTargetId = $state<string | null>(null);
@@ -104,8 +103,6 @@
 				return 'Delete Page';
 			case 'reset-order':
 				return 'Reset Order';
-			case 'set-rep-name':
-				return 'Set Rep Name';
 			default:
 				return '';
 		}
@@ -122,8 +119,6 @@
 				return 'Delete';
 			case 'reset-order':
 				return 'Reset';
-			case 'set-rep-name':
-				return 'Save';
 			default:
 				return '';
 		}
@@ -135,8 +130,6 @@
 				return 'Company name';
 			case 'rename-page':
 				return 'Page name';
-			case 'set-rep-name':
-				return 'Rep name';
 			default:
 				return '';
 		}
@@ -153,7 +146,7 @@
 		}
 		return '';
 	});
-	let dialogInputValid = $derived(dialogType === 'set-rep-name' || dialogInput.trim().length > 0);
+	let dialogInputValid = $derived(dialogInput.trim().length > 0);
 
 	function toggleDropdown(e: MouseEvent) {
 		e.stopPropagation();
@@ -273,12 +266,6 @@
 		closeContextMenu();
 	}
 
-	function handleSetRepName() {
-		dialogType = 'set-rep-name';
-		dialogInput = userPrefsStore.getRepName();
-		closeContextMenu();
-	}
-
 	async function handleCopyForQB() {
 		if (!currentCompany) {
 			toastStore.error('No company selected');
@@ -340,17 +327,29 @@
 		closeContextMenu();
 	}
 
-	function handleCopyPage() {
+	function handleDuplicatePage() {
 		const pageId = contextMenu?.id;
 		if (!pageId) return;
 		const page = companiesStore.copyPage(pageId);
 		if (page) {
-			toastStore.success('Page copied');
+			toastStore.success('Page duplicated');
 		}
 		closeContextMenu();
 	}
 
-	async function handleCopyKey() {
+	async function handleCopyPageName() {
+		const page = contextMenuPage;
+		if (!page) return;
+		try {
+			await navigator.clipboard.writeText(page.name);
+			toastStore.success('Copied');
+		} catch {
+			toastStore.error('Failed to copy');
+		}
+		closeContextMenu();
+	}
+
+	async function handleCopyLicenseKey() {
 		const page = contextMenuPage;
 		if (!page?.licenseKey) return;
 		try {
@@ -460,11 +459,6 @@
 			return;
 		}
 
-		if (dialogType === 'set-rep-name') {
-			userPrefsStore.setRepName(dialogInput.trim());
-			toastStore.success('Rep name saved');
-			closeDialog();
-		}
 	}
 
 	function handleDialogInputKeydown(e: KeyboardEvent) {
@@ -733,7 +727,6 @@
 			<button type="button" role="menuitem" onclick={handleDuplicateCompany}>Duplicate</button>
 			<button type="button" role="menuitem" onclick={handleImportLicense}>Import License</button>
 			<button type="button" role="menuitem" onclick={handleCopyForQB}>Copy for QB</button>
-			<button type="button" role="menuitem" onclick={handleSetRepName}>Set Rep Name</button>
 			<button type="button" role="menuitem" class="danger" onclick={handleDeleteCompany}
 				>Delete</button
 			>
@@ -745,9 +738,10 @@
 			{/if}
 		{:else}
 			<button type="button" role="menuitem" onclick={handleRenamePage}>Rename</button>
-			<button type="button" role="menuitem" onclick={handleCopyPage}>Copy</button>
+			<button type="button" role="menuitem" onclick={handleDuplicatePage}>Duplicate</button>
+			<button type="button" role="menuitem" onclick={handleCopyPageName}>Copy Page Name</button>
 			{#if contextMenuPage?.licenseKey}
-				<button type="button" role="menuitem" onclick={handleCopyKey}>Copy Key</button>
+				<button type="button" role="menuitem" onclick={handleCopyLicenseKey}>Copy License Key</button>
 			{/if}
 			<button type="button" role="menuitem" class="danger" onclick={handleDeletePage}>Delete</button
 			>

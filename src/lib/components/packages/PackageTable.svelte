@@ -6,10 +6,11 @@
 		packages: Package[];
 		editMode?: boolean;
 		maintenanceRange?: string;
+		skuMode?: 'bdm' | 'ms';
 		onwhatleft?: () => void;
 	}
 
-	let { packages, editMode = false, maintenanceRange = '', onwhatleft }: Props = $props();
+	let { packages, editMode = false, maintenanceRange = '', skuMode = 'bdm', onwhatleft }: Props = $props();
 </script>
 
 <div class="package-table-container">
@@ -29,11 +30,12 @@
 							<div class="bits-header-actions">
 								{#if onwhatleft}
 									<button
-										class="what-left-btn"
+										class="upgrades-btn"
+										class:upgrades-btn-ms={skuMode === 'ms'}
 										onclick={onwhatleft}
-										title="See what packages and modules are not yet selected"
+										title="See available upgrades and add-ons"
 									>
-										What's Left
+										Upgrades
 									</button>
 								{/if}
 								{#if maintenanceRange}
@@ -151,7 +153,7 @@
 		flex-wrap: wrap;
 	}
 
-	.what-left-btn {
+	.upgrades-btn {
 		font-size: 0.6rem;
 		font-weight: 700;
 		padding: 2px 7px;
@@ -161,16 +163,26 @@
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
 		line-height: 1.3;
-		background: rgba(74, 222, 128, 0.1);
-		color: #4ade80;
-		border: 1px solid rgba(74, 222, 128, 0.25);
+		background: rgba(212, 175, 55, 0.12);
+		color: var(--color-solidcam-gold, #d4af37);
+		border: 1px solid rgba(212, 175, 55, 0.3);
 		transition: all 150ms ease;
 	}
 
-	.what-left-btn:hover {
-		background: rgba(74, 222, 128, 0.2);
-		border-color: rgba(74, 222, 128, 0.5);
-		filter: brightness(1.1);
+	.upgrades-btn:hover {
+		background: rgba(212, 175, 55, 0.22);
+		border-color: rgba(212, 175, 55, 0.5);
+	}
+
+	.upgrades-btn-ms {
+		background: rgba(59, 130, 246, 0.12);
+		color: #60a5fa;
+		border-color: rgba(59, 130, 246, 0.3);
+	}
+
+	.upgrades-btn-ms:hover {
+		background: rgba(59, 130, 246, 0.22);
+		border-color: rgba(59, 130, 246, 0.5);
 	}
 
 	.maintenance-range {

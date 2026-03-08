@@ -91,7 +91,7 @@
 
 	// CF Tools links array (matching Machine Research)
 	const cfToolsLinks = [
-		{ label: 'Cheat Sheet', href: 'https://cheatsheet.crf-tools.com/' },
+		{ label: 'Cheat Sheet', href: 'https://cheatsheetv2.crf-tools.com/' },
 		{ label: 'TOS Tracker', href: 'https://tos-renewal-tracker.vercel.app/' },
 		{ label: 'Opp Tracker', href: 'https://opp-tracker.vercel.app/' },
 		{ label: 'Machine Catalogue', href: 'https://codyrf1990.github.io/machine-catalog-standalone/' }
@@ -245,6 +245,7 @@
 				{packages}
 				editMode={packageEditMode}
 				{maintenanceRange}
+				skuMode={effectiveSkuTabMode}
 				onwhatleft={() => (showWhatLeftModal = true)}
 			/>
 

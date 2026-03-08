@@ -60,8 +60,8 @@ test.describe('Build Mode', () => {
 			await expect(li.locator('input[type="checkbox"]')).toBeDisabled();
 		}
 
-		// What's Left button not shown yet
-		await expect(page.getByRole('button', { name: "What's Left" })).not.toBeVisible();
+		// Upgrades button not shown yet
+		await expect(page.getByRole('button', { name: "Upgrades" })).not.toBeVisible();
 	});
 
 	// -------------------------------------------------------------------------
@@ -83,8 +83,8 @@ test.describe('Build Mode', () => {
 		const hssLi = page.locator('li', { hasText: 'HSS' }).first();
 		await expect(hssLi.locator('input[type="checkbox"]')).toBeChecked();
 
-		// What's Left button now visible
-		await expect(page.getByRole('button', { name: "What's Left" })).toBeVisible();
+		// Upgrades button now visible
+		await expect(page.getByRole('button', { name: "Upgrades" })).toBeVisible();
 	});
 
 	// -------------------------------------------------------------------------
@@ -242,14 +242,14 @@ test.describe('Build Mode', () => {
 	});
 
 	// -------------------------------------------------------------------------
-	// 10. What's Left modal
+	// 10. Upgrades modal
 	// -------------------------------------------------------------------------
-	test("What's Left modal shows correct sections and descriptions", async ({ page }) => {
+	test("Upgrades modal shows correct sections and descriptions", async ({ page }) => {
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Mill bits' }).click();
-		await page.getByRole('button', { name: "What's Left" }).click();
+		await page.getByRole('button', { name: "Upgrades" }).click();
 
 		// Modal open
-		await expect(page.getByRole('heading', { name: "What's Left to Sell" })).toBeVisible();
+		await expect(page.getByRole('heading', { name: "Upgrades — BDM" })).toBeVisible();
 
 		// Correct section headings in order
 		const sections = page.locator('h4.group-title').filter({ hasText: /SC-MILL|ADDITIONAL/i });
@@ -265,6 +265,6 @@ test.describe('Build Mode', () => {
 
 		// Close modal
 		await page.getByRole('button', { name: 'Close' }).click();
-		await expect(page.getByRole('heading', { name: "What's Left to Sell" })).not.toBeVisible();
+		await expect(page.getByRole('heading', { name: "Upgrades — BDM" })).not.toBeVisible();
 	});
 });
