@@ -99,6 +99,20 @@ export interface CloudUserData {
 
 export type SyncStatus = 'disconnected' | 'connecting' | 'connected' | 'syncing' | 'error';
 
+// Extended sync session state (superset of SyncStatus with richer offline/reconnection states)
+export type SyncSessionState =
+	| 'disconnected'
+	| 'connecting'
+	| 'connected'
+	| 'syncing'
+	| 'reconnecting'
+	| 'local_only'
+	| 'degraded'
+	| 'error';
+
+// Boot phase for startup coordination
+export type BootPhase = 'idle' | 'prefs' | 'companies' | 'sync' | 'ready' | 'error';
+
 // Header Links
 export interface HeaderLink {
 	label: string;

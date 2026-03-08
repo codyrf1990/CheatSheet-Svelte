@@ -5,9 +5,16 @@
 
 import { browser } from '$app/environment';
 import type { SyncStatus, UserPrefsData } from '$types';
-import { loadUserData, queueSave, cancelPendingSave, flushPendingSave, normalizeUsername } from '$firebase';
+import {
+	loadUserData,
+	queueSave,
+	cancelPendingSave,
+	flushPendingSave,
+	normalizeUsername
+} from '$firebase';
 import { companiesStore, DEFAULT_COMPANY_NAME, DEFAULT_PAGE_NAME } from './companies.svelte';
 import { userPrefsStore } from './userPrefs.svelte';
+import { syncSession } from './syncSession.svelte';
 
 const SYNC_USERNAME_KEY = 'solidcam-sync-username';
 const REMEMBER_ME_KEY = 'solidcam-remember-me';
@@ -130,20 +137,24 @@ function queueCombinedSave(): void {
 	if (!autoSyncEnabled || !username) return;
 
 	status = 'syncing';
+	syncSession.transition('syncing');
 
 	const payload = buildSyncPayload();
 	queueSave(username, payload, (success, err) => {
 		if (success) {
 			lastSyncTime = Date.now();
 			status = 'connected';
+			syncSession.transition('connected');
 			error = null;
 		} else if (err) {
 			status = 'error';
+			syncSession.transition('error');
 			error = err.message || 'Sync failed';
 			console.error('[SyncStore] Auto-sync failed:', err);
 		} else {
 			// Clean cancel (user switched accounts) — not an error
 			status = 'connected';
+			syncSession.transition('connected');
 		}
 	});
 }
@@ -196,6 +207,7 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 	const normalizedName = normalizeUsername(trimmedName);
 	error = null;
 	status = 'connecting';
+	syncSession.transition('connecting');
 	rememberMe = remember;
 
 	// Check if switching to a different user - reset syncable prefs to prevent cross-user pollution
@@ -288,6 +300,21 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 		saveToLocalStorage();
 		startAutoSync();
 		status = 'connected';
+		syncSession.transition('connected');
+
+		// Register reconnection handler so syncSession can auto-recover on network restore
+		syncSession.setReconnectHandler(async () => {
+			if (!username) return false;
+			try {
+				await loadUserData(username);
+				status = 'connected';
+				syncSession.transition('connected');
+				startAutoSync();
+				return true;
+			} catch {
+				return false;
+			}
+		});
 
 		return true;
 	} catch (err) {
@@ -295,6 +322,7 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 		console.warn('[SyncStore] Cloud read failed, entering local-only mode:', err);
 		error = err instanceof Error ? err.message : 'Cloud sync unavailable';
 		status = 'error';
+		syncSession.transition('local_only');
 		// Set username so user enters the app; do NOT start auto-sync writes
 		username = trimmedName;
 		lastConnectedUsername = normalizedName;
@@ -319,8 +347,11 @@ async function disconnect(): Promise<void> {
 	}
 
 	stopAutoSync();
+	syncSession.setReconnectHandler(null);
+	syncSession.cancelReconnect();
 	username = null;
 	status = 'disconnected';
+	syncSession.transition('disconnected');
 	lastSyncTime = null;
 	error = null;
 	saveToLocalStorage();
@@ -441,6 +472,13 @@ export const syncStore = {
 	},
 	get rememberMe() {
 		return rememberMe;
+	},
+	/** Extended sync session state (richer than status) */
+	get sessionState() {
+		return syncSession.state;
+	},
+	get isOnline() {
+		return syncSession.isOnline;
 	},
 
 	// Operations

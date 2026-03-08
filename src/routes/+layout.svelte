@@ -6,7 +6,7 @@
 	import { ToastContainer, Skeleton } from '$components/ui';
 	import { LoginScreen } from '$components/layout';
 	import { syncStore } from '$stores/sync.svelte';
-	import { companiesStore } from '$stores/companies.svelte';
+	import { bootPhaseStore } from '$stores/bootPhase.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 
 	interface Props {
@@ -14,22 +14,13 @@
 	}
 
 	let { children }: Props = $props();
-	let initialized = $state(false);
 	let videoRef: HTMLVideoElement | null = $state(null);
+
+	const initialized = $derived(bootPhaseStore.isReady);
 
 	$effect(() => {
 		untrack(() => {
-			(async () => {
-				userPrefsStore.init();
-				companiesStore.load();
-				// Race against a 3s timeout — if Firebase IndexedDB lock is stale
-				// (e.g. after a browser crash) we still show the login screen promptly.
-				await Promise.race([
-					syncStore.load(),
-					new Promise<void>((resolve) => setTimeout(resolve, 3_000))
-				]);
-				initialized = true;
-			})();
+			bootPhaseStore.boot();
 		});
 
 		// Flush pending debounced save when tab is hidden (covers mobile/Safari tab-close too)
