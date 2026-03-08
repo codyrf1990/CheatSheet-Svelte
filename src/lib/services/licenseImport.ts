@@ -199,7 +199,13 @@ export function importLicense(license: LicenseInfo, overrideCompanyName?: string
 	}
 
 	// 10. Package-level maint SKUs — add when package is fully selected
-	const PACKAGE_CODES = ['SC-Mill', 'SC-Mill-Adv', 'SC-Mill-3D', 'SC-Mill-5Axis', 'SC-Turn'] as const;
+	const PACKAGE_CODES = [
+		'SC-Mill',
+		'SC-Mill-Adv',
+		'SC-Mill-3D',
+		'SC-Mill-5Axis',
+		'SC-Turn'
+	] as const;
 	for (const code of PACKAGE_CODES) {
 		const pkgEntry = SKU_LOOKUP[`${code}::PACKAGE`];
 		if (!pkgEntry?.maintSku) continue;

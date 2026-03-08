@@ -13,7 +13,8 @@ export const BIT_DESCRIPTIONS: Record<string, string> = {
 	iMach3D: 'iMachining 3D — adaptive 3D roughing on top of HSM. Requires SC-Mill and iMach2D.',
 	// SC-Mill-5Axis
 	Sim4x: 'Simultaneous 4-axis — rotary and 4th-axis contouring. Requires SC-Mill.',
-	'Multiaxis Roughing': 'Multiaxis roughing — 5-axis stock removal with tilted tool to avoid collisions. Requires SC-Mill.',
+	'Multiaxis Roughing':
+		'Multiaxis roughing — 5-axis stock removal with tilted tool to avoid collisions. Requires SC-Mill.',
 	// SC-Turn
 	'SC-Turn':
 		'Turning module — profile turning, grooving, threading, backspindle. Includes Mill-Turn when combined with SC-Mill.',
@@ -39,5 +40,6 @@ export const BIT_DESCRIPTIONS: Record<string, string> = {
 	'SC-Wire': '4-axis wire EDM — adds upper/lower independent contour cutting.',
 	'SolidShop-Editor': 'CIMCO Editor for NC code editing, backplotting, and DNC communication.',
 	'SC-4Op': 'Operator-facing interface for running and managing SolidCAM jobs on the shop floor.',
-	'SC-4Op-Sim': 'Simulation-only operator interface — run and visualize jobs without full NC output access.'
+	'SC-4Op-Sim':
+		'Simulation-only operator interface — run and visualize jobs without full NC output access.'
 };

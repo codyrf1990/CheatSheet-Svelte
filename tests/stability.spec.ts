@@ -63,7 +63,6 @@ test.describe('Fresh-login stability', () => {
 		const depthErrors = consoleErrors.filter((e) => e.includes('effect_update_depth_exceeded'));
 		expect(depthErrors, `Depth errors found: ${depthErrors.join('\n')}`).toHaveLength(0);
 	});
-
 });
 
 // ---------------------------------------------------------------------------
@@ -96,9 +95,7 @@ test.describe('Add-page stability', () => {
 		const lastTab = tabs.nth(count - 1);
 		await expect(lastTab).toHaveAttribute('aria-selected', 'true', { timeout: 3_000 });
 	});
-
 });
-
 
 // ---------------------------------------------------------------------------
 // 5. Local-first sync fallback

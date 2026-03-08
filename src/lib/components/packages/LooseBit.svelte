@@ -90,7 +90,7 @@
 	<div class="bit-row">
 		<span
 			class="checkbox-wrapper"
-			{...(disabled ? { role: 'button', tabindex: 0 } : {})}
+			{...disabled ? { role: 'button', tabindex: 0 } : {}}
 			onclick={disabled ? handleToggle : undefined}
 			onkeydown={disabled ? handleWrapperKeydown : undefined}
 		>

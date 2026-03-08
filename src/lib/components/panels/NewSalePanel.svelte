@@ -24,7 +24,6 @@
 		subEntries?: SkuEntry[];
 	}
 
-
 	// Derive sale lines from current package selections
 	let saleLines = $derived.by(() => {
 		const lines: SaleLine[] = [];

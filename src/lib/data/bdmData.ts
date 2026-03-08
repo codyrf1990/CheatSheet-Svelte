@@ -121,9 +121,7 @@ export const BDM_SECTIONS: BDMSection[] = [
 	{
 		id: 'wire',
 		title: 'Wire EDM',
-		items: [
-			{ sku: 'SC-Wire', label: 'Wirecut 4 Axis', price: 3450, maint: 450 }
-		]
+		items: [{ sku: 'SC-Wire', label: 'Wirecut 4 Axis', price: 3450, maint: 450 }]
 	},
 	{
 		id: 'solidworks',

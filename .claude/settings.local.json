@@ -26,7 +26,21 @@
       "mcp__playwright__browser_type",
       "mcp__playwright__browser_click",
       "mcp__playwright__browser_run_code",
-      "mcp__playwright__browser_snapshot"
+      "mcp__playwright__browser_snapshot",
+      "WebSearch",
+      "Bash(where:*)",
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(mv:*)",
+      "Bash(python3:*)",
+      "Bash(powershell:*)",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(grep \"''.*'':\" packages.ts)",
+      "Bash(git tag:*)",
+      "Bash(git checkout:*)",
+      "Bash(npx playwright:*)",
+      "Bash(git log:*)",
+      "Bash(git:*)"
     ]
   }
 }

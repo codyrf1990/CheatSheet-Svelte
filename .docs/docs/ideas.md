@@ -1,13 +1,15 @@
 # Ideas & Backlog
+
 NEW Idea add aautomatic recgonition of a solidowrks license file and auto import thatas well as we can set info gates if we need extra info will supply pdf of each type of license
+
 ## Bugs
 
-- [ ] **Sim5x false positive** — Sim5x bit gets checked when customer only has HSS + Sim4x. Should only check Sim5x if the license explicitly says "Sim 5x". |Sim 5x Bit|Sim 5x Level|Maps To|Notes|
-|---|---|---|---|
-|**0**|Any|None|Bit disabled — ignore level.|
-|**1**|"3 Axis" or "1"|**SC-HSS-Maint** only|Restricted to 3-axis HSS.|
-|**1**|"3/4 Axis"|**SC-HSS-Maint** + **SC-Sim4x-Maint**|Allows 4-axis simultaneous.|
-|**1**|Blank / empty|Check all 5-axis bits|Unrestricted — follow package default logic.|  the logic should follow this on importing.
+- [ ] | **Sim5x false positive** — Sim5x bit gets checked when customer only has HSS + Sim4x. Should only check Sim5x if the license explicitly says "Sim 5x". | Sim 5x Bit      | Sim 5x Level                          | Maps To                                      | Notes                                      |
+      | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- | ------------------------------------- | -------------------------------------------- | ------------------------------------------ |
+      | **0**                                                                                                                                                  | Any             | None                                  | Bit disabled — ignore level.                 |
+      | **1**                                                                                                                                                  | "3 Axis" or "1" | **SC-HSS-Maint** only                 | Restricted to 3-axis HSS.                    |
+      | **1**                                                                                                                                                  | "3/4 Axis"      | **SC-HSS-Maint** + **SC-Sim4x-Maint** | Allows 4-axis simultaneous.                  |
+      | **1**                                                                                                                                                  | Blank / empty   | Check all 5-axis bits                 | Unrestricted — follow package default logic. | the logic should follow this on importing. |
 
 - [ ] **Narrow viewport: check-all checkbox hidden** — At small screen widths the top-level "select all packages" checkbox disappears in the maintenance SKU tab. Should stay visible at all widths.
 

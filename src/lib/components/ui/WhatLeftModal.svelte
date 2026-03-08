@@ -194,7 +194,8 @@
 
 	let totalUpgrade = $derived(
 		upgradeGroups.reduce(
-			(sum, g) => sum + g.items.reduce((s, i) => s + (skuMode === 'ms' ? i.maintPrice : i.price), 0),
+			(sum, g) =>
+				sum + g.items.reduce((s, i) => s + (skuMode === 'ms' ? i.maintPrice : i.price), 0),
 			0
 		)
 	);
@@ -216,8 +217,15 @@
 								<div class="item-header">
 									<span class="item-name">{item.name}</span>
 									<div class="item-meta">
-										<button type="button" class="item-sku" onclick={() => handleCopySku(skuMode === 'ms' ? item.maintSku : item.sku)} title="Click to copy">{skuMode === 'ms' ? item.maintSku : item.sku}</button>
-										<span class="item-price">{formatPrice(skuMode === 'ms' ? item.maintPrice : item.price)}</span>
+										<button
+											type="button"
+											class="item-sku"
+											onclick={() => handleCopySku(skuMode === 'ms' ? item.maintSku : item.sku)}
+											title="Click to copy">{skuMode === 'ms' ? item.maintSku : item.sku}</button
+										>
+										<span class="item-price"
+											>{formatPrice(skuMode === 'ms' ? item.maintPrice : item.price)}</span
+										>
 									</div>
 								</div>
 								{#if item.description}

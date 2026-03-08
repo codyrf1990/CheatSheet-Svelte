@@ -84,7 +84,7 @@
 	<div class="bit-row">
 		<span
 			class="checkbox-wrapper"
-			{...(disabled ? { role: 'button', tabindex: 0 } : {})}
+			{...disabled ? { role: 'button', tabindex: 0 } : {}}
 			onclick={disabled ? handleToggle : undefined}
 			onkeydown={disabled ? handleWrapperKeydown : undefined}
 		>
@@ -97,7 +97,8 @@
 			tabindex="0"
 			onclick={handleCopy}
 			onkeydown={handleKeydown}
-			data-copyable-bit>{#if isCustom}<span class="custom-indicator">+</span>{/if}{bit}</span
+			data-copyable-bit
+			>{#if isCustom}<span class="custom-indicator">+</span>{/if}{bit}</span
 		>
 	</div>
 </li>

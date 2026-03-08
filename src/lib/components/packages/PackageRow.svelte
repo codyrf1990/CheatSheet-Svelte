@@ -294,7 +294,11 @@
 						<li class="loose-bit">
 							<div class="bit-label">
 								<span class="checkbox-wrapper">
-									<Checkbox checked={scTurnSelected} onchange={handleSCTurnToggle} disabled={!!SC_TURN_LOCKED.find((b) => disabledBits.has(b))} />
+									<Checkbox
+										checked={scTurnSelected}
+										onchange={handleSCTurnToggle}
+										disabled={!!SC_TURN_LOCKED.find((b) => disabledBits.has(b))}
+									/>
 								</span>
 								<span
 									class="bit-text"

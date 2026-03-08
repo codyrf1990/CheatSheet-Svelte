@@ -2,7 +2,11 @@
 	import type { LicenseInfo, ImportResult } from '$lib/types';
 	import { parseSalesforceText } from '$lib/utils/salesforceParser';
 	import { getPageNameForLicense } from '$lib/utils/licenseSelections';
-	import { importLicense, needsCompanyNameInput, getImportPreview } from '$lib/services/licenseImport';
+	import {
+		importLicense,
+		needsCompanyNameInput,
+		getImportPreview
+	} from '$lib/services/licenseImport';
 	import { toastStore } from '$lib/stores/toast.svelte';
 	import Modal from './Modal.svelte';
 	import Button from './Button.svelte';
@@ -327,12 +331,9 @@ HSM           Checked    5-axes indexial  Not Checked"
 
 				{#if importResult.importedSkuList?.length}
 					<div class="skus-section">
-						<button
-							class="features-toggle"
-							onclick={() => (showSkus = !showSkus)}
-							type="button"
-						>
-							<span class="features-count">{importResult.importedSkuList.length} SKUs imported</span>
+						<button class="features-toggle" onclick={() => (showSkus = !showSkus)} type="button">
+							<span class="features-count">{importResult.importedSkuList.length} SKUs imported</span
+							>
 							<span class="toggle-icon">{showSkus ? '\u25BC' : '\u25B6'}</span>
 						</button>
 						{#if showSkus}

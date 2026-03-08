@@ -10,7 +10,13 @@
 		onwhatleft?: () => void;
 	}
 
-	let { packages, editMode = false, maintenanceRange = '', skuMode = 'bdm', onwhatleft }: Props = $props();
+	let {
+		packages,
+		editMode = false,
+		maintenanceRange = '',
+		skuMode = 'bdm',
+		onwhatleft
+	}: Props = $props();
 </script>
 
 <div class="package-table-container">
