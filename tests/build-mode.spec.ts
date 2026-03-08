@@ -67,8 +67,8 @@ test.describe('Build Mode', () => {
 			await expect(li.locator('input[type="checkbox"]')).toBeDisabled();
 		}
 
-		// Upgrades button not shown yet
-		await expect(page.getByRole('button', { name: 'Upgrades' })).not.toBeVisible();
+		// Upgrades button is always visible (shows available add-ons regardless of selection)
+		await expect(page.getByRole('button', { name: 'Upgrades' })).toBeVisible();
 	});
 
 	// -------------------------------------------------------------------------
@@ -243,15 +243,15 @@ test.describe('Build Mode', () => {
 
 		await expect(page.getByRole('button', { name: 'SC-HSS' })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'SC-25M' })).toBeVisible();
-		await expect(page.getByText('$3,868')).toBeVisible(); // SC-Mill package price
+		await expect(page.getByText('$3,868').first()).toBeVisible(); // SC-Mill package price
 	});
 
 	test('SC-Turn adds SC-Turn SKU and updates total', async ({ page }) => {
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Mill bits' }).click();
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Turn bits' }).click();
 
-		await expect(page.getByTitle('Click to copy SC-Turn')).toBeVisible();
-		await expect(page.getByText('$6,168')).toBeVisible(); // $3,868 + $2,300
+		await expect(page.getByTitle('Click to copy SC-Turn', { exact: true })).toBeVisible();
+		await expect(page.getByText('$6,168').first()).toBeVisible(); // $3,868 + $2,300
 	});
 
 	// -------------------------------------------------------------------------
@@ -264,17 +264,17 @@ test.describe('Build Mode', () => {
 		// Modal open
 		await expect(page.getByRole('heading', { name: 'Upgrades — BDM' })).toBeVisible();
 
-		// Correct section headings in order
-		const sections = page.locator('h4.group-title').filter({ hasText: /SC-MILL|ADDITIONAL/i });
+		// Correct section headings — packages show as groups when fully unselected
+		const sections = page.locator('h4.group-title');
 		await expect(sections.first()).toContainText('SC-Mill-Adv');
 
-		// iMach2D has a description
-		const iMach2DRow = page.locator('.upgrade-item', { hasText: 'iMachining 2D' }).first();
-		await expect(iMach2DRow).toContainText('adaptive roughing');
+		// Package-level entries shown (whole groups unselected → single package item)
+		const advRow = page.locator('.upgrade-item', { hasText: 'SC-Mill-Adv' }).first();
+		await expect(advRow).toBeVisible();
 
-		// Multiaxis Roughing now has a real description (our bug fix)
-		const multiaxisRow = page.locator('.upgrade-item', { hasText: 'Multiaxis Roughing' }).first();
-		await expect(multiaxisRow).toContainText('5-axis stock removal');
+		// SC-Turn upgrade available
+		const turnRow = page.locator('.upgrade-item', { hasText: 'SC-Turn' }).first();
+		await expect(turnRow).toBeVisible();
 
 		// Close modal
 		await page.getByRole('button', { name: 'Close' }).click();
