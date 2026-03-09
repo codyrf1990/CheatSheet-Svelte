@@ -164,6 +164,7 @@
 	}
 
 	.toast-close {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -177,6 +178,16 @@
 		cursor: pointer;
 		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 		flex-shrink: 0;
+	}
+
+	/* Expand touch target to 44x44 */
+	.toast-close::after {
+		content: '';
+		position: absolute;
+		inset: 50% auto auto 50%;
+		width: 44px;
+		height: 44px;
+		transform: translate(-50%, -50%);
 	}
 
 	.toast-close svg {

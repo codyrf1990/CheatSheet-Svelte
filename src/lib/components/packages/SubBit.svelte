@@ -32,6 +32,7 @@
 	}: Props = $props();
 
 	let isSelected = $derived(packagesStore.isBitSelected(packageCode, bit));
+	let justCopied = $state(false);
 
 	function handleToggle() {
 		if (editMode) return;
@@ -46,7 +47,8 @@
 		if (editMode) return;
 		try {
 			await navigator.clipboard.writeText(bit);
-			toastStore.success('Copied!', 1500);
+			justCopied = true;
+			setTimeout(() => (justCopied = false), 1500);
 		} catch {
 			toastStore.error('Failed to copy');
 		}
@@ -98,7 +100,7 @@
 			onclick={handleCopy}
 			onkeydown={handleKeydown}
 			data-copyable-bit
-			>{#if isCustom}<span class="custom-indicator">+</span>{/if}{bit}</span
+			>{#if justCopied}<span class="copy-check">&#10003;</span>{:else}{#if isCustom}<span class="custom-indicator">+</span>{/if}{bit}{/if}</span
 		>
 	</div>
 </li>
@@ -133,6 +135,9 @@
 
 	.sub-bit[draggable='true']:active {
 		cursor: grabbing;
+		opacity: 0.5;
+		outline: 2px dashed rgba(212, 175, 55, 0.5);
+		outline-offset: 1px;
 	}
 
 	.sub-bit[draggable='true'] .bit-row,
@@ -178,6 +183,10 @@
 
 	.bit-text:hover {
 		color: var(--chip-text-hover);
+	}
+
+	.copy-check {
+		color: var(--color-success, #22c55e);
 	}
 
 	.bit-text.custom {

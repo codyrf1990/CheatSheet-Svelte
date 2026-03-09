@@ -101,6 +101,7 @@
 		align-items: center;
 		gap: 0.375rem;
 		padding: 0;
+		min-height: 44px;
 		background: transparent;
 		border: none;
 		cursor: pointer;
@@ -132,6 +133,7 @@
 	}
 
 	.panel-control-btn {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -146,6 +148,16 @@
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 150ms ease;
+	}
+
+	/* Expand touch target to 44x44 */
+	.panel-control-btn::after {
+		content: '';
+		position: absolute;
+		inset: 50% auto auto 50%;
+		width: 44px;
+		height: 44px;
+		transform: translate(-50%, -50%);
 	}
 
 	.panel-control-btn:hover {

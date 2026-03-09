@@ -101,6 +101,9 @@
 
 	.panel-item[draggable='true']:active {
 		cursor: grabbing;
+		opacity: 0.5;
+		outline: 2px dashed rgba(212, 175, 55, 0.5);
+		outline-offset: 1px;
 	}
 
 	.panel-item[draggable='true'] .panel-item-main,

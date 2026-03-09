@@ -336,7 +336,8 @@
 		overflow: hidden;
 	}
 
-	.user-container:hover .change-link {
+	.user-container:hover .change-link,
+	.user-container:focus-within .change-link {
 		max-height: 1.5rem;
 		opacity: 1;
 	}
@@ -391,6 +392,7 @@
 	}
 
 	.user-container:hover .settings-button,
+	.user-container:focus-within .settings-button,
 	.user-container.actions-visible .settings-button {
 		max-height: 1.5rem;
 		opacity: 1;

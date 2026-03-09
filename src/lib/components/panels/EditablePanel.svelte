@@ -110,22 +110,26 @@
 	onAddItem={handleAddItem}
 	onToggleRemove={handleToggleRemove}
 >
-	<ul class="panel-items" data-sortable-group={panel.id} ondragend={handleDragEnd}>
-		{#each items as item, index (item)}
-			<PanelItem
-				{item}
-				checked={panelsStore.hasItem(panel.id, item)}
-				showCheckbox={showCheckboxes}
-				{removeMode}
-				draggable={panel.editable && !removeMode}
-				onToggle={() => handleItemToggle(item)}
-				onRemove={() => handleItemRemove(item)}
-				ondragstart={(e) => handleDragStart(e, index)}
-				ondragover={handleDragOver}
-				ondrop={(e) => handleDrop(e, index)}
-			/>
-		{/each}
-	</ul>
+	{#if items.length === 0}
+		<p class="empty-state">Click + to add an item</p>
+	{:else}
+		<ul class="panel-items" data-sortable-group={panel.id} ondragend={handleDragEnd}>
+			{#each items as item, index (item)}
+				<PanelItem
+					{item}
+					checked={panelsStore.hasItem(panel.id, item)}
+					showCheckbox={showCheckboxes}
+					{removeMode}
+					draggable={panel.editable && !removeMode}
+					onToggle={() => handleItemToggle(item)}
+					onRemove={() => handleItemRemove(item)}
+					ondragstart={(e) => handleDragStart(e, index)}
+					ondragover={handleDragOver}
+					ondrop={(e) => handleDrop(e, index)}
+				/>
+			{/each}
+		</ul>
+	{/if}
 </Panel>
 
 {#snippet addDialogFooter()}
@@ -160,6 +164,15 @@
 		gap: var(--space-0-5);
 		padding: var(--space-px);
 		list-style: none;
+		margin: 0;
+	}
+
+	.empty-state {
+		text-align: center;
+		padding: var(--space-4) var(--space-2);
+		font-size: var(--text-xs);
+		color: rgba(255, 255, 255, 0.4);
+		font-style: italic;
 		margin: 0;
 	}
 

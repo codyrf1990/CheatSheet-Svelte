@@ -471,6 +471,39 @@
 		}
 	});
 
+	// Company dropdown keyboard navigation
+	function handleDropdownKeydown(e: KeyboardEvent) {
+		if (!dropdownOpen) return;
+		const items = Array.from(
+			document.querySelectorAll<HTMLElement>('.dropdown-menu [role="option"]')
+		);
+		if (items.length === 0) return;
+
+		const current = items.indexOf(document.activeElement as HTMLElement);
+
+		if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			if (document.activeElement === searchInputRef) {
+				items[0]?.focus();
+			} else {
+				items[Math.min(current + 1, items.length - 1)]?.focus();
+			}
+		} else if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			if (current <= 0) {
+				searchInputRef?.focus();
+			} else {
+				items[current - 1]?.focus();
+			}
+		} else if (e.key === 'Home') {
+			e.preventDefault();
+			items[0]?.focus();
+		} else if (e.key === 'End') {
+			e.preventDefault();
+			items[items.length - 1]?.focus();
+		}
+	}
+
 	// Close dropdown/context when clicking outside
 	function handleWindowClick(e: MouseEvent) {
 		const target = e.target as HTMLElement;
@@ -499,6 +532,28 @@
 			closeActionsMenu();
 			kebabTriggerRef?.focus();
 		}
+	}
+
+	// Page tab arrow-key navigation (roving tabindex)
+	function handlePageTabKeydown(e: KeyboardEvent) {
+		const target = e.currentTarget as HTMLElement;
+		const tablist = target.closest('[role="tablist"]');
+		if (!tablist) return;
+		const tabs = Array.from(tablist.querySelectorAll<HTMLElement>('[role="tab"]'));
+		const idx = tabs.indexOf(target);
+		if (idx === -1) return;
+
+		let next: number | null = null;
+		if (e.key === 'ArrowRight') next = (idx + 1) % tabs.length;
+		else if (e.key === 'ArrowLeft') next = (idx - 1 + tabs.length) % tabs.length;
+		else if (e.key === 'Home') next = 0;
+		else if (e.key === 'End') next = tabs.length - 1;
+		if (next === null) return;
+
+		e.preventDefault();
+		tabs[next].focus();
+		tabs[next].click(); // select-follows-focus
+		tabs[next].scrollIntoView({ block: 'nearest', inline: 'nearest' });
 	}
 </script>
 
@@ -559,9 +614,11 @@
 							class="page-tab"
 							class:active={page.id === currentCompany.currentPageId}
 							aria-selected={page.id === currentCompany.currentPageId}
+							tabindex={page.id === currentCompany.currentPageId ? 0 : -1}
 							onclick={() => handlePageSelect(page.id)}
 							ondblclick={() => handlePageDoubleClick(page.id, page.name)}
 							oncontextmenu={(e) => handlePageContextMenu(e, page.id)}
+							onkeydown={handlePageTabKeydown}
 							title="Double-click to rename"
 						>
 							{page.name}
@@ -620,8 +677,10 @@
 	<div
 		class="dropdown-menu"
 		role="listbox"
+		tabindex="-1"
 		aria-label="Companies"
 		style="top: {dropdownPosition.top}px; left: {dropdownPosition.left}px;"
+		onkeydown={handleDropdownKeydown}
 	>
 		<!-- Search (fixed) -->
 		<div class="dropdown-header">
@@ -1141,6 +1200,7 @@
 	}
 
 	.page-tab-menu-btn {
+		position: relative;
 		opacity: 0;
 		padding: 0.1rem 0.15rem;
 		margin-left: -0.15rem;
@@ -1152,6 +1212,18 @@
 		border-radius: 4px;
 		cursor: pointer;
 		transition: opacity 150ms ease;
+	}
+
+	/* Expand touch target to 44x44 on touch devices only */
+	@media (hover: none) {
+		.page-tab-menu-btn::after {
+			content: '';
+			position: absolute;
+			inset: 50% auto auto 50%;
+			width: 44px;
+			height: 44px;
+			transform: translate(-50%, -50%);
+		}
 	}
 
 	.page-tab-group:hover .page-tab-menu-btn,
@@ -1204,6 +1276,7 @@
 	}
 
 	.kebab-trigger {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -1218,6 +1291,16 @@
 		line-height: 1;
 		cursor: pointer;
 		transition: all 150ms ease;
+	}
+
+	/* Expand touch target to 44x44 */
+	.kebab-trigger::after {
+		content: '';
+		position: absolute;
+		inset: 50% auto auto 50%;
+		width: 44px;
+		height: 44px;
+		transform: translate(-50%, -50%);
 	}
 
 	.kebab-trigger:hover {

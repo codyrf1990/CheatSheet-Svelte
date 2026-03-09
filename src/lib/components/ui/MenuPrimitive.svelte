@@ -65,18 +65,34 @@
 	});
 
 	// Viewport clamping
+	function clampToViewport() {
+		if (!menuRef) return;
+		const rect = menuRef.getBoundingClientRect();
+		if (rect.bottom > window.innerHeight) {
+			menuRef.style.top = `${window.innerHeight - rect.height - 8}px`;
+		}
+		if (rect.right > window.innerWidth) {
+			menuRef.style.left = `${window.innerWidth - rect.width - 8}px`;
+		}
+	}
+
 	$effect(() => {
 		if (!open || !menuRef) return;
-		requestAnimationFrame(() => {
-			if (!menuRef) return;
-			const rect = menuRef.getBoundingClientRect();
-			if (rect.bottom > window.innerHeight) {
-				menuRef.style.top = `${window.innerHeight - rect.height - 8}px`;
-			}
-			if (rect.right > window.innerWidth) {
-				menuRef.style.left = `${window.innerWidth - rect.width - 8}px`;
-			}
-		});
+		requestAnimationFrame(clampToViewport);
+
+		// Re-clamp on resize/scroll, dismiss on orientation change
+		const onResize = () => clampToViewport();
+		const onScroll = () => clampToViewport();
+		const onOrientationChange = () => onclose();
+
+		window.addEventListener('resize', onResize);
+		window.addEventListener('scroll', onScroll, true);
+		window.addEventListener('orientationchange', onOrientationChange);
+		return () => {
+			window.removeEventListener('resize', onResize);
+			window.removeEventListener('scroll', onScroll, true);
+			window.removeEventListener('orientationchange', onOrientationChange);
+		};
 	});
 
 	let positionStyle = $derived.by(() => {

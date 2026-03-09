@@ -212,6 +212,31 @@
 			showCFTools = false;
 		}
 	}
+
+	// Keyboard navigation for dropdown menus (Operations, CF Tools)
+	function handleMenuKeydown(e: KeyboardEvent, closeFn: () => void) {
+		const menu = (e.currentTarget as HTMLElement);
+		const items = Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+		if (items.length === 0) return;
+		const current = items.indexOf(document.activeElement as HTMLElement);
+
+		if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			items[(current + 1) % items.length]?.focus();
+		} else if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			items[(current - 1 + items.length) % items.length]?.focus();
+		} else if (e.key === 'Home') {
+			e.preventDefault();
+			items[0]?.focus();
+		} else if (e.key === 'End') {
+			e.preventDefault();
+			items[items.length - 1]?.focus();
+		} else if (e.key === 'Escape') {
+			e.preventDefault();
+			closeFn();
+		}
+	}
 </script>
 
 <svelte:window onclick={handleWindowClick} />
@@ -343,6 +368,8 @@
 		class="dropdown-menu operations-menu"
 		style="top: {operationsPosition.top}px; left: {operationsPosition.left}px;"
 		role="menu"
+		tabindex="-1"
+		onkeydown={(e) => handleMenuKeydown(e, closeOperations)}
 	>
 		<button class="dropdown-item" role="menuitem" onclick={handleSalesTax}>
 			<span class="dropdown-icon" aria-hidden="true">
@@ -371,6 +398,8 @@
 		class="dropdown-menu cf-tools-menu"
 		style="top: {cfToolsPosition.top}px; left: {cfToolsPosition.left}px;"
 		role="menu"
+		tabindex="-1"
+		onkeydown={(e) => handleMenuKeydown(e, closeCFTools)}
 	>
 		{#each cfToolsLinks as link (link.href)}
 			<a

@@ -58,10 +58,13 @@
 		}
 	}
 
+	let copiedSku = $state<string | null>(null);
+
 	async function copySku(sku: string) {
 		try {
 			await navigator.clipboard.writeText(sku);
-			toastStore.success(`Copied ${sku}`, 1500);
+			copiedSku = sku;
+			setTimeout(() => (copiedSku = null), 1500);
 		} catch {
 			toastStore.error('Failed to copy');
 		}
@@ -121,7 +124,7 @@
 									onclick={() => copySku(item.sku)}
 									title="Click to copy {item.sku}"
 								>
-									{item.sku}
+									{#if copiedSku === item.sku}<span class="copy-check">&#10003;</span>{:else}{item.sku}{/if}
 								</button>
 								<span class="item-label">{item.label}</span>
 								<div class="item-pricing">
@@ -272,6 +275,10 @@
 
 	.sku-chip:hover {
 		color: var(--chip-text-hover);
+	}
+
+	.copy-check {
+		color: var(--color-success, #22c55e);
 	}
 
 	.item-label {

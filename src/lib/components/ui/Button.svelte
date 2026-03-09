@@ -46,7 +46,12 @@
 		cursor: pointer;
 		transition: all 150ms ease;
 		border: none;
-		outline: none;
+	}
+
+	.btn:focus-visible {
+		outline: 2px solid var(--color-solidcam-gold, #d4af37);
+		outline-offset: 2px;
+		box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
 	}
 
 	.btn-sm {

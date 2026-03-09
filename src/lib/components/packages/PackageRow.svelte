@@ -143,10 +143,14 @@
 		return userPrefsStore.isCustomPackageBit(pkg.code, bit);
 	}
 
+	let codeCopied = $state(false);
+	let maintCopied = $state(false);
+
 	async function handleCodeCopy() {
 		try {
 			await navigator.clipboard.writeText(pkg.code);
-			toastStore.success('Copied!', 1500);
+			codeCopied = true;
+			setTimeout(() => (codeCopied = false), 1500);
 		} catch {
 			toastStore.error('Failed to copy');
 		}
@@ -155,7 +159,8 @@
 	async function handleMaintCopy() {
 		try {
 			await navigator.clipboard.writeText(pkg.maintenance);
-			toastStore.success('Copied!', 1500);
+			maintCopied = true;
+			setTimeout(() => (maintCopied = false), 1500);
 		} catch {
 			toastStore.error('Failed to copy');
 		}
@@ -261,7 +266,7 @@
 			{/if}
 			<div>
 				<button type="button" class="code-btn package-code" onclick={handleCodeCopy}>
-					{pkg.code}
+					{#if codeCopied}<span class="copy-check">&#10003;</span>{:else}{pkg.code}{/if}
 				</button>
 				<span class="package-description">{pkg.description}</span>
 			</div>
@@ -281,7 +286,7 @@
 				</span>
 			{/if}
 			<button type="button" class="code-btn maint-code" onclick={handleMaintCopy}>
-				{pkg.maintenance}
+				{#if maintCopied}<span class="copy-check">&#10003;</span>{:else}{pkg.maintenance}{/if}
 			</button>
 		</div>
 	</td>
@@ -442,6 +447,10 @@
 
 	.package-code:hover {
 		color: #e5c55a;
+	}
+
+	.copy-check {
+		color: var(--color-success, #22c55e);
 	}
 
 	.package-description {

@@ -21,25 +21,31 @@
 	const FOCUSABLE_SELECTOR =
 		'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-	// Store previously focused element and focus first element when modal opens
+	// Store previously focused element, lock scroll, and focus first body element when modal opens
 	$effect(() => {
 		let cancelled = false;
 
 		if (open) {
 			previouslyFocusedElement = document.activeElement as HTMLElement;
+			document.body.style.overflow = 'hidden';
 
-			// Focus first focusable element after the modal renders
-			// Using tick() ensures DOM is updated before focusing
+			// Focus first focusable element inside .modal-body (not the close button)
 			tick().then(() => {
 				if (cancelled) return;
 				if (modalRef) {
-					const focusableElements = modalRef.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-					if (focusableElements.length > 0) {
-						focusableElements[0].focus();
+					const body = modalRef.querySelector<HTMLElement>('.modal-body');
+					const target = body?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+					if (target) {
+						target.focus();
+					} else {
+						// Fallback: focus first focusable anywhere in modal
+						const fallback = modalRef!.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+						fallback[0]?.focus();
 					}
 				}
 			});
 		} else {
+			document.body.style.overflow = '';
 			// Return focus when modal closes
 			if (previouslyFocusedElement) {
 				previouslyFocusedElement.focus();
@@ -47,9 +53,10 @@
 			}
 		}
 
-		// Cleanup: cancel pending focus if effect re-runs or component unmounts
+		// Cleanup: restore scroll and cancel pending focus
 		return () => {
 			cancelled = true;
+			if (open) document.body.style.overflow = '';
 		};
 	});
 

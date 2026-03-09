@@ -11,6 +11,23 @@
 	type TabId = 'overview' | 'milling' | 'other' | 'training' | 'posts';
 	let activeTab = $state<TabId>('overview');
 
+	function handleTabKeydown(e: KeyboardEvent) {
+		const tabIds: TabId[] = tabs.map((t) => t.id);
+		const idx = tabIds.indexOf(activeTab);
+		let next: number | null = null;
+		if (e.key === 'ArrowRight') next = (idx + 1) % tabIds.length;
+		else if (e.key === 'ArrowLeft') next = (idx - 1 + tabIds.length) % tabIds.length;
+		else if (e.key === 'Home') next = 0;
+		else if (e.key === 'End') next = tabIds.length - 1;
+		if (next === null) return;
+		e.preventDefault();
+		activeTab = tabIds[next];
+		// Focus the target tab button
+		const tablist = (e.currentTarget as HTMLElement).closest('[role="tablist"]');
+		const buttons = tablist?.querySelectorAll<HTMLElement>('[role="tab"]');
+		buttons?.[next]?.focus();
+	}
+
 	const tabs: { id: TabId; label: string }[] = [
 		{ id: 'overview', label: 'Overview' },
 		{ id: 'milling', label: 'Milling' },
@@ -233,7 +250,9 @@
 				class="tab-btn"
 				class:active={activeTab === tab.id}
 				aria-selected={activeTab === tab.id}
+				tabindex={activeTab === tab.id ? 0 : -1}
 				onclick={() => (activeTab = tab.id)}
+				onkeydown={handleTabKeydown}
 			>
 				{tab.label}
 			</button>
