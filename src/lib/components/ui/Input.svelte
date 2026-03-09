@@ -82,10 +82,12 @@
 	.input-field {
 		width: 100%;
 		padding: calc(var(--space-2) + var(--space-0)) calc(var(--space-3) + var(--space-0));
+		padding-left: calc(var(--space-3) + var(--space-0) - 2px);
 		font-size: var(--text-xl);
 		color: #f5f5f5;
 		background-color: rgba(18, 18, 26, 0.8);
 		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-left: 3px solid transparent;
 		border-radius: 0.5rem;
 		transition: all 150ms ease;
 	}
@@ -144,8 +146,7 @@
 	/* Enhanced error state with red left border */
 	.has-error .input-field {
 		border-color: #ef4444;
-		border-left: 3px solid #ef4444;
-		padding-left: calc(var(--space-3) + var(--space-0) - 2px);
+		border-left-color: #ef4444;
 	}
 
 	.has-error .input-field:focus {
@@ -158,5 +159,15 @@
 		opacity: 0.5;
 		cursor: not-allowed;
 		background: rgba(18, 18, 26, 0.5);
+	}
+
+	/* Reduced motion */
+	@media (prefers-reduced-motion: reduce) {
+		.input-field {
+			transition: none;
+		}
+		.input-field:focus {
+			transform: none;
+		}
 	}
 </style>

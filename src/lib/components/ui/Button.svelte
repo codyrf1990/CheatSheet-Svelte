@@ -130,7 +130,7 @@
 	.btn-ghost {
 		background: transparent;
 		border: 1px solid rgba(255, 255, 255, 0.12);
-		color: rgba(255, 255, 255, 0.7);
+		color: rgba(255, 255, 255, 0.85);
 	}
 
 	.btn-ghost:hover {
@@ -158,5 +158,18 @@
 	.btn:focus-visible {
 		outline: 2px solid rgba(212, 175, 55, 0.8);
 		outline-offset: 2px;
+	}
+
+	/* Reduced motion */
+	@media (prefers-reduced-motion: reduce) {
+		.btn {
+			transition: none;
+		}
+		.btn:hover {
+			transform: none;
+		}
+		.btn:active {
+			transform: none;
+		}
 	}
 </style>

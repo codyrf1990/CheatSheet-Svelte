@@ -292,12 +292,7 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 		const localPrefs = localPrefsExport.userPrefs;
 		const localIsDefault = isDefaultLocalData(localData);
 		const localPrefsIsDefault = isDefaultUserPrefs(localPrefs);
-		const localUpdatedAt = getLocalUpdatedAt();
 		const cloudUpdatedAt = cloudData?.updatedAt?.getTime() || 0;
-		const cloudPageUpdatedAt =
-			typeof cloudData?.pageSystemUpdatedAt === 'number'
-				? cloudData.pageSystemUpdatedAt
-				: cloudUpdatedAt;
 		const localPrefsUpdatedAt = localPrefsExport.updatedAt;
 		const cloudPrefsUpdatedAt = cloudData?.userPrefsUpdatedAt || 0;
 
