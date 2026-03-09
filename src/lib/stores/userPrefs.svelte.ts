@@ -192,28 +192,6 @@ function isCustomPackageBit(packageCode: string, bit: string): boolean {
 	return prefs.customPackageBits[packageCode]?.includes(bit) ?? false;
 }
 
-/**
- * Check if background video is paused
- */
-function isBackgroundVideoPaused(): boolean {
-	return prefs.backgroundVideoPaused;
-}
-
-/**
- * Set background video paused state
- */
-function setBackgroundVideoPaused(paused: boolean): void {
-	prefs.backgroundVideoPaused = paused;
-	commitLocalOnly();
-}
-
-/**
- * Toggle background video paused state
- */
-function toggleBackgroundVideoPaused(): void {
-	setBackgroundVideoPaused(!prefs.backgroundVideoPaused);
-}
-
 // ============ Rep Name ============
 
 /**
@@ -346,7 +324,7 @@ function importData(data: unknown, updatedAt?: number): boolean {
 }
 
 /**
- * Reset syncable prefs to default (keeps device-local prefs like backgroundVideoPaused)
+ * Reset syncable prefs to default (keeps device-local prefs)
  * Called when switching to a different user to prevent cross-user data pollution
  */
 function resetSyncablePrefs(): void {
@@ -387,11 +365,6 @@ export const userPrefsStore = {
 	addCustomPackageBit,
 	removeCustomPackageBit,
 	isCustomPackageBit,
-
-	// Background video
-	isBackgroundVideoPaused,
-	setBackgroundVideoPaused,
-	toggleBackgroundVideoPaused,
 
 	// Rep name
 	getRepName,
