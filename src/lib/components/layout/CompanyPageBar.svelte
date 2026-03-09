@@ -69,17 +69,22 @@
 		return companiesStore.search(searchQuery);
 	});
 
-	// Status indicator
+	// Status indicator with SVG icon key and differentiated states
+	let syncError = $derived(syncStore.error);
 	let statusIndicator = $derived.by(() => {
 		switch (syncStatus) {
 			case 'connected':
-				return { symbol: '●', color: 'var(--color-success, #22c55e)', title: 'Synced' };
+				return { icon: 'check', color: 'var(--color-success, #22c55e)', title: 'Synced' };
 			case 'syncing':
-				return { symbol: '○', color: 'var(--color-solidcam-gold, #d4af37)', title: 'Syncing...' };
+				return { icon: 'spinner', color: 'var(--color-solidcam-gold, #d4af37)', title: 'Syncing...' };
 			case 'error':
-				return { symbol: '⚠', color: 'var(--color-error, #ef4444)', title: 'Sync error' };
+				// Differentiate local-only (offline) from actual sync errors
+				if (syncError?.includes('offline')) {
+					return { icon: 'device', color: 'rgba(255,255,255,0.5)', title: 'Local only — not synced to cloud' };
+				}
+				return { icon: 'warning', color: 'var(--color-error, #ef4444)', title: 'Sync error' };
 			default:
-				return { symbol: '○', color: 'rgba(255,255,255,0.3)', title: 'Not synced' };
+				return { icon: 'disconnected', color: 'rgba(255,255,255,0.3)', title: 'Not connected' };
 		}
 	});
 
@@ -578,8 +583,28 @@
 				style="color: {statusIndicator.color}"
 				title={statusIndicator.title}
 				role="status"
-				aria-live="polite">{statusIndicator.symbol}</span
+				aria-live="polite"
 			>
+				<svg viewBox="0 0 16 16" fill="none" width="12" height="12" aria-hidden="true">
+					{#if statusIndicator.icon === 'check'}
+						<circle cx="8" cy="8" r="6" fill="currentColor" opacity="0.2"/>
+						<path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+					{:else if statusIndicator.icon === 'spinner'}
+						<circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="20 10" stroke-linecap="round">
+							<animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="1s" repeatCount="indefinite"/>
+						</circle>
+					{:else if statusIndicator.icon === 'warning'}
+						<path d="M8 3L2 13h12L8 3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+						<line x1="8" y1="7" x2="8" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+						<circle cx="8" cy="12" r="0.5" fill="currentColor"/>
+					{:else if statusIndicator.icon === 'device'}
+						<rect x="3" y="4" width="10" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
+						<line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+					{:else}
+						<circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2" fill="none"/>
+					{/if}
+				</svg>
+			</span>
 			<svg class="chevron" class:open={dropdownOpen} viewBox="0 0 20 20" fill="currentColor">
 				<path
 					d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
@@ -646,6 +671,42 @@
 			+
 		</button>
 	</div>
+
+	<!-- Edit Mode Indicator -->
+	{#if editMode}
+		<span class="edit-indicator">Editing</span>
+	{/if}
+
+	<!-- Quick Actions (visible when company active, not in edit mode) -->
+	{#if currentCompany && !editMode}
+		<div class="quick-actions">
+			<button
+				type="button"
+				class="quick-action-btn"
+				onclick={() => (showImportModal = true)}
+				title="Import License"
+				aria-label="Import License"
+			>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+					<polyline points="7 10 12 15 17 10"/>
+					<line x1="12" y1="15" x2="12" y2="3"/>
+				</svg>
+			</button>
+			<button
+				type="button"
+				class="quick-action-btn"
+				onclick={handleCopyForQB}
+				title="Copy for QuickBooks"
+				aria-label="Copy for QuickBooks"
+			>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+					<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+					<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+				</svg>
+			</button>
+		</div>
+	{/if}
 
 	<!-- Actions Kebab -->
 	<div class="kebab-wrapper">
@@ -935,21 +996,13 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+		font-weight: 600;
 	}
 
 	.status-dot {
-		font-size: var(--text-sm);
-		animation: statusPulse 2s ease-in-out infinite;
-	}
-
-	@keyframes statusPulse {
-		0%,
-		100% {
-			opacity: 0.8;
-		}
-		50% {
-			opacity: 1;
-		}
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
 	}
 
 	.chevron {
@@ -1187,8 +1240,9 @@
 	}
 
 	.page-tab.active {
-		background: rgba(212, 175, 55, 0.15);
+		background: rgba(212, 175, 55, 0.25);
 		border-color: rgba(212, 175, 55, 0.3);
+		border-bottom: 2px solid var(--color-solidcam-gold, #d4af37);
 		color: var(--color-solidcam-gold, #d4af37);
 		box-shadow: 0 0 12px rgba(212, 175, 55, 0.1);
 	}
@@ -1301,6 +1355,46 @@
 		width: 44px;
 		height: 44px;
 		transform: translate(-50%, -50%);
+	}
+
+	.quick-actions {
+		display: flex;
+		gap: 0.25rem;
+		flex-shrink: 0;
+	}
+
+	.quick-action-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 26px;
+		height: 26px;
+		padding: 0;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 6px;
+		color: rgba(255, 255, 255, 0.5);
+		cursor: pointer;
+		transition: all 150ms ease;
+	}
+
+	.quick-action-btn:hover {
+		background: rgba(255, 255, 255, 0.1);
+		border-color: rgba(255, 255, 255, 0.15);
+		color: var(--color-solidcam-gold, #d4af37);
+	}
+
+	.edit-indicator {
+		font-size: var(--text-2xs);
+		font-weight: 600;
+		color: var(--color-solidcam-gold, #d4af37);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		padding: 0.15rem 0.4rem;
+		background: rgba(212, 175, 55, 0.15);
+		border: 1px solid rgba(212, 175, 55, 0.3);
+		border-radius: 4px;
+		flex-shrink: 0;
 	}
 
 	.kebab-trigger:hover {
@@ -1552,8 +1646,9 @@
 			height: 16px;
 		}
 
-		.status-dot {
-			font-size: 0.5rem;
+		.status-dot svg {
+			width: 10px;
+			height: 10px;
 		}
 
 		.page-tab {

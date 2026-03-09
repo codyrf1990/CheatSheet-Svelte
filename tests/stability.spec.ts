@@ -120,7 +120,9 @@ test.describe('Local-first sync fallback', () => {
 			page.getByRole('heading', { name: 'Packages & Maintenance Cheat Sheet' })
 		).toBeVisible({ timeout: 10_000 });
 
-		// Sync status should show error indicator ⚠ (not spinning/connected)
-		await expect(page.getByTitle('Sync error')).toBeVisible({ timeout: 5_000 });
+		// Sync status should show error/offline indicator (not spinning/connected)
+		await expect(
+			page.getByTitle('Sync error').or(page.getByTitle('Local only — not synced to cloud'))
+		).toBeVisible({ timeout: 5_000 });
 	});
 });

@@ -210,7 +210,7 @@ function queueCombinedSave(): void {
 		} else if (err) {
 			status = 'error';
 			syncSession.transition('error');
-			error = err.message || 'Sync failed';
+			error = 'Unable to sync — check your connection';
 			console.error('[SyncStore] Auto-sync failed:', err);
 		} else {
 			// Clean cancel (user switched accounts) — not an error
@@ -374,7 +374,7 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 	} catch (err) {
 		// Cloud unavailable — establish local-only session so the app always enters
 		console.warn('[SyncStore] Cloud read failed, entering local-only mode:', err);
-		error = err instanceof Error ? err.message : 'Cloud sync unavailable';
+		error = 'Unable to reach cloud — working offline';
 		status = 'error';
 		syncSession.transition('local_only');
 		// Set username so user enters the app; do NOT start auto-sync writes
@@ -431,13 +431,14 @@ async function sync(): Promise<boolean> {
 				error = null;
 			} else {
 				status = 'error';
-				error = err?.message || 'Sync failed';
+				error = 'Unable to sync — check your connection';
 			}
 		});
 		return true;
 	} catch (err) {
 		status = 'error';
-		error = err instanceof Error ? err.message : 'Sync failed';
+		error = 'Unable to sync — check your connection';
+		console.error('[SyncStore] Connect failed:', err);
 		return false;
 	}
 }
