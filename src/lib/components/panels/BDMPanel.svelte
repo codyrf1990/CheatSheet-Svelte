@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import { toastStore } from '$stores/toast.svelte';
 	import { panelsStore } from '$stores/panels.svelte';
-	import { Checkbox } from '$components/ui';
+	import { Checkbox, CollapseWrapper } from '$components/ui';
 	import { BDM_SECTIONS } from '$lib/data/bdmData';
 
 	const BDM_PANEL_ID = 'bdm-skus';
@@ -46,6 +46,18 @@
 	}
 
 	let anyExpanded = $derived(Object.values(expanded).some(Boolean));
+	let allExpanded = $derived(Object.values(expanded).every(Boolean));
+
+	function expandAll() {
+		for (const key of Object.keys(expanded)) expanded[key] = true;
+		if (browser) {
+			try {
+				localStorage.setItem(STORAGE_KEY, JSON.stringify(expanded));
+			} catch {
+				/* localStorage unavailable — non-critical */
+			}
+		}
+	}
 
 	function collapseAll() {
 		for (const key of Object.keys(expanded)) expanded[key] = false;
@@ -80,11 +92,14 @@
 
 <section class="bdm-panel">
 	<div class="panel-body">
-		{#if anyExpanded}
-			<div class="panel-actions">
+		<div class="panel-actions">
+			{#if !allExpanded}
+				<button type="button" class="collapse-all-btn" onclick={expandAll}> Expand All </button>
+			{/if}
+			{#if anyExpanded}
 				<button type="button" class="collapse-all-btn" onclick={collapseAll}> Collapse All </button>
-			</div>
-		{/if}
+			{/if}
+		</div>
 		{#each BDM_SECTIONS as section (section.id)}
 			<div class="bdm-section">
 				<button
@@ -108,7 +123,7 @@
 					</svg>
 				</button>
 
-				{#if expanded[section.id]}
+				<CollapseWrapper open={expanded[section.id]}>
 					<ul class="item-list">
 						{#each section.items as item (item.sku + item.label)}
 							<li class="bdm-item">
@@ -139,7 +154,7 @@
 					{#if section.note}
 						<p class="section-note">{section.note}</p>
 					{/if}
-				{/if}
+				</CollapseWrapper>
 			</div>
 		{/each}
 	</div>

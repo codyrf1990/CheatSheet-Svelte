@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PackageGroup } from '$types';
-	import { Checkbox } from '$components/ui';
+	import { Checkbox, CollapseWrapper } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { toastStore } from '$stores/toast.svelte';
@@ -209,7 +209,7 @@
 			</svg>
 		</button>
 	</div>
-	{#if expanded}
+	<CollapseWrapper open={expanded}>
 		<ul
 			id="subbits-{group.masterId}"
 			class="sub-bits"
@@ -239,7 +239,7 @@
 				<li class="drop-hint">Drop items here</li>
 			{/if}
 		</ul>
-	{/if}
+	</CollapseWrapper>
 </div>
 
 <style>

@@ -250,7 +250,7 @@ test.describe('Build Mode', () => {
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Mill bits' }).click();
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Turn bits' }).click();
 
-		await expect(page.getByTitle('Click to copy SC-Turn', { exact: true })).toBeVisible();
+		await expect(page.getByRole('complementary').getByTitle('Click to copy SC-Turn', { exact: true })).toBeVisible();
 		await expect(page.getByText('$6,168').first()).toBeVisible(); // $3,868 + $2,300
 	});
 

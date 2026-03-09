@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { CollapseWrapper } from '$components/ui';
 
 	interface Props {
 		id: string;
@@ -75,11 +76,11 @@
 			</div>
 		{/if}
 	</div>
-	{#if !collapsed}
+	<CollapseWrapper open={!collapsed}>
 		<div class="panel-body">
 			{@render children()}
 		</div>
-	{/if}
+	</CollapseWrapper>
 </section>
 
 <style>
