@@ -920,7 +920,7 @@
 			inset 0 1px 0 rgba(255, 255, 255, 0.05);
 		backdrop-filter: blur(16px);
 		z-index: 1000;
-		animation: dropdownFadeIn 200ms cubic-bezier(0.4, 0, 0.2, 1);
+		animation: dropdownFadeIn 150ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	@keyframes dropdownFadeIn {
@@ -1259,7 +1259,7 @@
 		backdrop-filter: blur(16px);
 		z-index: 2000;
 		overflow: hidden;
-		animation: contextMenuFadeIn 150ms ease;
+		animation: contextMenuFadeIn 150ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	.actions-menu button {
@@ -1317,7 +1317,7 @@
 		backdrop-filter: blur(16px);
 		z-index: 2000;
 		overflow: hidden;
-		animation: contextMenuFadeIn 150ms ease;
+		animation: contextMenuFadeIn 150ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	@keyframes contextMenuFadeIn {

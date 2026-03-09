@@ -222,7 +222,7 @@
 	}
 
 	.toast-progress-success {
-		background: linear-gradient(90deg, rgba(34, 197, 94, 0.7), rgba(74, 222, 128, 0.7));
+		background: linear-gradient(90deg, rgba(34, 197, 94, 0.85), rgba(74, 222, 128, 0.85));
 	}
 
 	.toast-progress-error {

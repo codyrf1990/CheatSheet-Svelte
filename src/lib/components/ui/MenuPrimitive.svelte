@@ -107,7 +107,7 @@
 			0 2px 8px rgba(0, 0, 0, 0.2),
 			inset 0 1px 0 rgba(255, 255, 255, 0.04);
 		backdrop-filter: blur(16px);
-		animation: menuFadeIn 100ms ease;
+		animation: menuFadeIn 150ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	@keyframes menuFadeIn {

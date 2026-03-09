@@ -314,7 +314,7 @@
 	}
 
 	.header-title {
-		font-size: var(--text-xl);
+		font-size: clamp(0.85rem, 1.5vw, 1.25rem);
 		font-weight: 700;
 		color: #f5f5f5;
 		margin: 0;
@@ -522,10 +522,6 @@
 			padding: 0.25rem 0.35rem;
 		}
 
-		.header-title {
-			font-size: 0.95rem;
-		}
-
 		.nav-link {
 			font-size: 0.65rem;
 			padding: 0.15rem 0.35rem;
@@ -537,7 +533,7 @@
 		}
 
 		.nav-label {
-			display: none;
+			font-size: 0.6rem;
 		}
 	}
 
@@ -546,10 +542,6 @@
 		:global(.header) {
 			gap: 0.3rem;
 			padding: 0.2rem 0.25rem;
-		}
-
-		.header-title {
-			font-size: 0.85rem;
 		}
 
 		.nav-row {
@@ -578,10 +570,6 @@
 		:global(.header) {
 			gap: 0.2rem;
 			padding: 0.15rem 0.2rem;
-		}
-
-		.header-title {
-			font-size: 0.75rem;
 		}
 
 		.header-content {

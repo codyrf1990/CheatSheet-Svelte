@@ -330,6 +330,8 @@
 				</div>
 				<NewSalePanel skuMode={effectiveSkuTabMode} />
 			</div>
+			<!-- Note: sidebar toggle is a compact duplicate of the primary one above the table.
+			     Both exist because users may scroll past the primary toggle. -->
 			<Calculator />
 		</aside>
 	</div>
@@ -551,7 +553,7 @@
 		padding: var(--space-0-5) var(--space-1);
 		background: transparent;
 		border: none;
-		color: rgba(255, 255, 255, 0.35);
+		color: rgba(255, 255, 255, 0.5);
 		cursor: pointer;
 		transition: all 150ms ease;
 		letter-spacing: 0.04em;
@@ -586,6 +588,12 @@
 		background: rgba(59, 130, 246, 0.25);
 	}
 
+	/* Compact mode pill for sidebar (secondary indicator) */
+	.quote-header .mode-pill .mode-pill-btn {
+		font-size: 0.55rem;
+		padding: var(--space-0) var(--space-0-5);
+	}
+
 	/* Dropdown menus - positioned absolutely on page */
 	.dropdown-menu {
 		position: fixed;
@@ -600,7 +608,7 @@
 		backdrop-filter: blur(16px);
 		z-index: 1000;
 		overflow: hidden;
-		animation: menuFadeIn 200ms cubic-bezier(0.4, 0, 0.2, 1);
+		animation: menuFadeIn 150ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	@keyframes menuFadeIn {
@@ -701,19 +709,18 @@
 		}
 	}
 
-	@media (max-width: 500px) {
+	@media (max-width: 600px) {
 		.page-layout {
 			padding: 0.1rem;
 		}
 
 		.content-area {
-			grid-template-columns: minmax(0, 1fr) minmax(100px, 160px);
-			gap: var(--space-px);
-			align-items: start;
+			grid-template-columns: 1fr;
+			gap: var(--space-1);
 		}
 
 		.sidebar {
-			align-self: start;
+			order: -1;
 		}
 	}
 

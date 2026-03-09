@@ -40,6 +40,12 @@ async function boot(): Promise<void> {
 	}
 }
 
+function retry(): void {
+	phase = 'idle';
+	bootError = null;
+	boot();
+}
+
 export const bootPhaseStore = {
 	get phase() {
 		return phase;
@@ -47,8 +53,12 @@ export const bootPhaseStore = {
 	get isReady() {
 		return phase === 'ready';
 	},
+	get isError() {
+		return phase === 'error';
+	},
 	get error() {
 		return bootError;
 	},
-	boot
+	boot,
+	retry
 };

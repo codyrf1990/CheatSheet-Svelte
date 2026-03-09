@@ -423,9 +423,8 @@
 	/* Settings panel */
 	.settings-panel {
 		position: absolute;
-		top: 100%;
+		top: calc(100% + 0.5rem);
 		right: 0;
-		margin-top: 0.5rem;
 		min-width: 180px;
 		padding: 0.75rem;
 		background: rgba(28, 28, 34, 0.95);
@@ -439,6 +438,16 @@
 			inset 0 1px 0 rgba(255, 255, 255, 0.04);
 		z-index: 1000;
 		animation: panelSlideIn 150ms ease;
+	}
+
+	/* Invisible bridge covers the gap between container and panel so hover isn't lost */
+	.settings-panel::before {
+		content: '';
+		position: absolute;
+		top: -0.5rem;
+		left: 0;
+		right: 0;
+		height: 0.5rem;
 	}
 
 	@keyframes panelSlideIn {
@@ -491,6 +500,7 @@
 	.toggle-switch.active {
 		background: rgba(212, 175, 55, 0.3);
 		border-color: rgba(212, 175, 55, 0.4);
+		box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
 	}
 
 	.toggle-thumb {

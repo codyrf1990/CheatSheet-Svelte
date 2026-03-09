@@ -276,7 +276,7 @@
 
 	.item-label {
 		font-size: var(--text-2xs);
-		color: rgba(255, 255, 255, 0.4);
+		color: rgba(255, 255, 255, 0.5);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -302,7 +302,7 @@
 	.item-maint {
 		font-family: 'JetBrains Mono', monospace;
 		font-size: 0.55rem;
-		color: rgba(255, 255, 255, 0.28);
+		color: rgba(255, 255, 255, 0.5);
 		white-space: nowrap;
 	}
 

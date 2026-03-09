@@ -58,7 +58,7 @@
 <a href="#main-content" class="skip-link">Skip to main content</a>
 
 <!-- Video Background (decorative) -->
-<div class="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+<div class="video-bg" aria-hidden="true">
 	<video
 		bind:this={videoRef}
 		autoplay
@@ -75,9 +75,18 @@
 
 <!-- Content Gate -->
 <div class="relative min-h-screen" id="main-content">
-	{#if !initialized}
+	{#if bootPhaseStore.isError}
+		<div class="loading-screen">
+			<div class="boot-error-card">
+				<h1 class="boot-error-title">Unable to start</h1>
+				<p class="boot-error-message">{bootPhaseStore.error || 'Something went wrong during startup.'}</p>
+				<button class="boot-retry-btn" onclick={() => bootPhaseStore.retry()}>Try again</button>
+			</div>
+		</div>
+	{:else if !initialized}
 		<div class="loading-screen">
 			<div class="skeleton-card">
+				<span class="boot-brand">CheatSheet</span>
 				<Skeleton variant="circular" width="44px" height="44px" />
 				<div class="skeleton-text-group">
 					<Skeleton width="120px" height="1.5rem" />
@@ -98,6 +107,36 @@
 <ToastContainer />
 
 <style>
+	/* Video background with overlay for legibility */
+	.video-bg {
+		position: fixed;
+		inset: 0;
+		z-index: -10;
+		overflow: hidden;
+	}
+
+	.video-bg::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			180deg,
+			rgba(10, 10, 15, 0.4) 0%,
+			rgba(10, 10, 15, 0.2) 50%,
+			rgba(10, 10, 15, 0.5) 100%
+		);
+		pointer-events: none;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.video-bg video {
+			display: none;
+		}
+		.video-bg {
+			background: #0a0a0f;
+		}
+	}
+
 	/* Skip link - visible only when focused */
 	.skip-link {
 		position: fixed;
@@ -155,5 +194,62 @@
 
 	:global(.skeleton-button) {
 		border-radius: 10px !important;
+	}
+
+	/* Boot branding */
+	.boot-brand {
+		font-size: 1.25rem;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		background: linear-gradient(135deg, #ffffff 0%, #e8d59a 50%, #ffffff 100%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+
+	/* Boot error card */
+	.boot-error-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		width: 100%;
+		max-width: 380px;
+		padding: 2.5rem 2rem;
+		background: rgba(20, 20, 28, 0.85);
+		border: 1px solid rgba(200, 16, 46, 0.2);
+		border-radius: 16px;
+		backdrop-filter: blur(20px);
+		text-align: center;
+	}
+
+	.boot-error-title {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: #d4af37;
+		margin: 0;
+	}
+
+	.boot-error-message {
+		font-size: 0.875rem;
+		color: rgba(255, 255, 255, 0.6);
+		margin: 0;
+		line-height: 1.5;
+	}
+
+	.boot-retry-btn {
+		padding: 0.625rem 1.5rem;
+		font-size: 0.9375rem;
+		font-weight: 500;
+		color: #1a1a1a;
+		background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+		border: none;
+		border-radius: 9999px;
+		cursor: pointer;
+		transition: filter 150ms ease;
+	}
+
+	.boot-retry-btn:hover {
+		filter: brightness(1.1);
 	}
 </style>

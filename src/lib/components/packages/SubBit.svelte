@@ -108,7 +108,7 @@
 		display: flex;
 		align-items: center;
 		gap: var(--space-0);
-		padding: var(--space-0) var(--space-0-5);
+		padding: var(--space-0) var(--space-1);
 		border-radius: var(--radius-2xs);
 		border: 1px solid transparent;
 		transition: background-color 150ms ease;
@@ -168,7 +168,7 @@
 	}
 
 	.bit-text {
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		color: var(--chip-text-color);
 		line-height: 1.2;
 		cursor: pointer;

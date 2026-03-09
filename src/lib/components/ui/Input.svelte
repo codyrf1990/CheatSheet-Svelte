@@ -111,7 +111,7 @@
 
 	.input-field:focus {
 		outline: none;
-		border-color: #d4af37;
+		border-color: var(--color-solidcam-gold, #d4af37);
 		box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
 		transform: scale(1.01);
 	}
