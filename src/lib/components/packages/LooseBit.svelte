@@ -107,7 +107,9 @@
 			onclick={handleCopy}
 			onkeydown={handleKeydown}
 			data-copyable-bit
-			>{#if justCopied}<span class="copy-check">&#10003;</span>{:else}{#if isCustom}<span class="custom-indicator">+</span>{/if}{bit}{/if}</span
+			>{#if justCopied}<span class="copy-check">&#10003;</span>{:else}{#if isCustom}<span
+						class="custom-indicator">+</span
+					>{/if}{bit}{/if}</span
 		>
 	</div>
 	{#if removeMode && isCustom}

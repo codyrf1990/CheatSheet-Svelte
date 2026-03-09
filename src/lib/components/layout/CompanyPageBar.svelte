@@ -76,11 +76,19 @@
 			case 'connected':
 				return { icon: 'check', color: 'var(--color-success, #22c55e)', title: 'Synced' };
 			case 'syncing':
-				return { icon: 'spinner', color: 'var(--color-solidcam-gold, #d4af37)', title: 'Syncing...' };
+				return {
+					icon: 'spinner',
+					color: 'var(--color-solidcam-gold, #d4af37)',
+					title: 'Syncing...'
+				};
 			case 'error':
 				// Differentiate local-only (offline) from actual sync errors
 				if (syncError?.includes('offline')) {
-					return { icon: 'device', color: 'rgba(255,255,255,0.5)', title: 'Local only — not synced to cloud' };
+					return {
+						icon: 'device',
+						color: 'rgba(255,255,255,0.5)',
+						title: 'Local only — not synced to cloud'
+					};
 				}
 				return { icon: 'warning', color: 'var(--color-error, #ef4444)', title: 'Sync error' };
 			default:
@@ -587,21 +595,71 @@
 			>
 				<svg viewBox="0 0 16 16" fill="none" width="12" height="12" aria-hidden="true">
 					{#if statusIndicator.icon === 'check'}
-						<circle cx="8" cy="8" r="6" fill="currentColor" opacity="0.2"/>
-						<path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+						<circle cx="8" cy="8" r="6" fill="currentColor" opacity="0.2" />
+						<path
+							d="M5 8l2 2 4-4"
+							stroke="currentColor"
+							stroke-width="1.5"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
 					{:else if statusIndicator.icon === 'spinner'}
-						<circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="20 10" stroke-linecap="round">
-							<animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="1s" repeatCount="indefinite"/>
+						<circle
+							cx="8"
+							cy="8"
+							r="6"
+							stroke="currentColor"
+							stroke-width="1.5"
+							stroke-dasharray="20 10"
+							stroke-linecap="round"
+						>
+							<animateTransform
+								attributeName="transform"
+								type="rotate"
+								from="0 8 8"
+								to="360 8 8"
+								dur="1s"
+								repeatCount="indefinite"
+							/>
 						</circle>
 					{:else if statusIndicator.icon === 'warning'}
-						<path d="M8 3L2 13h12L8 3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-						<line x1="8" y1="7" x2="8" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-						<circle cx="8" cy="12" r="0.5" fill="currentColor"/>
+						<path
+							d="M8 3L2 13h12L8 3z"
+							stroke="currentColor"
+							stroke-width="1.2"
+							stroke-linejoin="round"
+						/>
+						<line
+							x1="8"
+							y1="7"
+							x2="8"
+							y2="10"
+							stroke="currentColor"
+							stroke-width="1.2"
+							stroke-linecap="round"
+						/>
+						<circle cx="8" cy="12" r="0.5" fill="currentColor" />
 					{:else if statusIndicator.icon === 'device'}
-						<rect x="3" y="4" width="10" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
-						<line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+						<rect
+							x="3"
+							y="4"
+							width="10"
+							height="7"
+							rx="1"
+							stroke="currentColor"
+							stroke-width="1.2"
+						/>
+						<line
+							x1="6"
+							y1="13"
+							x2="10"
+							y2="13"
+							stroke="currentColor"
+							stroke-width="1.2"
+							stroke-linecap="round"
+						/>
 					{:else}
-						<circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2" fill="none"/>
+						<circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2" fill="none" />
 					{/if}
 				</svg>
 			</span>
@@ -687,10 +745,17 @@
 				title="Import License"
 				aria-label="Import License"
 			>
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-					<polyline points="7 10 12 15 17 10"/>
-					<line x1="12" y1="15" x2="12" y2="3"/>
+				<svg
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					width="14"
+					height="14"
+				>
+					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+					<polyline points="7 10 12 15 17 10" />
+					<line x1="12" y1="15" x2="12" y2="3" />
 				</svg>
 			</button>
 			<button
@@ -700,9 +765,16 @@
 				title="Copy for QuickBooks"
 				aria-label="Copy for QuickBooks"
 			>
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-					<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-					<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+				<svg
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					width="14"
+					height="14"
+				>
+					<rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+					<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
 				</svg>
 			</button>
 		</div>

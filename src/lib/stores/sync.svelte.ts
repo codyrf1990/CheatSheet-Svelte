@@ -424,7 +424,7 @@ async function sync(): Promise<boolean> {
 	try {
 		snapshotPageSystem();
 		const payload = buildSyncPayload();
-		queueSave(username, payload, (success, err) => {
+		queueSave(username, payload, (success) => {
 			if (success) {
 				lastSyncTime = Date.now();
 				status = 'connected';

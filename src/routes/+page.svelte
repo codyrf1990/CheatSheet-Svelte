@@ -215,7 +215,7 @@
 
 	// Keyboard navigation for dropdown menus (Operations, CF Tools)
 	function handleMenuKeydown(e: KeyboardEvent, closeFn: () => void) {
-		const menu = (e.currentTarget as HTMLElement);
+		const menu = e.currentTarget as HTMLElement;
 		const items = Array.from(menu.querySelectorAll<HTMLElement>('[role="menuitem"]'));
 		if (items.length === 0) return;
 		const current = items.indexOf(document.activeElement as HTMLElement);

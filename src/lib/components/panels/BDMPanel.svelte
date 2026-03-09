@@ -139,7 +139,8 @@
 									onclick={() => copySku(item.sku)}
 									title="Click to copy {item.sku}"
 								>
-									{#if copiedSku === item.sku}<span class="copy-check">&#10003;</span>{:else}{item.sku}{/if}
+									{#if copiedSku === item.sku}<span class="copy-check">&#10003;</span
+										>{:else}{item.sku}{/if}
 								</button>
 								<span class="item-label">{item.label}</span>
 								<div class="item-pricing">

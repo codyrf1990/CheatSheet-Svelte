@@ -79,7 +79,9 @@
 		<div class="loading-screen">
 			<div class="boot-error-card">
 				<h1 class="boot-error-title">Unable to start</h1>
-				<p class="boot-error-message">{bootPhaseStore.error || 'Something went wrong during startup.'}</p>
+				<p class="boot-error-message">
+					{bootPhaseStore.error || 'Something went wrong during startup.'}
+				</p>
 				<button class="boot-retry-btn" onclick={() => bootPhaseStore.retry()}>Try again</button>
 			</div>
 		</div>
