@@ -27,3 +27,11 @@ vite.config.ts.timestamp-*
 License\ PDF/
 *.xlsx
 *.xls
+
+# Testing
+test-results/
+.playwright-mcp/
+
+# Debug/temp
+debug-bg.png
+POLISH.md
