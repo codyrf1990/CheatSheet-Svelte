@@ -32,6 +32,9 @@ License\ PDF/
 test-results/
 .playwright-mcp/
 
+# Claude Code
+.claude/settings.local.json
+
 # Debug/temp
 debug-bg.png
 POLISH.md
