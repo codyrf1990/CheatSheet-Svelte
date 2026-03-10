@@ -165,16 +165,4 @@
 		outline-offset: 2px;
 	}
 
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		.btn {
-			transition: none;
-		}
-		.btn:hover {
-			transform: none;
-		}
-		.btn:active {
-			transform: none;
-		}
-	}
 </style>

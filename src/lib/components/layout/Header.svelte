@@ -604,11 +604,4 @@
 		}
 	}
 
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		:global(.header)::before,
-		.title-glow {
-			animation: none;
-		}
-	}
 </style>

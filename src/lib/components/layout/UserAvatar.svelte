@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import type { SyncStatus } from '$types';
+	import { userPrefsStore } from '$stores/userPrefs.svelte';
 
 	interface Props {
 		username: string | null;
@@ -10,8 +11,9 @@
 
 	let { username, status, onLogout }: Props = $props();
 
-	// Local state
+	// Local state for settings panel
 	let actionsVisible = $state(false);
+	let settingsOpen = $state(false);
 	let isTouch = $state(false);
 	let containerRef: HTMLDivElement | null = $state(null);
 
@@ -22,24 +24,37 @@
 		}
 	});
 
+	// Get video paused state
+	const backgroundVideoPaused = $derived(userPrefsStore.isBackgroundVideoPaused());
+
 	function handleContainerClick() {
 		if (isTouch) {
 			actionsVisible = !actionsVisible;
 		}
 	}
 
+	function toggleSettings(event: MouseEvent) {
+		event.stopPropagation();
+		settingsOpen = !settingsOpen;
+	}
+
+	function toggleBackgroundVideo() {
+		userPrefsStore.toggleBackgroundVideoPaused();
+	}
+
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape' && actionsVisible) {
-			actionsVisible = false;
+		if (event.key === 'Escape' && settingsOpen) {
+			settingsOpen = false;
 		}
 	}
 
-	// Close on outside click
+	// Close panel on outside click
 	$effect(() => {
-		if (!browser || !actionsVisible) return;
+		if (!browser || !settingsOpen) return;
 
 		function handleOutsideClick(event: PointerEvent) {
 			if (containerRef && !containerRef.contains(event.target as Node)) {
+				settingsOpen = false;
 				actionsVisible = false;
 			}
 		}
@@ -70,6 +85,20 @@
 	<div class="user-details">
 		<span class="user-name">{username || 'User'}</span>
 		<div class="user-actions">
+			<button
+				class="settings-button"
+				onclick={toggleSettings}
+				aria-expanded={settingsOpen}
+				aria-controls="user-settings-panel"
+				aria-label="User settings"
+			>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path
+						d="M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"
+					/>
+				</svg>
+				Settings
+			</button>
 			<button class="change-link" onclick={onLogout}>
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -83,6 +112,25 @@
 	<div class="sync-indicator" class:visible={status === 'syncing'}>
 		<div class="sync-spinner"></div>
 	</div>
+
+	{#if settingsOpen}
+		<div id="user-settings-panel" class="settings-panel" role="dialog" aria-label="User settings">
+			<div class="settings-header">Settings</div>
+			<label class="settings-toggle">
+				<span class="toggle-label">Pause background</span>
+				<button
+					type="button"
+					class="toggle-switch"
+					class:active={backgroundVideoPaused}
+					onclick={toggleBackgroundVideo}
+					aria-pressed={backgroundVideoPaused}
+					aria-label="Toggle background video"
+				>
+					<span class="toggle-thumb"></span>
+				</button>
+			</label>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -320,9 +368,157 @@
 		gap: 0.125rem;
 	}
 
+	/* Settings button - mirrors change-link behavior */
+	.settings-button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		font-size: 0.65rem;
+		color: rgba(255, 255, 255, 0.4);
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0.125rem 0.25rem;
+		margin: -0.125rem -0.25rem;
+		border-radius: 4px;
+		transition:
+			color 150ms ease,
+			background 150ms ease,
+			max-height 150ms ease,
+			opacity 150ms ease;
+		max-height: 0;
+		opacity: 0;
+		overflow: hidden;
+	}
+
+	.user-container:hover .settings-button,
+	.user-container:focus-within .settings-button,
+	.user-container.actions-visible .settings-button {
+		max-height: 1.5rem;
+		opacity: 1;
+	}
+
 	.user-container.actions-visible .change-link {
 		max-height: 1.5rem;
 		opacity: 1;
+	}
+
+	.settings-button:hover {
+		color: #d4af37;
+		background: rgba(212, 175, 55, 0.1);
+	}
+
+	.settings-button:active {
+		transform: scale(0.95);
+	}
+
+	.settings-button svg {
+		width: 10px;
+		height: 10px;
+		transition: transform 150ms ease;
+	}
+
+	.settings-button:hover svg {
+		transform: rotate(45deg);
+	}
+
+	/* Settings panel */
+	.settings-panel {
+		position: absolute;
+		top: calc(100% + 0.5rem);
+		right: 0;
+		min-width: 180px;
+		padding: 0.75rem;
+		background: rgba(28, 28, 34, 0.95);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 10px;
+		box-shadow:
+			0 8px 24px rgba(0, 0, 0, 0.3),
+			0 2px 8px rgba(0, 0, 0, 0.2),
+			inset 0 1px 0 rgba(255, 255, 255, 0.04);
+		z-index: 1000;
+		animation: panelSlideIn 150ms ease;
+	}
+
+	/* Invisible bridge covers the gap between container and panel so hover isn't lost */
+	.settings-panel::before {
+		content: '';
+		position: absolute;
+		top: -0.5rem;
+		left: 0;
+		right: 0;
+		height: 0.5rem;
+	}
+
+	@keyframes panelSlideIn {
+		from {
+			opacity: 0;
+			transform: translateY(-4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.settings-header {
+		font-size: 0.7rem;
+		font-weight: 600;
+		color: rgba(255, 255, 255, 0.5);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		margin-bottom: 0.625rem;
+	}
+
+	.settings-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		cursor: pointer;
+	}
+
+	.toggle-label {
+		font-size: 0.8rem;
+		color: rgba(255, 255, 255, 0.8);
+	}
+
+	.toggle-switch {
+		position: relative;
+		width: 36px;
+		height: 20px;
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 10px;
+		cursor: pointer;
+		transition:
+			background 150ms ease,
+			border-color 150ms ease;
+		padding: 0;
+	}
+
+	.toggle-switch.active {
+		background: rgba(212, 175, 55, 0.3);
+		border-color: rgba(212, 175, 55, 0.4);
+		box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+	}
+
+	.toggle-thumb {
+		position: absolute;
+		top: 2px;
+		left: 2px;
+		width: 14px;
+		height: 14px;
+		background: rgba(255, 255, 255, 0.7);
+		border-radius: 50%;
+		transition: transform 150ms ease;
+	}
+
+	.toggle-switch.active .toggle-thumb {
+		transform: translateX(16px);
+		background: #d4af37;
 	}
 
 	.sync-indicator {
@@ -356,30 +552,4 @@
 		}
 	}
 
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		.avatar-ring,
-		.sync-spinner {
-			animation: none;
-		}
-
-		.status-connected .avatar-inner {
-			animation: none;
-		}
-
-		.user-container,
-		.avatar-inner,
-		.change-link,
-		.sync-indicator {
-			transition: none;
-		}
-
-		.user-container:hover {
-			transform: none;
-		}
-
-		.user-container.status-syncing {
-			animation: none;
-		}
-	}
 </style>

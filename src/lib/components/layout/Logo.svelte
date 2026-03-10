@@ -70,10 +70,4 @@
 		transform: scale(1.02);
 	}
 
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		.logo-container::after {
-			animation: none;
-		}
-	}
 </style>

@@ -753,10 +753,4 @@
 		}
 	}
 
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		.dropdown-menu {
-			animation: none;
-		}
-	}
 </style>

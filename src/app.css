@@ -365,21 +365,3 @@ select:focus-visible {
 	background-size: 200% 100%;
 	animation: shimmer 1.5s infinite;
 }
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-	html {
-		scroll-behavior: auto;
-	}
-
-	.animate-fade-in,
-	.animate-pulse-gold,
-	.animate-shimmer {
-		animation: none !important;
-	}
-
-	.animate-fade-in {
-		opacity: 1;
-		transform: none;
-	}
-}

@@ -1739,20 +1739,4 @@
 		}
 	}
 
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		.company-page-bar::before,
-		.status-dot,
-		.dropdown-menu,
-		.context-menu {
-			animation: none;
-		}
-
-		.company-trigger,
-		.page-tab,
-		.company-item,
-		.footer-btn {
-			transition: none;
-		}
-	}
 </style>

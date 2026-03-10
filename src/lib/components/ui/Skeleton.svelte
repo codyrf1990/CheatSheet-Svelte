@@ -55,11 +55,4 @@
 		}
 	}
 
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		.skeleton {
-			animation: none;
-			background: rgba(255, 255, 255, 0.06);
-		}
-	}
 </style>

@@ -58,9 +58,4 @@
 		filter: brightness(1.1);
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.home-link {
-			transition: none;
-		}
-	}
 </style>

@@ -48,9 +48,4 @@
 		opacity: 1;
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.tooltip {
-			transition: none;
-		}
-	}
 </style>

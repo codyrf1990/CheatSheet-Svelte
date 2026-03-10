@@ -4,19 +4,7 @@
 	import { flip } from 'svelte/animate';
 	import { quintOut, quintIn } from 'svelte/easing';
 
-	let prefersReducedMotion = $state(false);
-
-	$effect(() => {
-		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-		prefersReducedMotion = mediaQuery.matches;
-
-		const handleChange = () => {
-			prefersReducedMotion = mediaQuery.matches;
-		};
-
-		mediaQuery.addEventListener('change', handleChange);
-		return () => mediaQuery.removeEventListener('change', handleChange);
-	});
+	let prefersReducedMotion = false;
 </script>
 
 {#if toastStore.all.length > 0}
@@ -269,11 +257,4 @@
 		animation-play-state: paused;
 	}
 
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		.toast-progress-fill {
-			animation: none;
-			transform: scaleX(1);
-		}
-	}
 </style>

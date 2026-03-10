@@ -37,9 +37,4 @@
 		min-height: 0;
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.collapse-wrapper {
-			transition: none;
-		}
-	}
 </style>

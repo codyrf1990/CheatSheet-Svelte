@@ -137,9 +137,4 @@
 		}
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.menu-primitive {
-			animation: none;
-		}
-	}
 </style>

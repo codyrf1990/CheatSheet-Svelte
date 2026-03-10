@@ -161,13 +161,4 @@
 		background: rgba(18, 18, 26, 0.5);
 	}
 
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		.input-field {
-			transition: none;
-		}
-		.input-field:focus {
-			transform: none;
-		}
-	}
 </style>

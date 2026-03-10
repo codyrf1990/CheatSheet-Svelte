@@ -91,10 +91,12 @@
 
 	<!-- Floating particles -->
 	<div class="particles">
-		{#each [0, 1, 2, 3, 4, 5] as i (i)}
+		{#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as i (i)}
 			<div
 				class="particle"
-				style="--delay: {i * 0.8}s; --x: {10 + i * 15}%; --duration: {8 + i * 2}s;"
+				class:particle--large={i % 4 === 0}
+				class:particle--warm={i % 3 === 0}
+				style="--delay: {i * 0.6}s; --x: {5 + i * 8}%; --duration: {7 + (i % 5) * 2.5}s; --drift: {i % 2 === 0 ? 20 : -20}px;"
 			></div>
 		{/each}
 	</div>
@@ -292,30 +294,47 @@
 
 	.particle {
 		position: absolute;
-		width: 4px;
-		height: 4px;
-		background: rgba(212, 175, 55, 0.5);
+		width: 3px;
+		height: 3px;
+		background: rgba(212, 175, 55, 0.45);
 		border-radius: 50%;
 		left: var(--x);
 		bottom: -10px;
+		box-shadow: 0 0 4px rgba(212, 175, 55, 0.3);
 		animation: particleRise var(--duration) ease-out infinite;
 		animation-delay: var(--delay);
 	}
 
+	.particle--large {
+		width: 5px;
+		height: 5px;
+		background: rgba(212, 175, 55, 0.6);
+		box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+	}
+
+	.particle--warm {
+		background: rgba(200, 140, 50, 0.5);
+		box-shadow: 0 0 6px rgba(200, 140, 50, 0.35);
+	}
+
 	@keyframes particleRise {
 		0% {
-			transform: translateY(0) scale(0);
+			transform: translateY(0) translateX(0) scale(0);
 			opacity: 0;
 		}
 		10% {
 			opacity: 1;
-			transform: scale(1);
+			transform: translateY(-10vh) translateX(0) scale(1);
+		}
+		50% {
+			transform: translateY(-50vh) translateX(var(--drift)) scale(0.9);
+			opacity: 0.6;
 		}
 		90% {
-			opacity: 0.5;
+			opacity: 0.2;
 		}
 		100% {
-			transform: translateY(-100vh) scale(0.5);
+			transform: translateY(-100vh) translateX(calc(var(--drift) * -0.5)) scale(0.3);
 			opacity: 0;
 		}
 	}
@@ -359,12 +378,12 @@
 	/* Logo */
 	.logo-top {
 		position: absolute;
-		top: 2rem;
+		top: 7%;
 		left: 50%;
 		transform: translateX(-50%) translateY(-20px);
 		opacity: 0;
 		transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-		width: clamp(187px, 22vw, 300px);
+		width: clamp(296px, 35vw, 476px);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -673,19 +692,4 @@
 		}
 	}
 
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		.ambient-glow,
-		.particle,
-		.deco-icon,
-		.logo-top::after {
-			animation: none;
-		}
-
-		.logo-top,
-		.login-container,
-		.bottom-brand {
-			transition: none;
-		}
-	}
 </style>
