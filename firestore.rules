@@ -16,8 +16,19 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if true;
       allow write: if request.resource.data.keys().hasAll(['username', 'normalizedUsername', 'schemaVersion'])
+                   // username: non-empty string, max 50 chars
                    && request.resource.data.username is string
-                   && request.resource.data.username.size() <= 50;
+                   && request.resource.data.username.size() > 0
+                   && request.resource.data.username.size() <= 50
+                   // normalizedUsername: non-empty string, max 50 chars, must match doc ID
+                   && request.resource.data.normalizedUsername is string
+                   && request.resource.data.normalizedUsername.size() > 0
+                   && request.resource.data.normalizedUsername.size() <= 50
+                   && request.resource.data.normalizedUsername == userId
+                   // schemaVersion: must be an integer (currently 1)
+                   && request.resource.data.schemaVersion is int
+                   && request.resource.data.schemaVersion >= 1
+                   && request.resource.data.schemaVersion <= 100;
     }
   }
 }

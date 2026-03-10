@@ -5,7 +5,9 @@
  */
 
 import type { Company, Page, PageState, PackageState, LicenseInfo } from '$types';
+import { deepCopy } from '$lib/utils/deepCopy';
 import { toastStore } from './toast.svelte';
+import { persistence } from './persistence.svelte';
 
 // localStorage keys (must match original for migration)
 const CURRENT_COMPANY_KEY = 'solidcam-current-company-id';
@@ -64,13 +66,6 @@ function buildDefaultCompany(name: string = DEFAULT_COMPANY_NAME): Company {
 		lastAccessed: Date.now(),
 		isFavorite: false
 	};
-}
-
-/**
- * Deep copy an object (prevents mutation bugs)
- */
-function deepCopy<T>(obj: T): T {
-	return JSON.parse(JSON.stringify(obj));
 }
 
 /**
@@ -599,25 +594,21 @@ function load(): void {
 	if (typeof window === 'undefined') return;
 
 	try {
-		const currentId = localStorage.getItem(CURRENT_COMPANY_KEY);
-		const companiesRaw = localStorage.getItem(COMPANIES_STORAGE_KEY);
-		const favoritesRaw = localStorage.getItem(FAVORITES_STORAGE_KEY);
-		const recentRaw = localStorage.getItem(RECENT_STORAGE_KEY);
+		const currentId = persistence.getString(CURRENT_COMPANY_KEY);
+		const loadedCompanies = persistence.get<Company[] | null>(COMPANIES_STORAGE_KEY, null);
+		const loadedFavorites = persistence.get<string[]>(FAVORITES_STORAGE_KEY, []);
+		const loadedRecent = persistence.get<string[]>(RECENT_STORAGE_KEY, []);
 
-		if (companiesRaw) {
+		if (loadedCompanies) {
 			// Load new structure
-			companies = JSON.parse(companiesRaw);
+			companies = loadedCompanies;
 			currentCompanyId =
 				currentId && companies.find((c) => c.id === currentId)
 					? currentId
 					: companies[0]?.id || null;
 
-			if (favoritesRaw) {
-				favoriteIds = JSON.parse(favoritesRaw);
-			}
-			if (recentRaw) {
-				recentIds = JSON.parse(recentRaw);
-			}
+			favoriteIds = loadedFavorites;
+			recentIds = loadedRecent;
 
 			// Migrate package state format in all pages (handles old format)
 			for (const company of companies) {
@@ -633,16 +624,18 @@ function load(): void {
 			}
 		} else {
 			// MIGRATION: Check for old structure
-			const oldPages = localStorage.getItem(OLD_PAGES_KEY);
+			const oldData = persistence.get<{ pages?: Page[]; currentPageId?: string } | null>(
+				OLD_PAGES_KEY,
+				null
+			);
 
-			if (oldPages) {
+			if (oldData) {
 				// Migrate old "working pages" to a company
-				const oldData = JSON.parse(oldPages);
 				const newCompany: Company = {
 					id: generateId('comp'),
 					name: DEFAULT_COMPANY_NAME,
 					pages: oldData.pages || [],
-					currentPageId: oldData.currentPageId || oldData.pages?.[0]?.id || null,
+					currentPageId: oldData.currentPageId || oldData.pages?.[0]?.id || '',
 					createdAt: Date.now(),
 					updatedAt: Date.now(),
 					lastAccessed: Date.now(),
@@ -652,7 +645,7 @@ function load(): void {
 				currentCompanyId = newCompany.id;
 			} else {
 				// Check for very old single-state structure
-				const oldState = localStorage.getItem(OLD_STATE_KEY);
+				const oldState = persistence.get<PageState | null>(OLD_STATE_KEY, null);
 				if (oldState) {
 					const pageId = generateId('page');
 					const newCompany: Company = {
@@ -662,7 +655,7 @@ function load(): void {
 							{
 								id: pageId,
 								name: DEFAULT_PAGE_NAME,
-								state: JSON.parse(oldState)
+								state: oldState
 							}
 						],
 						currentPageId: pageId,
@@ -677,7 +670,7 @@ function load(): void {
 			}
 
 			// Clean up old keys after migration
-			localStorage.removeItem(OLD_PAGES_KEY);
+			persistence.remove(OLD_PAGES_KEY);
 		}
 
 		ensureIntegrity();
@@ -695,28 +688,17 @@ function load(): void {
 function save(): void {
 	if (typeof window === 'undefined') return;
 
-	try {
-		localStorage.setItem(CURRENT_COMPANY_KEY, currentCompanyId || '');
-		localStorage.setItem(COMPANIES_STORAGE_KEY, JSON.stringify(companies));
-		localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteIds));
-		localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(recentIds));
-		emitChange();
-	} catch (err) {
-		console.error('[CompaniesStore] Failed to save:', err);
+	const ok =
+		persistence.setString(CURRENT_COMPANY_KEY, currentCompanyId || '') &&
+		persistence.set(COMPANIES_STORAGE_KEY, companies) &&
+		persistence.set(FAVORITES_STORAGE_KEY, favoriteIds) &&
+		persistence.set(RECENT_STORAGE_KEY, recentIds);
 
-		// Handle quota errors
-		if (
-			err instanceof Error &&
-			(err.name === 'QuotaExceededError' || (err as { code?: number }).code === 22)
-		) {
-			toastStore.error(
-				'Storage quota exceeded — delete some companies/pages or clear browser cache.',
-				8000
-			);
-		} else {
-			toastStore.warning('Failed to save changes to local storage.', 5000);
-		}
+	if (!ok) {
+		toastStore.warning('Failed to save changes to local storage.', 5000);
 	}
+
+	emitChange();
 }
 
 function exportData() {

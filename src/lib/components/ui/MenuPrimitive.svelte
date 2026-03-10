@@ -3,14 +3,14 @@
 
 	interface Props {
 		open: boolean;
-		onclose: () => void;
+		onClose: () => void;
 		position: { top: number; left?: number; right?: number };
 		label: string;
 		role?: 'menu' | 'listbox';
 		children: Snippet;
 	}
 
-	let { open, onclose, position, label, role = 'menu', children }: Props = $props();
+	let { open, onClose, position, label, role = 'menu', children }: Props = $props();
 
 	let menuRef: HTMLDivElement | null = $state(null);
 
@@ -46,13 +46,13 @@
 				items[items.length - 1]?.focus();
 			} else if (e.key === 'Escape') {
 				e.preventDefault();
-				onclose();
+				onClose();
 			}
 		}
 
 		function handleClickOutside(e: MouseEvent) {
 			if (menuRef && !menuRef.contains(e.target as Node)) {
-				onclose();
+				onClose();
 			}
 		}
 
@@ -83,7 +83,7 @@
 		// Re-clamp on resize/scroll, dismiss on orientation change
 		const onResize = () => clampToViewport();
 		const onScroll = () => clampToViewport();
-		const onOrientationChange = () => onclose();
+		const onOrientationChange = () => onClose();
 
 		window.addEventListener('resize', onResize);
 		window.addEventListener('scroll', onScroll, true);
@@ -136,5 +136,4 @@
 			transform: translateY(0);
 		}
 	}
-
 </style>

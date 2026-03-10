@@ -12,4 +12,5 @@ export { default as SalesTaxModal } from './SalesTaxModal.svelte';
 export { default as Skeleton } from './Skeleton.svelte';
 export { default as SmokedGlassCard } from './SmokedGlassCard.svelte';
 export { default as ToastContainer } from './ToastContainer.svelte';
+export { default as Tooltip } from './Tooltip.svelte';
 export { default as WhatLeftModal } from './WhatLeftModal.svelte';

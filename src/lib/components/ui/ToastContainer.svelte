@@ -3,8 +3,6 @@
 	import { fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 	import { quintOut, quintIn } from 'svelte/easing';
-
-	let prefersReducedMotion = false;
 </script>
 
 {#if toastStore.all.length > 0}
@@ -14,16 +12,16 @@
 			<div
 				class="toast toast-{t.type}"
 				role={t.type === 'error' ? 'alert' : 'status'}
-				animate:flip={{ duration: prefersReducedMotion ? 0 : 200 }}
+				animate:flip={{ duration: 200 }}
 				in:fly={{
-					x: prefersReducedMotion ? 0 : 24,
-					duration: prefersReducedMotion ? 0 : 280,
+					x: 24,
+					duration: 250,
 					easing: quintOut,
-					delay: prefersReducedMotion ? 0 : index * 40
+					delay: index * 40
 				}}
 				out:fly={{
-					x: prefersReducedMotion ? 0 : 12,
-					duration: prefersReducedMotion ? 0 : 150,
+					x: 12,
+					duration: 150,
 					easing: quintIn
 				}}
 				onmouseenter={() => toastStore.pause(t.id)}
@@ -146,7 +144,7 @@
 
 	.toast-message {
 		flex: 1;
-		font-size: 0.75rem;
+		font-size: var(--text-sm);
 		color: rgba(255, 255, 255, 0.9);
 		line-height: 1.3;
 	}
@@ -256,5 +254,4 @@
 	:global(.toast-paused) .toast-progress-fill {
 		animation-play-state: paused;
 	}
-
 </style>

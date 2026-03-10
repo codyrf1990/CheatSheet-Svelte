@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { toastStore } from '$stores/toast.svelte';
+	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { panelsStore } from '$stores/panels.svelte';
-	import { Checkbox, CollapseWrapper } from '$components/ui';
+	import { persistence } from '$stores/persistence.svelte';
+	import { Checkbox, CollapseWrapper, Tooltip } from '$components/ui';
 	import { BDM_SECTIONS } from '$lib/data/bdmData';
 
 	const BDM_PANEL_ID = 'bdm-skus';
@@ -23,12 +24,8 @@
 
 	function loadExpanded(): Record<string, boolean> {
 		if (!browser) return { ...defaults };
-		try {
-			const stored = localStorage.getItem(STORAGE_KEY);
-			if (stored) return { ...defaults, ...JSON.parse(stored) };
-		} catch {
-			/* localStorage unavailable — non-critical */
-		}
+		const stored = persistence.get<Record<string, boolean> | null>(STORAGE_KEY, null);
+		if (stored) return { ...defaults, ...stored };
 		return { ...defaults };
 	}
 
@@ -36,13 +33,7 @@
 
 	function toggle(id: string) {
 		expanded[id] = !expanded[id];
-		if (browser) {
-			try {
-				localStorage.setItem(STORAGE_KEY, JSON.stringify(expanded));
-			} catch {
-				/* localStorage unavailable — non-critical */
-			}
-		}
+		persistence.set(STORAGE_KEY, expanded);
 	}
 
 	let anyExpanded = $derived(Object.values(expanded).some(Boolean));
@@ -50,35 +41,21 @@
 
 	function expandAll() {
 		for (const key of Object.keys(expanded)) expanded[key] = true;
-		if (browser) {
-			try {
-				localStorage.setItem(STORAGE_KEY, JSON.stringify(expanded));
-			} catch {
-				/* localStorage unavailable — non-critical */
-			}
-		}
+		persistence.set(STORAGE_KEY, expanded);
 	}
 
 	function collapseAll() {
 		for (const key of Object.keys(expanded)) expanded[key] = false;
-		if (browser) {
-			try {
-				localStorage.setItem(STORAGE_KEY, JSON.stringify(expanded));
-			} catch {
-				/* localStorage unavailable — non-critical */
-			}
-		}
+		persistence.set(STORAGE_KEY, expanded);
 	}
 
 	let copiedSku = $state<string | null>(null);
 
 	async function copySku(sku: string) {
-		try {
-			await navigator.clipboard.writeText(sku);
+		const ok = await copyToClipboard(sku, false);
+		if (ok) {
 			copiedSku = sku;
 			setTimeout(() => (copiedSku = null), 1500);
-		} catch {
-			toastStore.error('Failed to copy');
 		}
 	}
 
@@ -133,15 +110,12 @@
 										onchange={() => panelsStore.toggleItem(BDM_PANEL_ID, item.sku)}
 									/>
 								</span>
-								<button
-									type="button"
-									class="sku-chip"
-									onclick={() => copySku(item.sku)}
-									title="Click to copy {item.sku}"
-								>
-									{#if copiedSku === item.sku}<span class="copy-check">&#10003;</span
-										>{:else}{item.sku}{/if}
-								</button>
+								<Tooltip text="Click to copy {item.sku}">
+									<button type="button" class="sku-chip" onclick={() => copySku(item.sku)}>
+										{#if copiedSku === item.sku}<span class="copy-check">&#10003;</span
+											>{:else}{item.sku}{/if}
+									</button>
+								</Tooltip>
 								<span class="item-label">{item.label}</span>
 								<div class="item-pricing">
 									<span class="item-price">{formatPrice(item.price, item.priceNote)}</span>
@@ -180,7 +154,7 @@
 	}
 
 	.collapse-all-btn {
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		color: rgba(255, 255, 255, 0.35);
 		background: transparent;
 		border: none;
@@ -227,7 +201,7 @@
 	}
 
 	.section-count {
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		color: rgba(255, 255, 255, 0.25);
 		font-family: 'JetBrains Mono', monospace;
 	}
@@ -298,7 +272,7 @@
 	}
 
 	.item-label {
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		color: rgba(255, 255, 255, 0.5);
 		white-space: nowrap;
 		overflow: hidden;
@@ -317,7 +291,7 @@
 
 	.item-price {
 		font-family: 'JetBrains Mono', monospace;
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		color: rgba(255, 255, 255, 0.65);
 		white-space: nowrap;
 	}
@@ -341,10 +315,10 @@
 
 	@media (max-width: 768px) {
 		.section-title {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 		.sku-chip {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 	}
 </style>

@@ -4,6 +4,7 @@
  */
 
 import type { PanelState, PageState } from '$types';
+import { deepCopy } from '$lib/utils/deepCopy';
 
 // Reactive state
 let panelStates = $state<Record<string, PanelState>>({});
@@ -169,7 +170,7 @@ function loadFromPageState(pageState: PageState): void {
 	removeMode = false;
 	if (pageState?.panels) {
 		// Deep copy to prevent mutations
-		panelStates = JSON.parse(JSON.stringify(pageState.panels));
+		panelStates = deepCopy(pageState.panels);
 	} else {
 		panelStates = {};
 	}
@@ -179,7 +180,7 @@ function loadFromPageState(pageState: PageState): void {
  * Get current state for saving to page state
  */
 function getPageState(): Record<string, PanelState> {
-	return JSON.parse(JSON.stringify(panelStates));
+	return deepCopy(panelStates);
 }
 
 /**

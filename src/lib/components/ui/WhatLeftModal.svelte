@@ -1,7 +1,9 @@
 <script lang="ts">
 	import Modal from './Modal.svelte';
+	import Tooltip from './Tooltip.svelte';
 	import { packagesStore } from '$stores/packages.svelte';
 	import { panelsStore } from '$stores/panels.svelte';
+	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { SKU_LOOKUP, MODULE_SKUS } from '$lib/data/skuData';
 	import { PACKAGE_TOGGLE_BITS, REQUIRES_SC_MILL_MODULES } from '$lib/data/prerequisites';
 	import { BIT_DESCRIPTIONS } from '$lib/data/bitDescriptions';
@@ -9,11 +11,11 @@
 
 	interface Props {
 		open: boolean;
-		onclose: () => void;
+		onClose: () => void;
 		skuMode?: 'bdm' | 'ms';
 	}
 
-	let { open, onclose, skuMode = 'bdm' }: Props = $props();
+	let { open, onClose, skuMode = 'bdm' }: Props = $props();
 
 	interface UpgradeItem {
 		name: string;
@@ -180,12 +182,7 @@
 	}
 
 	async function handleCopySku(sku: string) {
-		try {
-			await navigator.clipboard.writeText(sku);
-			// silent copy — no toast in modal
-		} catch {
-			// ignore
-		}
+		await copyToClipboard(sku, false);
 	}
 
 	function formatPrice(price: number): string {
@@ -201,7 +198,7 @@
 	);
 </script>
 
-<Modal {open} {onclose} title="Upgrades — {skuMode === 'ms' ? 'MS' : 'BDM'}" size="wide">
+<Modal {open} {onClose} title="Upgrades — {skuMode === 'ms' ? 'MS' : 'BDM'}" size="wide">
 	{#if upgradeGroups.length === 0}
 		<div class="empty-state">
 			<p>All available packages and modules are already selected.</p>
@@ -217,12 +214,14 @@
 								<div class="item-header">
 									<span class="item-name">{item.name}</span>
 									<div class="item-meta">
-										<button
-											type="button"
-											class="item-sku"
-											onclick={() => handleCopySku(skuMode === 'ms' ? item.maintSku : item.sku)}
-											title="Click to copy">{skuMode === 'ms' ? item.maintSku : item.sku}</button
-										>
+										<Tooltip text="Click to copy">
+											<button
+												type="button"
+												class="item-sku"
+												onclick={() => handleCopySku(skuMode === 'ms' ? item.maintSku : item.sku)}
+												>{skuMode === 'ms' ? item.maintSku : item.sku}</button
+											>
+										</Tooltip>
 										<span class="item-price"
 											>{formatPrice(skuMode === 'ms' ? item.maintPrice : item.price)}</span
 										>
@@ -270,7 +269,7 @@
 	.group-title {
 		font-size: 0.8125rem;
 		font-weight: 600;
-		color: #d4af37;
+		color: var(--color-solidcam-gold);
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		margin: 0 0 0.625rem 0;

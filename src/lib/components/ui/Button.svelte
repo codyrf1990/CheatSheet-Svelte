@@ -164,5 +164,4 @@
 		outline: 2px solid rgba(212, 175, 55, 0.8);
 		outline-offset: 2px;
 	}
-
 </style>

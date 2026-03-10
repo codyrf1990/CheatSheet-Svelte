@@ -36,5 +36,4 @@
 	.collapse-inner {
 		min-height: 0;
 	}
-
 </style>

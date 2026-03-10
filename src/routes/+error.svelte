@@ -31,7 +31,7 @@
 	.error-code {
 		font-size: 4rem;
 		font-weight: 700;
-		color: #d4af37;
+		color: var(--color-solidcam-gold);
 		margin: 0 0 0.5rem;
 		line-height: 1;
 	}
@@ -57,5 +57,4 @@
 	.home-link:hover {
 		filter: brightness(1.1);
 	}
-
 </style>

@@ -113,13 +113,6 @@ export type SyncSessionState =
 // Boot phase for startup coordination
 export type BootPhase = 'idle' | 'prefs' | 'companies' | 'sync' | 'ready' | 'error';
 
-// Header Links
-export interface HeaderLink {
-	label: string;
-	url: string;
-	icon?: string;
-}
-
 // Calculator
 export interface CalculatorState {
 	displayValue: string;
@@ -186,10 +179,4 @@ export interface ImportResult {
 	skusImported: number; // Maintenance SKUs added to panel
 	importedSkuList?: string[]; // List of SKU codes that were added
 	errors?: string[];
-}
-
-export interface ParsedPDF {
-	fileName: string;
-	license: LicenseInfo | null;
-	parseError?: string;
 }

@@ -230,13 +230,13 @@
 	/* Responsive */
 	@media (max-width: 768px) {
 		.section-title {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 	}
 
 	@media (max-width: 640px) {
 		.section-title {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 
 		.panel-items {

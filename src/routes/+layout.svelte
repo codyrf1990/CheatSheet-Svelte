@@ -137,9 +137,9 @@
 		transform: translateX(-50%);
 		z-index: 9999;
 		padding: 0.75rem 1.5rem;
-		background: #0a0a0f;
-		color: #d4af37;
-		border: 2px solid #d4af37;
+		background: var(--color-bg-primary);
+		color: var(--color-solidcam-gold);
+		border: 2px solid var(--color-solidcam-gold);
 		border-radius: 8px;
 		font-weight: 600;
 		text-decoration: none;
@@ -218,12 +218,12 @@
 	.boot-error-title {
 		font-size: 1.25rem;
 		font-weight: 700;
-		color: #d4af37;
+		color: var(--color-solidcam-gold);
 		margin: 0;
 	}
 
 	.boot-error-message {
-		font-size: 0.875rem;
+		font-size: var(--text-lg);
 		color: rgba(255, 255, 255, 0.6);
 		margin: 0;
 		line-height: 1.5;

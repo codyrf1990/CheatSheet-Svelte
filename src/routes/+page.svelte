@@ -8,7 +8,9 @@
 		SalesTaxModal,
 		CurrentProductsModal,
 		CompaniesModal,
-		WhatLeftModal
+		WhatLeftModal,
+		CollapseWrapper,
+		Tooltip
 	} from '$components/ui';
 	import type { PageState } from '$types';
 	import { toastStore } from '$stores/toast.svelte';
@@ -270,7 +272,7 @@
 				editMode={packageEditMode}
 				{maintenanceRange}
 				skuMode={effectiveSkuTabMode}
-				onwhatleft={() => (showWhatLeftModal = true)}
+				onWhatLeft={() => (showWhatLeftModal = true)}
 			/>
 
 			<!-- SKU panel under table -->
@@ -280,20 +282,22 @@
 						{effectiveSkuTabMode === 'bdm' ? 'BDM SKUs' : 'Maint SKUs'}
 					</span>
 					<div class="mode-pill" role="group" aria-label="View mode">
-						<button
-							class="mode-pill-btn"
-							class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
-							onclick={() => userPrefsStore.setSkuTabMode('bdm')}
-							aria-pressed={effectiveSkuTabMode === 'bdm'}
-							title="BDM mode — new sale prices">BDM</button
-						>
-						<button
-							class="mode-pill-btn"
-							class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
-							onclick={() => userPrefsStore.setSkuTabMode('ms')}
-							aria-pressed={effectiveSkuTabMode === 'ms'}
-							title="MS mode — maintenance prices">MS</button
-						>
+						<Tooltip text="BDM mode — new sale prices">
+							<button
+								class="mode-pill-btn"
+								class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
+								onclick={() => userPrefsStore.setSkuTabMode('bdm')}
+								aria-pressed={effectiveSkuTabMode === 'bdm'}>BDM</button
+							>
+						</Tooltip>
+						<Tooltip text="MS mode — maintenance prices">
+							<button
+								class="mode-pill-btn"
+								class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
+								onclick={() => userPrefsStore.setSkuTabMode('ms')}
+								aria-pressed={effectiveSkuTabMode === 'ms'}>MS</button
+							>
+						</Tooltip>
 					</div>
 					<button
 						type="button"
@@ -314,7 +318,7 @@
 						</svg>
 					</button>
 				</div>
-				{#if skuPanelOpen}
+				<CollapseWrapper open={skuPanelOpen}>
 					{#if effectiveSkuTabMode === 'bdm'}
 						<BDMPanel />
 					{:else if panels.find((p) => p.id === 'maintenance-skus') && panels.find((p) => p.id === 'solidworks-maintenance')}
@@ -325,7 +329,7 @@
 							skuMode={effectiveSkuTabMode}
 						/>
 					{/if}
-				{/if}
+				</CollapseWrapper>
 			</div>
 		</section>
 
@@ -337,20 +341,22 @@
 						{effectiveSkuTabMode === 'bdm' ? 'New Sale' : 'Maint Price'}
 					</span>
 					<div class="mode-pill" role="group" aria-label="View mode">
-						<button
-							class="mode-pill-btn"
-							class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
-							onclick={() => userPrefsStore.setSkuTabMode('bdm')}
-							aria-pressed={effectiveSkuTabMode === 'bdm'}
-							title="BDM mode — new sale prices">BDM</button
-						>
-						<button
-							class="mode-pill-btn"
-							class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
-							onclick={() => userPrefsStore.setSkuTabMode('ms')}
-							aria-pressed={effectiveSkuTabMode === 'ms'}
-							title="MS mode — maintenance prices">MS</button
-						>
+						<Tooltip text="BDM mode — new sale prices">
+							<button
+								class="mode-pill-btn"
+								class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
+								onclick={() => userPrefsStore.setSkuTabMode('bdm')}
+								aria-pressed={effectiveSkuTabMode === 'bdm'}>BDM</button
+							>
+						</Tooltip>
+						<Tooltip text="MS mode — maintenance prices">
+							<button
+								class="mode-pill-btn"
+								class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
+								onclick={() => userPrefsStore.setSkuTabMode('ms')}
+								aria-pressed={effectiveSkuTabMode === 'ms'}>MS</button
+							>
+						</Tooltip>
 					</div>
 				</div>
 				<NewSalePanel skuMode={effectiveSkuTabMode} />
@@ -424,12 +430,12 @@
 {/if}
 
 <!-- Modals -->
-<SalesTaxModal open={showSalesTaxModal} onclose={() => (showSalesTaxModal = false)} />
-<CurrentProductsModal open={showProductsModal} onclose={() => (showProductsModal = false)} />
-<CompaniesModal open={showCompaniesModal} onclose={() => (showCompaniesModal = false)} />
+<SalesTaxModal open={showSalesTaxModal} onClose={() => (showSalesTaxModal = false)} />
+<CurrentProductsModal open={showProductsModal} onClose={() => (showProductsModal = false)} />
+<CompaniesModal open={showCompaniesModal} onClose={() => (showCompaniesModal = false)} />
 <WhatLeftModal
 	open={showWhatLeftModal}
-	onclose={() => (showWhatLeftModal = false)}
+	onClose={() => (showWhatLeftModal = false)}
 	skuMode={effectiveSkuTabMode}
 />
 
@@ -577,7 +583,7 @@
 	}
 
 	.mode-pill-btn {
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		font-weight: 700;
 		padding: var(--space-0-5) var(--space-1);
 		background: transparent;
@@ -669,7 +675,7 @@
 
 	.dropdown-item:hover {
 		background: rgba(212, 175, 55, 0.15);
-		color: #d4af37;
+		color: var(--color-solidcam-gold);
 		padding-left: 0.9rem;
 	}
 
@@ -752,5 +758,4 @@
 			order: -1;
 		}
 	}
-
 </style>

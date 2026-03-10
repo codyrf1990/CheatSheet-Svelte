@@ -316,7 +316,7 @@
 	.header-title {
 		font-size: clamp(0.85rem, 1.5vw, 1.25rem);
 		font-weight: 700;
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 		margin: 0;
 		text-align: center;
 		letter-spacing: -0.02em;
@@ -410,7 +410,7 @@
 
 	.nav-red {
 		background: rgba(200, 16, 46, 0.12);
-		color: #ef4444;
+		color: var(--color-error);
 		border-color: rgba(200, 16, 46, 0.15);
 	}
 	.nav-red:hover {
@@ -438,7 +438,7 @@
 
 	.nav-blue {
 		background: rgba(59, 130, 246, 0.12);
-		color: #3b82f6;
+		color: var(--color-info);
 		border-color: rgba(59, 130, 246, 0.15);
 	}
 	.nav-blue:hover {
@@ -480,7 +480,7 @@
 	.nav-gray.active {
 		background: rgba(212, 175, 55, 0.15);
 		border-color: rgba(212, 175, 55, 0.3);
-		color: #d4af37;
+		color: var(--color-solidcam-gold);
 	}
 
 	.operations-dropdown,
@@ -581,7 +581,7 @@
 		}
 
 		.nav-link {
-			font-size: 0.55rem;
+			font-size: 0.6875rem;
 			padding: 0.1rem 0.2rem;
 		}
 
@@ -603,5 +603,4 @@
 			display: none;
 		}
 	}
-
 </style>

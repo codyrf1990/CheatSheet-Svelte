@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { CalculatorState } from '$types';
-	import { toastStore } from '$stores/toast.svelte';
+	import { Tooltip } from '$components/ui';
+	import { copyToClipboard } from '$lib/utils/clipboard';
 
 	// Calculator state
 	let state = $state<CalculatorState>({
@@ -383,24 +384,14 @@
 			textToCopy = truncatedValue.toString();
 		}
 
-		try {
-			await navigator.clipboard.writeText(textToCopy);
-			toastStore.success(`Copied: ${textToCopy}`, 1500);
-		} catch {
-			toastStore.error('Failed to copy');
-		}
+		await copyToClipboard(textToCopy, `Copied: ${textToCopy}`);
 	}
 
 	// Double-click copy (full value)
 	async function handleDisplayDoubleClick() {
 		if (state.error) return;
 
-		try {
-			await navigator.clipboard.writeText(state.displayValue);
-			toastStore.success(`Copied: ${state.displayValue}`, 1500);
-		} catch {
-			toastStore.error('Failed to copy');
-		}
+		await copyToClipboard(state.displayValue, `Copied: ${state.displayValue}`);
 	}
 </script>
 
@@ -410,17 +401,18 @@
 	</div>
 	<div class="calculator-shell">
 		<div class="calculator" role="application" aria-label="Calculator">
-			<button
-				type="button"
-				class="calculator-display"
-				onclick={handleDisplayClick}
-				ondblclick={handleDisplayDoubleClick}
-				aria-label="Display: {displayText}. Click to copy discount, double-click to copy full value"
-				title="Click to copy discount value • Double-click to copy full value"
-				aria-live="polite"
-			>
-				{displayText}
-			</button>
+			<Tooltip text="Click to copy discount value • Double-click to copy full value">
+				<button
+					type="button"
+					class="calculator-display"
+					onclick={handleDisplayClick}
+					ondblclick={handleDisplayDoubleClick}
+					aria-label="Display: {displayText}. Click to copy discount, double-click to copy full value"
+					aria-live="polite"
+				>
+					{displayText}
+				</button>
+			</Tooltip>
 			{#if state.error}
 				<p class="error-hint">Press AC to clear</p>
 			{/if}
@@ -711,7 +703,7 @@
 		}
 
 		.panel-title {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 
 		.calculator-shell {

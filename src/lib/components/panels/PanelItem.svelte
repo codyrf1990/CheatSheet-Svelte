@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Checkbox } from '$components/ui';
-	import { toastStore } from '$stores/toast.svelte';
+	import { copyToClipboard } from '$lib/utils/clipboard';
 
 	interface Props {
 		item: string;
@@ -34,12 +34,7 @@
 
 	async function handleCopy() {
 		if (editMode) return;
-		try {
-			await navigator.clipboard.writeText(item);
-			toastStore.success('Copied!', 1500);
-		} catch {
-			toastStore.error('Failed to copy');
-		}
+		await copyToClipboard(item);
 	}
 
 	function handleCheckboxChange() {
@@ -187,7 +182,7 @@
 		border: none;
 		border-radius: var(--radius-2xs);
 		color: rgba(255, 255, 255, 0.4);
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		cursor: pointer;
 		transition: all 150ms ease;
 		flex-shrink: 0;
@@ -206,14 +201,14 @@
 		}
 
 		.item-text {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 			padding: var(--space-px) var(--space-0);
 		}
 
 		.item-remove-btn {
 			width: 12px;
 			height: 12px;
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 	}
 
@@ -224,14 +219,14 @@
 		}
 
 		.item-text {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 			padding: var(--space-px) var(--space-0);
 		}
 
 		.item-remove-btn {
 			width: 10px;
 			height: 10px;
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 	}
 
@@ -241,14 +236,14 @@
 		}
 
 		.item-text {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 			padding: var(--space-px) var(--space-0);
 		}
 
 		.item-remove-btn {
 			width: 12px;
 			height: 12px;
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 	}
 </style>

@@ -4,6 +4,7 @@
 	import { packagesStore } from '$stores/packages.svelte';
 	import { panelsStore } from '$stores/panels.svelte';
 	import { toastStore } from '$stores/toast.svelte';
+	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { applyOrder } from '$lib/utils/order';
 	import { PACKAGE_TOGGLE_BITS, SC_TURN_LOCKED } from '$lib/data/prerequisites';
@@ -147,22 +148,18 @@
 	let maintCopied = $state(false);
 
 	async function handleCodeCopy() {
-		try {
-			await navigator.clipboard.writeText(pkg.code);
+		const ok = await copyToClipboard(pkg.code, false);
+		if (ok) {
 			codeCopied = true;
 			setTimeout(() => (codeCopied = false), 1500);
-		} catch {
-			toastStore.error('Failed to copy');
 		}
 	}
 
 	async function handleMaintCopy() {
-		try {
-			await navigator.clipboard.writeText(pkg.maintenance);
+		const ok = await copyToClipboard(pkg.maintenance, false);
+		if (ok) {
 			maintCopied = true;
 			setTimeout(() => (maintCopied = false), 1500);
-		} catch {
-			toastStore.error('Failed to copy');
 		}
 	}
 
@@ -539,7 +536,7 @@
 	}
 
 	.drop-hint {
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		color: rgba(255, 255, 255, 0.4);
 		font-style: italic;
 	}
@@ -594,7 +591,7 @@
 		}
 
 		.maint-code {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 
 		.bits-cell {

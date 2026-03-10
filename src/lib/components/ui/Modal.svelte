@@ -5,14 +5,14 @@
 
 	interface Props {
 		open: boolean;
-		onclose: () => void;
+		onClose: () => void;
 		title: string;
 		children: Snippet;
 		footer?: Snippet;
 		size?: 'default' | 'wide' | 'full';
 	}
 
-	let { open = $bindable(), onclose, title, children, footer, size = 'default' }: Props = $props();
+	let { open = $bindable(), onClose, title, children, footer, size = 'default' }: Props = $props();
 
 	let modalRef: HTMLElement | null = $state(null);
 	let previouslyFocusedElement: HTMLElement | null = null;
@@ -62,7 +62,7 @@
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
-			onclose();
+			onClose();
 			return;
 		}
 
@@ -89,7 +89,7 @@
 
 	function handleBackdropClick(e: MouseEvent) {
 		if (e.target === e.currentTarget) {
-			onclose();
+			onClose();
 		}
 	}
 </script>
@@ -116,7 +116,7 @@
 		>
 			<div class="modal-header">
 				<h2 id="modal-title" class="modal-title">{title}</h2>
-				<button class="close-btn" onclick={onclose} aria-label="Close modal">
+				<button class="close-btn" onclick={onClose} aria-label="Close modal">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="20"
@@ -212,6 +212,7 @@
 	}
 
 	.close-btn {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -223,6 +224,15 @@
 		border-radius: var(--radius-xs);
 		cursor: pointer;
 		transition: all 150ms ease;
+	}
+
+	.close-btn::after {
+		content: '';
+		position: absolute;
+		inset: 50% auto auto 50%;
+		width: 44px;
+		height: 44px;
+		transform: translate(-50%, -50%);
 	}
 
 	.close-btn:hover {

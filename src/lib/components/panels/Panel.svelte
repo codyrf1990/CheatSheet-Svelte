@@ -236,7 +236,7 @@
 		}
 
 		.panel-title {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 
 		.panel-body {
@@ -270,7 +270,7 @@
 		}
 
 		.panel-title {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 
 		.panel-body {

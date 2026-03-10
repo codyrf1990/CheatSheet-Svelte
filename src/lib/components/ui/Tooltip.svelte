@@ -3,17 +3,63 @@
 
 	interface Props {
 		text: string;
+		position?: 'top' | 'bottom';
 		children: Snippet;
 	}
 
-	let { text, children }: Props = $props();
+	let { text, position = 'top', children }: Props = $props();
 
-	let tooltipId = crypto.randomUUID();
+	let tooltipId = `tip-${crypto.randomUUID()}`;
+	let triggerEl: HTMLSpanElement | undefined = $state();
+	let tipEl: HTMLDivElement | null = null;
+
+	function show() {
+		if (!triggerEl) return;
+		const rect = triggerEl.getBoundingClientRect();
+		const x = rect.left + rect.width / 2;
+
+		if (!tipEl) {
+			tipEl = document.createElement('div');
+			tipEl.id = tooltipId;
+			tipEl.role = 'tooltip';
+			tipEl.className = 'app-tooltip';
+			document.body.appendChild(tipEl);
+		}
+
+		tipEl.textContent = text;
+
+		if (position === 'bottom') {
+			tipEl.style.cssText = `left:${x}px;top:${rect.bottom + 6}px;transform:translateX(-50%)`;
+		} else {
+			tipEl.style.cssText = `left:${x}px;top:${rect.top - 6}px;transform:translateX(-50%) translateY(-100%)`;
+		}
+
+		tipEl.classList.add('visible');
+	}
+
+	function hide() {
+		tipEl?.classList.remove('visible');
+	}
+
+	$effect(() => {
+		return () => {
+			tipEl?.remove();
+			tipEl = null;
+		};
+	});
 </script>
 
-<span class="tooltip-trigger" aria-describedby={tooltipId}>
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<span
+	class="tooltip-trigger"
+	aria-describedby={tooltipId}
+	bind:this={triggerEl}
+	onmouseenter={show}
+	onmouseleave={hide}
+	onfocusin={show}
+	onfocusout={hide}
+>
 	{@render children()}
-	<span id={tooltipId} class="tooltip" role="tooltip">{text}</span>
 </span>
 
 <style>
@@ -21,31 +67,4 @@
 		position: relative;
 		display: inline-flex;
 	}
-
-	.tooltip {
-		position: absolute;
-		bottom: calc(100% + 6px);
-		left: 50%;
-		transform: translateX(-50%);
-		padding: 4px 10px;
-		font-size: 0.75rem;
-		line-height: 1.4;
-		white-space: nowrap;
-		color: #f5f5f5;
-		background: #2a2a2a;
-		border: 1px solid rgba(255, 255, 255, 0.12);
-		border-radius: 6px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-		pointer-events: none;
-		opacity: 0;
-		transition: opacity 150ms ease;
-		z-index: 9999;
-	}
-
-	/* Show on hover or focus-within */
-	.tooltip-trigger:hover .tooltip,
-	.tooltip-trigger:focus-within .tooltip {
-		opacity: 1;
-	}
-
 </style>

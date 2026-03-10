@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { packagesStore } from '$stores/packages.svelte';
-	import { toastStore } from '$stores/toast.svelte';
+	import { copyToClipboard } from '$lib/utils/clipboard';
+	import { Tooltip } from '$components/ui';
 	import { SKU_LOOKUP, MODULE_SKUS, type SkuEntry } from '$lib/data/skuData';
 	import { BDM_SECTIONS, type BDMItem } from '$lib/data/bdmData';
 	import { PACKAGE_TOGGLE_BITS } from '$lib/data/prerequisites';
@@ -128,12 +129,7 @@
 	}
 
 	async function handleCopySku(sku: string) {
-		try {
-			await navigator.clipboard.writeText(sku);
-			toastStore.success(`Copied ${sku}`, 1500);
-		} catch {
-			toastStore.error('Failed to copy');
-		}
+		await copyToClipboard(sku, `Copied ${sku}`);
 	}
 </script>
 
@@ -151,15 +147,16 @@
 							: 0}
 						<li class="sku-row" class:has-sub={line.subEntries?.length}>
 							<div class="sku-main-row">
-								<button
-									type="button"
-									class="sku-code"
-									class:is-package={line.subEntries?.length}
-									onclick={() => handleCopySku(line.entry.maintSku)}
-									title="Click to copy {line.entry.maintSku}"
-								>
-									{line.entry.maintSku}
-								</button>
+								<Tooltip text="Click to copy {line.entry.maintSku}">
+									<button
+										type="button"
+										class="sku-code"
+										class:is-package={line.subEntries?.length}
+										onclick={() => handleCopySku(line.entry.maintSku)}
+									>
+										{line.entry.maintSku}
+									</button>
+								</Tooltip>
 								<div class="sku-price-group">
 									{#if savings > 0}
 										<span class="sku-savings">Save {formatPrice(savings)}</span>
@@ -171,14 +168,15 @@
 								<ul class="sku-sub-list" aria-label="Included in {line.entry.maintSku}">
 									{#each line.subEntries as sub (sub.sku)}
 										<li class="sku-sub-row">
-											<button
-												type="button"
-												class="sku-code sku-code--sub"
-												onclick={() => handleCopySku(sub.maintSku)}
-												title="Click to copy {sub.maintSku}"
-											>
-												{sub.maintSku}
-											</button>
+											<Tooltip text="Click to copy {sub.maintSku}">
+												<button
+													type="button"
+													class="sku-code sku-code--sub"
+													onclick={() => handleCopySku(sub.maintSku)}
+												>
+													{sub.maintSku}
+												</button>
+											</Tooltip>
 											<span class="sku-price sku-price--sub">{formatPrice(sub.maintPrice)}</span>
 										</li>
 									{/each}
@@ -204,15 +202,16 @@
 							: 0}
 						<li class="sku-row" class:has-sub={line.subEntries?.length}>
 							<div class="sku-main-row">
-								<button
-									type="button"
-									class="sku-code"
-									class:is-package={line.subEntries?.length}
-									onclick={() => handleCopySku(line.entry.sku)}
-									title="Click to copy {line.entry.sku}"
-								>
-									{line.entry.sku}
-								</button>
+								<Tooltip text="Click to copy {line.entry.sku}">
+									<button
+										type="button"
+										class="sku-code"
+										class:is-package={line.subEntries?.length}
+										onclick={() => handleCopySku(line.entry.sku)}
+									>
+										{line.entry.sku}
+									</button>
+								</Tooltip>
 								<div class="sku-price-group">
 									{#if savings > 0}
 										<span class="sku-savings">Save {formatPrice(savings)}</span>
@@ -224,14 +223,15 @@
 								<ul class="sku-sub-list" aria-label="Included in {line.entry.sku}">
 									{#each line.subEntries as sub (sub.sku)}
 										<li class="sku-sub-row">
-											<button
-												type="button"
-												class="sku-code sku-code--sub"
-												onclick={() => handleCopySku(sub.sku)}
-												title="Click to copy {sub.sku} (reference price)"
-											>
-												{sub.sku}
-											</button>
+											<Tooltip text="Click to copy {sub.sku} (reference price)">
+												<button
+													type="button"
+													class="sku-code sku-code--sub"
+													onclick={() => handleCopySku(sub.sku)}
+												>
+													{sub.sku}
+												</button>
+											</Tooltip>
 											<span class="sku-price sku-price--sub">{formatPrice(sub.price)}</span>
 										</li>
 									{/each}
@@ -344,7 +344,7 @@
 
 	.sku-savings {
 		font-family: 'JetBrains Mono', monospace;
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		color: #4ade80;
 		opacity: 0.85;
 		white-space: nowrap;
@@ -375,7 +375,7 @@
 	}
 
 	.sku-code--sub {
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		opacity: 0.6;
 		border-color: rgba(255, 255, 255, 0.06);
 		background: transparent;
@@ -388,7 +388,7 @@
 	}
 
 	.sku-price--sub {
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		color: rgba(255, 255, 255, 0.35);
 		font-style: italic;
 	}
@@ -420,21 +420,21 @@
 	/* Responsive */
 	@media (max-width: 768px) {
 		.sku-code {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 
 		.sku-price {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 	}
 
 	@media (max-width: 640px) {
 		.sku-code {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 
 		.sku-price {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 	}
 </style>

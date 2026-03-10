@@ -5,6 +5,7 @@
  */
 
 import { browser } from '$app/environment';
+import { persistence } from './persistence.svelte';
 
 const STORAGE_KEY = 'solidcam-user-prefs';
 
@@ -40,28 +41,24 @@ function createDefaultPrefs(): UserPrefs {
 function loadPrefs(): UserPrefs {
 	if (!browser) return createDefaultPrefs();
 
-	try {
-		const stored = localStorage.getItem(STORAGE_KEY);
-		if (stored) {
-			const parsed = JSON.parse(stored);
-			const updatedAt =
-				typeof parsed.updatedAt === 'number' && Number.isFinite(parsed.updatedAt)
-					? parsed.updatedAt
-					: Date.now();
-			return {
-				customPanelItems: parsed.customPanelItems ?? {},
-				customPackageBits: parsed.customPackageBits ?? {},
-				backgroundVideoPaused: parsed.backgroundVideoPaused ?? false,
-				repName: parsed.repName || '',
-				skuTabMode: parsed.skuTabMode || 'bdm',
-				updatedAt,
-				packageBitOrders: parsed.packageBitOrders ?? {},
-				packageLooseBitOrders: parsed.packageLooseBitOrders ?? {},
-				packageGroupMembership: parsed.packageGroupMembership ?? {}
-			};
-		}
-	} catch (e) {
-		console.warn('Failed to load user preferences:', e);
+	const parsed = persistence.get<Record<string, unknown> | null>(STORAGE_KEY, null);
+	if (parsed) {
+		const updatedAt =
+			typeof parsed.updatedAt === 'number' && Number.isFinite(parsed.updatedAt)
+				? parsed.updatedAt
+				: Date.now();
+		return {
+			customPanelItems: (parsed.customPanelItems as Record<string, string[]>) ?? {},
+			customPackageBits: (parsed.customPackageBits as Record<string, string[]>) ?? {},
+			backgroundVideoPaused: (parsed.backgroundVideoPaused as boolean) ?? false,
+			repName: (parsed.repName as string) || '',
+			skuTabMode: (parsed.skuTabMode as 'bdm' | 'ms') || 'bdm',
+			updatedAt,
+			packageBitOrders: (parsed.packageBitOrders as Record<string, string[]>) ?? {},
+			packageLooseBitOrders: (parsed.packageLooseBitOrders as Record<string, string[]>) ?? {},
+			packageGroupMembership:
+				(parsed.packageGroupMembership as Record<string, Record<string, string>>) ?? {}
+		};
 	}
 
 	return createDefaultPrefs();
@@ -86,11 +83,7 @@ function init(): void {
  */
 function save(): void {
 	if (!browser) return;
-	try {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-	} catch (e) {
-		console.warn('Failed to save user preferences:', e);
-	}
+	persistence.set(STORAGE_KEY, prefs);
 }
 
 function emitChange(): void {

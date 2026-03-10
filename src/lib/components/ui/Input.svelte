@@ -84,7 +84,7 @@
 		padding: calc(var(--space-2) + var(--space-0)) calc(var(--space-3) + var(--space-0));
 		padding-left: calc(var(--space-3) + var(--space-0) - 2px);
 		font-size: var(--text-xl);
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 		background-color: rgba(18, 18, 26, 0.8);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-left: 3px solid transparent;
@@ -117,7 +117,7 @@
 	}
 
 	.input-field.has-error {
-		border-color: #ef4444;
+		border-color: var(--color-error);
 	}
 
 	.feedback-space {
@@ -134,23 +134,23 @@
 
 	.input-error {
 		font-size: var(--text-sm);
-		color: #ef4444;
+		color: var(--color-error);
 	}
 
 	.required-indicator {
-		color: #ef4444;
+		color: var(--color-error);
 		font-weight: 600;
 		margin-left: var(--space-1);
 	}
 
 	/* Enhanced error state with red left border */
 	.has-error .input-field {
-		border-color: #ef4444;
-		border-left-color: #ef4444;
+		border-color: var(--color-error);
+		border-left-color: var(--color-error);
 	}
 
 	.has-error .input-field:focus {
-		border-color: #ef4444;
+		border-color: var(--color-error);
 		box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 	}
 
@@ -160,5 +160,4 @@
 		cursor: not-allowed;
 		background: rgba(18, 18, 26, 0.5);
 	}
-
 </style>

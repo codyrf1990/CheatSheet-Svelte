@@ -3,8 +3,9 @@
 	import { panelsStore } from '$stores/panels.svelte';
 	import { syncStore } from '$stores/sync.svelte';
 	import { toastStore } from '$stores/toast.svelte';
-	import { AddSkuModal, Button, Input, Modal, ImportLicenseModal } from '$components/ui';
+	import { AddSkuModal, Button, Input, Modal, ImportLicenseModal, Tooltip } from '$components/ui';
 	import { copyQBExportToClipboard } from '$lib/utils/quickbooksExport';
+	import { copyToClipboard } from '$lib/utils/clipboard';
 
 	interface Props {
 		editMode?: boolean;
@@ -350,24 +351,14 @@
 	async function handleCopyPageName() {
 		const page = contextMenuPage;
 		if (!page) return;
-		try {
-			await navigator.clipboard.writeText(page.name);
-			toastStore.success('Copied');
-		} catch {
-			toastStore.error('Failed to copy');
-		}
+		await copyToClipboard(page.name, 'Copied');
 		closeContextMenu();
 	}
 
 	async function handleCopyLicenseKey() {
 		const page = contextMenuPage;
 		if (!page?.licenseKey) return;
-		try {
-			await navigator.clipboard.writeText(page.licenseKey);
-			toastStore.success('Copied');
-		} catch {
-			toastStore.error('Failed to copy');
-		}
+		await copyToClipboard(page.licenseKey, 'Copied');
 		closeContextMenu();
 	}
 
@@ -586,83 +577,84 @@
 			aria-label="Select company, currently {currentCompany?.name || 'none'}"
 		>
 			<span class="company-name">{currentCompany?.name || 'No Company'}</span>
-			<span
-				class="status-dot"
-				style="color: {statusIndicator.color}"
-				title={statusIndicator.title}
-				role="status"
-				aria-live="polite"
-			>
-				<svg viewBox="0 0 16 16" fill="none" width="12" height="12" aria-hidden="true">
-					{#if statusIndicator.icon === 'check'}
-						<circle cx="8" cy="8" r="6" fill="currentColor" opacity="0.2" />
-						<path
-							d="M5 8l2 2 4-4"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					{:else if statusIndicator.icon === 'spinner'}
-						<circle
-							cx="8"
-							cy="8"
-							r="6"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-dasharray="20 10"
-							stroke-linecap="round"
-						>
-							<animateTransform
-								attributeName="transform"
-								type="rotate"
-								from="0 8 8"
-								to="360 8 8"
-								dur="1s"
-								repeatCount="indefinite"
+			<Tooltip text={statusIndicator.title} position="bottom">
+				<span
+					class="status-dot"
+					style="color: {statusIndicator.color}"
+					role="status"
+					aria-live="polite"
+				>
+					<svg viewBox="0 0 16 16" fill="none" width="12" height="12" aria-hidden="true">
+						{#if statusIndicator.icon === 'check'}
+							<circle cx="8" cy="8" r="6" fill="currentColor" opacity="0.2" />
+							<path
+								d="M5 8l2 2 4-4"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"
 							/>
-						</circle>
-					{:else if statusIndicator.icon === 'warning'}
-						<path
-							d="M8 3L2 13h12L8 3z"
-							stroke="currentColor"
-							stroke-width="1.2"
-							stroke-linejoin="round"
-						/>
-						<line
-							x1="8"
-							y1="7"
-							x2="8"
-							y2="10"
-							stroke="currentColor"
-							stroke-width="1.2"
-							stroke-linecap="round"
-						/>
-						<circle cx="8" cy="12" r="0.5" fill="currentColor" />
-					{:else if statusIndicator.icon === 'device'}
-						<rect
-							x="3"
-							y="4"
-							width="10"
-							height="7"
-							rx="1"
-							stroke="currentColor"
-							stroke-width="1.2"
-						/>
-						<line
-							x1="6"
-							y1="13"
-							x2="10"
-							y2="13"
-							stroke="currentColor"
-							stroke-width="1.2"
-							stroke-linecap="round"
-						/>
-					{:else}
-						<circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2" fill="none" />
-					{/if}
-				</svg>
-			</span>
+						{:else if statusIndicator.icon === 'spinner'}
+							<circle
+								cx="8"
+								cy="8"
+								r="6"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-dasharray="20 10"
+								stroke-linecap="round"
+							>
+								<animateTransform
+									attributeName="transform"
+									type="rotate"
+									from="0 8 8"
+									to="360 8 8"
+									dur="1s"
+									repeatCount="indefinite"
+								/>
+							</circle>
+						{:else if statusIndicator.icon === 'warning'}
+							<path
+								d="M8 3L2 13h12L8 3z"
+								stroke="currentColor"
+								stroke-width="1.2"
+								stroke-linejoin="round"
+							/>
+							<line
+								x1="8"
+								y1="7"
+								x2="8"
+								y2="10"
+								stroke="currentColor"
+								stroke-width="1.2"
+								stroke-linecap="round"
+							/>
+							<circle cx="8" cy="12" r="0.5" fill="currentColor" />
+						{:else if statusIndicator.icon === 'device'}
+							<rect
+								x="3"
+								y="4"
+								width="10"
+								height="7"
+								rx="1"
+								stroke="currentColor"
+								stroke-width="1.2"
+							/>
+							<line
+								x1="6"
+								y1="13"
+								x2="10"
+								y2="13"
+								stroke="currentColor"
+								stroke-width="1.2"
+								stroke-linecap="round"
+							/>
+						{:else}
+							<circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2" fill="none" />
+						{/if}
+					</svg>
+				</span>
+			</Tooltip>
 			<svg class="chevron" class:open={dropdownOpen} viewBox="0 0 20 20" fill="currentColor">
 				<path
 					d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
@@ -691,25 +683,26 @@
 					/>
 				{:else}
 					<div class="page-tab-group">
-						<button
-							type="button"
-							role="tab"
-							class="page-tab"
-							class:active={page.id === currentCompany.currentPageId}
-							aria-selected={page.id === currentCompany.currentPageId}
-							tabindex={page.id === currentCompany.currentPageId ? 0 : -1}
-							onclick={() => handlePageSelect(page.id)}
-							ondblclick={() => handlePageDoubleClick(page.id, page.name)}
-							oncontextmenu={(e) => handlePageContextMenu(e, page.id)}
-							onkeydown={handlePageTabKeydown}
-							title="Double-click to rename"
-						>
-							{page.name}
-						</button>
+						<Tooltip text="Double-click to rename" position="bottom">
+							<button
+								type="button"
+								role="tab"
+								class="page-tab"
+								class:active={page.id === currentCompany.currentPageId}
+								aria-selected={page.id === currentCompany.currentPageId}
+								tabindex={page.id === currentCompany.currentPageId ? 0 : -1}
+								onclick={() => handlePageSelect(page.id)}
+								ondblclick={() => handlePageDoubleClick(page.id, page.name)}
+								oncontextmenu={(e) => handlePageContextMenu(e, page.id)}
+								onkeydown={handlePageTabKeydown}
+							>
+								{page.name}
+							</button>
+						</Tooltip>
 						<button
 							type="button"
 							class="page-tab-menu-btn"
-							tabindex={-1}
+							tabindex={0}
 							aria-label="Options for {page.name}"
 							onclick={(e) => {
 								e.stopPropagation();
@@ -738,70 +731,79 @@
 	<!-- Quick Actions (visible when company active, not in edit mode) -->
 	{#if currentCompany && !editMode}
 		<div class="quick-actions">
-			<button
-				type="button"
-				class="quick-action-btn"
-				onclick={() => (showImportModal = true)}
-				title="Import License"
-				aria-label="Import License"
-			>
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					width="14"
-					height="14"
+			<Tooltip text="Import License" position="bottom">
+				<button
+					type="button"
+					class="quick-action-btn"
+					onclick={() => (showImportModal = true)}
+					aria-label="Import License"
 				>
-					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-					<polyline points="7 10 12 15 17 10" />
-					<line x1="12" y1="15" x2="12" y2="3" />
-				</svg>
-			</button>
-			<button
-				type="button"
-				class="quick-action-btn"
-				onclick={handleCopyForQB}
-				title="Copy for QuickBooks"
-				aria-label="Copy for QuickBooks"
-			>
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					width="14"
-					height="14"
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						width="14"
+						height="14"
+					>
+						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+						<polyline points="7 10 12 15 17 10" />
+						<line x1="12" y1="15" x2="12" y2="3" />
+					</svg>
+				</button>
+			</Tooltip>
+			<Tooltip text="Copy for QuickBooks" position="bottom">
+				<button
+					type="button"
+					class="quick-action-btn"
+					onclick={handleCopyForQB}
+					aria-label="Copy for QuickBooks"
 				>
-					<rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-					<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-				</svg>
-			</button>
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						width="14"
+						height="14"
+					>
+						<rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+						<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+					</svg>
+				</button>
+			</Tooltip>
 		</div>
 	{/if}
 
 	<!-- Actions Kebab -->
 	<div class="kebab-wrapper">
-		<button
-			type="button"
-			class="kebab-trigger"
-			class:is-open={showActionsMenu}
-			class:is-edit-mode={editMode}
-			bind:this={kebabTriggerRef}
-			onclick={editMode ? onToggleEdit : toggleActionsMenu}
-			oncontextmenu={editMode
-				? (e) => {
+		{#if editMode}
+			<Tooltip text="Click to finish · Right-click for menu" position="bottom">
+				<button
+					type="button"
+					class="kebab-trigger is-edit-mode"
+					bind:this={kebabTriggerRef}
+					onclick={onToggleEdit}
+					oncontextmenu={(e) => {
 						e.preventDefault();
 						toggleActionsMenu(e);
-					}
-				: undefined}
-			aria-expanded={editMode ? undefined : showActionsMenu}
-			aria-haspopup={editMode ? undefined : 'menu'}
-			aria-pressed={editMode ? true : undefined}
-			aria-label={editMode ? 'Done editing (right-click for menu)' : 'More actions'}
-			title={editMode ? 'Click to finish · Right-click for menu' : undefined}
-			>{editMode ? '✓' : '⋮'}</button
-		>
+					}}
+					aria-pressed={true}
+					aria-label="Done editing (right-click for menu)">✓</button
+				>
+			</Tooltip>
+		{:else}
+			<button
+				type="button"
+				class="kebab-trigger"
+				class:is-open={showActionsMenu}
+				bind:this={kebabTriggerRef}
+				onclick={toggleActionsMenu}
+				aria-expanded={showActionsMenu}
+				aria-haspopup="menu"
+				aria-label="More actions">⋮</button
+			>
+		{/if}
 	</div>
 </div>
 
@@ -968,7 +970,7 @@
 	</div>
 {/snippet}
 
-<Modal open={dialogType !== null} onclose={closeDialog} title={dialogTitle} footer={dialogFooter}>
+<Modal open={dialogType !== null} onClose={closeDialog} title={dialogTitle} footer={dialogFooter}>
 	{#if isConfirmDialog}
 		<p class="dialog-message">{dialogMessage}</p>
 	{:else}
@@ -983,8 +985,8 @@
 	{/if}
 </Modal>
 
-<AddSkuModal bind:open={showAddSkuModal} onclose={() => (showAddSkuModal = false)} />
-<ImportLicenseModal bind:open={showImportModal} onclose={() => (showImportModal = false)} />
+<AddSkuModal bind:open={showAddSkuModal} onClose={() => (showAddSkuModal = false)} />
+<ImportLicenseModal bind:open={showImportModal} onClose={() => (showImportModal = false)} />
 
 <style>
 	.company-page-bar {
@@ -1000,7 +1002,6 @@
 		box-shadow:
 			0 4px 16px rgba(0, 0, 0, 0.2),
 			inset 0 1px 0 rgba(255, 255, 255, 0.03);
-		overflow: hidden;
 	}
 
 	/* Subtle animated border shimmer */
@@ -1047,7 +1048,7 @@
 		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 10px;
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 		font-size: var(--text-base);
 		font-weight: 500;
 		cursor: pointer;
@@ -1153,7 +1154,7 @@
 		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 6px;
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 		font-size: var(--text-sm);
 		transition: all 200ms ease;
 	}
@@ -1175,7 +1176,7 @@
 
 	.section-title {
 		padding: 0.15rem 0.4rem;
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		font-weight: 600;
 		color: rgba(255, 255, 255, 0.4);
 		text-transform: uppercase;
@@ -1198,7 +1199,7 @@
 
 	.company-item:hover {
 		background: rgba(255, 255, 255, 0.08);
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 		padding-left: 0.75rem;
 	}
 
@@ -1227,7 +1228,7 @@
 		padding: 0.3rem 0.5rem;
 		border: none;
 		border-radius: 5px;
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 150ms ease;
@@ -1256,7 +1257,7 @@
 
 	.footer-btn--view:hover {
 		background: rgba(255, 255, 255, 0.1);
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 	}
 
 	/* Divider */
@@ -1357,9 +1358,16 @@
 		opacity: 0.6;
 	}
 
-	.page-tab-menu-btn:hover {
+	.page-tab-menu-btn:hover,
+	.page-tab-menu-btn:focus-visible {
 		opacity: 1 !important;
 		color: var(--color-solidcam-gold, #d4af37);
+	}
+
+	.page-tab-menu-btn:focus-visible {
+		outline: 2px solid var(--color-solidcam-gold, #d4af37);
+		outline-offset: 1px;
+		border-radius: 4px;
 	}
 
 	@media (hover: none) {
@@ -1384,7 +1392,7 @@
 		background: rgba(255, 255, 255, 0.1);
 		border: 1px solid var(--color-solidcam-gold, #d4af37);
 		border-radius: 8px;
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 		font-size: var(--text-base);
 		width: 70px;
 		box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
@@ -1457,7 +1465,7 @@
 	}
 
 	.edit-indicator {
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		font-weight: 600;
 		color: var(--color-solidcam-gold, #d4af37);
 		text-transform: uppercase;
@@ -1529,7 +1537,7 @@
 	.actions-menu button:hover {
 		background: rgba(255, 255, 255, 0.08);
 		padding-left: 1.125rem;
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 	}
 
 	.actions-menu button.active {
@@ -1604,7 +1612,7 @@
 
 	.context-menu button.danger:hover {
 		background: rgba(239, 68, 68, 0.15);
-		color: #ef4444;
+		color: var(--color-error);
 	}
 
 	.context-menu .menu-divider {
@@ -1704,7 +1712,7 @@
 
 		.company-trigger {
 			padding: 0.15rem 0.25rem;
-			font-size: 0.55rem;
+			font-size: 0.6875rem;
 			border-radius: 6px;
 			min-height: 24px;
 		}
@@ -1725,12 +1733,12 @@
 
 		.page-tab {
 			padding: 0.1rem 0.2rem;
-			font-size: 0.5rem;
+			font-size: 0.6875rem;
 			border-radius: 4px;
 		}
 
 		.page-tab.add-tab {
-			font-size: 0.65rem;
+			font-size: 0.625rem;
 			padding: 0.1rem 0.3rem;
 		}
 
@@ -1738,5 +1746,4 @@
 			height: 12px;
 		}
 	}
-
 </style>

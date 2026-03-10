@@ -15,10 +15,10 @@
 
 	interface Props {
 		open: boolean;
-		onclose: () => void;
+		onClose: () => void;
 	}
 
-	let { open = $bindable(), onclose }: Props = $props();
+	let { open = $bindable(), onClose }: Props = $props();
 
 	// State
 	let modalState = $state<ModalState>('paste');
@@ -142,7 +142,7 @@
 	}
 
 	function handleClose() {
-		onclose();
+		onClose();
 	}
 </script>
 
@@ -164,7 +164,7 @@
 	</div>
 {/snippet}
 
-<Modal {open} {onclose} title="Import License" size="wide" {footer}>
+<Modal {open} {onClose} title="Import License" size="wide" {footer}>
 	{#if modalState === 'paste'}
 		<!-- Textarea for pasting Salesforce text -->
 		<div class="paste-section">
@@ -415,7 +415,7 @@ HSM           Checked    5-axes indexial  Not Checked"
 	}
 
 	.paste-textarea.has-error {
-		border-color: #ef4444;
+		border-color: var(--color-error);
 	}
 
 	.error-message {
@@ -503,7 +503,7 @@ HSM           Checked    5-axes indexial  Not Checked"
 	}
 
 	.company-input.required-empty {
-		border-color: #ef4444;
+		border-color: var(--color-error);
 		background: rgba(239, 68, 68, 0.1);
 	}
 

@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { Checkbox } from '$components/ui';
+	import { Checkbox, Tooltip } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { toastStore } from '$stores/toast.svelte';
+	import { copyToClipboard } from '$lib/utils/clipboard';
 
 	interface Props {
 		bit: string;
@@ -46,13 +47,10 @@
 
 	async function handleCopy() {
 		if (editMode) return;
-		try {
-			await navigator.clipboard.writeText(bit);
+		const ok = await copyToClipboard(bit);
+		if (ok) {
 			justCopied = true;
-			toastStore.success('Copied!', 1500);
 			setTimeout(() => (justCopied = false), 1500);
-		} catch {
-			toastStore.error('Failed to copy');
 		}
 	}
 
@@ -84,34 +82,60 @@
 	class:disabled-bit={disabled}
 	data-sortable-item
 	data-bit={bit}
-	title={disabled ? disabledReason : ''}
 	draggable={draggable && editMode}
 	{ondragstart}
 	{ondragover}
 	{ondrop}
 >
-	<div class="bit-row">
-		<span
-			class="checkbox-wrapper"
-			{...disabled ? { role: 'button', tabindex: 0 } : {}}
-			onclick={disabled ? handleToggle : undefined}
-			onkeydown={disabled ? handleWrapperKeydown : undefined}
-		>
-			<Checkbox checked={isSelected} onchange={handleToggle} {disabled} />
-		</span>
-		<span
-			class="bit-text"
-			class:custom={isCustom}
-			role="button"
-			tabindex="0"
-			onclick={handleCopy}
-			onkeydown={handleKeydown}
-			data-copyable-bit
-			>{#if justCopied}<span class="copy-check">&#10003;</span>{:else}{#if isCustom}<span
-						class="custom-indicator">+</span
-					>{/if}{bit}{/if}</span
-		>
-	</div>
+	{#if disabled && disabledReason}
+		<Tooltip text={disabledReason}>
+			<div class="bit-row">
+				<span
+					class="checkbox-wrapper"
+					{...disabled ? { role: 'button', tabindex: 0 } : {}}
+					onclick={disabled ? handleToggle : undefined}
+					onkeydown={disabled ? handleWrapperKeydown : undefined}
+				>
+					<Checkbox checked={isSelected} onchange={handleToggle} {disabled} />
+				</span>
+				<span
+					class="bit-text"
+					class:custom={isCustom}
+					role="button"
+					tabindex="0"
+					onclick={handleCopy}
+					onkeydown={handleKeydown}
+					data-copyable-bit
+					>{#if justCopied}<span class="copy-check">&#10003;</span>{:else}{#if isCustom}<span
+								class="custom-indicator">+</span
+							>{/if}{bit}{/if}</span
+				>
+			</div>
+		</Tooltip>
+	{:else}
+		<div class="bit-row">
+			<span
+				class="checkbox-wrapper"
+				{...disabled ? { role: 'button', tabindex: 0 } : {}}
+				onclick={disabled ? handleToggle : undefined}
+				onkeydown={disabled ? handleWrapperKeydown : undefined}
+			>
+				<Checkbox checked={isSelected} onchange={handleToggle} {disabled} />
+			</span>
+			<span
+				class="bit-text"
+				class:custom={isCustom}
+				role="button"
+				tabindex="0"
+				onclick={handleCopy}
+				onkeydown={handleKeydown}
+				data-copyable-bit
+				>{#if justCopied}<span class="copy-check">&#10003;</span>{:else}{#if isCustom}<span
+							class="custom-indicator">+</span
+						>{/if}{bit}{/if}</span
+			>
+		</div>
+	{/if}
 	{#if removeMode && isCustom}
 		<button type="button" class="bit-remove-btn" onclick={handleRemove} aria-label="Remove {bit}">
 			&times;
@@ -234,7 +258,7 @@
 
 	.bit-remove-btn:hover {
 		background: rgba(200, 16, 46, 0.2);
-		color: #c8102e;
+		color: var(--color-solidcam-red);
 	}
 
 	/* Narrow viewport compaction */
@@ -249,7 +273,7 @@
 		}
 
 		.bit-text {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 
 		.bit-remove-btn {
@@ -269,13 +293,13 @@
 		}
 
 		.bit-text {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 
 		.bit-remove-btn {
 			width: 12px;
 			height: 12px;
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 	}
 </style>

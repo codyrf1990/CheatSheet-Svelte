@@ -143,7 +143,7 @@
 
 <Modal
 	open={addDialogOpen}
-	onclose={closeAddDialog}
+	onClose={closeAddDialog}
 	title={addDialogTitle}
 	footer={addDialogFooter}
 >

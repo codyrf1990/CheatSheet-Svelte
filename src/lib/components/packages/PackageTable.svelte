@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Package } from '$types';
+	import { Tooltip } from '$components/ui';
 	import PackageRow from './PackageRow.svelte';
 
 	interface Props {
@@ -7,7 +8,7 @@
 		editMode?: boolean;
 		maintenanceRange?: string;
 		skuMode?: 'bdm' | 'ms';
-		onwhatleft?: () => void;
+		onWhatLeft?: () => void;
 	}
 
 	let {
@@ -15,7 +16,7 @@
 		editMode = false,
 		maintenanceRange = '',
 		skuMode = 'bdm',
-		onwhatleft
+		onWhatLeft
 	}: Props = $props();
 </script>
 
@@ -34,20 +35,23 @@
 							<div></div>
 							<span class="bits-label">Included Modules</span>
 							<div class="bits-header-actions">
-								{#if onwhatleft}
-									<button
-										class="upgrades-btn"
-										class:upgrades-btn-ms={skuMode === 'ms'}
-										onclick={onwhatleft}
-										title="See available upgrades and add-ons"
-									>
-										Upgrades
-									</button>
+								{#if onWhatLeft}
+									<Tooltip text="See available upgrades and add-ons">
+										<button
+											class="upgrades-btn"
+											class:upgrades-btn-ms={skuMode === 'ms'}
+											onclick={onWhatLeft}
+										>
+											Upgrades
+										</button>
+									</Tooltip>
 								{/if}
 								{#if maintenanceRange}
-									<span class="maintenance-range" title="Maintenance dates">
-										{maintenanceRange}
-									</span>
+									<Tooltip text="Maintenance dates">
+										<span class="maintenance-range">
+											{maintenanceRange}
+										</span>
+									</Tooltip>
 								{/if}
 							</div>
 						</div>
@@ -220,7 +224,7 @@
 	@media (max-width: 680px) {
 		th {
 			padding: var(--space-0-5) var(--space-0);
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 			letter-spacing: 0.06em;
 		}
 	}

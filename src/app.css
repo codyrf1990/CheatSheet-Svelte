@@ -365,3 +365,25 @@ select:focus-visible {
 	background-size: 200% 100%;
 	animation: shimmer 1.5s infinite;
 }
+
+/* Global tooltip (portaled to body) */
+.app-tooltip {
+	position: fixed;
+	padding: 4px 10px;
+	font-size: var(--text-sm);
+	line-height: 1.4;
+	white-space: nowrap;
+	color: var(--color-text-primary);
+	background: #2a2a2a;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 6px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+	pointer-events: none;
+	z-index: 9999;
+	opacity: 0;
+	transition: opacity 150ms ease;
+}
+
+.app-tooltip.visible {
+	opacity: 1;
+}

@@ -1,9 +1,10 @@
 <script lang="ts">
 	import type { PackageGroup } from '$types';
-	import { Checkbox, CollapseWrapper } from '$components/ui';
+	import { Checkbox, CollapseWrapper, Tooltip } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { toastStore } from '$stores/toast.svelte';
+	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { applyOrder } from '$lib/utils/order';
 	import SubBit from './SubBit.svelte';
 
@@ -73,12 +74,7 @@
 
 	async function handleLabelCopy() {
 		if (editMode) return;
-		try {
-			await navigator.clipboard.writeText(group.label);
-			toastStore.success('Copied!', 1500);
-		} catch {
-			toastStore.error('Failed to copy');
-		}
+		await copyToClipboard(group.label);
 	}
 
 	function handleLabelKeydown(e: KeyboardEvent) {
@@ -169,46 +165,88 @@
 	class:disabled-bit={disabled}
 	data-master={group.masterId}
 	data-master-label={group.label}
-	title={disabled ? disabledReason : ''}
 >
-	<div class="master-header">
-		<Checkbox
-			checked={masterState.checked}
-			indeterminate={masterState.indeterminate}
-			onchange={handleMasterToggle}
-			{disabled}
-		/>
-		<span
-			class="master-label"
-			role="button"
-			tabindex="0"
-			onclick={handleLabelCopy}
-			onkeydown={handleLabelKeydown}
-			data-copyable-bit
-		>
-			{group.label}
-		</span>
-		<button
-			type="button"
-			class="expand-toggle"
-			onclick={handleExpandToggle}
-			aria-expanded={expanded}
-			aria-controls="subbits-{group.masterId}"
-			aria-label="{expanded ? 'Collapse' : 'Expand'} {group.label}"
-		>
-			<svg
-				class="expand-icon"
-				class:rotated={!expanded}
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				aria-hidden="true"
+	{#if disabled && disabledReason}
+		<Tooltip text={disabledReason}>
+			<div class="master-header">
+				<Checkbox
+					checked={masterState.checked}
+					indeterminate={masterState.indeterminate}
+					onchange={handleMasterToggle}
+					{disabled}
+				/>
+				<span
+					class="master-label"
+					role="button"
+					tabindex="0"
+					onclick={handleLabelCopy}
+					onkeydown={handleLabelKeydown}
+					data-copyable-bit
+				>
+					{group.label}
+				</span>
+				<button
+					type="button"
+					class="expand-toggle"
+					onclick={handleExpandToggle}
+					aria-expanded={expanded}
+					aria-controls="subbits-{group.masterId}"
+					aria-label="{expanded ? 'Collapse' : 'Expand'} {group.label}"
+				>
+					<svg
+						class="expand-icon"
+						class:rotated={!expanded}
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						aria-hidden="true"
+					>
+						<path d="M19 9l-7 7-7-7" />
+					</svg>
+				</button>
+			</div>
+		</Tooltip>
+	{:else}
+		<div class="master-header">
+			<Checkbox
+				checked={masterState.checked}
+				indeterminate={masterState.indeterminate}
+				onchange={handleMasterToggle}
+				{disabled}
+			/>
+			<span
+				class="master-label"
+				role="button"
+				tabindex="0"
+				onclick={handleLabelCopy}
+				onkeydown={handleLabelKeydown}
+				data-copyable-bit
 			>
-				<path d="M19 9l-7 7-7-7" />
-			</svg>
-		</button>
-	</div>
+				{group.label}
+			</span>
+			<button
+				type="button"
+				class="expand-toggle"
+				onclick={handleExpandToggle}
+				aria-expanded={expanded}
+				aria-controls="subbits-{group.masterId}"
+				aria-label="{expanded ? 'Collapse' : 'Expand'} {group.label}"
+			>
+				<svg
+					class="expand-icon"
+					class:rotated={!expanded}
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					aria-hidden="true"
+				>
+					<path d="M19 9l-7 7-7-7" />
+				</svg>
+			</button>
+		</div>
+	{/if}
 	<CollapseWrapper open={expanded}>
 		<ul
 			id="subbits-{group.masterId}"
@@ -334,7 +372,7 @@
 
 	.drop-hint {
 		grid-column: span 2;
-		font-size: var(--text-2xs);
+		font-size: var(--text-xs);
 		color: rgba(255, 255, 255, 0.4);
 		font-style: italic;
 		text-align: center;
@@ -349,7 +387,7 @@
 		}
 
 		.master-label {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 
 		.expand-toggle {
@@ -376,7 +414,7 @@
 		}
 
 		.master-label {
-			font-size: var(--text-2xs);
+			font-size: var(--text-xs);
 		}
 
 		.expand-toggle {

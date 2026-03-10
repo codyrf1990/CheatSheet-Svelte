@@ -3,10 +3,10 @@
 
 	interface Props {
 		open: boolean;
-		onclose: () => void;
+		onClose: () => void;
 	}
 
-	let { open, onclose }: Props = $props();
+	let { open, onClose }: Props = $props();
 
 	const requiredStates = [
 		'Arizona',
@@ -28,7 +28,7 @@
 	const exemptStates = ['Alaska', 'Delaware', 'Montana', 'New Hampshire', 'Oregon'];
 </script>
 
-<Modal {open} {onclose} title="U.S. Sales Tax Guide 2025">
+<Modal {open} {onClose} title="U.S. Sales Tax Guide 2025">
 	<div class="sales-tax-content">
 		<!-- Required States -->
 		<section class="tax-section">

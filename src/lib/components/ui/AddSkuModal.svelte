@@ -8,10 +8,10 @@
 
 	interface Props {
 		open: boolean;
-		onclose: () => void;
+		onClose: () => void;
 	}
 
-	let { open = $bindable(), onclose }: Props = $props();
+	let { open = $bindable(), onClose }: Props = $props();
 
 	// Form state
 	let selectedTarget = $state('');
@@ -46,7 +46,7 @@
 		// Reset and close
 		selectedTarget = '';
 		skuValue = '';
-		onclose();
+		onClose();
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -59,7 +59,7 @@
 	function handleClose() {
 		selectedTarget = '';
 		skuValue = '';
-		onclose();
+		onClose();
 	}
 </script>
 
@@ -70,7 +70,7 @@
 	</div>
 {/snippet}
 
-<Modal {open} onclose={handleClose} title="Add SKU" {footer}>
+<Modal {open} onClose={handleClose} title="Add SKU" {footer}>
 	<div class="add-sku-form">
 		<label class="form-field">
 			<span class="form-label">Target</span>
@@ -121,7 +121,7 @@
 		width: 100%;
 		padding: var(--space-2) var(--space-3);
 		font-size: var(--text-sm);
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 		background-color: rgba(18, 18, 26, 0.8);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 0.5rem;
@@ -137,7 +137,7 @@
 
 	.form-select option {
 		background: #1a1a1a;
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 	}
 
 	.form-select optgroup {

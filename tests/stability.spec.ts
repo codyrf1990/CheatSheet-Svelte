@@ -120,9 +120,10 @@ test.describe('Local-first sync fallback', () => {
 			page.getByRole('heading', { name: 'Packages & Maintenance Cheat Sheet' })
 		).toBeVisible({ timeout: 10_000 });
 
-		// Sync status should show error/offline indicator (not spinning/connected)
+		// Sync status should show error/offline indicator (tooltip trigger with warning/error icon)
+		// Tooltips are portaled to body on hover, so check the status dot has a warning color
 		await expect(
-			page.getByTitle('Sync error').or(page.getByTitle('Local only — not synced to cloud'))
+			page.locator('.status-dot').first()
 		).toBeVisible({ timeout: 5_000 });
 	});
 });

@@ -114,7 +114,13 @@
 	</div>
 
 	{#if settingsOpen}
-		<div id="user-settings-panel" class="settings-panel" role="dialog" aria-label="User settings">
+		<div
+			id="user-settings-panel"
+			class="settings-panel"
+			role="dialog"
+			aria-modal="true"
+			aria-label="User settings"
+		>
 			<div class="settings-header">Settings</div>
 			<label class="settings-toggle">
 				<span class="toggle-label">Pause background</span>
@@ -306,7 +312,7 @@
 	.user-name {
 		font-size: 0.8rem;
 		font-weight: 600;
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 		line-height: 1.3;
 		max-width: 100px;
 		overflow: hidden;
@@ -343,7 +349,7 @@
 	}
 
 	.change-link:hover {
-		color: #d4af37;
+		color: var(--color-solidcam-gold);
 		background: rgba(212, 175, 55, 0.1);
 	}
 
@@ -404,7 +410,7 @@
 	}
 
 	.settings-button:hover {
-		color: #d4af37;
+		color: var(--color-solidcam-gold);
 		background: rgba(212, 175, 55, 0.1);
 	}
 
@@ -518,7 +524,7 @@
 
 	.toggle-switch.active .toggle-thumb {
 		transform: translateX(16px);
-		background: #d4af37;
+		background: var(--color-solidcam-gold);
 	}
 
 	.sync-indicator {
@@ -540,7 +546,7 @@
 		width: 14px;
 		height: 14px;
 		border: 2px solid rgba(212, 175, 55, 0.2);
-		border-top-color: #d4af37;
+		border-top-color: var(--color-solidcam-gold);
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 		box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
@@ -551,5 +557,4 @@
 			transform: rotate(360deg);
 		}
 	}
-
 </style>

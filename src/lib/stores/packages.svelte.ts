@@ -5,6 +5,7 @@
  */
 
 import type { PackageState, PageState } from '$types';
+import { deepCopy } from '$lib/utils/deepCopy';
 import { userPrefsStore } from './userPrefs.svelte';
 
 // Reactive state
@@ -69,7 +70,7 @@ function toggleBit(packageCode: string, bit: string): void {
  * Toggle a master bit - controls all sub-bits in its group
  * If all sub-bits selected, deselect all. Otherwise, select all.
  */
-function toggleMasterBit(packageCode: string, masterId: string, subBits: string[]): void {
+function toggleMasterBit(packageCode: string, _masterId: string, subBits: string[]): void {
 	const state = getState(packageCode);
 
 	// Check how many sub-bits are currently selected
@@ -233,7 +234,7 @@ function getBitGroup(packageCode: string, bit: string, defaultGroup: string): st
 function loadFromPageState(pageState: PageState): void {
 	if (pageState?.packages) {
 		// Deep copy to prevent mutations
-		packageStates = JSON.parse(JSON.stringify(pageState.packages));
+		packageStates = deepCopy(pageState.packages);
 	} else {
 		packageStates = {};
 	}

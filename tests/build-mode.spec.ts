@@ -31,15 +31,19 @@ async function getToasts(page: Page): Promise<Toast[]> {
 	});
 }
 
-/** Trigger our outer .checkbox-wrapper onclick on a disabled bit. */
-async function clickDisabledBitWrapper(page: Page, liTitle: string) {
-	await page.evaluate((title) => {
-		const li = document.querySelector(`li[title="${title}"]`);
+/** Trigger our outer .checkbox-wrapper onclick on a disabled bit (found by tooltip text). */
+async function clickDisabledBitWrapper(page: Page, bitName: string) {
+	await page.evaluate((name) => {
+		// Find the li containing this bit name, then click its checkbox wrapper
+		const lis = [...document.querySelectorAll('li')];
+		const li = lis.find((el) => el.textContent?.includes(name));
 		const span = li?.querySelector('span.checkbox-wrapper');
-		span?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-	}, liTitle);
+		if (span) {
+			span.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+		}
+	}, bitName);
 	// Give Svelte reactivity a tick
-	await page.waitForTimeout(100);
+	await page.waitForTimeout(200);
 }
 
 // ---------------------------------------------------------------------------
@@ -58,13 +62,13 @@ test.describe('Build Mode', () => {
 	// 1. Initial gated state
 	// -------------------------------------------------------------------------
 	test('all gated bits disabled before SC-Mill is selected', async ({ page }) => {
-		// SC-Mill-Adv bits require SC-Mill
-		await expect(page.locator('li[title="Requires SC-Mill"]').first()).toBeVisible();
-
-		// iMach2D, Machine Simulation, Edge Breaking all have disabled checkboxes
+		// SC-Mill-Adv bits require SC-Mill — gated bits have disabled checkboxes
+		// and are wrapped in a tooltip trigger (span.tooltip-trigger)
 		for (const name of ['iMach2D', 'Machine Simulation', 'Edge Breaking']) {
 			const li = page.locator('li', { hasText: name }).first();
 			await expect(li.locator('input[type="checkbox"]')).toBeDisabled();
+			// Gated bits are wrapped in a Tooltip (has tooltip-trigger wrapper)
+			await expect(li.locator('.tooltip-trigger')).toBeVisible();
 		}
 
 		// Upgrades button is always visible (shows available add-ons regardless of selection)
@@ -112,10 +116,10 @@ test.describe('Build Mode', () => {
 			await expect(li.locator('input[type="checkbox"]')).toBeEnabled();
 		}
 
-		// iMach3D still gated — requires iMach2D
-		const iMach3DLi = page.locator('li[title="Requires iMach2D (SC-Mill-Adv)"]');
-		await expect(iMach3DLi).toBeVisible();
+		// iMach3D still gated — requires iMach2D (disabled checkbox + tooltip trigger)
+		const iMach3DLi = page.locator('li', { hasText: 'iMach3D' }).first();
 		await expect(iMach3DLi.locator('input[type="checkbox"]')).toBeDisabled();
+		await expect(iMach3DLi.locator('.tooltip-trigger')).toBeVisible();
 	});
 
 	// -------------------------------------------------------------------------
@@ -125,7 +129,7 @@ test.describe('Build Mode', () => {
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Mill bits' }).click();
 
 		// iMach3D is still gated — click its outer wrapper span
-		await clickDisabledBitWrapper(page, 'Requires iMach2D (SC-Mill-Adv)');
+		await clickDisabledBitWrapper(page, 'iMach3D');
 
 		const toasts = await getToasts(page);
 		expect(toasts).toHaveLength(1);
@@ -139,18 +143,17 @@ test.describe('Build Mode', () => {
 	test('selecting iMach2D unlocks iMach3D', async ({ page }) => {
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Mill bits' }).click();
 
-		// Confirm gate exists
-		await expect(page.locator('li[title="Requires iMach2D (SC-Mill-Adv)"]')).toBeVisible();
+		// Confirm iMach3D is gated (disabled + tooltip trigger)
+		const iMach3DLi = page.locator('li', { hasText: 'iMach3D' }).first();
+		await expect(iMach3DLi.locator('input[type="checkbox"]')).toBeDisabled();
+		await expect(iMach3DLi.locator('.tooltip-trigger')).toBeVisible();
 
 		// Select iMach2D
 		const iMach2DLi = page.locator('li', { hasText: 'iMach2D' }).first();
 		await iMach2DLi.locator('input[type="checkbox"]').click();
 
-		// Gate should be gone — li no longer has that title
-		await expect(page.locator('li[title="Requires iMach2D (SC-Mill-Adv)"]')).not.toBeVisible();
-
-		// iMach3D checkbox is now enabled
-		const iMach3DLi = page.locator('li', { hasText: 'iMach3D' }).first();
+		// Gate should be gone — tooltip trigger no longer rendered, checkbox enabled
+		await expect(iMach3DLi.locator('.tooltip-trigger')).not.toBeVisible();
 		await expect(iMach3DLi.locator('input[type="checkbox"]')).toBeEnabled();
 	});
 
@@ -251,7 +254,7 @@ test.describe('Build Mode', () => {
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Turn bits' }).click();
 
 		await expect(
-			page.getByRole('complementary').getByTitle('Click to copy SC-Turn', { exact: true })
+			page.getByRole('complementary').getByRole('button', { name: 'SC-Turn', exact: true }).first()
 		).toBeVisible();
 		await expect(page.getByText('$6,168').first()).toBeVisible(); // $3,868 + $2,300
 	});

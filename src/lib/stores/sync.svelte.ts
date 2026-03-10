@@ -15,6 +15,7 @@ import {
 import { companiesStore, DEFAULT_COMPANY_NAME, DEFAULT_PAGE_NAME } from './companies.svelte';
 import { userPrefsStore } from './userPrefs.svelte';
 import { syncSession } from './syncSession.svelte';
+import { persistence } from './persistence.svelte';
 
 const SYNC_USERNAME_KEY = 'solidcam-sync-username';
 const REMEMBER_ME_KEY = 'solidcam-remember-me';
@@ -373,7 +374,7 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 		return true;
 	} catch (err) {
 		// Cloud unavailable — establish local-only session so the app always enters
-		console.warn('[SyncStore] Cloud read failed, entering local-only mode:', err);
+		console.error('[SyncStore] Cloud read failed, entering local-only mode:', err);
 		error = 'Unable to reach cloud — working offline';
 		status = 'error';
 		syncSession.transition('local_only');
@@ -393,10 +394,10 @@ async function disconnect(): Promise<void> {
 	if (username) {
 		await flushPendingSave();
 		// Save last username for pre-filling only if rememberMe is true
-		if (browser && rememberMe) {
-			localStorage.setItem(LAST_USERNAME_KEY, username);
-		} else if (browser) {
-			localStorage.removeItem(LAST_USERNAME_KEY);
+		if (rememberMe) {
+			persistence.setString(LAST_USERNAME_KEY, username);
+		} else {
+			persistence.remove(LAST_USERNAME_KEY);
 		}
 	}
 
@@ -451,16 +452,16 @@ async function load(): Promise<void> {
 
 	try {
 		// Load remember me preference
-		const storedRemember = localStorage.getItem(REMEMBER_ME_KEY);
+		const storedRemember = persistence.getString(REMEMBER_ME_KEY);
 		rememberMe = storedRemember === 'true'; // Default to false
 
 		// Restore last connected user for cross-user detection
-		const storedLastConnected = localStorage.getItem(LAST_CONNECTED_KEY);
+		const storedLastConnected = persistence.getString(LAST_CONNECTED_KEY);
 		if (storedLastConnected) {
 			lastConnectedUsername = storedLastConnected;
 		}
 
-		const storedUsername = localStorage.getItem(SYNC_USERNAME_KEY);
+		const storedUsername = persistence.getString(SYNC_USERNAME_KEY);
 		if (storedUsername) {
 			// Auto-connect with stored username
 			await connect(storedUsername, rememberMe);
@@ -476,23 +477,19 @@ async function load(): Promise<void> {
 function saveToLocalStorage(): void {
 	if (!browser) return;
 
-	try {
-		// Save remember me preference
-		localStorage.setItem(REMEMBER_ME_KEY, String(rememberMe));
+	// Save remember me preference
+	persistence.setString(REMEMBER_ME_KEY, String(rememberMe));
 
-		// Only save for auto-connect if rememberMe is true
-		if (username && rememberMe) {
-			localStorage.setItem(SYNC_USERNAME_KEY, username);
-		} else {
-			localStorage.removeItem(SYNC_USERNAME_KEY);
-		}
+	// Only save for auto-connect if rememberMe is true
+	if (username && rememberMe) {
+		persistence.setString(SYNC_USERNAME_KEY, username);
+	} else {
+		persistence.remove(SYNC_USERNAME_KEY);
+	}
 
-		// Always persist last connected user for cross-user detection
-		if (lastConnectedUsername) {
-			localStorage.setItem(LAST_CONNECTED_KEY, lastConnectedUsername);
-		}
-	} catch (err) {
-		console.error('[SyncStore] Failed to save:', err);
+	// Always persist last connected user for cross-user detection
+	if (lastConnectedUsername) {
+		persistence.setString(LAST_CONNECTED_KEY, lastConnectedUsername);
 	}
 }
 
@@ -502,7 +499,7 @@ export const syncStore = {
 		return username;
 	},
 	get lastUsername() {
-		return browser ? localStorage.getItem(LAST_USERNAME_KEY) : null;
+		return persistence.getString(LAST_USERNAME_KEY);
 	},
 	get normalizedUsername() {
 		return username ? normalizeUsername(username) : null;

@@ -5,10 +5,10 @@
 
 	interface Props {
 		open: boolean;
-		onclose: () => void;
+		onClose: () => void;
 	}
 
-	let { open, onclose }: Props = $props();
+	let { open, onClose }: Props = $props();
 
 	// Auto-focus action for inline inputs
 	function autofocus(node: HTMLInputElement) {
@@ -41,7 +41,7 @@
 
 	function handleCompanySelect(companyId: string) {
 		companiesStore.switchTo(companyId);
-		onclose();
+		onClose();
 	}
 
 	function handleNewCompany() {
@@ -173,7 +173,7 @@
 	</div>
 {/snippet}
 
-<Modal {open} {onclose} title="All Companies" {footer}>
+<Modal {open} {onClose} title="All Companies" {footer}>
 	<div class="companies-content">
 		<!-- Search (fixed) -->
 		<div class="search-container">
@@ -322,7 +322,7 @@
 		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 8px;
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 		font-size: 0.8125rem;
 		transition: all 200ms ease;
 	}
@@ -399,7 +399,7 @@
 
 	.company-name-btn:hover {
 		background: rgba(255, 255, 255, 0.06);
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 	}
 
 	.company-row.active .company-name-btn {
@@ -466,7 +466,7 @@
 
 	.action-btn--danger:hover:not(:disabled) {
 		background: rgba(239, 68, 68, 0.15);
-		color: #ef4444;
+		color: var(--color-error);
 		border-color: rgba(239, 68, 68, 0.3);
 	}
 
@@ -511,7 +511,7 @@
 		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 8px;
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 		font-size: 0.75rem;
 	}
 
@@ -558,7 +558,7 @@
 		transform: none;
 		box-shadow: none;
 		background: rgba(255, 255, 255, 0.12);
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 	}
 
 	.company-count {
@@ -582,7 +582,7 @@
 		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.12);
 		border-radius: 6px;
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 		font-size: 0.75rem;
 	}
 
@@ -606,7 +606,7 @@
 
 	.action-btn--confirm {
 		background: rgba(212, 175, 55, 0.2);
-		color: #d4af37;
+		color: var(--color-solidcam-gold);
 		border-color: rgba(212, 175, 55, 0.3);
 	}
 

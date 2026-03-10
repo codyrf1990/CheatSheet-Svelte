@@ -3,10 +3,10 @@
 
 	interface Props {
 		open: boolean;
-		onclose: () => void;
+		onClose: () => void;
 	}
 
-	let { open, onclose }: Props = $props();
+	let { open, onClose }: Props = $props();
 
 	type TabId = 'overview' | 'milling' | 'other' | 'training' | 'posts';
 	let activeTab = $state<TabId>('overview');
@@ -241,7 +241,7 @@
 	];
 </script>
 
-<Modal {open} {onclose} title="SolidCAM Product Catalog" size="wide">
+<Modal {open} {onClose} title="SolidCAM Product Catalog" size="wide">
 	<!-- Tabs -->
 	<div class="tabs-container" role="tablist" aria-label="Product categories">
 		{#each tabs as tab (tab.id)}
@@ -529,7 +529,7 @@
 
 	.tab-btn.active {
 		background: rgba(212, 175, 55, 0.2);
-		color: #d4af37;
+		color: var(--color-solidcam-gold);
 		border-color: rgba(212, 175, 55, 0.4);
 	}
 
@@ -550,7 +550,7 @@
 	.section-title {
 		font-size: 0.8125rem;
 		font-weight: 600;
-		color: #d4af37;
+		color: var(--color-solidcam-gold);
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		margin: 0 0 0.625rem 0;

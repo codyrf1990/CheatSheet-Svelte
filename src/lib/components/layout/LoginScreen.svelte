@@ -4,6 +4,7 @@
 	import Button from '$components/ui/Button.svelte';
 	import Input from '$components/ui/Input.svelte';
 	import Checkbox from '$components/ui/Checkbox.svelte';
+	import Tooltip from '$components/ui/Tooltip.svelte';
 	import { syncStore } from '$stores/sync.svelte';
 
 	let username = $state(syncStore.lastUsername || '');
@@ -96,7 +97,8 @@
 				class="particle"
 				class:particle--large={i % 4 === 0}
 				class:particle--warm={i % 3 === 0}
-				style="--delay: {i * 0.6}s; --x: {5 + i * 8}%; --duration: {7 + (i % 5) * 2.5}s; --drift: {i % 2 === 0 ? 20 : -20}px;"
+				style="--delay: {i * 0.6}s; --x: {5 + i * 8}%; --duration: {7 +
+					(i % 5) * 2.5}s; --drift: {i % 2 === 0 ? 20 : -20}px;"
 			></div>
 		{/each}
 	</div>
@@ -163,9 +165,11 @@
 								disabled={isLoading}
 							/>
 						</div>
-						<div class="remember-checkbox" title="Remember me">
-							<Checkbox bind:checked={rememberMe} disabled={isLoading} aria-label="Remember me" />
-						</div>
+						<Tooltip text="Remember me">
+							<div class="remember-checkbox">
+								<Checkbox bind:checked={rememberMe} disabled={isLoading} aria-label="Remember me" />
+							</div>
+						</Tooltip>
 					</div>
 
 					<Button
@@ -495,7 +499,7 @@
 		background: linear-gradient(145deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
 		border: 1px solid rgba(212, 175, 55, 0.2);
 		border-radius: 12px;
-		color: #d4af37;
+		color: var(--color-solidcam-gold);
 		animation: iconFloat 3s ease-in-out infinite;
 	}
 
@@ -521,7 +525,7 @@
 	.login-title {
 		font-size: 1.75rem;
 		font-weight: 700;
-		color: #f5f5f5;
+		color: var(--color-text-primary);
 		margin: 0 0 0.5rem 0;
 		background: linear-gradient(135deg, #ffffff 0%, #d4af37 100%);
 		-webkit-background-clip: text;
@@ -615,7 +619,7 @@
 
 	:global(.submit-btn.success) {
 		background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-		border-color: #22c55e;
+		border-color: var(--color-success);
 	}
 
 	:global(.submit-btn:hover) .arrow-icon {
@@ -691,5 +695,4 @@
 			font-size: 1.5rem;
 		}
 	}
-
 </style>

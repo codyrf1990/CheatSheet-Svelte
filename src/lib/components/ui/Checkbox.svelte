@@ -99,6 +99,7 @@
 	}
 
 	.checkbox-control {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -109,6 +110,16 @@
 		border-radius: var(--radius-2xs);
 		transition: all 150ms ease;
 		flex-shrink: 0;
+		pointer-events: none;
+	}
+
+	.checkbox-control::after {
+		content: '';
+		position: absolute;
+		inset: 50% auto auto 50%;
+		width: 44px;
+		height: 44px;
+		transform: translate(-50%, -50%);
 	}
 
 	.checkbox-control svg {
@@ -120,8 +131,8 @@
 	/* Checked state */
 	.checkbox-control.checked,
 	.checkbox-control.indeterminate {
-		background: #d4af37;
-		border-color: #d4af37;
+		background: var(--color-solidcam-gold);
+		border-color: var(--color-solidcam-gold);
 	}
 
 	/* Hover state */
@@ -137,14 +148,13 @@
 
 	/* Focus state */
 	.checkbox-input input:focus-visible + .checkbox-control {
-		outline: 2px solid #d4af37;
+		outline: 2px solid var(--color-solidcam-gold);
 		outline-offset: 2px;
 		box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
 	}
 
 	.checkbox-label {
-		font-size: 0.875rem;
+		font-size: var(--text-lg);
 		color: rgba(255, 255, 255, 0.9);
 	}
-
 </style>

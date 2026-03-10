@@ -8,6 +8,7 @@ import { panelsStore } from '$stores/panels.svelte';
 import { packagesStore } from '$stores/packages.svelte';
 import { userPrefsStore } from '$stores/userPrefs.svelte';
 import { packages } from '$data';
+import { copyToClipboard } from '$lib/utils/clipboard';
 
 /**
  * Mapping from individual bits to their maintenance SKUs
@@ -236,18 +237,7 @@ export function generateQBExportText(company: Company, page: Page): ExportResult
 export async function copyQBExportToClipboard(company: Company, page: Page): Promise<ExportResult> {
 	const result = generateQBExportText(company, page);
 
-	try {
-		await navigator.clipboard.writeText(result.text);
-	} catch {
-		const textarea = document.createElement('textarea');
-		textarea.value = result.text;
-		textarea.style.position = 'fixed';
-		textarea.style.opacity = '0';
-		document.body.appendChild(textarea);
-		textarea.select();
-		document.execCommand('copy');
-		document.body.removeChild(textarea);
-	}
+	await copyToClipboard(result.text, false);
 
 	return result;
 }
