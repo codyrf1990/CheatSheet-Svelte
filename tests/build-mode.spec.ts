@@ -87,7 +87,6 @@ test.describe('Build Mode', () => {
 			'Machinist',
 			'SolidCAM Mill 2D',
 			'SolidCAM Mill 2.5D',
-			'SC Mill 3D',
 			'C-axes (Wrap)',
 			'4-axes Indexial',
 			'5-axes Indexial'

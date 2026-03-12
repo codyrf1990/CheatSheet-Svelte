@@ -22,7 +22,6 @@ export const packages: Package[] = [
 					'Pocket Recognition',
 					'Chamfer Recognition',
 					'Hole+Drill Recognition',
-					'SC Mill 3D',
 					'C-axes (Wrap)',
 					'4-axes Indexial',
 					'5-axes Indexial',

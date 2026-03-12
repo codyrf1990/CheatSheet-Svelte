@@ -207,6 +207,13 @@ export const MODULE_SKUS: SkuEntry[] = [
 		price: 3450,
 		maintSku: 'MTS-Maint',
 		maintPrice: 450
+	},
+	{
+		sku: 'Lic-Net',
+		label: 'Network License (per seat)',
+		price: 600,
+		maintSku: 'Lic-Net-Maint',
+		maintPrice: 90
 	}
 ];
 
