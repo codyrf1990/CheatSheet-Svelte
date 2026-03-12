@@ -7,6 +7,8 @@
 	import { PACKAGE_TOGGLE_BITS } from '$lib/data/prerequisites';
 	import { panelsStore } from '$stores/panels.svelte';
 	import { packages as packageDefs } from '$data';
+	import { companiesStore } from '$stores/companies.svelte';
+	import { calculateMaintTotal } from '$lib/utils/maintCalculator';
 	interface Props {
 		skuMode?: 'bdm' | 'ms';
 	}
@@ -124,6 +126,25 @@
 	// MS mode: same structure as sale lines but using maintPrice/maintSku fields
 	let maintTotal = $derived(saleLines.reduce((sum, l) => sum + l.entry.maintPrice, 0));
 
+	// Account total: sum maintenance across ALL pages in the company (MS mode, 2+ pages)
+	let accountTotal = $derived.by(() => {
+		if (skuMode !== 'ms') return 0;
+		const company = companiesStore.current;
+		if (!company || company.pages.length < 2) return 0;
+
+		let total = 0;
+		for (const page of company.pages) {
+			if (page.id === company.currentPageId) {
+				// Current page: use the live reactive total
+				total += maintTotal;
+			} else {
+				// Other pages: calculate from saved state
+				total += calculateMaintTotal(page.state);
+			}
+		}
+		return total;
+	});
+
 	function formatPrice(price: number): string {
 		return '$' + price.toLocaleString('en-US');
 	}
@@ -189,6 +210,12 @@
 					<span class="total-label">Maint Total</span>
 					<span class="total-price">{formatPrice(maintTotal)}</span>
 				</div>
+				{#if accountTotal > 0}
+					<div class="total-row total-row--account">
+						<span class="total-label total-label--account">Account Total</span>
+						<span class="total-price total-price--account">{formatPrice(accountTotal)}</span>
+					</div>
+				{/if}
 			{/if}
 		{:else}
 			<!-- BDM mode: show new sale pricing -->
@@ -415,6 +442,26 @@
 		font-size: var(--text-sm);
 		font-weight: 700;
 		color: var(--color-solidcam-gold, #d4af37);
+	}
+
+	.total-row--account {
+		margin-top: 0;
+		border-top: 1px solid rgba(96, 165, 250, 0.2);
+		padding-top: var(--space-0-5);
+	}
+
+	.total-label--account {
+		color: #60a5fa;
+		font-weight: 500;
+		font-size: var(--text-xs);
+		opacity: 0.85;
+	}
+
+	.total-price--account {
+		color: #60a5fa;
+		font-size: var(--text-xs);
+		font-weight: 600;
+		opacity: 0.85;
 	}
 
 	/* Responsive */
