@@ -132,7 +132,7 @@ Pattern: FeatureName\s+Checked(?!\s*Not)
 
 This matches "Feature Checked" but NOT "Feature Not Checked"
 
-### Profile Information Section
+### Profile Information Sectio
 
 If the Information section is collapsed, look for:
 
