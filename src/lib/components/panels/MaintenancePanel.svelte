@@ -9,11 +9,10 @@
 	interface Props {
 		maintenancePanel: PanelType;
 		solidworksPanel: PanelType;
-		editMode?: boolean;
 		skuMode?: 'bdm' | 'ms';
 	}
 
-	let { maintenancePanel, solidworksPanel, editMode = false, skuMode = 'ms' }: Props = $props();
+	let { maintenancePanel, solidworksPanel, skuMode = 'ms' }: Props = $props();
 
 	function displayCode(maintCode: string): string {
 		if (skuMode === 'bdm') return MAINT_TO_BDM[maintCode] ?? maintCode;
@@ -58,71 +57,6 @@
 		return userPrefsStore.isCustomPanelItem(panelId, item);
 	}
 
-	// Drag and drop state for maintenance section
-	let maintDraggedIndex = $state<number | null>(null);
-
-	function handleMaintDragStart(e: DragEvent, index: number) {
-		if (!editMode) return;
-		maintDraggedIndex = index;
-		if (e.dataTransfer) {
-			e.dataTransfer.effectAllowed = 'move';
-			e.dataTransfer.setData('text/plain', String(index));
-		}
-	}
-
-	function handleMaintDragOver(e: DragEvent) {
-		if (!editMode) return;
-		e.preventDefault();
-		if (e.dataTransfer) {
-			e.dataTransfer.dropEffect = 'move';
-		}
-	}
-
-	function handleMaintDrop(e: DragEvent, dropIndex: number) {
-		if (!editMode || maintDraggedIndex === null) return;
-		e.preventDefault();
-
-		if (maintDraggedIndex !== dropIndex) {
-			const newOrder = [...maintenanceItems];
-			const [removed] = newOrder.splice(maintDraggedIndex, 1);
-			newOrder.splice(dropIndex, 0, removed);
-			panelsStore.setItemsOrder(maintenancePanel.id, newOrder);
-		}
-		maintDraggedIndex = null;
-	}
-
-	// Drag and drop state for solidworks section
-	let swDraggedIndex = $state<number | null>(null);
-
-	function handleSwDragStart(e: DragEvent, index: number) {
-		if (!editMode) return;
-		swDraggedIndex = index;
-		if (e.dataTransfer) {
-			e.dataTransfer.effectAllowed = 'move';
-			e.dataTransfer.setData('text/plain', String(index));
-		}
-	}
-
-	function handleSwDragOver(e: DragEvent) {
-		if (!editMode) return;
-		e.preventDefault();
-		if (e.dataTransfer) {
-			e.dataTransfer.dropEffect = 'move';
-		}
-	}
-
-	function handleSwDrop(e: DragEvent, dropIndex: number) {
-		if (!editMode || swDraggedIndex === null) return;
-		e.preventDefault();
-
-		if (swDraggedIndex !== dropIndex) {
-			const newOrder = [...solidworksItems];
-			const [removed] = newOrder.splice(swDraggedIndex, 1);
-			newOrder.splice(dropIndex, 0, removed);
-			panelsStore.setItemsOrder(solidworksPanel.id, newOrder);
-		}
-		swDraggedIndex = null;
-	}
 </script>
 
 <section class="maintenance-panel tile">
@@ -130,21 +64,16 @@
 		<!-- Maintenance SKUs Section -->
 		<div class="section">
 			<ul class="panel-items">
-				{#each maintenanceItems as item, index (item)}
+				{#each maintenanceItems as item (item)}
 					<PanelItem
 						item={displayCode(item)}
 						checked={panelsStore.hasItem(maintenancePanel.id, item)}
 						showCheckbox={true}
-						{editMode}
 						{removeMode}
 						isCustom={isCustomItem(maintenancePanel.id, item)}
-						draggable={editMode}
 						onToggle={() => handleItemToggle(maintenancePanel.id, item)}
 						onRemove={() =>
 							handleItemRemove(maintenancePanel.id, item, isCustomItem(maintenancePanel.id, item))}
-						ondragstart={(e) => handleMaintDragStart(e, index)}
-						ondragover={handleMaintDragOver}
-						ondrop={(e) => handleMaintDrop(e, index)}
 					/>
 				{/each}
 			</ul>
@@ -156,21 +85,16 @@
 				<span class="section-title">SolidWorks SKUs</span>
 			</div>
 			<ul class="panel-items">
-				{#each solidworksItems as item, index (item)}
+				{#each solidworksItems as item (item)}
 					<PanelItem
 						item={displayCode(item)}
 						checked={panelsStore.hasItem(solidworksPanel.id, item)}
 						showCheckbox={true}
-						{editMode}
 						{removeMode}
 						isCustom={isCustomItem(solidworksPanel.id, item)}
-						draggable={editMode}
 						onToggle={() => handleItemToggle(solidworksPanel.id, item)}
 						onRemove={() =>
 							handleItemRemove(solidworksPanel.id, item, isCustomItem(solidworksPanel.id, item))}
-						ondragstart={(e) => handleSwDragStart(e, index)}
-						ondragover={handleSwDragOver}
-						ondrop={(e) => handleSwDrop(e, index)}
 					/>
 				{/each}
 			</ul>

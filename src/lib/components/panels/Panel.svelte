@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { CollapseWrapper } from '$components/ui';
+	import { tooltip } from '$lib/utils/tooltipAction';
 
 	interface Props {
 		id: string;
@@ -60,6 +61,7 @@
 					class="panel-control-btn"
 					onclick={handleAddClick}
 					aria-label="Add item to {title}"
+					use:tooltip={'Add item'}
 				>
 					+
 				</button>
@@ -70,6 +72,7 @@
 					onclick={handleRemoveToggle}
 					aria-pressed={removeMode}
 					aria-label="Toggle delete mode for {title}"
+					use:tooltip={removeMode ? 'Done removing' : 'Remove items'}
 				>
 					&minus;
 				</button>

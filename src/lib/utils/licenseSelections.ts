@@ -41,6 +41,12 @@ export interface LicenseSelections {
  * - Profile only (no dongle, has profile number): "P5801", etc.
  */
 export function getPageNameForLicense(license: LicenseInfo): string {
+	// Profile: always use profile identifier, regardless of dongle/product key
+	// Profiles have a Profile-XXXX identifier that takes priority over everything
+	if (license.isProfile && license.profileNo) {
+		return `P${license.profileNo}`;
+	}
+
 	// Product Key: long product key number
 	if (license.productKey && license.productKey.length > 4) {
 		const last4 = license.productKey.slice(-4).toUpperCase();
@@ -63,7 +69,7 @@ export function getPageNameForLicense(license: LicenseInfo): string {
 		return dongle;
 	}
 
-	// Profile only: use profile number
+	// Profile without proper identifier (shouldn't happen with parser fix)
 	if (license.profileNo) {
 		return `P${license.profileNo}`;
 	}

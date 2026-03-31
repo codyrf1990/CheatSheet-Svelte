@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { Checkbox } from '$components/ui';
 	import { copyToClipboard } from '$lib/utils/clipboard';
+	import { tooltip } from '$lib/utils/tooltipAction';
 
 	interface Props {
 		item: string;
 		checked?: boolean;
 		showCheckbox?: boolean;
-		editMode?: boolean;
 		removeMode?: boolean;
 		draggable?: boolean;
 		isCustom?: boolean;
@@ -21,7 +21,6 @@
 		item,
 		checked = false,
 		showCheckbox = false,
-		editMode = false,
 		removeMode = false,
 		draggable = false,
 		isCustom = false,
@@ -33,12 +32,10 @@
 	}: Props = $props();
 
 	async function handleCopy() {
-		if (editMode) return;
 		await copyToClipboard(item);
 	}
 
 	function handleCheckboxChange() {
-		if (editMode) return;
 		onToggle?.();
 	}
 
@@ -49,10 +46,8 @@
 
 <li
 	class="panel-item"
-	class:edit-mode={editMode}
 	class:remove-mode={removeMode && isCustom}
 	class:custom={isCustom}
-	data-sortable-item
 	draggable={draggable && !removeMode}
 	{ondragstart}
 	{ondragover}
@@ -64,12 +59,12 @@
 				<Checkbox {checked} onchange={handleCheckboxChange} />
 			</span>
 		{/if}
-		<button type="button" class="item-text" class:custom={isCustom} onclick={handleCopy}>
+		<button type="button" class="item-text" class:custom={isCustom} onclick={handleCopy} use:tooltip={item}>
 			{#if isCustom}<span class="custom-indicator">+</span>{/if}{item}
 		</button>
 	</div>
 	{#if removeMode && isCustom}
-		<button type="button" class="item-remove-btn" onclick={handleRemove} aria-label="Remove {item}">
+		<button type="button" class="item-remove-btn" onclick={handleRemove} aria-label="Remove {item}" use:tooltip={'Remove ' + item}>
 			&times;
 		</button>
 	{/if}
@@ -97,27 +92,6 @@
 	.panel-item[draggable='true']:active {
 		cursor: grabbing;
 		opacity: 0.5;
-		outline: 2px dashed rgba(212, 175, 55, 0.5);
-		outline-offset: 1px;
-	}
-
-	.panel-item[draggable='true'] .panel-item-main,
-	.panel-item[draggable='true'] .item-text {
-		cursor: grab;
-	}
-
-	.panel-item[draggable='true']:active .panel-item-main,
-	.panel-item[draggable='true']:active .item-text {
-		cursor: grabbing;
-	}
-
-	.panel-item.edit-mode {
-		outline: 1px dashed rgba(212, 175, 55, 0.4);
-		outline-offset: -1px;
-	}
-
-	.panel-item.edit-mode .panel-item-main {
-		pointer-events: none;
 	}
 
 	.checkbox-wrapper {

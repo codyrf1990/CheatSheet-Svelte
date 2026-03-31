@@ -6,6 +6,7 @@
 	import { toastStore } from '$stores/toast.svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
+	import { tooltip } from '$lib/utils/tooltipAction';
 	import { applyOrder } from '$lib/utils/order';
 	import { PACKAGE_TOGGLE_BITS, SC_TURN_LOCKED } from '$lib/data/prerequisites';
 	import { getDisabledBits } from '$lib/services/buildValidation';
@@ -17,10 +18,9 @@
 
 	interface Props {
 		pkg: Package;
-		editMode?: boolean;
 	}
 
-	let { pkg, editMode = false }: Props = $props();
+	let { pkg }: Props = $props();
 
 	// Package master toggle state
 	let packageToggleDef = $derived(PACKAGE_TOGGLE_BITS[pkg.code]);
@@ -65,7 +65,7 @@
 	});
 
 	function handlePackageToggle() {
-		if (editMode || !packageToggleDef) return;
+		if (!packageToggleDef) return;
 		if (isPackageDisabled) {
 			toastStore.warning(packageDisabledReason);
 			return;
@@ -98,7 +98,6 @@
 	});
 
 	function handleSCTurnToggle() {
-		if (editMode) return;
 		const disabledBit = SC_TURN_LOCKED.find((b) => disabledBits.has(b));
 		if (disabledBit) {
 			toastStore.warning(disabledBits.get(disabledBit) ?? '');
@@ -163,88 +162,6 @@
 		}
 	}
 
-	// Drag and drop state for reordering loose bits
-	let draggedIndex = $state<number | null>(null);
-
-	function handleDragStart(e: DragEvent, index: number, bit: string) {
-		if (!editMode) return;
-		e.stopPropagation();
-		draggedIndex = index;
-		if (e.dataTransfer) {
-			e.dataTransfer.effectAllowed = 'move';
-			// Include bit name and source group in drag data for cross-group moves
-			e.dataTransfer.setData('application/json', JSON.stringify({ bit, sourceGroup: 'loose' }));
-		}
-	}
-
-	function handleDragOver(e: DragEvent) {
-		if (!editMode) return;
-		e.preventDefault();
-		if (e.dataTransfer) {
-			e.dataTransfer.dropEffect = 'move';
-		}
-	}
-
-	function handleDrop(e: DragEvent, dropIndex: number) {
-		if (!editMode) return;
-		e.preventDefault();
-
-		// Try to get cross-group drag data
-		const jsonData = e.dataTransfer?.getData('application/json');
-		if (jsonData) {
-			try {
-				const data = JSON.parse(jsonData);
-				if (data.bit && data.sourceGroup && data.sourceGroup !== 'loose') {
-					// Cross-group move: from a MasterBit group to loose bits
-					packagesStore.moveBitToGroup(pkg.code, data.bit, 'loose');
-					// Add to end of loose bits order
-					const currentOrder = [...allLooseBits];
-					if (!currentOrder.includes(data.bit)) {
-						currentOrder.push(data.bit);
-						packagesStore.setLooseBitsOrder(pkg.code, currentOrder);
-					}
-					draggedIndex = null;
-					return;
-				}
-			} catch {
-				// Not valid JSON, continue with normal drop
-			}
-		}
-
-		// Normal reorder within loose bits
-		if (draggedIndex !== null && draggedIndex !== dropIndex) {
-			const newOrder = [...allLooseBits];
-			const [removed] = newOrder.splice(draggedIndex, 1);
-			newOrder.splice(dropIndex, 0, removed);
-			packagesStore.setLooseBitsOrder(pkg.code, newOrder);
-		}
-		draggedIndex = null;
-	}
-
-	// Handle drop on the loose bits container itself (not just on items)
-	function handleLooseBitsContainerDrop(e: DragEvent) {
-		if (!editMode) return;
-		e.preventDefault();
-
-		const jsonData = e.dataTransfer?.getData('application/json');
-		if (jsonData) {
-			try {
-				const data = JSON.parse(jsonData);
-				if (data.bit && data.sourceGroup && data.sourceGroup !== 'loose') {
-					// Cross-group move: from a MasterBit group to loose bits
-					packagesStore.moveBitToGroup(pkg.code, data.bit, 'loose');
-					const currentOrder = [...allLooseBits];
-					if (!currentOrder.includes(data.bit)) {
-						currentOrder.push(data.bit);
-						packagesStore.setLooseBitsOrder(pkg.code, currentOrder);
-					}
-				}
-			} catch {
-				// Ignore
-			}
-		}
-		draggedIndex = null;
-	}
 </script>
 
 <tr class="package-row" data-package={pkg.code}>
@@ -262,7 +179,7 @@
 				</span>
 			{/if}
 			<div>
-				<button type="button" class="code-btn package-code" onclick={handleCodeCopy}>
+				<button type="button" class="code-btn package-code" onclick={handleCodeCopy} use:tooltip={'Click to copy ' + pkg.code}>
 					{#if codeCopied}<span class="copy-check">&#10003;</span>{:else}{pkg.code}{/if}
 				</button>
 				<span class="package-description">{pkg.description}</span>
@@ -282,7 +199,7 @@
 					/>
 				</span>
 			{/if}
-			<button type="button" class="code-btn maint-code" onclick={handleMaintCopy}>
+			<button type="button" class="code-btn maint-code" onclick={handleMaintCopy} use:tooltip={'Click to copy ' + pkg.maintenance}>
 				{#if maintCopied}<span class="copy-check">&#10003;</span>{:else}{pkg.maintenance}{/if}
 			</button>
 		</div>
@@ -326,43 +243,29 @@
 							<MasterBit
 								{group}
 								packageCode={pkg.code}
-								{editMode}
 								disabled={disabledBits.has(group.masterId)}
 								disabledReason={disabledBits.get(group.masterId) ?? ''}
 							/>
 						{/each}
 					</div>
 				{/if}
-				{#if hasLooseBits || editMode}
+				{#if hasLooseBits}
 					<div
 						class="loose-bits-section"
 						class:has-groups={hasGroups}
-						class:edit-mode={editMode}
-						role="group"
-						aria-label="Loose bits drop zone"
-						ondragover={handleDragOver}
-						ondrop={handleLooseBitsContainerDrop}
 					>
-						<ul class="loose-bits" data-sortable-group={pkg.code}>
-							{#each allLooseBits as bit, index (bit)}
+						<ul class="loose-bits">
+							{#each allLooseBits as bit (bit)}
 								<LooseBit
 									{bit}
 									packageCode={pkg.code}
-									{editMode}
 									{removeMode}
 									isCustom={isCustomBit(bit)}
 									disabled={disabledBits.has(bit)}
 									disabledReason={disabledBits.get(bit) ?? ''}
-									draggable={editMode && !disabledBits.has(bit)}
-									ondragstart={(e) => handleDragStart(e, index, bit)}
-									ondragover={handleDragOver}
-									ondrop={(e) => handleDrop(e, index)}
 								/>
 							{/each}
 						</ul>
-						{#if editMode && allLooseBits.length === 0}
-							<span class="drop-hint">Drop items here</span>
-						{/if}
 					</div>
 				{/if}
 			{/if}
@@ -528,20 +431,7 @@
 		border-top: 1px solid var(--chip-border-color);
 	}
 
-	.loose-bits-section.edit-mode {
-		outline: 1px dashed rgba(212, 175, 55, 0.3);
-		outline-offset: 2px;
-		border-radius: var(--radius-xs);
-		padding: var(--space-0-5);
-	}
-
-	.drop-hint {
-		font-size: var(--text-xs);
-		color: rgba(255, 255, 255, 0.4);
-		font-style: italic;
-	}
-
-	.loose-bits {
+.loose-bits {
 		list-style: none;
 		margin: 0;
 		padding: 0;

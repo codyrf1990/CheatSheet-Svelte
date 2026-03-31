@@ -5,16 +5,16 @@
 
 	interface Props {
 		packages: Package[];
-		editMode?: boolean;
 		maintenanceRange?: string;
+		profileUsers?: number | null;
 		skuMode?: 'bdm' | 'ms';
 		onWhatLeft?: () => void;
 	}
 
 	let {
 		packages,
-		editMode = false,
 		maintenanceRange = '',
+		profileUsers = null,
 		skuMode = 'bdm',
 		onWhatLeft
 	}: Props = $props();
@@ -53,6 +53,13 @@
 										</span>
 									</Tooltip>
 								{/if}
+								{#if profileUsers != null}
+									<Tooltip text="Profile users (seats)">
+										<span class="profile-users-badge">
+											{profileUsers} {profileUsers === 1 ? 'user' : 'users'}
+										</span>
+									</Tooltip>
+								{/if}
 							</div>
 						</div>
 					</th>
@@ -60,7 +67,7 @@
 			</thead>
 			<tbody>
 				{#each packages as pkg (pkg.code)}
-					<PackageRow {pkg} {editMode} />
+					<PackageRow {pkg} />
 				{/each}
 			</tbody>
 		</table>
@@ -205,6 +212,18 @@
 		text-transform: none;
 		letter-spacing: 0.02em;
 		color: rgba(255, 255, 255, 0.7);
+		white-space: nowrap;
+	}
+
+	.profile-users-badge {
+		padding: 2px 7px;
+		border-radius: 4px;
+		background: rgba(139, 92, 246, 0.12);
+		border: 1px solid rgba(139, 92, 246, 0.3);
+		font-size: 0.6rem;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		color: rgba(167, 139, 250, 0.9);
 		white-space: nowrap;
 	}
 

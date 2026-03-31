@@ -366,7 +366,7 @@ select:focus-visible {
 	animation: shimmer 1.5s infinite;
 }
 
-/* Global tooltip (portaled to body) */
+/* Global tooltip (singleton, portaled to body) */
 .app-tooltip {
 	position: fixed;
 	padding: 4px 10px;
@@ -381,7 +381,7 @@ select:focus-visible {
 	pointer-events: none;
 	z-index: 9999;
 	opacity: 0;
-	transition: opacity 150ms ease;
+	transition: opacity 120ms ease;
 }
 
 .app-tooltip.visible {

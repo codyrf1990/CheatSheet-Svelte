@@ -150,7 +150,8 @@ export interface LicenseInfo {
 	displayType: string; // Human-readable: 'Hardware Dongle', 'Product Key (Network)', etc.
 	isNetworkLicense: boolean; // Net Dongle checkbox
 	isProfile: boolean; // True if Profile format (has Profile No.)
-	profileNo?: string; // Profile number (e.g., "1", "2") for profile pages
+	profileNo?: string; // Profile identifier from Profile-XXXX pattern (e.g., "7479")
+	profileUsers?: number; // Number of users on this profile (from "Profile Users" field)
 	sim5xLevel?: string; // Sim 5x Level value: "3 Axis", "3/4 Axis", or blank
 
 	// Maintenance

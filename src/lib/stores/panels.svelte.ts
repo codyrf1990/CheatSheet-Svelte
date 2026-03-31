@@ -190,20 +190,6 @@ function reset(): void {
 	panelStates = {};
 }
 
-/**
- * Reset all order arrays to default (empty = original order)
- * Keeps items and removed items intact
- */
-function resetAllOrders(): void {
-	for (const panelId of Object.keys(panelStates)) {
-		const state = panelStates[panelId];
-		if (state.itemsOrder) {
-			state.itemsOrder = [];
-		}
-	}
-	panelStates = { ...panelStates };
-}
-
 export const panelsStore = {
 	// Getters
 	get all() {
@@ -232,12 +218,8 @@ export const panelsStore = {
 	loadFromPageState,
 	getPageState,
 	reset,
-	resetAllOrders,
 
 	// Remove mode
-	toggleRemoveMode() {
-		removeMode = !removeMode;
-	},
 	setRemoveMode(value: boolean) {
 		removeMode = value;
 	}

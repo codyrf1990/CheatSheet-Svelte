@@ -28,13 +28,14 @@
 	let currentCompany = $derived(companiesStore.current);
 	let currentPage = $derived(companiesStore.currentPage);
 
-	let maintenanceRange = $derived.by(() => {
+	// Find the latest matching license for the current page
+	let matchedLicense = $derived.by(() => {
 		const company = currentCompany;
 		const page = currentPage;
-		if (!company || !page) return '';
+		if (!company || !page) return null;
 
 		const licenses = company.licenses ?? [];
-		if (licenses.length === 0) return '';
+		if (licenses.length === 0) return null;
 
 		const pageName = page.name;
 		const matching = licenses.filter((license) => getPageNameForLicense(license) === pageName);
@@ -48,6 +49,11 @@
 			latest = licenses[0];
 		}
 
+		return latest ?? null;
+	});
+
+	let maintenanceRange = $derived.by(() => {
+		const latest = matchedLicense;
 		if (!latest) return '';
 
 		const start = latest.maintenanceStart?.trim() ?? '';
@@ -58,20 +64,9 @@
 		return start || end;
 	});
 
+	let profileUsers = $derived(matchedLicense?.profileUsers ?? null);
+
 	let effectiveSkuTabMode = $derived(userPrefsStore.skuTabMode);
-
-	// Package edit mode state (lifted from PackageTable)
-	let packageEditMode = $state(false);
-
-	function togglePackageEditMode() {
-		packageEditMode = !packageEditMode;
-	}
-
-	function handleResetOrder() {
-		packagesStore.resetAllOrders();
-		panelsStore.resetAllOrders();
-		packageEditMode = false;
-	}
 
 	// Collapsible SKU panel state (under table)
 	let skuPanelOpen = $state(true);
@@ -257,9 +252,6 @@
 
 	<!-- Company & Pages Bar -->
 	<CompanyPageBar
-		editMode={packageEditMode}
-		onToggleEdit={togglePackageEditMode}
-		onResetOrder={handleResetOrder}
 		onViewAllCompanies={() => (showCompaniesModal = true)}
 	/>
 
@@ -269,8 +261,8 @@
 		<section class="main-content">
 			<PackageTable
 				{packages}
-				editMode={packageEditMode}
 				{maintenanceRange}
+				{profileUsers}
 				skuMode={effectiveSkuTabMode}
 				onWhatLeft={() => (showWhatLeftModal = true)}
 			/>
@@ -325,7 +317,6 @@
 						<MaintenancePanel
 							maintenancePanel={panels.find((p) => p.id === 'maintenance-skus')!}
 							solidworksPanel={panels.find((p) => p.id === 'solidworks-maintenance')!}
-							editMode={packageEditMode}
 							skuMode={effectiveSkuTabMode}
 						/>
 					{/if}

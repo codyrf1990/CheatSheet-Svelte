@@ -1,20 +1,17 @@
 <script lang="ts">
 	import { companiesStore } from '$stores/companies.svelte';
-	import { panelsStore } from '$stores/panels.svelte';
+
 	import { syncStore } from '$stores/sync.svelte';
 	import { toastStore } from '$stores/toast.svelte';
-	import { AddSkuModal, Button, Input, Modal, ImportLicenseModal, Tooltip } from '$components/ui';
-	import { copyQBExportToClipboard } from '$lib/utils/quickbooksExport';
+	import { Button, Input, Modal, ImportLicenseModal, Tooltip } from '$components/ui';
 	import { copyToClipboard } from '$lib/utils/clipboard';
+	import { getPageNameForLicense } from '$lib/utils/licenseSelections';
 
 	interface Props {
-		editMode?: boolean;
-		onToggleEdit?: () => void;
-		onResetOrder?: () => void;
 		onViewAllCompanies?: () => void;
 	}
 
-	let { editMode = false, onToggleEdit, onResetOrder, onViewAllCompanies }: Props = $props();
+	let { onViewAllCompanies }: Props = $props();
 
 	function onViewAll() {
 		closeDropdown();
@@ -28,7 +25,6 @@
 	let syncStatus = $derived(syncStore.status);
 
 	// Local UI state
-	let showAddSkuModal = $state(false);
 	let showImportModal = $state(false);
 	let dropdownOpen = $state(false);
 	let dropdownPosition = $state({ top: 0, left: 0 });
@@ -37,16 +33,12 @@
 	let editingPageName = $state('');
 	let dropdownTriggerRef = $state<HTMLButtonElement | null>(null);
 	let searchInputRef = $state<HTMLInputElement | null>(null);
-	let showActionsMenu = $state(false);
-	let actionsMenuPosition = $state({ top: 0, right: 0 });
-	let kebabTriggerRef = $state<HTMLButtonElement | null>(null);
 	let dialogType = $state<
 		| 'new-company'
 		| 'rename-company'
 		| 'rename-page'
 		| 'delete-company'
 		| 'delete-page'
-		| 'reset-order'
 		| null
 	>(null);
 	let dialogTargetId = $state<string | null>(null);
@@ -62,6 +54,19 @@
 	let contextMenuPage = $derived.by(() => {
 		if (!contextMenu || contextMenu.type !== 'page' || !contextMenu.id) return null;
 		return currentCompany?.pages.find((p) => p.id === contextMenu!.id) ?? null;
+	});
+
+	// License matching the context menu page (for type-aware copy labels)
+	let contextMenuLicense = $derived.by(() => {
+		const page = contextMenuPage;
+		if (!page) return null;
+		const licenses = currentCompany?.licenses ?? [];
+		if (licenses.length === 0) return null;
+		// Find the latest license matching this page name
+		const matching = licenses.filter((l) => getPageNameForLicense(l) === page.name);
+		if (matching.length === 0 && licenses.length === 1) return licenses[0];
+		if (matching.length <= 1) return matching[0] ?? null;
+		return matching.reduce((acc, l) => (l.importedAt > acc.importedAt ? l : acc));
 	});
 
 	// Filtered companies based on search
@@ -98,7 +103,7 @@
 	});
 
 	let isConfirmDialog = $derived(
-		dialogType === 'delete-company' || dialogType === 'delete-page' || dialogType === 'reset-order'
+		dialogType === 'delete-company' || dialogType === 'delete-page'
 	);
 	let dialogTitle = $derived.by(() => {
 		switch (dialogType) {
@@ -112,8 +117,6 @@
 				return 'Delete Company';
 			case 'delete-page':
 				return 'Delete Page';
-			case 'reset-order':
-				return 'Reset Order';
 			default:
 				return '';
 		}
@@ -128,8 +131,6 @@
 			case 'delete-company':
 			case 'delete-page':
 				return 'Delete';
-			case 'reset-order':
-				return 'Reset';
 			default:
 				return '';
 		}
@@ -151,9 +152,6 @@
 		}
 		if (dialogType === 'delete-page') {
 			return `Delete "${dialogTargetLabel}"? This cannot be undone.`;
-		}
-		if (dialogType === 'reset-order') {
-			return 'Reset all items to their default order? Custom items will remain but move to the end.';
 		}
 		return '';
 	});
@@ -179,39 +177,6 @@
 		searchQuery = '';
 	}
 
-	function toggleActionsMenu(e: MouseEvent) {
-		e.stopPropagation();
-		showActionsMenu = !showActionsMenu;
-		if (showActionsMenu) {
-			const button = e.currentTarget as HTMLElement;
-			const rect = button.getBoundingClientRect();
-			actionsMenuPosition = { top: rect.bottom + 8, right: window.innerWidth - rect.right };
-		}
-	}
-
-	function closeActionsMenu() {
-		showActionsMenu = false;
-	}
-
-	function handleAddSku() {
-		showAddSkuModal = true;
-		closeActionsMenu();
-	}
-
-	function handleRemoveSku() {
-		panelsStore.toggleRemoveMode();
-		closeActionsMenu();
-	}
-
-	function handleToggleEditOrder() {
-		onToggleEdit?.();
-		closeActionsMenu();
-	}
-
-	function handleResetOrderMenu() {
-		dialogType = 'reset-order';
-		closeActionsMenu();
-	}
 
 	function handleCompanySelect(companyId: string) {
 		companiesStore.switchTo(companyId);
@@ -277,34 +242,6 @@
 		closeContextMenu();
 	}
 
-	async function handleCopyForQB() {
-		if (!currentCompany) {
-			toastStore.error('No company selected');
-			closeContextMenu();
-			return;
-		}
-
-		const page = companiesStore.currentPage;
-		if (!page) {
-			toastStore.error('No page selected');
-			closeContextMenu();
-			return;
-		}
-
-		try {
-			const result = await copyQBExportToClipboard(currentCompany, page);
-			if (result.warnings.length > 0) {
-				toastStore.warning(`Copied ${result.skuCount} SKUs (${result.warnings.length} warnings)`);
-			} else {
-				toastStore.success(`Copied ${result.skuCount} SKUs for QuickBooks`);
-			}
-		} catch {
-			toastStore.error('Failed to copy to clipboard');
-		}
-
-		closeContextMenu();
-	}
-
 	function handleClearAllCompanies() {
 		if (confirm('DEV: Delete ALL companies? This cannot be undone.')) {
 			companiesStore.deleteAll();
@@ -359,6 +296,13 @@
 		const page = contextMenuPage;
 		if (!page?.licenseKey) return;
 		await copyToClipboard(page.licenseKey, 'Copied');
+		closeContextMenu();
+	}
+
+	async function handleCopyProfileName() {
+		const license = contextMenuLicense;
+		if (!license?.profileNo) return;
+		await copyToClipboard(`Profile-${license.profileNo}`, 'Copied');
 		closeContextMenu();
 	}
 
@@ -453,12 +397,6 @@
 			return;
 		}
 
-		if (dialogType === 'reset-order') {
-			onResetOrder?.();
-			toastStore.success('Order reset');
-			closeDialog();
-			return;
-		}
 	}
 
 	function handleDialogInputKeydown(e: KeyboardEvent) {
@@ -517,9 +455,6 @@
 		if (!target.closest('.context-menu') && contextMenu) {
 			closeContextMenu();
 		}
-		if (!target.closest('.kebab-wrapper') && !target.closest('.actions-menu') && showActionsMenu) {
-			closeActionsMenu();
-		}
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -531,10 +466,6 @@
 		}
 		if (contextMenu) {
 			closeContextMenu();
-		}
-		if (showActionsMenu) {
-			closeActionsMenu();
-			kebabTriggerRef?.focus();
 		}
 	}
 
@@ -576,7 +507,9 @@
 			aria-haspopup="listbox"
 			aria-label="Select company, currently {currentCompany?.name || 'none'}"
 		>
-			<span class="company-name">{currentCompany?.name || 'No Company'}</span>
+			<Tooltip text={currentCompany?.name || 'No Company'} position="bottom">
+				<span class="company-name">{currentCompany?.name || 'No Company'}</span>
+			</Tooltip>
 			<Tooltip text={statusIndicator.title} position="bottom">
 				<span
 					class="status-dot"
@@ -683,7 +616,7 @@
 					/>
 				{:else}
 					<div class="page-tab-group">
-						<Tooltip text="Double-click to rename" position="bottom">
+						<Tooltip text="{page.name} — double-click to rename" position="bottom">
 							<button
 								type="button"
 								role="tab"
@@ -713,23 +646,22 @@
 				{/if}
 			{/each}
 		{/if}
-		<button
-			type="button"
-			class="page-tab add-tab"
-			onclick={handleNewPage}
-			aria-label="Add new page"
-		>
-			+
-		</button>
+		<Tooltip text="Add new page" position="bottom">
+			<button
+				type="button"
+				class="page-tab add-tab"
+				onclick={handleNewPage}
+				aria-label="Add new page"
+			>
+				+
+			</button>
+		</Tooltip>
 	</div>
 
-	<!-- Edit Mode Indicator -->
-	{#if editMode}
-		<span class="edit-indicator">Editing</span>
-	{/if}
 
-	<!-- Quick Actions (visible when company active, not in edit mode) -->
-	{#if currentCompany && !editMode}
+
+	<!-- Quick Actions -->
+	{#if currentCompany}
 		<div class="quick-actions">
 			<Tooltip text="Import License" position="bottom">
 				<button
@@ -750,61 +682,11 @@
 						<polyline points="7 10 12 15 17 10" />
 						<line x1="12" y1="15" x2="12" y2="3" />
 					</svg>
-				</button>
-			</Tooltip>
-			<Tooltip text="Copy for QuickBooks" position="bottom">
-				<button
-					type="button"
-					class="quick-action-btn"
-					onclick={handleCopyForQB}
-					aria-label="Copy for QuickBooks"
-				>
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						width="14"
-						height="14"
-					>
-						<rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-						<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-					</svg>
+					Import
 				</button>
 			</Tooltip>
 		</div>
 	{/if}
-
-	<!-- Actions Kebab -->
-	<div class="kebab-wrapper">
-		{#if editMode}
-			<Tooltip text="Click to finish · Right-click for menu" position="bottom">
-				<button
-					type="button"
-					class="kebab-trigger is-edit-mode"
-					bind:this={kebabTriggerRef}
-					onclick={onToggleEdit}
-					oncontextmenu={(e) => {
-						e.preventDefault();
-						toggleActionsMenu(e);
-					}}
-					aria-pressed={true}
-					aria-label="Done editing (right-click for menu)">✓</button
-				>
-			</Tooltip>
-		{:else}
-			<button
-				type="button"
-				class="kebab-trigger"
-				class:is-open={showActionsMenu}
-				bind:this={kebabTriggerRef}
-				onclick={toggleActionsMenu}
-				aria-expanded={showActionsMenu}
-				aria-haspopup="menu"
-				aria-label="More actions">⋮</button
-			>
-		{/if}
-	</div>
 </div>
 
 <!-- Company Dropdown Menu (outside company-page-bar to escape backdrop-filter clipping) -->
@@ -887,37 +769,6 @@
 	</div>
 {/if}
 
-<!-- Actions Menu -->
-{#if showActionsMenu}
-	<div
-		class="actions-menu"
-		role="menu"
-		aria-label="Edit actions"
-		style="top: {actionsMenuPosition.top}px; right: {actionsMenuPosition.right}px;"
-	>
-		<button type="button" role="menuitem" onclick={handleAddSku}>
-			<span class="menu-icon">+</span> SKU
-		</button>
-		<button
-			type="button"
-			role="menuitem"
-			class:active={panelsStore.removeMode}
-			onclick={handleRemoveSku}
-		>
-			<span class="menu-icon">−</span> SKU
-			{#if panelsStore.removeMode}<span class="menu-check">✓</span>{/if}
-		</button>
-		<button type="button" role="menuitem" class:active={editMode} onclick={handleToggleEditOrder}>
-			{editMode ? 'Done Editing' : 'Edit Order'}
-			{#if editMode}<span class="menu-check">✓</span>{/if}
-		</button>
-		{#if editMode}
-			<hr class="menu-divider" />
-			<button type="button" role="menuitem" onclick={handleResetOrderMenu}> Reset Order </button>
-		{/if}
-	</div>
-{/if}
-
 <!-- Context Menu -->
 {#if contextMenu}
 	<div
@@ -930,7 +781,6 @@
 			<button type="button" role="menuitem" onclick={handleRenameCompany}>Rename</button>
 			<button type="button" role="menuitem" onclick={handleDuplicateCompany}>Duplicate</button>
 			<button type="button" role="menuitem" onclick={handleImportLicense}>Import License</button>
-			<button type="button" role="menuitem" onclick={handleCopyForQB}>Copy for QB</button>
 			<button type="button" role="menuitem" class="danger" onclick={handleDeleteCompany}
 				>Delete</button
 			>
@@ -943,11 +793,28 @@
 		{:else}
 			<button type="button" role="menuitem" onclick={handleRenamePage}>Rename</button>
 			<button type="button" role="menuitem" onclick={handleDuplicatePage}>Duplicate</button>
-			<button type="button" role="menuitem" onclick={handleCopyPageName}>Copy Page Name</button>
-			{#if contextMenuPage?.licenseKey}
-				<button type="button" role="menuitem" onclick={handleCopyLicenseKey}
-					>Copy License Key</button
+			{#if !contextMenuLicense}
+				<button type="button" role="menuitem" onclick={handleCopyPageName}>Copy Page Name</button>
+			{/if}
+			{#if contextMenuLicense?.isProfile}
+				{#if contextMenuPage?.licenseKey}
+					<button type="button" role="menuitem" onclick={handleCopyLicenseKey}
+						>Copy License Number</button
+					>
+				{/if}
+				<button type="button" role="menuitem" onclick={handleCopyProfileName}
+					>Copy Profile Name</button
 				>
+			{:else if contextMenuPage?.licenseKey}
+				{#if contextMenuLicense?.licenseType === 'dongle'}
+					<button type="button" role="menuitem" onclick={handleCopyLicenseKey}
+						>Copy Dongle Number</button
+					>
+				{:else}
+					<button type="button" role="menuitem" onclick={handleCopyLicenseKey}
+						>Copy Key</button
+					>
+				{/if}
 			{/if}
 			<button type="button" role="menuitem" class="danger" onclick={handleDeletePage}>Delete</button
 			>
@@ -985,7 +852,6 @@
 	{/if}
 </Modal>
 
-<AddSkuModal bind:open={showAddSkuModal} onClose={() => (showAddSkuModal = false)} />
 <ImportLicenseModal bind:open={showImportModal} onClose={() => (showImportModal = false)} />
 
 <style>
@@ -1402,41 +1268,6 @@
 		outline: none;
 	}
 
-	/* Kebab trigger */
-	.kebab-wrapper {
-		position: relative;
-		z-index: 1;
-		flex-shrink: 0;
-	}
-
-	.kebab-trigger {
-		position: relative;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 26px;
-		height: 26px;
-		padding: 0;
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 8px;
-		color: rgba(255, 255, 255, 0.6);
-		font-size: 1.1rem;
-		line-height: 1;
-		cursor: pointer;
-		transition: all 150ms ease;
-	}
-
-	/* Expand touch target to 44x44 */
-	.kebab-trigger::after {
-		content: '';
-		position: absolute;
-		inset: 50% auto auto 50%;
-		width: 44px;
-		height: 44px;
-		transform: translate(-50%, -50%);
-	}
-
 	.quick-actions {
 		display: flex;
 		gap: 0.25rem;
@@ -1446,14 +1277,15 @@
 	.quick-action-btn {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		width: 26px;
+		gap: 0.35rem;
 		height: 26px;
-		padding: 0;
+		padding: 0 0.5rem;
 		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 6px;
 		color: rgba(255, 255, 255, 0.5);
+		font-size: 0.7rem;
+		font-weight: 600;
 		cursor: pointer;
 		transition: all 150ms ease;
 	}
@@ -1462,102 +1294,6 @@
 		background: rgba(255, 255, 255, 0.1);
 		border-color: rgba(255, 255, 255, 0.15);
 		color: var(--color-solidcam-gold, #d4af37);
-	}
-
-	.edit-indicator {
-		font-size: var(--text-xs);
-		font-weight: 600;
-		color: var(--color-solidcam-gold, #d4af37);
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		padding: 0.15rem 0.4rem;
-		background: rgba(212, 175, 55, 0.15);
-		border: 1px solid rgba(212, 175, 55, 0.3);
-		border-radius: 4px;
-		flex-shrink: 0;
-	}
-
-	.kebab-trigger:hover {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
-		color: rgba(255, 255, 255, 0.9);
-	}
-
-	.kebab-trigger.is-open {
-		background: rgba(212, 175, 55, 0.15);
-		border-color: rgba(212, 175, 55, 0.3);
-		color: var(--color-solidcam-gold, #d4af37);
-	}
-
-	.kebab-trigger.is-edit-mode {
-		background: rgba(74, 222, 128, 0.15);
-		border-color: rgba(74, 222, 128, 0.4);
-		color: #4ade80;
-		font-size: 0.85rem;
-	}
-
-	.kebab-trigger.is-edit-mode:hover {
-		background: rgba(74, 222, 128, 0.25);
-		border-color: rgba(74, 222, 128, 0.6);
-		color: #86efac;
-	}
-
-	/* Actions dropdown menu */
-	.actions-menu {
-		position: fixed;
-		min-width: 148px;
-		background: linear-gradient(145deg, rgba(32, 32, 38, 0.98), rgba(24, 24, 30, 0.98));
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 10px;
-		box-shadow:
-			0 12px 40px rgba(0, 0, 0, 0.5),
-			0 4px 12px rgba(0, 0, 0, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.05);
-		backdrop-filter: blur(16px);
-		z-index: 2000;
-		overflow: hidden;
-		animation: contextMenuFadeIn 150ms cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.actions-menu button {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		width: 100%;
-		padding: 0.5rem 0.875rem;
-		background: transparent;
-		border: none;
-		color: rgba(255, 255, 255, 0.8);
-		font-size: var(--text-sm);
-		text-align: left;
-		cursor: pointer;
-		transition: all 150ms ease;
-	}
-
-	.actions-menu button:hover {
-		background: rgba(255, 255, 255, 0.08);
-		padding-left: 1.125rem;
-		color: var(--color-text-primary);
-	}
-
-	.actions-menu button.active {
-		color: var(--color-solidcam-gold, #d4af37);
-	}
-
-	.actions-menu button:not(:last-child) {
-		border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-	}
-
-	.menu-icon {
-		font-weight: 700;
-		width: 12px;
-		text-align: center;
-		flex-shrink: 0;
-	}
-
-	.menu-check {
-		margin-left: auto;
-		font-size: var(--text-xs);
 	}
 
 	/* Context Menu */

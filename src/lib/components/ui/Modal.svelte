@@ -2,6 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { tick } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
+	import { tooltip } from '$lib/utils/tooltipAction';
 
 	interface Props {
 		open: boolean;
@@ -116,7 +117,7 @@
 		>
 			<div class="modal-header">
 				<h2 id="modal-title" class="modal-title">{title}</h2>
-				<button class="close-btn" onclick={onClose} aria-label="Close modal">
+				<button class="close-btn" onclick={onClose} aria-label="Close modal" use:tooltip={'Close'}>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="20"

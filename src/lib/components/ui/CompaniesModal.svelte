@@ -2,6 +2,7 @@
 	import Modal from './Modal.svelte';
 	import { companiesStore } from '$stores/companies.svelte';
 	import { toastStore } from '$stores/toast.svelte';
+	import { tooltip } from '$lib/utils/tooltipAction';
 
 	interface Props {
 		open: boolean;
@@ -225,9 +226,9 @@
 								onclick={() => handleCompanySelect(company.id)}
 								disabled={deleteConfirmId === company.id}
 							>
-								<span class="company-name">{company.name}</span>
+								<span class="company-name" use:tooltip={company.name}>{company.name}</span>
 								{#if company.id === currentCompany?.id}
-									<span class="current-badge">Current</span>
+									<span class="current-badge" use:tooltip={'Currently selected company'}>Current</span>
 								{/if}
 							</button>
 							{#if deleteConfirmId === company.id}
@@ -254,6 +255,7 @@
 										class="action-btn"
 										onclick={() => startRenameCompany(company.id, company.name)}
 										aria-label="Rename {company.name}"
+										use:tooltip={'Rename'}
 									>
 										<svg
 											viewBox="0 0 24 24"
@@ -271,6 +273,7 @@
 										class="action-btn action-btn--danger"
 										onclick={() => requestDeleteCompany(company.id)}
 										aria-label="Delete {company.name}"
+										use:tooltip={'Delete'}
 										disabled={allCompanies.length <= 1}
 									>
 										<svg

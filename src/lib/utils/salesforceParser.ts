@@ -105,6 +105,15 @@ export function validateSalesforceText(text: string): ValidationResult {
 		};
 	}
 
+	// Profile with collapsed Information section — missing critical metadata
+	const isProfileText = /Profile-\d+/.test(text);
+	if (isProfileText && text.includes('Show Section - InformationInformation')) {
+		return {
+			valid: false,
+			error: 'Make sure the Information section isn\'t collapsed and re-copy.'
+		};
+	}
+
 	// Must have SolidCAM section or feature names
 	const hasFeatures = ALL_KNOWN_FEATURES.some((f) => text.includes(f));
 	if (!hasFeatures && !text.includes('SolidCAM')) {
@@ -148,28 +157,41 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 	const solidcamVersion = extractField(text, 'SolidCAM Version');
 
 	// Extract profile info (for Profile pages)
-	let profileNo = extractField(text, 'Profile No.');
+	// "Profile No." is just the slot number (1, 2, 3...) — NOT the profile identifier.
+	// The real identifier comes from the "Profile-XXXX" pattern in Profile Name or the page title.
+	const profileNoField = extractField(text, 'Profile No.');
 	let profileName = extractField(text, 'Profile Name');
+	let profileNo = '';
 
-	// If no explicit Profile Name field, look for "Profile-XXXX" pattern at start of text
-	// This handles cases where Information section is collapsed
-	if (!profileName) {
-		const profileMatch = text.match(/Profile-(\d+)/);
-		if (profileMatch) {
-			profileName = profileMatch[0]; // e.g., "Profile-5801"
-			if (!profileNo) {
-				profileNo = profileMatch[1]; // e.g., "5801"
-			}
-		}
-	}
-
-	// If we have Profile Name like "Profile-5801" but no profileNo, extract it
-	if (profileName && !profileNo) {
+	// First: extract identifier from Profile Name field (uncollapsed format: "Profile-7479")
+	if (profileName) {
 		const numMatch = profileName.match(/Profile-(\d+)/i);
 		if (numMatch) {
 			profileNo = numMatch[1];
 		}
 	}
+
+	// Second: fall back to Profile-XXXX pattern in full text (title line)
+	if (!profileNo) {
+		const profileMatch = text.match(/Profile-(\d+)/);
+		if (profileMatch) {
+			profileName = profileName || profileMatch[0];
+			profileNo = profileMatch[1];
+		}
+	}
+
+	// Last resort: use Profile No. field (slot number) if nothing else matched
+	if (!profileNo && profileNoField) {
+		profileNo = profileNoField;
+	}
+
+	// Parse Profile Users count (only present when Information section is expanded)
+	const profileUsersRaw = extractField(text, 'Profile Users');
+	const profileUsersParsed = profileUsersRaw ? parseInt(profileUsersRaw, 10) : undefined;
+	const profileUsers =
+		profileUsersParsed !== undefined && !isNaN(profileUsersParsed) && profileUsersParsed >= 0
+			? profileUsersParsed
+			: undefined;
 
 	const isProfile = !!(profileNo || profileName);
 
@@ -247,6 +269,7 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 		isNetworkLicense: isNetwork, // Only true if Net Dongle is checked (product keys are NOT always network)
 		isProfile,
 		profileNo,
+		profileUsers,
 		sim5xLevel: sim5xLevel || undefined, // "3 Axis", "3/4 Axis", or undefined if blank
 		maintenanceType,
 		maintenanceStart,
@@ -339,6 +362,7 @@ export function parseSalesforceText(text: string): ParseResult {
 		isNetworkLicense: headerInfo.isNetworkLicense || false,
 		isProfile: headerInfo.isProfile || false,
 		profileNo: headerInfo.profileNo,
+		profileUsers: headerInfo.profileUsers,
 		sim5xLevel: headerInfo.sim5xLevel,
 		maintenanceType: headerInfo.maintenanceType || '',
 		maintenanceStart: headerInfo.maintenanceStart || '',

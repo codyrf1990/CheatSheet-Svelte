@@ -266,14 +266,6 @@ function reset(): void {
 }
 
 /**
- * Reset all order arrays and group membership to default
- * Clears global ordering in userPrefsStore
- */
-function resetAllOrders(): void {
-	userPrefsStore.resetAllPackageOrders();
-}
-
-/**
  * Get the global bit order for a package
  * Reads from userPrefsStore (global across all companies)
  */
@@ -338,6 +330,5 @@ export const packagesStore = {
 	// State sync
 	loadFromPageState,
 	getPageState,
-	reset,
-	resetAllOrders
+	reset
 };

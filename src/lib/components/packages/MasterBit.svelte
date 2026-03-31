@@ -6,12 +6,12 @@
 	import { toastStore } from '$stores/toast.svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { applyOrder } from '$lib/utils/order';
+	import { tooltip } from '$lib/utils/tooltipAction';
 	import SubBit from './SubBit.svelte';
 
 	interface Props {
 		group: PackageGroup;
 		packageCode: string;
-		editMode?: boolean;
 		disabled?: boolean;
 		disabledReason?: string;
 	}
@@ -19,7 +19,6 @@
 	let {
 		group,
 		packageCode,
-		editMode = false,
 		disabled = false,
 		disabledReason = ''
 	}: Props = $props();
@@ -60,7 +59,6 @@
 	let masterState = $derived(packagesStore.getMasterBitState(packageCode, effectiveBits));
 
 	function handleMasterToggle() {
-		if (editMode) return;
 		if (disabled) {
 			toastStore.warning(disabledReason);
 			return;
@@ -73,7 +71,6 @@
 	}
 
 	async function handleLabelCopy() {
-		if (editMode) return;
 		await copyToClipboard(group.label);
 	}
 
@@ -84,80 +81,6 @@
 		}
 	}
 
-	// Drag and drop state for reordering
-	let draggedIndex = $state<number | null>(null);
-
-	function handleDragStart(e: DragEvent, index: number, bit: string) {
-		if (!editMode) return;
-		e.stopPropagation();
-		draggedIndex = index;
-		if (e.dataTransfer) {
-			e.dataTransfer.effectAllowed = 'move';
-			// Include bit name and source group for cross-group moves
-			e.dataTransfer.setData(
-				'application/json',
-				JSON.stringify({ bit, sourceGroup: group.masterId })
-			);
-		}
-	}
-
-	function handleDragOver(e: DragEvent) {
-		if (!editMode) return;
-		e.preventDefault();
-		if (e.dataTransfer) {
-			e.dataTransfer.dropEffect = 'move';
-		}
-	}
-
-	function handleDrop(e: DragEvent, dropIndex: number) {
-		if (!editMode) return;
-		e.preventDefault();
-
-		// Try to get cross-group drag data
-		const jsonData = e.dataTransfer?.getData('application/json');
-		if (jsonData) {
-			try {
-				const data = JSON.parse(jsonData);
-				if (data.bit && data.sourceGroup && data.sourceGroup !== group.masterId) {
-					// Cross-group move: from loose or another group to this group
-					packagesStore.moveBitToGroup(packageCode, data.bit, group.masterId);
-					draggedIndex = null;
-					return;
-				}
-			} catch {
-				// Not valid JSON, continue with normal drop
-			}
-		}
-
-		// Normal reorder within this group
-		if (draggedIndex !== null && draggedIndex !== dropIndex) {
-			const newOrder = [...orderedBits];
-			const [removed] = newOrder.splice(draggedIndex, 1);
-			newOrder.splice(dropIndex, 0, removed);
-			packagesStore.setOrder(packageCode, newOrder);
-		}
-		draggedIndex = null;
-	}
-
-	// Handle drop on the sub-bits container itself
-	function handleContainerDrop(e: DragEvent) {
-		if (!editMode) return;
-		e.preventDefault();
-
-		const jsonData = e.dataTransfer?.getData('application/json');
-		if (jsonData) {
-			try {
-				const data = JSON.parse(jsonData);
-				if (data.bit && data.sourceGroup && data.sourceGroup !== group.masterId) {
-					// Cross-group move to this group
-					packagesStore.moveBitToGroup(packageCode, data.bit, group.masterId);
-				}
-			} catch {
-				// Ignore
-			}
-		}
-		draggedIndex = null;
-	}
 </script>
 
 <div
@@ -222,6 +145,7 @@
 				onclick={handleLabelCopy}
 				onkeydown={handleLabelKeydown}
 				data-copyable-bit
+				use:tooltip={group.label}
 			>
 				{group.label}
 			</span>
@@ -232,6 +156,7 @@
 				aria-expanded={expanded}
 				aria-controls="subbits-{group.masterId}"
 				aria-label="{expanded ? 'Collapse' : 'Expand'} {group.label}"
+				use:tooltip={expanded ? 'Collapse' : 'Expand'}
 			>
 				<svg
 					class="expand-icon"
@@ -251,31 +176,19 @@
 		<ul
 			id="subbits-{group.masterId}"
 			class="sub-bits"
-			class:edit-mode={editMode}
-			data-sortable-group={group.masterId}
 			role="group"
 			aria-label="{group.label} options"
-			ondragover={handleDragOver}
-			ondrop={handleContainerDrop}
 		>
-			{#each orderedBits as bit, index (bit)}
+			{#each orderedBits as bit (bit)}
 				<SubBit
 					{bit}
 					{packageCode}
 					masterId={group.masterId}
-					{editMode}
 					isCustom={customBits.includes(bit)}
 					{disabled}
 					{disabledReason}
-					draggable={editMode}
-					ondragstart={(e) => handleDragStart(e, index, bit)}
-					ondragover={handleDragOver}
-					ondrop={(e) => handleDrop(e, index)}
 				/>
 			{/each}
-			{#if editMode && orderedBits.length === 0}
-				<li class="drop-hint">Drop items here</li>
-			{/if}
 		</ul>
 	</CollapseWrapper>
 </div>
@@ -365,21 +278,7 @@
 		min-height: 24px;
 	}
 
-	.sub-bits.edit-mode {
-		outline: 1px dashed rgba(212, 175, 55, 0.2);
-		outline-offset: -2px;
-	}
-
-	.drop-hint {
-		grid-column: span 2;
-		font-size: var(--text-xs);
-		color: rgba(255, 255, 255, 0.4);
-		font-style: italic;
-		text-align: center;
-		padding: var(--space-0-5);
-	}
-
-	/* Narrow viewport compaction */
+/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.master-header {
 			padding: var(--space-0-5) var(--space-1);

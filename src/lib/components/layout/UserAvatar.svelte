@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import type { SyncStatus } from '$types';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
+	import { tooltip } from '$lib/utils/tooltipAction';
 
 	interface Props {
 		username: string | null;
@@ -83,7 +84,7 @@
 		</div>
 	</div>
 	<div class="user-details">
-		<span class="user-name">{username || 'User'}</span>
+		<span class="user-name" use:tooltip={username || 'User'}>{username || 'User'}</span>
 		<div class="user-actions">
 			<button
 				class="settings-button"
@@ -109,7 +110,7 @@
 			</button>
 		</div>
 	</div>
-	<div class="sync-indicator" class:visible={status === 'syncing'}>
+	<div class="sync-indicator" class:visible={status === 'syncing'} use:tooltip={'Syncing...'}>
 		<div class="sync-spinner"></div>
 	</div>
 

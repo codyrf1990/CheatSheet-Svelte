@@ -3,41 +3,31 @@
 	import { packagesStore } from '$stores/packages.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { toastStore } from '$stores/toast.svelte';
+	import { tooltip } from '$lib/utils/tooltipAction';
 	import { copyToClipboard } from '$lib/utils/clipboard';
 
 	interface Props {
 		bit: string;
 		packageCode: string;
-		editMode?: boolean;
 		removeMode?: boolean;
 		isCustom?: boolean;
 		disabled?: boolean;
 		disabledReason?: string;
-		draggable?: boolean;
-		ondragstart?: (e: DragEvent) => void;
-		ondragover?: (e: DragEvent) => void;
-		ondrop?: (e: DragEvent) => void;
 	}
 
 	let {
 		bit,
 		packageCode,
-		editMode = false,
 		removeMode = false,
 		isCustom = false,
 		disabled = false,
-		disabledReason = '',
-		draggable = false,
-		ondragstart,
-		ondragover,
-		ondrop
+		disabledReason = ''
 	}: Props = $props();
 
 	let isSelected = $derived(packagesStore.isBitSelected(packageCode, bit));
 	let justCopied = $state(false);
 
 	function handleToggle() {
-		if (editMode) return;
 		if (disabled) {
 			toastStore.warning(disabledReason);
 			return;
@@ -46,7 +36,6 @@
 	}
 
 	async function handleCopy() {
-		if (editMode) return;
 		const ok = await copyToClipboard(bit);
 		if (ok) {
 			justCopied = true;
@@ -76,16 +65,10 @@
 
 <li
 	class="loose-bit"
-	class:edit-mode={editMode}
 	class:custom={isCustom}
 	class:remove-mode={removeMode && isCustom}
 	class:disabled-bit={disabled}
-	data-sortable-item
 	data-bit={bit}
-	draggable={draggable && editMode}
-	{ondragstart}
-	{ondragover}
-	{ondrop}
 >
 	{#if disabled && disabledReason}
 		<Tooltip text={disabledReason}>
@@ -137,7 +120,7 @@
 		</div>
 	{/if}
 	{#if removeMode && isCustom}
-		<button type="button" class="bit-remove-btn" onclick={handleRemove} aria-label="Remove {bit}">
+		<button type="button" class="bit-remove-btn" onclick={handleRemove} aria-label="Remove {bit}" use:tooltip={'Remove ' + bit}>
 			&times;
 		</button>
 	{/if}
@@ -166,38 +149,7 @@
 		cursor: not-allowed;
 	}
 
-	.loose-bit[draggable='true'] {
-		cursor: grab;
-		user-select: none;
-	}
-
-	.loose-bit[draggable='true']:active {
-		cursor: grabbing;
-		opacity: 0.5;
-		outline: 2px dashed rgba(212, 175, 55, 0.5);
-		outline-offset: 1px;
-	}
-
-	.loose-bit[draggable='true'] .bit-row,
-	.loose-bit[draggable='true'] .bit-row .bit-text {
-		cursor: grab;
-	}
-
-	.loose-bit[draggable='true']:active .bit-row,
-	.loose-bit[draggable='true']:active .bit-row .bit-text {
-		cursor: grabbing;
-	}
-
-	.loose-bit.edit-mode {
-		outline: 1px dashed rgba(212, 175, 55, 0.4);
-		outline-offset: -1px;
-	}
-
-	.loose-bit.edit-mode .bit-row {
-		pointer-events: none;
-	}
-
-	.checkbox-wrapper {
+.checkbox-wrapper {
 		display: flex;
 		align-items: center;
 	}

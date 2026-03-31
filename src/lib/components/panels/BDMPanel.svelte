@@ -5,6 +5,7 @@
 	import { persistence } from '$stores/persistence.svelte';
 	import { Checkbox, CollapseWrapper, Tooltip } from '$components/ui';
 	import { BDM_SECTIONS } from '$lib/data/bdmData';
+	import { tooltip } from '$lib/utils/tooltipAction';
 
 	const BDM_PANEL_ID = 'bdm-skus';
 	const STORAGE_KEY = 'solidcam-bdm-sections';
@@ -116,7 +117,7 @@
 											>{:else}{item.sku}{/if}
 									</button>
 								</Tooltip>
-								<span class="item-label">{item.label}</span>
+								<span class="item-label" use:tooltip={item.label}>{item.label}</span>
 								<div class="item-pricing">
 									<span class="item-price">{formatPrice(item.price, item.priceNote)}</span>
 									{#if item.maint}

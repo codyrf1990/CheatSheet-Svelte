@@ -8,35 +8,24 @@
 		bit: string;
 		packageCode: string;
 		masterId: string;
-		editMode?: boolean;
 		isCustom?: boolean;
 		disabled?: boolean;
 		disabledReason?: string;
-		draggable?: boolean;
-		ondragstart?: (e: DragEvent) => void;
-		ondragover?: (e: DragEvent) => void;
-		ondrop?: (e: DragEvent) => void;
 	}
 
 	let {
 		bit,
 		packageCode,
 		masterId,
-		editMode = false,
 		isCustom = false,
 		disabled = false,
-		disabledReason = '',
-		draggable = false,
-		ondragstart,
-		ondragover,
-		ondrop
+		disabledReason = ''
 	}: Props = $props();
 
 	let isSelected = $derived(packagesStore.isBitSelected(packageCode, bit));
 	let justCopied = $state(false);
 
 	function handleToggle() {
-		if (editMode) return;
 		if (disabled) {
 			toastStore.warning(disabledReason);
 			return;
@@ -45,7 +34,6 @@
 	}
 
 	async function handleCopy() {
-		if (editMode) return;
 		const ok = await copyToClipboard(bit, false);
 		if (ok) {
 			justCopied = true;
@@ -70,16 +58,10 @@
 
 <li
 	class="sub-bit"
-	class:edit-mode={editMode}
 	class:custom={isCustom}
 	class:disabled-bit={disabled}
-	data-sortable-item
 	data-bit={bit}
 	data-parent={masterId}
-	draggable={draggable && editMode}
-	{ondragstart}
-	{ondragover}
-	{ondrop}
 >
 	{#if disabled && disabledReason}
 		<Tooltip text={disabledReason}>
@@ -155,38 +137,7 @@
 		cursor: not-allowed;
 	}
 
-	.sub-bit[draggable='true'] {
-		cursor: grab;
-		user-select: none;
-	}
-
-	.sub-bit[draggable='true']:active {
-		cursor: grabbing;
-		opacity: 0.5;
-		outline: 2px dashed rgba(212, 175, 55, 0.5);
-		outline-offset: 1px;
-	}
-
-	.sub-bit[draggable='true'] .bit-row,
-	.sub-bit[draggable='true'] .bit-row .bit-text {
-		cursor: grab;
-	}
-
-	.sub-bit[draggable='true']:active .bit-row,
-	.sub-bit[draggable='true']:active .bit-row .bit-text {
-		cursor: grabbing;
-	}
-
-	.sub-bit.edit-mode {
-		outline: 1px dashed rgba(212, 175, 55, 0.4);
-		outline-offset: -1px;
-	}
-
-	.sub-bit.edit-mode .bit-row {
-		pointer-events: none;
-	}
-
-	.checkbox-wrapper {
+.checkbox-wrapper {
 		display: flex;
 		align-items: center;
 	}
