@@ -198,7 +198,7 @@
 	);
 </script>
 
-<Modal {open} {onClose} title="Upgrades — {skuMode === 'ms' ? 'MS' : 'BDM'}" size="wide">
+<Modal {open} {onClose} title="Upgrades — {skuMode === 'ms' ? 'Maintenance' : 'New Sale'}" size="wide">
 	{#if upgradeGroups.length === 0}
 		<div class="empty-state">
 			<p>All available packages and modules are already selected.</p>

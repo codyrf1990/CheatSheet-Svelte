@@ -271,23 +271,23 @@
 			<div class="sku-under-wrapper tile">
 				<div class="sku-collapse-bar tile-header">
 					<span class="sku-panel-label" class:sku-panel-label-ms={effectiveSkuTabMode === 'ms'}>
-						{effectiveSkuTabMode === 'bdm' ? 'BDM SKUs' : 'Maint SKUs'}
+						{effectiveSkuTabMode === 'bdm' ? 'New Sale SKUs' : 'Maintenance SKUs'}
 					</span>
 					<div class="mode-pill" role="group" aria-label="View mode">
-						<Tooltip text="BDM mode — new sale prices">
+						<Tooltip text="New Sale — new sale prices">
 							<button
 								class="mode-pill-btn"
 								class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
 								onclick={() => userPrefsStore.setSkuTabMode('bdm')}
-								aria-pressed={effectiveSkuTabMode === 'bdm'}>BDM</button
+								aria-pressed={effectiveSkuTabMode === 'bdm'}>New Sale</button
 							>
 						</Tooltip>
-						<Tooltip text="MS mode — maintenance prices">
+						<Tooltip text="Maintenance — maintenance prices">
 							<button
 								class="mode-pill-btn"
 								class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
 								onclick={() => userPrefsStore.setSkuTabMode('ms')}
-								aria-pressed={effectiveSkuTabMode === 'ms'}>MS</button
+								aria-pressed={effectiveSkuTabMode === 'ms'}>Maintenance</button
 							>
 						</Tooltip>
 					</div>
@@ -329,23 +329,23 @@
 			<div class="quote-tile tile">
 				<div class="quote-header tile-header">
 					<span class="quote-mode-label" class:quote-label-ms={effectiveSkuTabMode === 'ms'}>
-						{effectiveSkuTabMode === 'bdm' ? 'New Sale' : 'Maint Price'}
+						{effectiveSkuTabMode === 'bdm' ? 'New Sale' : 'Maintenance Price'}
 					</span>
 					<div class="mode-pill" role="group" aria-label="View mode">
-						<Tooltip text="BDM mode — new sale prices">
+						<Tooltip text="New Sale — new sale prices">
 							<button
 								class="mode-pill-btn"
 								class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
 								onclick={() => userPrefsStore.setSkuTabMode('bdm')}
-								aria-pressed={effectiveSkuTabMode === 'bdm'}>BDM</button
+								aria-pressed={effectiveSkuTabMode === 'bdm'}>New Sale</button
 							>
 						</Tooltip>
-						<Tooltip text="MS mode — maintenance prices">
+						<Tooltip text="Maintenance — maintenance prices">
 							<button
 								class="mode-pill-btn"
 								class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
 								onclick={() => userPrefsStore.setSkuTabMode('ms')}
-								aria-pressed={effectiveSkuTabMode === 'ms'}>MS</button
+								aria-pressed={effectiveSkuTabMode === 'ms'}>Maintenance</button
 							>
 						</Tooltip>
 					</div>

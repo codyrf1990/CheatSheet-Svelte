@@ -364,21 +364,47 @@ function search(query: string): Company[] {
 
 	const lowerQuery = query.toLowerCase().trim();
 
-	return companies.filter((company) => {
+	const scored: { company: Company; score: number }[] = [];
+
+	for (const company of companies) {
 		const name = company.name.toLowerCase();
 
-		// Exact match
-		if (name.includes(lowerQuery)) return true;
-
-		// Fuzzy match (allow missing characters)
-		let queryIndex = 0;
-		for (let i = 0; i < name.length && queryIndex < lowerQuery.length; i++) {
-			if (name[i] === lowerQuery[queryIndex]) {
-				queryIndex++;
+		if (name.startsWith(lowerQuery)) {
+			// Name starts with query — best match
+			scored.push({ company, score: 3 });
+		} else if (name.includes(lowerQuery)) {
+			// Query found as substring anywhere
+			scored.push({ company, score: 2 });
+		} else {
+			// Check if any word in the name starts with the query
+			const words = name.split(/\s+/);
+			if (words.some((w) => w.startsWith(lowerQuery))) {
+				scored.push({ company, score: 2 });
+			} else if (lowerQuery.length >= 2) {
+				// Fuzzy match — require all query chars in order
+				// but only accept if matched chars are clustered (not scattered)
+				let queryIndex = 0;
+				let gaps = 0;
+				let lastMatchIndex = -1;
+				for (let i = 0; i < name.length && queryIndex < lowerQuery.length; i++) {
+					if (name[i] === lowerQuery[queryIndex]) {
+						if (lastMatchIndex >= 0 && i - lastMatchIndex > 1) gaps++;
+						lastMatchIndex = i;
+						queryIndex++;
+					}
+				}
+				// All chars matched AND gaps are reasonable (not too scattered)
+				if (queryIndex === lowerQuery.length && gaps <= lowerQuery.length) {
+					scored.push({ company, score: 1 });
+				}
 			}
 		}
-		return queryIndex === lowerQuery.length;
-	});
+	}
+
+	// Sort by score descending, then alphabetically within each tier
+	scored.sort((a, b) => b.score - a.score || a.company.name.localeCompare(b.company.name));
+
+	return scored.map((s) => s.company);
 }
 
 /**
