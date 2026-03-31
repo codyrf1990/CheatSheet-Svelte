@@ -193,6 +193,14 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 			? profileUsersParsed
 			: undefined;
 
+	// Parse Actual Users count (present on main license pages, not profiles)
+	const actualUsersRaw = extractField(text, 'Actual Users');
+	const actualUsersParsed = actualUsersRaw ? parseInt(actualUsersRaw, 10) : undefined;
+	const actualUsers =
+		actualUsersParsed !== undefined && !isNaN(actualUsersParsed) && actualUsersParsed >= 0
+			? actualUsersParsed
+			: undefined;
+
 	const isProfile = !!(profileNo || profileName);
 
 	// Extract Sim 5x Level for profile datasets
@@ -270,6 +278,7 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 		isProfile,
 		profileNo,
 		profileUsers,
+		actualUsers,
 		sim5xLevel: sim5xLevel || undefined, // "3 Axis", "3/4 Axis", or undefined if blank
 		maintenanceType,
 		maintenanceStart,
@@ -363,6 +372,7 @@ export function parseSalesforceText(text: string): ParseResult {
 		isProfile: headerInfo.isProfile || false,
 		profileNo: headerInfo.profileNo,
 		profileUsers: headerInfo.profileUsers,
+		actualUsers: headerInfo.actualUsers,
 		sim5xLevel: headerInfo.sim5xLevel,
 		maintenanceType: headerInfo.maintenanceType || '',
 		maintenanceStart: headerInfo.maintenanceStart || '',

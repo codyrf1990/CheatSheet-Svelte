@@ -152,6 +152,7 @@ export interface LicenseInfo {
 	isProfile: boolean; // True if Profile format (has Profile No.)
 	profileNo?: string; // Profile identifier from Profile-XXXX pattern (e.g., "7479")
 	profileUsers?: number; // Number of users on this profile (from "Profile Users" field)
+	actualUsers?: number; // Number of users on the license itself (from "Actual Users" field)
 	sim5xLevel?: string; // Sim 5x Level value: "3 Axis", "3/4 Axis", or blank
 
 	// Maintenance

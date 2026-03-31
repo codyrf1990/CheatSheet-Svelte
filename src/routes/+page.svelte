@@ -64,7 +64,7 @@
 		return start || end;
 	});
 
-	let profileUsers = $derived(matchedLicense?.profileUsers ?? null);
+	let profileUsers = $derived(matchedLicense?.profileUsers ?? matchedLicense?.actualUsers ?? null);
 
 	let effectiveSkuTabMode = $derived(userPrefsStore.skuTabMode);
 

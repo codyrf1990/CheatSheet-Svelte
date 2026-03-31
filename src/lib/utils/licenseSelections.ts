@@ -49,12 +49,12 @@ export function getPageNameForLicense(license: LicenseInfo): string {
 
 	// Product Key: long product key number
 	if (license.productKey && license.productKey.length > 4) {
-		const last4 = license.productKey.slice(-4).toUpperCase();
 		if (license.isNetworkLicense) {
-			// Network Product Key
-			return `NPK ${last4}`;
+			// Network Product Key — use full number (no profiles to distinguish, key IS the identifier)
+			return `NPK ${license.productKey}`;
 		}
-		// Standalone Product Key
+		// Standalone Product Key — last 4 is enough (single user)
+		const last4 = license.productKey.slice(-4).toUpperCase();
 		return `SPK ${last4}`;
 	}
 
