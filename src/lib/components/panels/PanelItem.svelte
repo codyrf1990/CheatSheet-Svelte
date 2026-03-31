@@ -10,6 +10,7 @@
 		removeMode?: boolean;
 		draggable?: boolean;
 		isCustom?: boolean;
+		note?: string;
 		onToggle?: () => void;
 		onRemove?: () => void;
 		ondragstart?: (e: DragEvent) => void;
@@ -24,6 +25,7 @@
 		removeMode = false,
 		draggable = false,
 		isCustom = false,
+		note = '',
 		onToggle,
 		onRemove,
 		ondragstart,
@@ -59,9 +61,16 @@
 				<Checkbox {checked} onchange={handleCheckboxChange} />
 			</span>
 		{/if}
-		<button type="button" class="item-text" class:custom={isCustom} onclick={handleCopy} use:tooltip={item}>
+		<button type="button" class="item-text" class:custom={isCustom} onclick={handleCopy} use:tooltip={note || item}>
 			{#if isCustom}<span class="custom-indicator">+</span>{/if}{item}
 		</button>
+		{#if note}
+			<span class="item-note" use:tooltip={note}>
+				<svg viewBox="0 0 16 16" fill="currentColor" width="11" height="11" aria-hidden="true">
+					<path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"/>
+				</svg>
+			</span>
+		{/if}
 	</div>
 	{#if removeMode && isCustom}
 		<button type="button" class="item-remove-btn" onclick={handleRemove} aria-label="Remove {item}" use:tooltip={'Remove ' + item}>
@@ -143,6 +152,19 @@
 		color: var(--color-solidcam-gold, #d4af37);
 		font-weight: 600;
 		margin-right: 2px;
+	}
+
+	.item-note {
+		display: flex;
+		align-items: center;
+		color: rgba(96, 165, 250, 0.6);
+		cursor: help;
+		flex-shrink: 0;
+		transition: color 150ms ease;
+	}
+
+	.item-note:hover {
+		color: rgba(96, 165, 250, 1);
 	}
 
 	.item-remove-btn {

@@ -4,6 +4,7 @@
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { applyOrder } from '$lib/utils/order';
 	import { MAINT_TO_BDM } from '$lib/data/skuData';
+	import { SKU_NOTES } from '$lib/utils/featureMapper';
 	import PanelItem from './PanelItem.svelte';
 
 	interface Props {
@@ -71,6 +72,7 @@
 						showCheckbox={true}
 						{removeMode}
 						isCustom={isCustomItem(maintenancePanel.id, item)}
+						note={SKU_NOTES[item] ?? ''}
 						onToggle={() => handleItemToggle(maintenancePanel.id, item)}
 						onRemove={() =>
 							handleItemRemove(maintenancePanel.id, item, isCustomItem(maintenancePanel.id, item))}

@@ -107,7 +107,11 @@ export const SKU_MAP: Record<string, string> = {
 
 	// Non-posting dongle (checkbox field)
 	'Non Posting Option': 'NPD-Maint',
-	'NO G-code': 'NPD-Maint'
+	'NO G-code': 'NPD-Maint',
+
+	// CAM Assist compliance flags (not purchased — turned on across account)
+	'CAM Assist': 'CAMAssist',
+	'CAM Assist - Gov Cloud': 'CAMAssist-GovCloud'
 };
 
 /**
@@ -162,6 +166,15 @@ export const IGNORED_FEATURES: Set<string> = new Set([
 	'HSS - Express',
 	'Xpress (HSS)'
 ]);
+
+/**
+ * Notes attached to specific SKU items — shown as tooltip/indicator.
+ * These are informational flags, not purchasable modules.
+ */
+export const SKU_NOTES: Record<string, string> = {
+	CAMAssist: 'Compliant — turned on across account. Verify if purchased.',
+	'CAMAssist-GovCloud': 'Gov Cloud compliant — turned on across account. Verify if purchased.'
+};
 
 export interface MappedFeature {
 	pdfFeature: string;

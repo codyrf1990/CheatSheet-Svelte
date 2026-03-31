@@ -11,6 +11,8 @@ export const panels: Panel[] = [
 		editable: true,
 		items: [
 			'25M-Maint',
+			'CAMAssist',
+			'CAMAssist-GovCloud',
 			'EdgeBreak-Maint',
 			'EdgeTrim-Maint',
 			'HSM-Maint',
