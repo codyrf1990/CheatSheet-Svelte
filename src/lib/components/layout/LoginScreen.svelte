@@ -147,7 +147,7 @@
 
 				<div class="title-group">
 					<h1 class="login-title">Welcome</h1>
-					<p class="login-subtitle">Pick a tag to get started</p>
+					<p class="login-subtitle">Enter your name to get started</p>
 				</div>
 
 				<form onsubmit={handleSubmit} class="login-form">
@@ -158,7 +158,7 @@
 								placeholder="e.g., carlos"
 								bind:value={username}
 								{error}
-								hint="Used to save and sync your selections"
+								hint="Your name is used to save and sync your work across devices"
 								autocomplete="nickname"
 								autocapitalize="none"
 								autofocus

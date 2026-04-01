@@ -286,7 +286,7 @@
 			</section>
 
 			<section class="section">
-				<h4 class="section-title">SW Bundles</h4>
+				<h4 class="section-title">SOLIDWORKS Bundles</h4>
 				<div class="data-table">
 					<div class="table-row table-header">
 						<span>Product</span>

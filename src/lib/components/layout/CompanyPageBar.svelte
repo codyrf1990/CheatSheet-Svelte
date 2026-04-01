@@ -646,7 +646,7 @@
 				{/if}
 			{/each}
 		{/if}
-		<Tooltip text="Add new page" position="bottom">
+		<Tooltip text="Add a new page — each page is a separate license or quote" position="bottom">
 			<button
 				type="button"
 				class="page-tab add-tab"

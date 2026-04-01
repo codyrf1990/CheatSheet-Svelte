@@ -159,7 +159,7 @@
 		{#if skuMode === 'ms'}
 			<!-- MS mode: same items as BDM but show maintSku + maintPrice -->
 			{#if saleLines.length === 0}
-				<div class="empty-state">Select bits from the table to see pricing.</div>
+				<div class="empty-state">Select modules from the table to see pricing.</div>
 			{:else}
 				<ul class="sku-list">
 					{#each saleLines as line (line.entry.sku)}
@@ -220,7 +220,7 @@
 		{:else}
 			<!-- BDM mode: show new sale pricing -->
 			{#if saleLines.length === 0}
-				<div class="empty-state">Select bits from the table to see pricing.</div>
+				<div class="empty-state">Select modules from the table to see pricing.</div>
 			{:else}
 				<ul class="sku-list">
 					{#each saleLines as line (line.entry.sku)}

@@ -22,9 +22,9 @@
 
 <div class="package-table-container">
 	<div class="main-table tile">
-		<table aria-label="SolidCAM packages and included bits">
+		<table aria-label="SolidCAM packages and included modules">
 			<caption class="sr-only"
-				>SolidCAM package options with maintenance SKUs and included software bits</caption
+				>SolidCAM package options with maintenance SKUs and included modules</caption
 			>
 			<thead>
 				<tr>

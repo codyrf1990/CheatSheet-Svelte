@@ -168,10 +168,20 @@
 	{#if modalState === 'paste'}
 		<!-- Textarea for pasting Salesforce text -->
 		<div class="paste-section">
-			<p class="paste-instructions">
-				Open the dongle record in Salesforce, press <kbd>Ctrl+A</kbd> to select all, then
-				<kbd>Ctrl+C</kbd> to copy. Paste below.
-			</p>
+			<div class="paste-instructions">
+				<p class="instructions-title">How to import a license from Salesforce:</p>
+				<ol class="instructions-steps">
+					<li>Open the customer's <strong>dongle or product key page</strong> in Salesforce</li>
+					<li>If the license has <strong>profiles</strong>, go into <strong>Details</strong> and open the specific profile configuration you want to import</li>
+					<li>Click <strong>Printable View</strong></li>
+					<li>Press <kbd>Ctrl+A</kbd> to select everything on the page</li>
+					<li>Press <kbd>Ctrl+C</kbd> to copy</li>
+					<li>Click the text box below and press <kbd>Ctrl+V</kbd> to paste</li>
+				</ol>
+				<p class="instructions-note">
+					The system will automatically detect the license type, modules, and maintenance dates. Import each profile separately.
+				</p>
+			</div>
 			<textarea
 				class="paste-textarea"
 				class:has-error={!!parseError}
@@ -215,7 +225,7 @@ HSM           Checked    5-axes indexial  Not Checked"
 						{/if}
 					</div>
 					<div class="summary-row">
-						<span class="summary-label">Dongle No:</span>
+						<span class="summary-label">License Number:</span>
 						<span class="summary-value">{parsedLicense.dongleNo || '-'}</span>
 					</div>
 					<div class="summary-row">
@@ -256,7 +266,7 @@ HSM           Checked    5-axes indexial  Not Checked"
 						onclick={() => (showFeatures = !showFeatures)}
 						type="button"
 					>
-						<span class="features-count">{parsedLicense.features.length} features found</span>
+						<span class="features-count">{parsedLicense.features.length} licensed modules found</span>
 						<span class="toggle-icon">{showFeatures ? '▼' : '▶'}</span>
 					</button>
 					{#if showFeatures}
@@ -275,7 +285,7 @@ HSM           Checked    5-axes indexial  Not Checked"
 				{/if}
 
 				<div class="page-info">
-					<p>Will create/update page: <strong>{pageName}</strong></p>
+					<p>This import will create or update the page: <strong>{pageName}</strong></p>
 				</div>
 			{/if}
 		</div>
@@ -316,7 +326,7 @@ HSM           Checked    5-axes indexial  Not Checked"
 					<div class="stats-grid">
 						<div class="stat-card">
 							<span class="stat-value">{importResult.featuresImported}</span>
-							<span class="stat-label">Bits Selected</span>
+							<span class="stat-label">Modules Selected</span>
 						</div>
 						<div class="stat-card">
 							<span class="stat-value">{importResult.skusImported}</span>
@@ -379,6 +389,34 @@ HSM           Checked    5-axes indexial  Not Checked"
 		margin: 0;
 		font-size: var(--text-sm);
 		color: rgba(255, 255, 255, 0.7);
+	}
+
+	.instructions-title {
+		margin: 0 0 var(--space-2) 0;
+		font-weight: 600;
+		color: rgba(255, 255, 255, 0.85);
+	}
+
+	.instructions-steps {
+		margin: 0 0 var(--space-2) 0;
+		padding-left: var(--space-5);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+	}
+
+	.instructions-steps li {
+		line-height: 1.5;
+	}
+
+	.instructions-note {
+		margin: 0;
+		padding: var(--space-2) var(--space-3);
+		background: rgba(212, 175, 55, 0.08);
+		border-left: 2px solid rgba(212, 175, 55, 0.4);
+		border-radius: 0 4px 4px 0;
+		color: rgba(255, 255, 255, 0.65);
+		font-size: 0.8rem;
 	}
 
 	.paste-instructions kbd {

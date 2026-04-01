@@ -28,7 +28,7 @@
 	const exemptStates = ['Alaska', 'Delaware', 'Montana', 'New Hampshire', 'Oregon'];
 </script>
 
-<Modal {open} {onClose} title="U.S. Sales Tax Guide 2025">
+<Modal {open} {onClose} title="U.S. Sales Tax Guide {new Date().getFullYear()}">
 	<div class="sales-tax-content">
 		<!-- Required States -->
 		<section class="tax-section">
