@@ -462,6 +462,9 @@
 		gap: var(--space-1);
 		min-width: 0;
 		min-height: 0;
+		position: sticky;
+		top: var(--space-2);
+		align-self: start;
 	}
 
 	/* Under-table SKU panel */

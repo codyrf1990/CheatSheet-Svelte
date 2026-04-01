@@ -1,54 +1,11 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { panelsStore } from '$stores/panels.svelte';
-	import { persistence } from '$stores/persistence.svelte';
-	import { Checkbox, CollapseWrapper, Tooltip } from '$components/ui';
+	import { Checkbox, Tooltip } from '$components/ui';
 	import { BDM_SECTIONS } from '$lib/data/bdmData';
 	import { tooltip } from '$lib/utils/tooltipAction';
 
 	const BDM_PANEL_ID = 'bdm-skus';
-	const STORAGE_KEY = 'solidcam-bdm-sections';
-
-	const defaults: Record<string, boolean> = {
-		license: false,
-		packages: false,
-		milling: false,
-		turning: false,
-		addons: false,
-		wire: false,
-		solidworks: false,
-		bundles: false,
-		training: false,
-		solidshop: false
-	};
-
-	function loadExpanded(): Record<string, boolean> {
-		if (!browser) return { ...defaults };
-		const stored = persistence.get<Record<string, boolean> | null>(STORAGE_KEY, null);
-		if (stored) return { ...defaults, ...stored };
-		return { ...defaults };
-	}
-
-	let expanded = $state<Record<string, boolean>>(loadExpanded());
-
-	function toggle(id: string) {
-		expanded[id] = !expanded[id];
-		persistence.set(STORAGE_KEY, expanded);
-	}
-
-	let anyExpanded = $derived(Object.values(expanded).some(Boolean));
-	let allExpanded = $derived(Object.values(expanded).every(Boolean));
-
-	function expandAll() {
-		for (const key of Object.keys(expanded)) expanded[key] = true;
-		persistence.set(STORAGE_KEY, expanded);
-	}
-
-	function collapseAll() {
-		for (const key of Object.keys(expanded)) expanded[key] = false;
-		persistence.set(STORAGE_KEY, expanded);
-	}
 
 	let copiedSku = $state<string | null>(null);
 
@@ -70,67 +27,39 @@
 
 <section class="bdm-panel">
 	<div class="panel-body">
-		<div class="panel-actions">
-			{#if !allExpanded}
-				<button type="button" class="collapse-all-btn" onclick={expandAll}> Expand All </button>
-			{/if}
-			{#if anyExpanded}
-				<button type="button" class="collapse-all-btn" onclick={collapseAll}> Collapse All </button>
-			{/if}
-		</div>
 		{#each BDM_SECTIONS as section (section.id)}
 			<div class="bdm-section">
-				<button
-					type="button"
-					class="section-header"
-					onclick={() => toggle(section.id)}
-					aria-expanded={expanded[section.id]}
-				>
+				<div class="section-header">
 					<span class="section-title">{section.title}</span>
-					<span class="section-count">{section.items.length}</span>
-					<svg
-						class="chevron"
-						class:open={expanded[section.id]}
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						aria-hidden="true"
-					>
-						<path d="M19 9l-7 7-7-7" />
-					</svg>
-				</button>
-
-				<CollapseWrapper open={expanded[section.id]}>
-					<ul class="item-list">
-						{#each section.items as item (item.sku + item.label)}
-							<li class="bdm-item">
-								<span class="item-check">
-									<Checkbox
-										checked={panelsStore.hasItem(BDM_PANEL_ID, item.sku)}
-										onchange={() => panelsStore.toggleItem(BDM_PANEL_ID, item.sku)}
-									/>
-								</span>
-								<Tooltip text="Click to copy {item.sku}">
-									<button type="button" class="sku-chip" onclick={() => copySku(item.sku)}>
-										{#if copiedSku === item.sku}<span class="copy-check">&#10003;</span
-											>{:else}{item.sku}{/if}
-									</button>
-								</Tooltip>
-								<span class="item-label" use:tooltip={item.label}>{item.label}</span>
-								<div class="item-pricing">
-									<span class="item-price">{formatPrice(item.price, item.priceNote)}</span>
-									{#if item.maint}
-										<span class="item-maint">+{formatPrice(item.maint)}/yr</span>
-									{/if}
-								</div>
-							</li>
-						{/each}
-					</ul>
-					{#if section.note}
-						<p class="section-note">{section.note}</p>
-					{/if}
-				</CollapseWrapper>
+				</div>
+				<ul class="item-list">
+					{#each section.items as item (item.sku + item.label)}
+						<li class="bdm-item">
+							<span class="item-check">
+								<Checkbox
+									checked={panelsStore.hasItem(BDM_PANEL_ID, item.sku)}
+									onchange={() => panelsStore.toggleItem(BDM_PANEL_ID, item.sku)}
+								/>
+							</span>
+							<Tooltip text="Click to copy {item.sku}">
+								<button type="button" class="sku-chip" onclick={() => copySku(item.sku)}>
+									{#if copiedSku === item.sku}<span class="copy-check">&#10003;</span
+										>{:else}{item.sku}{/if}
+								</button>
+							</Tooltip>
+							<span class="item-label" use:tooltip={item.label}>{item.label}</span>
+							<div class="item-pricing">
+								<span class="item-price">{formatPrice(item.price, item.priceNote)}</span>
+								{#if item.maint}
+									<span class="item-maint">+{formatPrice(item.maint)}/yr</span>
+								{/if}
+							</div>
+						</li>
+					{/each}
+				</ul>
+				{#if section.note}
+					<p class="section-note">{section.note}</p>
+				{/if}
 			</div>
 		{/each}
 	</div>
@@ -148,28 +77,6 @@
 		padding: var(--space-1) var(--space-2);
 	}
 
-	.panel-actions {
-		display: flex;
-		justify-content: flex-end;
-		padding: 0 var(--space-0-5) var(--space-0-5);
-	}
-
-	.collapse-all-btn {
-		font-size: var(--text-xs);
-		color: rgba(255, 255, 255, 0.35);
-		background: transparent;
-		border: none;
-		cursor: pointer;
-		padding: 0;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		transition: color 150ms ease;
-	}
-
-	.collapse-all-btn:hover {
-		color: rgba(255, 255, 255, 0.7);
-	}
-
 	.bdm-section {
 		margin-bottom: var(--space-2);
 	}
@@ -181,15 +88,9 @@
 	.section-header {
 		display: flex;
 		align-items: center;
-		gap: var(--space-0-5);
-		width: 100%;
 		padding: var(--space-0) var(--space-0-5);
 		margin-bottom: var(--space-0-5);
-		background: transparent;
-		border: none;
 		border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-		cursor: pointer;
-		text-align: left;
 	}
 
 	.section-title {
@@ -201,32 +102,13 @@
 		letter-spacing: var(--tile-title-tracking);
 	}
 
-	.section-count {
-		font-size: var(--text-xs);
-		color: rgba(255, 255, 255, 0.25);
-		font-family: 'JetBrains Mono', monospace;
-	}
-
-	.chevron {
-		width: 10px;
-		height: 10px;
-		color: rgba(255, 255, 255, 0.3);
-		flex-shrink: 0;
-		transform: rotate(-90deg);
-		transition: transform 200ms ease;
-	}
-
-	.chevron.open {
-		transform: rotate(0deg);
-	}
-
 	.item-list {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-px);
+		padding: var(--space-px);
 		list-style: none;
 		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 1px;
 	}
 
 	.bdm-item {
@@ -320,6 +202,12 @@
 		}
 		.sku-chip {
 			font-size: var(--text-xs);
+		}
+	}
+
+	@media (max-width: 640px) {
+		.item-list {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>
