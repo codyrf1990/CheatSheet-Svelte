@@ -115,20 +115,6 @@ function getCustomPanelItems(panelId: string): string[] {
 }
 
 /**
- * Add a custom item to a panel
- */
-function addCustomPanelItem(panelId: string, item: string): void {
-	if (!prefs.customPanelItems[panelId]) {
-		prefs.customPanelItems[panelId] = [];
-	}
-
-	if (!prefs.customPanelItems[panelId].includes(item)) {
-		prefs.customPanelItems[panelId] = [...prefs.customPanelItems[panelId], item];
-		commitSyncable();
-	}
-}
-
-/**
  * Remove a custom item from a panel
  */
 function removeCustomPanelItem(panelId: string, item: string): void {
@@ -143,20 +129,6 @@ function removeCustomPanelItem(panelId: string, item: string): void {
  */
 function getCustomPackageBits(packageCode: string): string[] {
 	return prefs.customPackageBits[packageCode] || [];
-}
-
-/**
- * Add a custom bit to a package
- */
-function addCustomPackageBit(packageCode: string, bit: string): void {
-	if (!prefs.customPackageBits[packageCode]) {
-		prefs.customPackageBits[packageCode] = [];
-	}
-
-	if (!prefs.customPackageBits[packageCode].includes(bit)) {
-		prefs.customPackageBits[packageCode] = [...prefs.customPackageBits[packageCode], bit];
-		commitSyncable();
-	}
 }
 
 /**
@@ -371,13 +343,11 @@ export const userPrefsStore = {
 
 	// Panel items
 	getCustomPanelItems,
-	addCustomPanelItem,
 	removeCustomPanelItem,
 	isCustomPanelItem,
 
 	// Package bits
 	getCustomPackageBits,
-	addCustomPackageBit,
 	removeCustomPackageBit,
 	isCustomPackageBit,
 

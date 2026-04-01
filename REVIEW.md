@@ -73,6 +73,24 @@
 - [x] Error/success message patterns consistent — same red family throughout (#f87171 text, rgba(239,68,68) backgrounds)
 - [x] Focus states use `focus-visible` on Button component; inputs use gold border + box-shadow
 - [x] Spacing and font sizes consistent from prior polish phases
+- [x] BDM & Maintenance panel grid gaps: 1px → var(--space-1) for breathing room
+- [x] CurrentProductsModal SKU highlights: red → gold (brand-consistent)
+- [x] CompaniesModal: hardcoded 350px height → flexible min/max-height
+- [x] Empty states standardized across CompaniesModal, WhatLeftModal, CompanyPageBar
+- [x] NewSalePanel nested item border: 1px/0.06 opacity → 2px/0.12 opacity (visible)
+- [x] Removed 5 duplicate scrollbar style blocks (global app.css handles it)
+- [x] Calculator border-radius: hardcoded 6px → var(--radius-sm)
+- [x] Logo border-radius: hardcoded 14px → var(--radius-lg)
+
+## Dead Code Cleanup
+
+- [x] Deleted AddSkuModal.svelte (orphaned after edit mode removal)
+- [x] Deleted MenuPrimitive.svelte (exported but never imported)
+- [x] Deleted quickbooksExport.ts (entire module unused)
+- [x] Removed addCustomPanelItem/addCustomPackageBit from userPrefs store
+- [x] Removed calculateImportStats from featureMapper
+- [x] Removed REQUIRES_SC_MILL, REQUIRES_IMACH2D, STANDALONE_MODULE_SKUS, SC_MILL_25M_MASTER_ID from prerequisites
+- [x] Added aria-label to Upgrades button in PackageTable
 
 ---
 

@@ -247,9 +247,10 @@
 <style>
 	.empty-state {
 		text-align: center;
-		padding: 2rem 1rem;
-		color: rgba(255, 255, 255, 0.5);
-		font-size: 0.875rem;
+		padding: var(--space-4) var(--space-2);
+		color: rgba(255, 255, 255, 0.4);
+		font-size: var(--text-sm);
+		font-style: italic;
 	}
 
 	.upgrade-content {
@@ -367,22 +368,4 @@
 		color: #4ade80;
 	}
 
-	/* Scrollbar styling */
-	.upgrade-content::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.upgrade-content::-webkit-scrollbar-track {
-		background: rgba(255, 255, 255, 0.05);
-		border-radius: 3px;
-	}
-
-	.upgrade-content::-webkit-scrollbar-thumb {
-		background: rgba(255, 255, 255, 0.15);
-		border-radius: 3px;
-	}
-
-	.upgrade-content::-webkit-scrollbar-thumb:hover {
-		background: rgba(212, 175, 55, 0.4);
-	}
 </style>

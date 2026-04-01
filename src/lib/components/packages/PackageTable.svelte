@@ -41,6 +41,7 @@
 											class="upgrades-btn"
 											class:upgrades-btn-ms={skuMode === 'ms'}
 											onclick={onWhatLeft}
+											aria-label="See available upgrades and add-ons"
 										>
 											Upgrades
 										</button>

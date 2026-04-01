@@ -1075,10 +1075,11 @@
 	}
 
 	.no-results {
-		padding: 0.75rem;
+		padding: var(--space-4) var(--space-2);
 		text-align: center;
 		color: rgba(255, 255, 255, 0.4);
 		font-size: var(--text-sm);
+		font-style: italic;
 	}
 
 	.dropdown-footer {

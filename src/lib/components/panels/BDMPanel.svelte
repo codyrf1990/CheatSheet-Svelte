@@ -105,8 +105,8 @@
 	.item-list {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: var(--space-px);
-		padding: var(--space-px);
+		gap: var(--space-1);
+		padding: var(--space-1);
 		list-style: none;
 		margin: 0;
 	}

@@ -553,7 +553,7 @@
 		padding: 0.375rem 0.5rem;
 		background: rgba(0, 0, 0, 0.4);
 		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 6px;
+		border-radius: var(--radius-sm);
 		font-family: 'JetBrains Mono', monospace;
 		font-size: 1.125rem;
 		font-weight: 600;
@@ -586,7 +586,7 @@
 		padding: 0.5rem;
 		background: rgba(255, 255, 255, 0.08);
 		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 6px;
+		border-radius: var(--radius-sm);
 		font-family: inherit;
 		font-size: 0.85rem;
 		font-weight: 500;

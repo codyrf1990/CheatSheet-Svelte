@@ -737,22 +737,4 @@ HSM           Checked    5-axes indexial  Not Checked"
 		margin-bottom: var(--space-1);
 	}
 
-	/* Scrollbar styling */
-	.features-list::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.features-list::-webkit-scrollbar-track {
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 3px;
-	}
-
-	.features-list::-webkit-scrollbar-thumb {
-		background: rgba(212, 175, 55, 0.3);
-		border-radius: 3px;
-	}
-
-	.features-list::-webkit-scrollbar-thumb:hover {
-		background: rgba(212, 175, 55, 0.5);
-	}
 </style>

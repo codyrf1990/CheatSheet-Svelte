@@ -312,7 +312,8 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
-		height: 350px;
+		min-height: 250px;
+		max-height: 60vh;
 	}
 
 	.search-container {
@@ -349,23 +350,6 @@
 		padding-right: 0.25rem;
 	}
 
-	.companies-list::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.companies-list::-webkit-scrollbar-track {
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 3px;
-	}
-
-	.companies-list::-webkit-scrollbar-thumb {
-		background: rgba(212, 175, 55, 0.3);
-		border-radius: 3px;
-	}
-
-	.companies-list::-webkit-scrollbar-thumb:hover {
-		background: rgba(212, 175, 55, 0.5);
-	}
 
 	.company-row {
 		display: flex;
@@ -479,10 +463,11 @@
 	}
 
 	.no-results {
-		padding: 2rem 1rem;
+		padding: var(--space-4) var(--space-2);
 		text-align: center;
 		color: rgba(255, 255, 255, 0.4);
-		font-size: 0.8125rem;
+		font-size: var(--text-sm);
+		font-style: italic;
 	}
 
 	/* Footer */

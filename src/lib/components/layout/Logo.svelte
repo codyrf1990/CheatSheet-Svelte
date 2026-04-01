@@ -23,7 +23,7 @@
 		align-items: center;
 		justify-content: center;
 		padding: clamp(0.3rem, 0.8vw, 0.5rem);
-		border-radius: 14px;
+		border-radius: var(--radius-lg);
 		position: relative;
 	}
 

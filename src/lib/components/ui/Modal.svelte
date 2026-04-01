@@ -254,22 +254,4 @@
 		border-top: var(--tile-header-border);
 	}
 
-	/* Scrollbar styling */
-	.modal::-webkit-scrollbar {
-		width: 8px;
-	}
-
-	.modal::-webkit-scrollbar-track {
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 4px;
-	}
-
-	.modal::-webkit-scrollbar-thumb {
-		background: rgba(212, 175, 55, 0.3);
-		border-radius: 4px;
-	}
-
-	.modal::-webkit-scrollbar-thumb:hover {
-		background: rgba(212, 175, 55, 0.5);
-	}
 </style>

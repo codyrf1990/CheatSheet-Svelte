@@ -384,7 +384,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-0-5);
-		border-left: 1px solid rgba(255, 255, 255, 0.06);
+		border-left: 2px solid rgba(255, 255, 255, 0.12);
 	}
 
 	.sku-sub-row {

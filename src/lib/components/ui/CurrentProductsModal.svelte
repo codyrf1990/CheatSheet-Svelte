@@ -591,8 +591,8 @@
 	}
 
 	.table-row code {
-		background: rgba(200, 16, 46, 0.2);
-		color: #f87171;
+		background: rgba(212, 175, 55, 0.12);
+		color: var(--color-solidcam-gold, #d4af37);
 		padding: 0.125rem 0.375rem;
 		border-radius: 4px;
 		font-size: 0.6875rem;
@@ -625,8 +625,8 @@
 	}
 
 	.code-item code {
-		background: rgba(200, 16, 46, 0.2);
-		color: #f87171;
+		background: rgba(212, 175, 55, 0.12);
+		color: var(--color-solidcam-gold, #d4af37);
 		padding: 0.125rem 0.375rem;
 		border-radius: 4px;
 		font-size: 0.6875rem;
@@ -645,8 +645,8 @@
 	}
 
 	.note code {
-		background: rgba(200, 16, 46, 0.2);
-		color: #f87171;
+		background: rgba(212, 175, 55, 0.12);
+		color: var(--color-solidcam-gold, #d4af37);
 		padding: 0.125rem 0.25rem;
 		border-radius: 3px;
 		font-size: 0.6875rem;
@@ -684,8 +684,8 @@
 	}
 
 	.module-header code {
-		background: rgba(200, 16, 46, 0.2);
-		color: #f87171;
+		background: rgba(212, 175, 55, 0.12);
+		color: var(--color-solidcam-gold, #d4af37);
 		padding: 0.125rem 0.375rem;
 		border-radius: 4px;
 		font-size: 0.6875rem;
@@ -754,22 +754,4 @@
 		margin: 0.125rem 0;
 	}
 
-	/* Scrollbar styling */
-	.tab-content::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.tab-content::-webkit-scrollbar-track {
-		background: rgba(255, 255, 255, 0.05);
-		border-radius: 3px;
-	}
-
-	.tab-content::-webkit-scrollbar-thumb {
-		background: rgba(255, 255, 255, 0.15);
-		border-radius: 3px;
-	}
-
-	.tab-content::-webkit-scrollbar-thumb:hover {
-		background: rgba(212, 175, 55, 0.4);
-	}
 </style>

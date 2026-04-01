@@ -269,25 +269,3 @@ export function getUniqueSkus(mappedSkus: MappedSku[]): string[] {
 	return [...new Set(mappedSkus.map((s) => s.sku))];
 }
 
-/**
- * Calculate import statistics
- */
-export function calculateImportStats(result: MappingResult): {
-	totalFeatures: number;
-	mappedCount: number;
-	skuCount: number;
-	unmappedCount: number;
-	ignoredCount: number;
-} {
-	return {
-		totalFeatures:
-			result.mappedFeatures.length +
-			result.mappedSkus.length +
-			result.unmappedFeatures.length +
-			result.ignoredFeatures.length,
-		mappedCount: result.mappedFeatures.length,
-		skuCount: result.mappedSkus.length,
-		unmappedCount: result.unmappedFeatures.length,
-		ignoredCount: result.ignoredFeatures.length
-	};
-}
