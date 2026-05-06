@@ -65,6 +65,7 @@
 	});
 
 	let profileUsers = $derived(matchedLicense?.profileUsers ?? matchedLicense?.actualUsers ?? null);
+	let solidcamVersion = $derived(matchedLicense?.solidcamVersion ?? null);
 
 	let effectiveSkuTabMode = $derived(userPrefsStore.skuTabMode);
 
@@ -263,6 +264,7 @@
 				{packages}
 				{maintenanceRange}
 				{profileUsers}
+				{solidcamVersion}
 				skuMode={effectiveSkuTabMode}
 				onWhatLeft={() => (showWhatLeftModal = true)}
 			/>

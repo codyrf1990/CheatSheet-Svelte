@@ -39,23 +39,29 @@ export interface LicenseSelections {
  * - Network Product Key (long key + network): "NPK 7452" (last 4 of key)
  * - Standalone Product Key (long key, no network): "SPK 7452" (last 4 of key)
  * - Profile only (no dongle, has profile number): "P5801", etc.
+ *
+ * Suffix:
+ * - When "NO G-code" is checked, append " No-Gcode" (e.g. "67854 No-Gcode")
  */
 export function getPageNameForLicense(license: LicenseInfo): string {
+	const noGcode = license.features?.includes('NO G-code') ?? false;
+	const suffix = noGcode ? ' No-Gcode' : '';
+
 	// Profile: always use profile identifier, regardless of dongle/product key
 	// Profiles have a Profile-XXXX identifier that takes priority over everything
 	if (license.isProfile && license.profileNo) {
-		return `P${license.profileNo}`;
+		return `P${license.profileNo}${suffix}`;
 	}
 
 	// Product Key: long product key number
 	if (license.productKey && license.productKey.length > 4) {
 		if (license.isNetworkLicense) {
 			// Network Product Key — use full number (no profiles to distinguish, key IS the identifier)
-			return `NPK ${license.productKey}`;
+			return `NPK ${license.productKey}${suffix}`;
 		}
 		// Standalone Product Key — last 4 is enough (single user)
 		const last4 = license.productKey.slice(-4).toUpperCase();
-		return `SPK ${last4}`;
+		return `SPK ${last4}${suffix}`;
 	}
 
 	// Hardware or Network Dongle: 5-digit dongle number
@@ -63,19 +69,19 @@ export function getPageNameForLicense(license: LicenseInfo): string {
 		const dongle = license.dongleNo.trim();
 		if (license.isNetworkLicense) {
 			// Network Dongle
-			return `NWD ${dongle}`;
+			return `NWD ${dongle}${suffix}`;
 		}
 		// Hardware Dongle (standalone)
-		return dongle;
+		return `${dongle}${suffix}`;
 	}
 
 	// Profile without proper identifier (shouldn't happen with parser fix)
 	if (license.profileNo) {
-		return `P${license.profileNo}`;
+		return `P${license.profileNo}${suffix}`;
 	}
 
 	// Fallback
-	return 'P1';
+	return `P1${suffix}`;
 }
 
 /**

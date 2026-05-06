@@ -226,7 +226,7 @@ HSM           Checked    5-axes indexial  Not Checked"
 					</div>
 					<div class="summary-row">
 						<span class="summary-label">License Number:</span>
-						<span class="summary-value">{parsedLicense.dongleNo || '-'}</span>
+						<span class="summary-value">{parsedLicense.dongleNo || parsedLicense.productKey || '-'}</span>
 					</div>
 					<div class="summary-row">
 						<span class="summary-label">Type:</span>

@@ -7,6 +7,7 @@
 		packages: Package[];
 		maintenanceRange?: string;
 		profileUsers?: number | null;
+		solidcamVersion?: string | null;
 		skuMode?: 'bdm' | 'ms';
 		onWhatLeft?: () => void;
 	}
@@ -15,6 +16,7 @@
 		packages,
 		maintenanceRange = '',
 		profileUsers = null,
+		solidcamVersion = null,
 		skuMode = 'bdm',
 		onWhatLeft
 	}: Props = $props();
@@ -51,6 +53,13 @@
 									<Tooltip text="Maintenance dates">
 										<span class="maintenance-range">
 											{maintenanceRange}
+										</span>
+									</Tooltip>
+								{/if}
+								{#if solidcamVersion}
+									<Tooltip text="SolidCAM version">
+										<span class="version-badge">
+											v{solidcamVersion}
 										</span>
 									</Tooltip>
 								{/if}
@@ -213,6 +222,18 @@
 		text-transform: none;
 		letter-spacing: 0.02em;
 		color: rgba(255, 255, 255, 0.7);
+		white-space: nowrap;
+	}
+
+	.version-badge {
+		padding: 2px 7px;
+		border-radius: 4px;
+		background: rgba(59, 130, 246, 0.12);
+		border: 1px solid rgba(59, 130, 246, 0.3);
+		font-size: 0.6rem;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		color: rgba(96, 165, 250, 0.9);
 		white-space: nowrap;
 	}
 

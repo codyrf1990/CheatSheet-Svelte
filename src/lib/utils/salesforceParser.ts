@@ -171,8 +171,13 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 		}
 	}
 
-	// Second: fall back to Profile-XXXX pattern in full text (title line)
-	if (!profileNo) {
+	// Second: fall back to Profile-XXXX pattern in text, but ONLY if there's
+	// a "Profile Name" field — the definitive marker of an actual profile page.
+	// Without this guard, a top-level NPK page that lists profiles in a "Profiles"
+	// section would falsely match "Profile-7479" from the listing.
+	// Note: "Profile No." is NOT sufficient — it also appears in the Profiles listing
+	// on top-level NPK pages (e.g., "Profile No.	1").
+	if (!profileNo && profileName) {
 		const profileMatch = text.match(/Profile-(\d+)/);
 		if (profileMatch) {
 			profileName = profileName || profileMatch[0];
@@ -180,13 +185,15 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 		}
 	}
 
-	// Last resort: use Profile No. field (slot number) if nothing else matched
-	if (!profileNo && profileNoField) {
+	// Last resort: use Profile No. field (slot number) only if Profile Name exists
+	if (!profileNo && profileNoField && profileName) {
 		profileNo = profileNoField;
 	}
 
-	// Parse Profile Users count (only present when Information section is expanded)
-	const profileUsersRaw = extractField(text, 'Profile Users');
+	// Parse Profile Users count — only valid on actual profile pages (has Profile Name field).
+	// Top-level NPK pages list profiles at the bottom with "Profile Users" fields that
+	// would falsely match here, so we guard with profileName.
+	const profileUsersRaw = profileName ? extractField(text, 'Profile Users') : undefined;
 	const profileUsersParsed = profileUsersRaw ? parseInt(profileUsersRaw, 10) : undefined;
 	const profileUsers =
 		profileUsersParsed !== undefined && !isNaN(profileUsersParsed) && profileUsersParsed >= 0
