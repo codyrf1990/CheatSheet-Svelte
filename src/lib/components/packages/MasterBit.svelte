@@ -325,13 +325,9 @@
 			height: 7px;
 		}
 
-		/* Single column at the narrow viewport so each sub-bit gets the
-		   full master-card width — multi-word bits like "Profile/Pocket
-		   2.5D Rest Material" wrap once or not at all instead of three
-		   times in a 50px-wide cell. */
 		.sub-bits {
-			grid-template-columns: 1fr;
-			column-gap: 0;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			column-gap: 4px;
 			row-gap: 0;
 			padding: var(--space-px);
 		}

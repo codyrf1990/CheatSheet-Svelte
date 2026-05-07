@@ -179,52 +179,36 @@
 		background: rgba(212, 175, 55, 0.08);
 	}
 
-	/* Narrow viewport compaction — tighten without crushing legibility.
-	   Adds a faint top divider so wrapped multi-line bits don't visually
-	   merge with the row above. */
+	/* Narrow viewport compaction — keep the original 2-column layout and
+	   just shrink the text so it fits without wrapping a dozen times. */
 	@media (max-width: 768px) {
 		.sub-bit {
-			padding: 3px var(--space-0);
+			padding: var(--space-px) var(--space-0);
 			gap: var(--space-px);
 		}
 
-		.sub-bit:not(:first-child) {
-			border-top: 1px solid rgba(255, 255, 255, 0.04);
-		}
-
 		.bit-row {
-			gap: 4px;
+			gap: var(--space-0);
 		}
 
 		.bit-text {
 			font-size: var(--text-xs);
-			line-height: 1.3;
+			line-height: 1.25;
 		}
 	}
 
 	@media (max-width: 640px) {
 		.sub-bit {
-			padding: 3px var(--space-0);
+			padding: var(--space-px) var(--space-0);
 		}
 
 		.bit-row {
-			gap: 3px;
+			gap: var(--space-0);
 		}
 
 		.bit-text {
 			font-size: var(--text-2xs);
-			line-height: 1.3;
-		}
-	}
-
-	@media (max-width: 480px) {
-		.sub-bit {
-			padding: 4px 1px;
-		}
-
-		.bit-text {
-			font-size: var(--text-2xs);
-			line-height: 1.3;
+			line-height: 1.25;
 		}
 	}
 </style>

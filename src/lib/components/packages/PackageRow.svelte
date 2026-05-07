@@ -498,8 +498,7 @@
 		}
 	}
 
-	/* Narrow viewport - master groups stack full-width so sub-bit text
-	   has actual room to breathe instead of wrapping a half-dozen times. */
+	/* Narrow viewport - keep 2-column layout, readable text */
 	@media (max-width: 640px) {
 		.maint-cell {
 			padding: 0.15rem 0.1rem;
@@ -514,16 +513,16 @@
 		}
 
 		.bits-container {
-			gap: 4px;
+			gap: var(--space-0);
 		}
 
 		.groups-grid {
-			gap: 4px;
+			gap: var(--space-0);
 		}
 
 		.groups-grid > :global(.master-bit) {
-			flex: 1 1 100%;
-			min-width: 0;
+			flex: 1 1 120px;
+			min-width: 100px;
 		}
 
 		.loose-bits {

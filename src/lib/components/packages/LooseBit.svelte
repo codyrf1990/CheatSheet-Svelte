@@ -214,21 +214,17 @@
 	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.loose-bit {
-			padding: 3px var(--space-0-5);
+			padding: var(--space-0) var(--space-0-5);
 			gap: var(--space-0);
 		}
 
-		.loose-bit:not(:first-child) {
-			border-top: 1px solid rgba(255, 255, 255, 0.04);
-		}
-
 		.bit-row {
-			gap: 4px;
+			gap: var(--space-0-5);
 		}
 
 		.bit-text {
 			font-size: var(--text-xs);
-			line-height: 1.3;
+			line-height: 1.25;
 		}
 
 		.bit-remove-btn {
@@ -240,33 +236,22 @@
 
 	@media (max-width: 640px) {
 		.loose-bit {
-			padding: 3px var(--space-0);
+			padding: var(--space-px) var(--space-0);
 		}
 
 		.bit-row {
-			gap: 3px;
+			gap: var(--space-0-5);
 		}
 
 		.bit-text {
 			font-size: var(--text-2xs);
-			line-height: 1.3;
+			line-height: 1.25;
 		}
 
 		.bit-remove-btn {
 			width: 12px;
 			height: 12px;
 			font-size: var(--text-xs);
-		}
-	}
-
-	@media (max-width: 480px) {
-		.loose-bit {
-			padding: 4px 1px;
-		}
-
-		.bit-text {
-			font-size: var(--text-2xs);
-			line-height: 1.3;
 		}
 	}
 </style>
