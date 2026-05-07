@@ -9,12 +9,13 @@
  * 5. Store license metadata
  */
 
-import type { ImportResult, LicenseInfo } from '$lib/types';
+import type { ImportResult, LicenseInfo, SolidWorksLicenseInfo } from '$lib/types';
 import {
 	getLicenseSelections,
 	getPageNameForLicense,
 	PACKAGE_BIT_SKUS
 } from '$lib/utils/licenseSelections';
+import { solidworksMaintSku } from '$lib/utils/solidworksParser';
 import { companiesStore, DEFAULT_PAGE_NAME } from '$lib/stores/companies.svelte';
 import { packagesStore } from '$lib/stores/packages.svelte';
 import { panelsStore } from '$lib/stores/panels.svelte';
@@ -23,6 +24,10 @@ import { PACKAGE_TOGGLE_BITS } from '$lib/data/prerequisites';
 import { packages as packageDefs } from '$lib/data';
 
 const MAINTENANCE_PANEL_ID = 'maintenance-skus';
+const SOLIDWORKS_MAINTENANCE_PANEL_ID = 'solidworks-maintenance';
+
+// Re-export for callers that already import from this service module
+export { solidworksMaintSku };
 
 /** Check if a group has at least one selected bit */
 function isGroupSelectedInBits(packageCode: string, groupId: string, bits: string[]): boolean {
@@ -400,5 +405,111 @@ export function importLicense(
 		skusImported,
 		importedSkuList: importedSkuList.length > 0 ? importedSkuList : undefined,
 		errors: errors.length > 0 ? errors : undefined
+	};
+}
+
+// ============ SolidWorks Import ============
+
+export function needsAccountNameInput(license: SolidWorksLicenseInfo): boolean {
+	const account = license.account;
+	return !account || account === 'Unknown' || account.trim() === '';
+}
+
+/**
+ * Import a SolidWorks license. Finds (or creates) the company by Account name,
+ * upserts the license by serial number, drops the matching maint SKU on the
+ * SolidWorks Maintenance panel of the active page, and switches the company
+ * view to the SW tab.
+ */
+export function importSolidWorksLicense(
+	license: SolidWorksLicenseInfo,
+	overrideAccount?: string
+): ImportResult {
+	const accountName = (overrideAccount || license.account || '').trim();
+	const errors: string[] = [];
+
+	if (!accountName) {
+		return {
+			success: false,
+			companyName: '',
+			isNewCompany: false,
+			featuresImported: 0,
+			featuresSkipped: 0,
+			skusImported: 0,
+			isSolidWorks: true,
+			errors: ['Missing account name']
+		};
+	}
+
+	// 1. Find or create company by account name
+	let company = companiesStore.findByName(accountName);
+	const isNewCompany = !company;
+	if (!company) {
+		company = companiesStore.create(accountName);
+		if (!company) {
+			return {
+				success: false,
+				companyName: accountName,
+				isNewCompany: true,
+				featuresImported: 0,
+				featuresSkipped: 0,
+				skusImported: 0,
+				isSolidWorks: true,
+				errors: ['Failed to create company']
+			};
+		}
+	}
+
+	// 2. Switch to the company so subsequent panel writes hit the right page state
+	companiesStore.switchTo(company.id);
+
+	// 3. Load current page state into stores so panel writes persist correctly
+	const pageState = companiesStore.currentPageState;
+	packagesStore.loadFromPageState(pageState);
+	panelsStore.loadFromPageState(pageState);
+
+	// 4. Upsert SW license on the company
+	const upserted = companiesStore.setSolidWorksLicense(company.id, {
+		...license,
+		account: accountName
+	});
+	if (!upserted) {
+		errors.push('Failed to store SolidWorks license');
+	}
+
+	// 5. Add the matching maint SKU to the solidworks-maintenance panel
+	let skusImported = 0;
+	const importedSkuList: string[] = [];
+	const maintSku = solidworksMaintSku(license);
+	if (maintSku && !panelsStore.hasItem(SOLIDWORKS_MAINTENANCE_PANEL_ID, maintSku)) {
+		panelsStore.addItem(SOLIDWORKS_MAINTENANCE_PANEL_ID, maintSku);
+		skusImported = 1;
+		importedSkuList.push(maintSku);
+	}
+
+	// 6. Persist page state with the new SKU
+	const currentPage = companiesStore.currentPage;
+	if (currentPage) {
+		const newState = {
+			packages: packagesStore.getPageState(),
+			panels: panelsStore.getPageState()
+		};
+		companiesStore.savePageState(currentPage.id, newState);
+	}
+
+	// 7. Land the user on the SW view
+	companiesStore.setCurrentView('sw');
+
+	return {
+		success: errors.length === 0,
+		companyId: company.id,
+		companyName: company.name,
+		isNewCompany,
+		featuresImported: 0,
+		featuresSkipped: 0,
+		skusImported,
+		importedSkuList: importedSkuList.length > 0 ? importedSkuList : undefined,
+		errors: errors.length > 0 ? errors : undefined,
+		isSolidWorks: true
 	};
 }

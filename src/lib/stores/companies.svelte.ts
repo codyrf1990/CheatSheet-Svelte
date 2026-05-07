@@ -4,7 +4,14 @@
  * Ported from original page-system.js (~683 lines)
  */
 
-import type { Company, Page, PageState, PackageState, LicenseInfo } from '$types';
+import type {
+	Company,
+	Page,
+	PageState,
+	PackageState,
+	LicenseInfo,
+	SolidWorksLicenseInfo
+} from '$types';
 import { PACKAGE_STATE_VERSION } from '$types';
 import { deepCopy } from '$lib/utils/deepCopy';
 import { toastStore } from './toast.svelte';
@@ -456,6 +463,108 @@ function setLicenseData(companyId: string, licenseData: LicenseInfo): boolean {
 	return true;
 }
 
+// ============ SolidWorks License Operations ============
+
+/**
+ * Upsert a SolidWorks license on a company by serialNumber.
+ * Same serial → replace in place; new serial → append.
+ */
+function setSolidWorksLicense(companyId: string, license: SolidWorksLicenseInfo): boolean {
+	const company = companies.find((c) => c.id === companyId);
+	if (!company) return false;
+
+	const existing = company.solidworksLicenses ?? [];
+	const idx = existing.findIndex((l) => l.serialNumber === license.serialNumber);
+	if (idx >= 0) {
+		const next = [...existing];
+		next[idx] = license;
+		company.solidworksLicenses = next;
+	} else {
+		company.solidworksLicenses = [...existing, license];
+	}
+	company.updatedAt = Date.now();
+	companies = [...companies];
+	save();
+	return true;
+}
+
+/**
+ * Remove a single SolidWorks license by serialNumber.
+ * Returns true if a license was removed.
+ */
+function removeSolidWorksLicense(companyId: string, serialNumber: string): boolean {
+	const company = companies.find((c) => c.id === companyId);
+	if (!company || !company.solidworksLicenses) return false;
+	const before = company.solidworksLicenses.length;
+	company.solidworksLicenses = company.solidworksLicenses.filter(
+		(l) => l.serialNumber !== serialNumber
+	);
+	if (company.solidworksLicenses.length === before) return false;
+	if (company.solidworksLicenses.length === 0 && company.currentView === 'sw') {
+		company.currentView = 'page';
+	}
+	company.updatedAt = Date.now();
+	companies = [...companies];
+	save();
+	return true;
+}
+
+/**
+ * Drop every SolidWorks license on a company. Used by the right-click "Remove all" action.
+ */
+function clearSolidWorksLicenses(companyId: string): boolean {
+	const company = companies.find((c) => c.id === companyId);
+	if (!company) return false;
+	company.solidworksLicenses = [];
+	if (company.currentView === 'sw') {
+		company.currentView = 'page';
+	}
+	company.updatedAt = Date.now();
+	companies = [...companies];
+	save();
+	return true;
+}
+
+/**
+ * Set a custom label for the SW tab. Empty/whitespace clears the override.
+ */
+function setSolidWorksTabLabel(companyId: string, label: string): boolean {
+	const company = companies.find((c) => c.id === companyId);
+	if (!company) return false;
+	const trimmed = label.trim();
+	if (trimmed.length === 0) {
+		delete company.swTabLabelOverride;
+	} else {
+		company.swTabLabelOverride = trimmed;
+	}
+	company.updatedAt = Date.now();
+	companies = [...companies];
+	save();
+	return true;
+}
+
+/**
+ * Drop the custom SW tab label override (revert to auto-computed).
+ */
+function clearSolidWorksTabLabel(companyId: string): boolean {
+	return setSolidWorksTabLabel(companyId, '');
+}
+
+/**
+ * Switch the active workspace view for the current company between the
+ * SolidCAM page workspace and the pinned SolidWorks tab.
+ */
+function setCurrentView(view: 'page' | 'sw'): boolean {
+	const company = getCurrentCompany();
+	if (!company) return false;
+	if (company.currentView === view) return true;
+	company.currentView = view;
+	company.updatedAt = Date.now();
+	companies = [...companies];
+	save();
+	return true;
+}
+
 // ============ Page Operations ============
 
 function createPage(name?: string, switchImmediately = false): Page | null {
@@ -832,6 +941,14 @@ export const companiesStore = {
 	search,
 	findByName,
 	setLicenseData,
+
+	// SolidWorks license operations
+	setSolidWorksLicense,
+	removeSolidWorksLicense,
+	clearSolidWorksLicenses,
+	setSolidWorksTabLabel,
+	clearSolidWorksTabLabel,
+	setCurrentView,
 
 	// Page operations
 	createPage,

@@ -4,7 +4,7 @@
  */
 
 import { browser } from '$app/environment';
-import type { SyncStatus, UserPrefsData, LicenseInfo } from '$types';
+import type { SyncStatus, UserPrefsData, LicenseInfo, SolidWorksLicenseInfo } from '$types';
 import {
 	loadUserData,
 	queueSave,
@@ -137,6 +137,24 @@ function unionLicenses(a: LicenseInfo[] | undefined, b: LicenseInfo[] | undefine
 }
 
 /**
+ * Merge SolidWorks licenses from two sides, keyed by serialNumber.
+ * On conflict, the newer importedAt wins so re-imports propagate cleanly.
+ */
+function unionSolidWorksLicenses(
+	a: SolidWorksLicenseInfo[] | undefined,
+	b: SolidWorksLicenseInfo[] | undefined
+): SolidWorksLicenseInfo[] {
+	const map = new Map<string, SolidWorksLicenseInfo>();
+	for (const lic of [...(a || []), ...(b || [])]) {
+		const existing = map.get(lic.serialNumber);
+		if (!existing || (lic.importedAt ?? 0) > (existing.importedAt ?? 0)) {
+			map.set(lic.serialNumber, lic);
+		}
+	}
+	return [...map.values()];
+}
+
+/**
  * Merge local and cloud company data per-company instead of full overwrite.
  * - Per-company: newer updatedAt wins for pages/state
  * - Licenses: always unioned (never dropped)
@@ -161,6 +179,18 @@ function mergeCompanyData(local: LocalData, cloud: LocalData): LocalData {
 			// Newer updatedAt wins for pages/state, licenses always unioned
 			const winner = (lc.updatedAt ?? 0) >= (cc.updatedAt ?? 0) ? { ...lc } : { ...cc };
 			winner.licenses = unionLicenses(lc.licenses, cc.licenses);
+			winner.solidworksLicenses = unionSolidWorksLicenses(
+				lc.solidworksLicenses,
+				cc.solidworksLicenses
+			);
+			// Preserve whichever side has the more recent SW tab label override
+			const labelWinnerSide =
+				(lc.updatedAt ?? 0) >= (cc.updatedAt ?? 0) ? lc : cc;
+			if (labelWinnerSide.swTabLabelOverride) {
+				winner.swTabLabelOverride = labelWinnerSide.swTabLabelOverride;
+			} else {
+				delete winner.swTabLabelOverride;
+			}
 			merged.push(winner);
 		}
 	}

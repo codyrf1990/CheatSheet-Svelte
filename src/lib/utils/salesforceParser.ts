@@ -32,7 +32,7 @@ const ALL_KNOWN_FEATURES: string[] = [
 /**
  * Escape special regex characters in a string
  */
-function escapeRegex(str: string): string {
+export function escapeRegex(str: string): string {
 	return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
@@ -40,7 +40,7 @@ function escapeRegex(str: string): string {
  * Normalize whitespace in text - converts non-breaking spaces and other Unicode
  * whitespace to regular spaces for consistent matching
  */
-function normalizeWhitespace(text: string): string {
+export function normalizeWhitespace(text: string): string {
 	return text.replace(/[\u00a0\u2000-\u200b\u202f\u205f\u3000]/g, ' ');
 }
 
@@ -48,7 +48,7 @@ function normalizeWhitespace(text: string): string {
  * Extract a header field value from Salesforce text
  * Matches "Field Name\tvalue" patterns (tab-separated)
  */
-function extractField(text: string, fieldName: string): string {
+export function extractField(text: string, fieldName: string): string {
 	// Normalize whitespace for consistent matching
 	const normalizedText = normalizeWhitespace(text);
 	// Make field name flexible - allow any whitespace between words
@@ -75,7 +75,7 @@ function extractField(text: string, fieldName: string): string {
  * Check if a checkbox field is checked
  * Returns true if "Field Name    Checked" (not "Not Checked")
  */
-function extractChecked(text: string, fieldName: string): boolean {
+export function extractChecked(text: string, fieldName: string): boolean {
 	const normalizedText = normalizeWhitespace(text);
 	// Make field name flexible - allow any whitespace between words
 	const fieldParts = fieldName.trim().split(/\s+/);

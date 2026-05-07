@@ -1,0 +1,437 @@
+<script lang="ts">
+	import type { SolidWorksLicenseInfo } from '$types';
+	import { companiesStore } from '$stores/companies.svelte';
+	import { toastStore } from '$stores/toast.svelte';
+	import { Tooltip } from '$components/ui';
+	import { copyToClipboard } from '$lib/utils/clipboard';
+	import { solidworksMaintSku } from '$lib/services/licenseImport';
+
+	interface Props {
+		companyId: string;
+		licenses: SolidWorksLicenseInfo[];
+	}
+
+	let { companyId, licenses }: Props = $props();
+
+	function productClass(product: SolidWorksLicenseInfo['product']): string {
+		switch (product) {
+			case 'Pro':
+				return 'badge-pro';
+			case 'Standard':
+				return 'badge-std';
+			case 'Parts & Assemblies':
+				return 'badge-pa';
+			case 'Parts':
+				return 'badge-p';
+			default:
+				return 'badge-other';
+		}
+	}
+
+	function expirationStatus(end: string): { label: string; tone: 'expired' | 'soon' | 'ok' } | null {
+		if (!end) return null;
+		const parsed = new Date(end);
+		if (Number.isNaN(parsed.getTime())) return null;
+		const now = Date.now();
+		const diff = parsed.getTime() - now;
+		const day = 86_400_000;
+		if (diff < 0) return { label: 'Expired', tone: 'expired' };
+		if (diff < 90 * day) return { label: 'Expiring soon', tone: 'soon' };
+		return { label: 'Active', tone: 'ok' };
+	}
+
+	function fmtImported(ts: number): string {
+		try {
+			return new Date(ts).toLocaleString();
+		} catch {
+			return '';
+		}
+	}
+
+	async function handleCopySerial(serial: string) {
+		await copyToClipboard(serial, 'Serial copied');
+	}
+
+	function handleRemove(serial: string) {
+		const ok = confirm(`Remove SolidWorks license ${serial.slice(-8)}? This cannot be undone.`);
+		if (!ok) return;
+		const removed = companiesStore.removeSolidWorksLicense(companyId, serial);
+		if (removed) {
+			toastStore.success('SolidWorks license removed');
+		} else {
+			toastStore.error('Could not remove license');
+		}
+	}
+</script>
+
+<div class="sw-view">
+	<div class="sw-view-header">
+		<h2 class="sw-view-title">SolidWorks Licenses</h2>
+		<p class="sw-view-subtitle">
+			{licenses.length} license{licenses.length === 1 ? '' : 's'} on this company
+		</p>
+	</div>
+
+	{#if licenses.length === 0}
+		<div class="sw-empty">No SolidWorks licenses imported yet.</div>
+	{:else}
+		<div class="sw-card-list">
+			{#each licenses as license (license.serialNumber)}
+				{@const status = expirationStatus(license.subscriptionEnd)}
+				{@const maintSku = solidworksMaintSku(license)}
+				<div class="sw-card">
+					<div class="sw-card-head">
+						<span class="sw-product-badge {productClass(license.product)}">
+							{license.product}
+						</span>
+						<span class="sw-product-raw">{license.productRaw}</span>
+						<div class="sw-card-actions">
+							<Tooltip text="Remove this license" position="top">
+								<button
+									type="button"
+									class="sw-remove-btn"
+									aria-label="Remove SolidWorks license {license.serialNumber}"
+									onclick={() => handleRemove(license.serialNumber)}
+								>
+									×
+								</button>
+							</Tooltip>
+						</div>
+					</div>
+
+					<div class="sw-card-grid">
+						<div class="sw-row">
+							<span class="sw-label">Serial</span>
+							<button
+								type="button"
+								class="sw-value mono copyable"
+								onclick={() => handleCopySerial(license.serialNumber)}
+								aria-label="Copy serial number"
+							>
+								{license.serialNumber}
+							</button>
+						</div>
+						<div class="sw-row">
+							<span class="sw-label">Account</span>
+							<span class="sw-value">{license.account}</span>
+						</div>
+						{#if license.customerId}
+							<div class="sw-row">
+								<span class="sw-label">Customer ID</span>
+								<span class="sw-value mono">{license.customerId}</span>
+							</div>
+						{/if}
+						<div class="sw-row">
+							<span class="sw-label">Subscription</span>
+							<span class="sw-value">
+								{license.subscriptionStart || '?'} → {license.subscriptionEnd || '?'}
+								{#if status}
+									<span class="status-chip status-{status.tone}">{status.label}</span>
+								{/if}
+							</span>
+						</div>
+						<div class="sw-row">
+							<span class="sw-label">Users</span>
+							<span class="sw-value">{license.users}</span>
+						</div>
+						<div class="sw-row">
+							<span class="sw-label">Flags</span>
+							<span class="sw-value sw-flags">
+								{#if license.isNetworkLicense}
+									<span class="flag-chip flag-network">Network</span>
+								{/if}
+								{#if license.isTermLicense}
+									<span class="flag-chip flag-term">Term</span>
+								{/if}
+								{#if license.terminationOfSupport}
+									<span class="flag-chip flag-warn">Termination of Support</span>
+								{/if}
+								{#if !license.isNetworkLicense && !license.isTermLicense && !license.terminationOfSupport}
+									<span class="sw-empty-flags">—</span>
+								{/if}
+							</span>
+						</div>
+						{#if license.poNumber}
+							<div class="sw-row">
+								<span class="sw-label">PO Number</span>
+								<span class="sw-value mono dim">{license.poNumber}</span>
+							</div>
+						{/if}
+						{#if license.originalOrderType}
+							<div class="sw-row">
+								<span class="sw-label">Order Type</span>
+								<span class="sw-value dim">{license.originalOrderType}</span>
+							</div>
+						{/if}
+						{#if maintSku}
+							<div class="sw-row">
+								<span class="sw-label">Maint SKU</span>
+								<span class="sw-value mono">{maintSku}</span>
+							</div>
+						{/if}
+					</div>
+
+					<div class="sw-card-foot">
+						Imported {fmtImported(license.importedAt)}
+					</div>
+				</div>
+			{/each}
+		</div>
+	{/if}
+</div>
+
+<style>
+	.sw-view {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		padding: var(--space-4);
+		background: rgba(0, 0, 0, 0.18);
+		border: 1px solid rgba(255, 255, 255, 0.05);
+		border-radius: 12px;
+	}
+
+	.sw-view-header {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-3);
+	}
+
+	.sw-view-title {
+		margin: 0;
+		font-size: 1rem;
+		font-weight: 600;
+		color: rgba(252, 165, 165, 0.95);
+		letter-spacing: 0.02em;
+	}
+
+	.sw-view-subtitle {
+		margin: 0;
+		font-size: var(--text-xs);
+		color: rgba(255, 255, 255, 0.5);
+	}
+
+	.sw-empty {
+		padding: var(--space-6);
+		text-align: center;
+		color: rgba(255, 255, 255, 0.4);
+		font-size: var(--text-sm);
+	}
+
+	.sw-card-list {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	.sw-card {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+		padding: var(--space-3) var(--space-4);
+		background: rgba(0, 0, 0, 0.35);
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		border-left: 3px solid rgba(220, 38, 38, 0.55);
+		border-radius: 8px;
+	}
+
+	.sw-card-head {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+	}
+
+	.sw-product-badge {
+		padding: 2px 10px;
+		border-radius: 999px;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.badge-pro {
+		background: rgba(212, 175, 55, 0.18);
+		color: rgba(252, 211, 77, 0.95);
+		border: 1px solid rgba(212, 175, 55, 0.4);
+	}
+
+	.badge-std {
+		background: rgba(96, 165, 250, 0.18);
+		color: rgba(147, 197, 253, 0.95);
+		border: 1px solid rgba(96, 165, 250, 0.4);
+	}
+
+	.badge-pa {
+		background: rgba(34, 197, 94, 0.18);
+		color: rgba(134, 239, 172, 0.95);
+		border: 1px solid rgba(34, 197, 94, 0.4);
+	}
+
+	.badge-p {
+		background: rgba(168, 85, 247, 0.18);
+		color: rgba(216, 180, 254, 0.95);
+		border: 1px solid rgba(168, 85, 247, 0.4);
+	}
+
+	.badge-other {
+		background: rgba(255, 255, 255, 0.06);
+		color: rgba(255, 255, 255, 0.7);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+	}
+
+	.sw-product-raw {
+		flex: 1;
+		font-size: var(--text-sm);
+		color: rgba(255, 255, 255, 0.7);
+	}
+
+	.sw-card-actions {
+		display: flex;
+		gap: var(--space-1);
+	}
+
+	.sw-remove-btn {
+		width: 28px;
+		height: 28px;
+		padding: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: transparent;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 6px;
+		color: rgba(255, 255, 255, 0.5);
+		font-size: 1rem;
+		line-height: 1;
+		cursor: pointer;
+		transition: all 150ms ease;
+	}
+
+	.sw-remove-btn:hover,
+	.sw-remove-btn:focus-visible {
+		background: rgba(220, 38, 38, 0.15);
+		border-color: rgba(220, 38, 38, 0.5);
+		color: rgba(252, 165, 165, 1);
+		outline: none;
+	}
+
+	.sw-card-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+		gap: var(--space-2) var(--space-4);
+	}
+
+	.sw-row {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	.sw-label {
+		font-size: 0.7rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: rgba(255, 255, 255, 0.4);
+	}
+
+	.sw-value {
+		font-size: var(--text-sm);
+		color: rgba(255, 255, 255, 0.9);
+	}
+
+	.sw-value.mono {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+		font-size: 0.8rem;
+		word-break: break-all;
+	}
+
+	.sw-value.dim {
+		color: rgba(255, 255, 255, 0.55);
+	}
+
+	.sw-value.copyable {
+		background: none;
+		border: none;
+		padding: 0;
+		margin: 0;
+		text-align: left;
+		cursor: pointer;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+	}
+
+	.sw-value.copyable:hover {
+		color: rgba(252, 165, 165, 0.95);
+		text-decoration: underline;
+	}
+
+	.sw-flags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1);
+	}
+
+	.flag-chip {
+		padding: 1px 8px;
+		border-radius: 4px;
+		font-size: 0.7rem;
+		font-weight: 500;
+		white-space: nowrap;
+	}
+
+	.flag-network {
+		background: rgba(96, 165, 250, 0.15);
+		color: rgba(147, 197, 253, 0.95);
+		border: 1px solid rgba(96, 165, 250, 0.3);
+	}
+
+	.flag-term {
+		background: rgba(168, 85, 247, 0.15);
+		color: rgba(216, 180, 254, 0.95);
+		border: 1px solid rgba(168, 85, 247, 0.3);
+	}
+
+	.flag-warn {
+		background: rgba(245, 158, 11, 0.15);
+		color: #fbbf24;
+		border: 1px solid rgba(245, 158, 11, 0.4);
+	}
+
+	.sw-empty-flags {
+		color: rgba(255, 255, 255, 0.3);
+	}
+
+	.status-chip {
+		display: inline-block;
+		margin-left: 6px;
+		padding: 1px 8px;
+		border-radius: 4px;
+		font-size: 0.7rem;
+		font-weight: 600;
+	}
+
+	.status-ok {
+		background: rgba(34, 197, 94, 0.15);
+		color: #4ade80;
+		border: 1px solid rgba(34, 197, 94, 0.3);
+	}
+
+	.status-soon {
+		background: rgba(245, 158, 11, 0.15);
+		color: #fbbf24;
+		border: 1px solid rgba(245, 158, 11, 0.3);
+	}
+
+	.status-expired {
+		background: rgba(239, 68, 68, 0.15);
+		color: #fca5a5;
+		border: 1px solid rgba(239, 68, 68, 0.4);
+	}
+
+	.sw-card-foot {
+		font-size: 0.7rem;
+		color: rgba(255, 255, 255, 0.35);
+	}
+</style>

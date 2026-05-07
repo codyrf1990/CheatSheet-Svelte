@@ -2,6 +2,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseSalesforceText } from '../src/lib/utils/salesforceParser';
 import {
+	isSolidWorksText,
+	parseSolidWorksText,
+	solidworksMaintSku
+} from '../src/lib/utils/solidworksParser';
+import {
 	getLicenseSelections,
 	getPageNameForLicense,
 	PACKAGE_BIT_SKUS
@@ -40,6 +45,29 @@ async function run(): Promise<void> {
 	if (!text.trim()) {
 		usage();
 		process.exit(1);
+	}
+
+	if (isSolidWorksText(text)) {
+		const swResult = parseSolidWorksText(text);
+		if (!swResult.license) {
+			console.error(swResult.parseError || 'SolidWorks parse failed');
+			process.exit(1);
+		}
+		const lic = swResult.license;
+		console.log('-- SolidWorks license --');
+		console.log(`Account: ${lic.account}`);
+		console.log(`Product: ${lic.product}  (raw: ${lic.productRaw})`);
+		console.log(`Serial: ${lic.serialNumber}`);
+		console.log(`Customer ID: ${lic.customerId || '(none)'}`);
+		console.log(`Subscription: ${lic.subscriptionStart || '?'} -> ${lic.subscriptionEnd || '?'}`);
+		console.log(`Termination Date: ${lic.subscriptionTermination || '(none)'}`);
+		console.log(`Users: ${lic.users}`);
+		console.log(`Network: ${lic.isNetworkLicense ? 'yes' : 'no'}`);
+		console.log(`Term: ${lic.isTermLicense ? 'yes' : 'no'}`);
+		console.log(`Termination of Support: ${lic.terminationOfSupport ? 'yes' : 'no'}`);
+		console.log(`PO Number: ${lic.poNumber || '(none)'}`);
+		console.log(`Maint SKU: ${solidworksMaintSku(lic) ?? '(none — Other product)'}`);
+		return;
 	}
 
 	const result = parseSalesforceText(text);

@@ -15,6 +15,12 @@ export interface Company {
 	lastAccessed: number;
 	/** Imported license data from PDFs (append-only, never overwrite) */
 	licenses?: LicenseInfo[];
+	/** Imported SolidWorks licenses, upserted by serialNumber */
+	solidworksLicenses?: SolidWorksLicenseInfo[];
+	/** Which workspace view is active for this company */
+	currentView?: 'page' | 'sw';
+	/** User-set label for the SW tab; empty/undefined = auto-compute from products */
+	swTabLabelOverride?: string;
 }
 
 export interface Page {
@@ -186,4 +192,33 @@ export interface ImportResult {
 	skusImported: number; // Maintenance SKUs added to panel
 	importedSkuList?: string[]; // List of SKU codes that were added
 	errors?: string[];
+	/** True for SolidWorks imports, lets the modal/results screen branch UI */
+	isSolidWorks?: boolean;
+}
+
+// SolidWorks Licenses
+export type SolidWorksProduct = 'Standard' | 'Parts & Assemblies' | 'Parts' | 'Pro' | 'Other';
+
+export interface SolidWorksLicenseInfo {
+	/** Primary key for upsert — same serial replaces in place */
+	serialNumber: string;
+	/** Account name from SF "Account" field — used as company name */
+	account: string;
+	/** SolidWorks Customer ID (numeric) */
+	customerId: string;
+	/** Normalized product category */
+	product: SolidWorksProduct;
+	/** Raw "Product" field text, e.g. "SOLIDWORKS OEM Standard" */
+	productRaw: string;
+	subscriptionStart: string;
+	subscriptionEnd: string;
+	subscriptionTermination: string;
+	terminationOfSupport: boolean;
+	originalOrderType: string;
+	isNetworkLicense: boolean;
+	users: number;
+	isTermLicense: boolean;
+	poNumber: string;
+	importedAt: number;
+	sourceFileName: string;
 }

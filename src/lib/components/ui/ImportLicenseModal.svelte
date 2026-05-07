@@ -1,11 +1,15 @@
 <script lang="ts">
-	import type { LicenseInfo, ImportResult } from '$lib/types';
+	import type { LicenseInfo, ImportResult, SolidWorksLicenseInfo } from '$lib/types';
 	import { parseSalesforceText } from '$lib/utils/salesforceParser';
+	import { isSolidWorksText, parseSolidWorksText } from '$lib/utils/solidworksParser';
 	import { getPageNameForLicense } from '$lib/utils/licenseSelections';
 	import {
 		importLicense,
+		importSolidWorksLicense,
 		needsCompanyNameInput,
+		needsAccountNameInput,
 		getImportPreview,
+		solidworksMaintSku,
 		enrichProfileFromParent,
 		type InheritableField,
 		type ParentLicenseMatch
@@ -35,6 +39,9 @@
 	let showSkus = $state(false);
 	let parentMatch = $state<ParentLicenseMatch | null>(null);
 	let inheritedFields = $state<Set<InheritableField>>(new Set());
+	// SolidWorks: when set, the modal is in SW mode and the SolidCAM preview is hidden.
+	let parsedSWLicense = $state<SolidWorksLicenseInfo | null>(null);
+	let swAccountOverride = $state('');
 
 	// Derived
 	let canParse = $derived(pastedText.trim().length > 0);
@@ -47,7 +54,13 @@
 		if (start && end) return `${start} - ${end}`;
 		return start || end;
 	});
+	let needsSWAccount = $derived(parsedSWLicense ? needsAccountNameInput(parsedSWLicense) : false);
+	let swMaintSkuPreview = $derived(parsedSWLicense ? solidworksMaintSku(parsedSWLicense) : null);
 	let canImport = $derived.by(() => {
+		if (parsedSWLicense) {
+			if (needsSWAccount && !swAccountOverride.trim()) return false;
+			return true;
+		}
 		if (!parsedLicense) return false;
 		if (needsCompanyName && !companyNameOverride.trim()) return false;
 		return true;
@@ -74,6 +87,8 @@
 			showSkus = false;
 			parentMatch = null;
 			inheritedFields = new Set();
+			parsedSWLicense = null;
+			swAccountOverride = '';
 		} else {
 			// Also reset on close so stale state (e.g. stuck spinner) doesn't linger
 			modalState = 'paste';
@@ -82,6 +97,8 @@
 			importResult = null;
 			parentMatch = null;
 			inheritedFields = new Set();
+			parsedSWLicense = null;
+			swAccountOverride = '';
 		}
 	});
 
@@ -94,6 +111,23 @@
 
 		// Small delay to show parsing state
 		setTimeout(() => {
+			// SolidWorks branch — sniff first so SolidCAM parser doesn't false-fail
+			if (isSolidWorksText(pastedText)) {
+				const swResult = parseSolidWorksText(pastedText);
+				if (swResult.parseError || !swResult.license) {
+					parseError = swResult.parseError || 'Failed to parse SolidWorks license';
+					modalState = 'paste';
+					return;
+				}
+				parsedSWLicense = swResult.license;
+				swAccountOverride =
+					swResult.license.account && swResult.license.account !== 'Unknown'
+						? swResult.license.account
+						: '';
+				modalState = 'preview';
+				return;
+			}
+
 			const result = parseSalesforceText(pastedText);
 
 			if (result.parseError || !result.license) {
@@ -132,21 +166,33 @@
 
 	// Import handler
 	function handleImport() {
-		if (!parsedLicense || !canImport) return;
+		if (!canImport) return;
+		if (!parsedLicense && !parsedSWLicense) return;
 
 		modalState = 'importing';
 
 		// Small delay to show importing state
 		setTimeout(() => {
 			try {
-				// When customer was inherited from a parent NPK, always trust the
-				// parent — never let a typo split the profile into a new company.
-				const companyName = needsCompanyName ? companyNameOverride : parsedLicense!.customer;
-				const licenseToImport: LicenseInfo = {
-					...parsedLicense!,
-					maintenanceEnd: maintenanceEndOverride.trim()
-				};
-				importResult = importLicense(licenseToImport, companyName, parentMatch?.companyId);
+				if (parsedSWLicense) {
+					const accountName = needsSWAccount ? swAccountOverride : parsedSWLicense.account;
+					importResult = importSolidWorksLicense(parsedSWLicense, accountName);
+				} else {
+					// When customer was inherited from a parent NPK, always trust the
+					// parent — never let a typo split the profile into a new company.
+					const companyName = needsCompanyName
+						? companyNameOverride
+						: parsedLicense!.customer;
+					const licenseToImport: LicenseInfo = {
+						...parsedLicense!,
+						maintenanceEnd: maintenanceEndOverride.trim()
+					};
+					importResult = importLicense(
+						licenseToImport,
+						companyName,
+						parentMatch?.companyId
+					);
+				}
 
 				modalState = 'results';
 
@@ -165,8 +211,10 @@
 	// Navigation handlers
 	function handleBack() {
 		parsedLicense = null;
+		parsedSWLicense = null;
 		parseError = null;
 		companyNameOverride = '';
+		swAccountOverride = '';
 		maintenanceEndOverride = '';
 		parentMatch = null;
 		inheritedFields = new Set();
@@ -216,6 +264,9 @@
 				<p class="instructions-tip">
 					<strong>Tip for licenses with profiles:</strong> import the top-level <strong>Network Product Key</strong> first, then each profile. Profiles will auto-link to the parent NPK and inherit the customer name, maintenance dates, and version — no manual entry needed.
 				</p>
+				<p class="instructions-tip-alt">
+					<strong>SolidWorks licenses</strong> are detected automatically. Paste a SOLIDWORKS license page the same way — the system creates a pinned <strong>SW</strong> tab on the matching company.
+				</p>
 			</div>
 			<textarea
 				class="paste-textarea"
@@ -243,7 +294,84 @@ HSM           Checked    5-axes indexial  Not Checked"
 	{:else if modalState === 'preview'}
 		<!-- Preview of parsed data -->
 		<div class="preview-section">
-			{#if parsedLicense}
+			{#if parsedSWLicense}
+				<div class="parent-banner sw-banner">
+					<span class="parent-banner-label">SolidWorks license</span>
+					<span class="parent-banner-value">{parsedSWLicense.productRaw}</span>
+				</div>
+				<div class="summary-card">
+					<div class="summary-row">
+						<span class="summary-label">Account:</span>
+						{#if needsSWAccount}
+							<input
+								type="text"
+								class="company-input"
+								class:required-empty={!swAccountOverride.trim()}
+								bind:value={swAccountOverride}
+								placeholder="Enter account name"
+							/>
+						{:else}
+							<span class="summary-value">{parsedSWLicense.account}</span>
+						{/if}
+					</div>
+					<div class="summary-row">
+						<span class="summary-label">Product:</span>
+						<span class="summary-value">
+							{parsedSWLicense.product}
+							{#if parsedSWLicense.isNetworkLicense}
+								<span class="net-badge">Network</span>
+							{/if}
+							{#if parsedSWLicense.isTermLicense}
+								<span class="net-badge">Term</span>
+							{/if}
+						</span>
+					</div>
+					<div class="summary-row">
+						<span class="summary-label">Serial Number:</span>
+						<span class="summary-value mono">{parsedSWLicense.serialNumber}</span>
+					</div>
+					{#if parsedSWLicense.customerId}
+						<div class="summary-row">
+							<span class="summary-label">Customer ID:</span>
+							<span class="summary-value mono">{parsedSWLicense.customerId}</span>
+						</div>
+					{/if}
+					<div class="summary-row">
+						<span class="summary-label">Subscription:</span>
+						<span class="summary-value">
+							{parsedSWLicense.subscriptionStart || '?'} → {parsedSWLicense.subscriptionEnd || '?'}
+						</span>
+					</div>
+					<div class="summary-row">
+						<span class="summary-label">Users:</span>
+						<span class="summary-value">{parsedSWLicense.users}</span>
+					</div>
+					{#if parsedSWLicense.poNumber}
+						<div class="summary-row">
+							<span class="summary-label">PO Number:</span>
+							<span class="summary-value mono">{parsedSWLicense.poNumber}</span>
+						</div>
+					{/if}
+					{#if parsedSWLicense.terminationOfSupport}
+						<div class="summary-row">
+							<span class="summary-label">Status:</span>
+							<span class="summary-value warning">Termination of Support</span>
+						</div>
+					{/if}
+				</div>
+
+				{#if swMaintSkuPreview}
+					<div class="page-info">
+						<p>
+							<strong>{swMaintSkuPreview}</strong> will be added to the SolidWorks Maintenance panel.
+						</p>
+					</div>
+				{:else}
+					<div class="duplicate-warning">
+						No matching maintenance SKU for this product. Re-importing will store the license but won't add a SKU.
+					</div>
+				{/if}
+			{:else if parsedLicense}
 				{#if parentMatch}
 					<div class="parent-banner">
 						<span class="parent-banner-label">Linked to existing license</span>
@@ -627,6 +755,40 @@ HSM           Checked    5-axes indexial  Not Checked"
 		background: rgba(96, 165, 250, 0.08);
 		border: 1px solid rgba(96, 165, 250, 0.3);
 		border-radius: 6px;
+	}
+
+	.parent-banner.sw-banner {
+		background: rgba(220, 38, 38, 0.08);
+		border-color: rgba(220, 38, 38, 0.3);
+	}
+
+	.parent-banner.sw-banner .parent-banner-label {
+		color: rgba(248, 113, 113, 0.95);
+	}
+
+	.summary-value.mono {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+		font-size: 0.78rem;
+		color: rgba(255, 255, 255, 0.8);
+	}
+
+	.summary-value.warning {
+		color: #fbbf24;
+	}
+
+	.instructions-tip-alt {
+		margin: var(--space-2) 0 0;
+		padding: var(--space-2) var(--space-3);
+		background: rgba(220, 38, 38, 0.08);
+		border-left: 2px solid rgba(220, 38, 38, 0.4);
+		border-radius: 0 4px 4px 0;
+		color: rgba(255, 255, 255, 0.75);
+		font-size: 0.8rem;
+		line-height: 1.5;
+	}
+
+	.instructions-tip-alt strong {
+		color: rgba(248, 113, 113, 0.95);
 	}
 
 	.parent-banner-label {

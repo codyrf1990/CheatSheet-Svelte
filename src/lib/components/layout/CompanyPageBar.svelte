@@ -37,8 +37,10 @@
 		| 'new-company'
 		| 'rename-company'
 		| 'rename-page'
+		| 'rename-sw'
 		| 'delete-company'
 		| 'delete-page'
+		| 'delete-sw'
 		| null
 	>(null);
 	let dialogTargetId = $state<string | null>(null);
@@ -46,9 +48,12 @@
 	let dialogInput = $state('');
 
 	// Context menu state
-	let contextMenu = $state<{ x: number; y: number; type: 'company' | 'page'; id?: string } | null>(
-		null
-	);
+	let contextMenu = $state<{
+		x: number;
+		y: number;
+		type: 'company' | 'page' | 'sw';
+		id?: string;
+	} | null>(null);
 
 	// Page referenced by the current context menu (for licenseKey access)
 	let contextMenuPage = $derived.by(() => {
@@ -73,6 +78,40 @@
 	let filteredCompanies = $derived.by(() => {
 		if (!searchQuery.trim()) return [];
 		return companiesStore.search(searchQuery);
+	});
+
+	// SolidWorks tab state
+	let hasSW = $derived((currentCompany?.solidworksLicenses?.length ?? 0) > 0);
+	let swActive = $derived(currentCompany?.currentView === 'sw');
+	let swTabLabel = $derived.by(() => {
+		const company = currentCompany;
+		if (!company) return 'SW';
+		if (company.swTabLabelOverride && company.swTabLabelOverride.trim().length > 0) {
+			return company.swTabLabelOverride;
+		}
+		const licenses = company.solidworksLicenses ?? [];
+		if (licenses.length === 0) return 'SW';
+		const abbrev = new Set<string>();
+		for (const lic of licenses) {
+			switch (lic.product) {
+				case 'Standard':
+					abbrev.add('Std');
+					break;
+				case 'Parts & Assemblies':
+					abbrev.add('P&A');
+					break;
+				case 'Parts':
+					abbrev.add('P');
+					break;
+				case 'Pro':
+					abbrev.add('Pro');
+					break;
+				default:
+					// Other / Unknown — keep raw fallback grouped
+					abbrev.add('?');
+			}
+		}
+		return `SW ${[...abbrev].join('/')}`;
 	});
 
 	// Status indicator with SVG icon key and differentiated states
@@ -103,7 +142,9 @@
 	});
 
 	let isConfirmDialog = $derived(
-		dialogType === 'delete-company' || dialogType === 'delete-page'
+		dialogType === 'delete-company' ||
+			dialogType === 'delete-page' ||
+			dialogType === 'delete-sw'
 	);
 	let dialogTitle = $derived.by(() => {
 		switch (dialogType) {
@@ -113,10 +154,14 @@
 				return 'Rename Company';
 			case 'rename-page':
 				return 'Rename Page';
+			case 'rename-sw':
+				return 'Rename SolidWorks Tab';
 			case 'delete-company':
 				return 'Delete Company';
 			case 'delete-page':
 				return 'Delete Page';
+			case 'delete-sw':
+				return 'Remove SolidWorks Licenses';
 			default:
 				return '';
 		}
@@ -127,10 +172,13 @@
 				return 'Create';
 			case 'rename-company':
 			case 'rename-page':
+			case 'rename-sw':
 				return 'Save';
 			case 'delete-company':
 			case 'delete-page':
 				return 'Delete';
+			case 'delete-sw':
+				return 'Remove All';
 			default:
 				return '';
 		}
@@ -142,6 +190,8 @@
 				return 'Company name';
 			case 'rename-page':
 				return 'Page name';
+			case 'rename-sw':
+				return 'SW tab label (leave blank to auto-compute)';
 			default:
 				return '';
 		}
@@ -153,9 +203,14 @@
 		if (dialogType === 'delete-page') {
 			return `Delete "${dialogTargetLabel}"? This cannot be undone.`;
 		}
+		if (dialogType === 'delete-sw') {
+			return `Remove all SolidWorks licenses on this company? This cannot be undone.`;
+		}
 		return '';
 	});
-	let dialogInputValid = $derived(dialogInput.trim().length > 0);
+	let dialogInputValid = $derived(
+		dialogType === 'rename-sw' ? true : dialogInput.trim().length > 0
+	);
 
 	function toggleDropdown(e: MouseEvent) {
 		e.stopPropagation();
@@ -184,7 +239,41 @@
 	}
 
 	function handlePageSelect(pageId: string) {
+		companiesStore.setCurrentView('page');
 		companiesStore.switchToPage(pageId);
+	}
+
+	function handleSWSelect() {
+		companiesStore.setCurrentView('sw');
+	}
+
+	function handleSWContextMenu(e: MouseEvent) {
+		e.preventDefault();
+		contextMenu = { x: e.clientX, y: e.clientY, type: 'sw' };
+	}
+
+	function handleSWRename() {
+		if (!currentCompany) return;
+		dialogType = 'rename-sw';
+		dialogTargetId = currentCompany.id;
+		dialogTargetLabel = swTabLabel;
+		dialogInput = currentCompany.swTabLabelOverride ?? swTabLabel;
+		closeContextMenu();
+	}
+
+	function handleSWResetLabel() {
+		if (!currentCompany) return;
+		companiesStore.clearSolidWorksTabLabel(currentCompany.id);
+		toastStore.success('SW tab label reset');
+		closeContextMenu();
+	}
+
+	function handleSWDeleteAll() {
+		if (!currentCompany) return;
+		dialogType = 'delete-sw';
+		dialogTargetId = currentCompany.id;
+		dialogTargetLabel = swTabLabel;
+		closeContextMenu();
 	}
 
 	function handleNewCompany() {
@@ -381,6 +470,16 @@
 			return;
 		}
 
+		if (dialogType === 'rename-sw') {
+			if (!dialogTargetId) return;
+			companiesStore.setSolidWorksTabLabel(dialogTargetId, dialogInput);
+			toastStore.success(
+				dialogInput.trim().length === 0 ? 'SW tab label reset' : 'SW tab renamed'
+			);
+			closeDialog();
+			return;
+		}
+
 		if (dialogType === 'delete-company') {
 			if (!dialogTargetId) return;
 			companiesStore.delete(dialogTargetId);
@@ -393,6 +492,14 @@
 			if (!dialogTargetId) return;
 			companiesStore.deletePage(dialogTargetId);
 			toastStore.success('Page deleted');
+			closeDialog();
+			return;
+		}
+
+		if (dialogType === 'delete-sw') {
+			if (!dialogTargetId) return;
+			companiesStore.clearSolidWorksLicenses(dialogTargetId);
+			toastStore.success('SolidWorks licenses removed');
 			closeDialog();
 			return;
 		}
@@ -601,6 +708,38 @@
 
 	<!-- Page Tabs -->
 	<div class="page-tabs" role="tablist" aria-label="Company pages">
+		{#if currentCompany && hasSW}
+			<div class="page-tab-group">
+				<Tooltip
+					text="SolidWorks licenses on this company — right-click for options"
+					position="bottom"
+				>
+					<button
+						type="button"
+						role="tab"
+						class="page-tab sw-tab"
+						class:active={swActive}
+						aria-selected={swActive}
+						tabindex={swActive ? 0 : -1}
+						onclick={handleSWSelect}
+						oncontextmenu={handleSWContextMenu}
+						onkeydown={handlePageTabKeydown}
+					>
+						{swTabLabel}
+					</button>
+				</Tooltip>
+				<button
+					type="button"
+					class="page-tab-menu-btn"
+					tabindex={0}
+					aria-label="Options for {swTabLabel}"
+					onclick={(e) => {
+						e.stopPropagation();
+						handleSWContextMenu(e);
+					}}>⋮</button
+				>
+			</div>
+		{/if}
 		{#if currentCompany}
 			{#each currentCompany.pages as page (page.id)}
 				{#if editingPageId === page.id}
@@ -621,9 +760,9 @@
 								type="button"
 								role="tab"
 								class="page-tab"
-								class:active={page.id === currentCompany.currentPageId}
-								aria-selected={page.id === currentCompany.currentPageId}
-								tabindex={page.id === currentCompany.currentPageId ? 0 : -1}
+								class:active={!swActive && page.id === currentCompany.currentPageId}
+								aria-selected={!swActive && page.id === currentCompany.currentPageId}
+								tabindex={!swActive && page.id === currentCompany.currentPageId ? 0 : -1}
 								onclick={() => handlePageSelect(page.id)}
 								ondblclick={() => handlePageDoubleClick(page.id, page.name)}
 								oncontextmenu={(e) => handlePageContextMenu(e, page.id)}
@@ -790,6 +929,14 @@
 					>DEV: Clear All</button
 				>
 			{/if}
+		{:else if contextMenu.type === 'sw'}
+			<button type="button" role="menuitem" onclick={handleSWRename}>Rename</button>
+			{#if currentCompany?.swTabLabelOverride}
+				<button type="button" role="menuitem" onclick={handleSWResetLabel}>Reset to auto</button>
+			{/if}
+			<button type="button" role="menuitem" class="danger" onclick={handleSWDeleteAll}
+				>Remove all SolidWorks licenses</button
+			>
 		{:else}
 			<button type="button" role="menuitem" onclick={handleRenamePage}>Rename</button>
 			<button type="button" role="menuitem" onclick={handleDuplicatePage}>Duplicate</button>
@@ -1185,6 +1332,28 @@
 		border-bottom: 2px solid var(--color-solidcam-gold, #d4af37);
 		color: var(--color-solidcam-gold, #d4af37);
 		box-shadow: 0 0 12px rgba(212, 175, 55, 0.1);
+	}
+
+	.page-tab.sw-tab {
+		color: rgba(248, 113, 113, 0.85);
+		border-left: 2px solid rgba(220, 38, 38, 0.5);
+		padding-left: 0.45rem;
+	}
+
+	.page-tab.sw-tab:hover {
+		background: rgba(220, 38, 38, 0.08);
+		color: rgba(252, 165, 165, 0.95);
+		border-color: rgba(220, 38, 38, 0.2);
+		border-left-color: rgba(220, 38, 38, 0.7);
+	}
+
+	.page-tab.sw-tab.active {
+		background: rgba(220, 38, 38, 0.18);
+		border-color: rgba(220, 38, 38, 0.35);
+		border-bottom: 2px solid rgba(220, 38, 38, 0.85);
+		border-left: 2px solid rgba(220, 38, 38, 0.85);
+		color: rgba(252, 165, 165, 1);
+		box-shadow: 0 0 12px rgba(220, 38, 38, 0.12);
 	}
 
 	.page-tab-group {

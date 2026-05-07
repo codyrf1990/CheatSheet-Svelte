@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { Header, CompanyPageBar } from '$components/layout';
 	import { PackageTable } from '$components/packages';
+	import SolidWorksLicenseView from '$components/packages/SolidWorksLicenseView.svelte';
 	import { BDMPanel, MaintenancePanel, NewSalePanel } from '$components/panels';
 	import { Calculator } from '$components/calculator';
 	import {
@@ -67,6 +68,10 @@
 	let profileUsers = $derived(matchedLicense?.profileUsers ?? matchedLicense?.actualUsers ?? null);
 	let solidcamVersion = $derived(matchedLicense?.solidcamVersion ?? null);
 
+	// SolidWorks view branch
+	let swActive = $derived(currentCompany?.currentView === 'sw');
+	let swLicenses = $derived(currentCompany?.solidworksLicenses ?? []);
+
 	let effectiveSkuTabMode = $derived(userPrefsStore.skuTabMode);
 
 	// Collapsible SKU panel state (under table)
@@ -100,6 +105,9 @@
 	$effect(() => {
 		const pageId = currentPageId; // reactive: re-runs when page changes
 		if (!pageId) return;
+		// Skip while the SolidWorks view is active so we don't clobber the
+		// active SolidCAM page state when the user just toggled views.
+		if (currentCompany?.currentView === 'sw') return;
 		untrack(() => {
 			const snapshot = companiesStore.getPageStateSnapshot();
 			packagesStore.loadFromPageState(snapshot);
@@ -260,70 +268,77 @@
 	<div class="content-area">
 		<!-- Package Table + SKU Panel (main column) -->
 		<section class="main-content">
-			<PackageTable
-				{packages}
-				{maintenanceRange}
-				{profileUsers}
-				{solidcamVersion}
-				skuMode={effectiveSkuTabMode}
-				onWhatLeft={() => (showWhatLeftModal = true)}
-			/>
+			{#if swActive && currentCompany}
+				<SolidWorksLicenseView companyId={currentCompany.id} licenses={swLicenses} />
+			{:else}
+				<PackageTable
+					{packages}
+					{maintenanceRange}
+					{profileUsers}
+					{solidcamVersion}
+					skuMode={effectiveSkuTabMode}
+					onWhatLeft={() => (showWhatLeftModal = true)}
+				/>
 
-			<!-- SKU panel under table -->
-			<div class="sku-under-wrapper tile">
-				<div class="sku-collapse-bar tile-header">
-					<span class="sku-panel-label" class:sku-panel-label-ms={effectiveSkuTabMode === 'ms'}>
-						{effectiveSkuTabMode === 'bdm' ? 'New Sale SKUs' : 'Maintenance SKUs'}
-					</span>
-					<div class="mode-pill" role="group" aria-label="View mode">
-						<Tooltip text="New Sale — new sale prices">
-							<button
-								class="mode-pill-btn"
-								class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
-								onclick={() => userPrefsStore.setSkuTabMode('bdm')}
-								aria-pressed={effectiveSkuTabMode === 'bdm'}>New Sale</button
-							>
-						</Tooltip>
-						<Tooltip text="Maintenance — maintenance prices">
-							<button
-								class="mode-pill-btn"
-								class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
-								onclick={() => userPrefsStore.setSkuTabMode('ms')}
-								aria-pressed={effectiveSkuTabMode === 'ms'}>Maintenance</button
-							>
-						</Tooltip>
-					</div>
-					<button
-						type="button"
-						class="sku-collapse-btn"
-						onclick={() => (skuPanelOpen = !skuPanelOpen)}
-						aria-label={skuPanelOpen ? 'Collapse SKU panel' : 'Expand SKU panel'}
-					>
-						<svg
-							class="collapse-chevron"
-							class:open={skuPanelOpen}
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							aria-hidden="true"
+				<!-- SKU panel under table -->
+				<div class="sku-under-wrapper tile">
+					<div class="sku-collapse-bar tile-header">
+						<span
+							class="sku-panel-label"
+							class:sku-panel-label-ms={effectiveSkuTabMode === 'ms'}
 						>
-							<path d="M19 9l-7 7-7-7" />
-						</svg>
-					</button>
+							{effectiveSkuTabMode === 'bdm' ? 'New Sale SKUs' : 'Maintenance SKUs'}
+						</span>
+						<div class="mode-pill" role="group" aria-label="View mode">
+							<Tooltip text="New Sale — new sale prices">
+								<button
+									class="mode-pill-btn"
+									class:mode-pill-active-bdm={effectiveSkuTabMode === 'bdm'}
+									onclick={() => userPrefsStore.setSkuTabMode('bdm')}
+									aria-pressed={effectiveSkuTabMode === 'bdm'}>New Sale</button
+								>
+							</Tooltip>
+							<Tooltip text="Maintenance — maintenance prices">
+								<button
+									class="mode-pill-btn"
+									class:mode-pill-active-ms={effectiveSkuTabMode === 'ms'}
+									onclick={() => userPrefsStore.setSkuTabMode('ms')}
+									aria-pressed={effectiveSkuTabMode === 'ms'}>Maintenance</button
+								>
+							</Tooltip>
+						</div>
+						<button
+							type="button"
+							class="sku-collapse-btn"
+							onclick={() => (skuPanelOpen = !skuPanelOpen)}
+							aria-label={skuPanelOpen ? 'Collapse SKU panel' : 'Expand SKU panel'}
+						>
+							<svg
+								class="collapse-chevron"
+								class:open={skuPanelOpen}
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								aria-hidden="true"
+							>
+								<path d="M19 9l-7 7-7-7" />
+							</svg>
+						</button>
+					</div>
+					<CollapseWrapper open={skuPanelOpen}>
+						{#if effectiveSkuTabMode === 'bdm'}
+							<BDMPanel />
+						{:else if panels.find((p) => p.id === 'maintenance-skus') && panels.find((p) => p.id === 'solidworks-maintenance')}
+							<MaintenancePanel
+								maintenancePanel={panels.find((p) => p.id === 'maintenance-skus')!}
+								solidworksPanel={panels.find((p) => p.id === 'solidworks-maintenance')!}
+								skuMode={effectiveSkuTabMode}
+							/>
+						{/if}
+					</CollapseWrapper>
 				</div>
-				<CollapseWrapper open={skuPanelOpen}>
-					{#if effectiveSkuTabMode === 'bdm'}
-						<BDMPanel />
-					{:else if panels.find((p) => p.id === 'maintenance-skus') && panels.find((p) => p.id === 'solidworks-maintenance')}
-						<MaintenancePanel
-							maintenancePanel={panels.find((p) => p.id === 'maintenance-skus')!}
-							solidworksPanel={panels.find((p) => p.id === 'solidworks-maintenance')!}
-							skuMode={effectiveSkuTabMode}
-						/>
-					{/if}
-				</CollapseWrapper>
-			</div>
+			{/if}
 		</section>
 
 		<!-- Sidebar (Quoting + Calculator) -->
