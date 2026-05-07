@@ -265,11 +265,11 @@
 			<section class="note note-gold">
 				<header class="note-head">
 					<span class="note-icon" aria-hidden="true">⚙</span>
-					<span class="note-title">SolidCAM</span>
-					<span class="note-sub">Hardware Dongle · NPK · NWD · SPK</span>
+					<span class="note-title">Import a SolidCAM license</span>
+					<span class="note-sub">Dongle · NPK · NWD · SPK</span>
 				</header>
 				<p class="note-body">
-					Paste any SolidCAM dongle or product-key page. The system detects the type, fills in maintenance dates and modules, and creates a tab using the dongle / key short code.
+					Paste a SolidCAM dongle or product-key page. The tool reads it and creates a tab with the modules and maintenance dates already filled in.
 				</p>
 			</section>
 
@@ -277,11 +277,11 @@
 			<section class="note note-purple">
 				<header class="note-head">
 					<span class="note-icon" aria-hidden="true">👥</span>
-					<span class="note-title">Profiles</span>
-					<span class="note-sub">Under an NPK or NWD</span>
+					<span class="note-title">Profiles under an NPK</span>
+					<span class="note-sub">Always import the parent NPK first</span>
 				</header>
 				<p class="note-body">
-					Import the top-level <strong>Network Product Key</strong> first, then paste each profile separately. Profiles <strong>auto-link</strong> to the parent and inherit the customer name, maintenance dates, and SolidCAM version — the customer field becomes read-only so a typo can't split the profile into a new company.
+					If a license has profiles, paste the main <strong>Network Product Key</strong> first, then paste each profile separately. Profiles fill in the customer name, dates, and version automatically from the parent — you don't have to type anything.
 				</p>
 			</section>
 
@@ -289,11 +289,11 @@
 			<section class="note note-red">
 				<header class="note-head">
 					<span class="note-icon" aria-hidden="true">▦</span>
-					<span class="note-title">SolidWorks</span>
-					<span class="note-sub">Standard · P&amp;A · Pro</span>
+					<span class="note-title">Import a SolidWorks license</span>
+					<span class="note-sub">Standard · Parts &amp; Assemblies · Pro</span>
 				</header>
 				<p class="note-body">
-					Auto-detected. Creates a pinned <strong>SW</strong> tab at the front of the matching company and adds the right <code>-Maint</code> SKU (Standard, Networked, Pro, etc.) to that company's SolidWorks Maintenance panel. Re-importing the same serial updates in place.
+					You can paste SolidWorks license pages here too — the tool detects them automatically. It adds a small <strong>SW</strong> tab at the front of the matching company and the right SolidWorks maintenance SKU.
 				</p>
 			</section>
 
@@ -745,15 +745,6 @@
 	.note-body strong {
 		color: rgba(255, 255, 255, 0.95);
 		font-weight: 600;
-	}
-
-	.note-body code {
-		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
-		font-size: 0.85em;
-		padding: 1px 5px;
-		background: rgba(255, 255, 255, 0.06);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 3px;
 	}
 
 	.how-to-steps {

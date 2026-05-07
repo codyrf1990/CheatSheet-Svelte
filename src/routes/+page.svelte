@@ -761,12 +761,20 @@
 		}
 
 		.content-area {
-			grid-template-columns: 1fr;
-			gap: var(--space-1);
+			/* Keep two columns even at the narrowest viewport — never stack
+			   the quote/SKU sidebar on top of the package table. */
+			grid-template-columns: minmax(0, 1fr) minmax(100px, 180px);
+			gap: var(--space-0);
 		}
 
 		.sidebar {
-			order: -1;
+			gap: var(--space-0);
+		}
+	}
+
+	@media (max-width: 480px) {
+		.content-area {
+			grid-template-columns: minmax(0, 1fr) minmax(88px, 150px);
 		}
 	}
 </style>
