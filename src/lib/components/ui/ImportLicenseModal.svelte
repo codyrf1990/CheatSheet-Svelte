@@ -49,24 +49,15 @@
 	});
 	let canImport = $derived.by(() => {
 		if (!parsedLicense) return false;
-		const customerEditable = needsCompanyName || inheritedFields.has('customer');
-		if (customerEditable && !companyNameOverride.trim()) return false;
+		if (needsCompanyName && !companyNameOverride.trim()) return false;
 		return true;
 	});
 	let pageName = $derived.by(() => (parsedLicense ? getPageNameForLicense(parsedLicense) : 'P1'));
 	let parentPageName = $derived.by(() =>
 		parentMatch ? getPageNameForLicense(parentMatch.license) : ''
 	);
-	// Whether the user has changed the company-name input away from the
-	// inherited value. When true, drop the parent pin so import lands in the
-	// user-typed company instead.
-	let customerOverridden = $derived.by(() => {
-		if (!inheritedFields.has('customer') || !parsedLicense) return false;
-		return companyNameOverride.trim() !== parsedLicense.customer.trim();
-	});
-	let effectivePinnedId = $derived(customerOverridden ? undefined : parentMatch?.companyId);
 	let preview = $derived.by(() =>
-		parsedLicense ? getImportPreview(parsedLicense, effectivePinnedId) : null
+		parsedLicense ? getImportPreview(parsedLicense, parentMatch?.companyId) : null
 	);
 
 	// Reset state when modal opens or closes
@@ -148,17 +139,14 @@
 		// Small delay to show importing state
 		setTimeout(() => {
 			try {
-				// Use the typed name when the field was editable (manual entry OR
-				// overridden inheritance). Drop the parent pin when overridden so the
-				// import doesn't force the profile back into the parent's company.
-				const customerEditable = needsCompanyName || inheritedFields.has('customer');
-				const companyName = customerEditable ? companyNameOverride : parsedLicense!.customer;
-				const pinnedId = customerOverridden ? undefined : parentMatch?.companyId;
+				// When customer was inherited from a parent NPK, always trust the
+				// parent — never let a typo split the profile into a new company.
+				const companyName = needsCompanyName ? companyNameOverride : parsedLicense!.customer;
 				const licenseToImport: LicenseInfo = {
 					...parsedLicense!,
 					maintenanceEnd: maintenanceEndOverride.trim()
 				};
-				importResult = importLicense(licenseToImport, companyName, pinnedId);
+				importResult = importLicense(licenseToImport, companyName, parentMatch?.companyId);
 
 				modalState = 'results';
 
@@ -225,6 +213,9 @@
 				<p class="instructions-note">
 					The system will automatically detect the license type, modules, and maintenance dates. Import each profile separately.
 				</p>
+				<p class="instructions-tip">
+					<strong>Tip for licenses with profiles:</strong> import the top-level <strong>Network Product Key</strong> first, then each profile. Profiles will auto-link to the parent NPK and inherit the customer name, maintenance dates, and version — no manual entry needed.
+				</p>
 			</div>
 			<textarea
 				class="paste-textarea"
@@ -264,7 +255,7 @@ HSM           Checked    5-axes indexial  Not Checked"
 				<div class="summary-card">
 					<div class="summary-row">
 						<span class="summary-label">Customer:</span>
-						{#if needsCompanyName || inheritedFields.has('customer')}
+						{#if needsCompanyName}
 							<input
 								type="text"
 								class="company-input"
@@ -272,13 +263,13 @@ HSM           Checked    5-axes indexial  Not Checked"
 								bind:value={companyNameOverride}
 								placeholder="Enter company name"
 							/>
-							{#if inheritedFields.has('customer') && !customerOverridden}
-								<span class="inherited-hint">from {parentPageName}</span>
-							{:else if customerOverridden}
-								<span class="override-hint">will create new company</span>
-							{/if}
 						{:else}
-							<span class="summary-value">{parsedLicense.customer}</span>
+							<span class="summary-value">
+								{parsedLicense.customer}
+								{#if inheritedFields.has('customer')}
+									<span class="inherited-hint">from {parentPageName}</span>
+								{/if}
+							</span>
 						{/if}
 					</div>
 					<div class="summary-row">
@@ -487,6 +478,21 @@ HSM           Checked    5-axes indexial  Not Checked"
 		font-size: 0.8rem;
 	}
 
+	.instructions-tip {
+		margin: var(--space-2) 0 0;
+		padding: var(--space-2) var(--space-3);
+		background: rgba(96, 165, 250, 0.08);
+		border-left: 2px solid rgba(96, 165, 250, 0.4);
+		border-radius: 0 4px 4px 0;
+		color: rgba(255, 255, 255, 0.75);
+		font-size: 0.8rem;
+		line-height: 1.5;
+	}
+
+	.instructions-tip strong {
+		color: rgba(147, 197, 253, 0.95);
+	}
+
 	.paste-instructions kbd {
 		display: inline-block;
 		padding: 2px 6px;
@@ -644,18 +650,6 @@ HSM           Checked    5-axes indexial  Not Checked"
 		border: 1px solid rgba(96, 165, 250, 0.25);
 		border-radius: 4px;
 		color: rgba(147, 197, 253, 0.95);
-		font-size: 0.7rem;
-		font-style: italic;
-	}
-
-	.override-hint {
-		display: inline-block;
-		margin-left: 8px;
-		padding: 1px 6px;
-		background: rgba(245, 158, 11, 0.12);
-		border: 1px solid rgba(245, 158, 11, 0.3);
-		border-radius: 4px;
-		color: #fbbf24;
 		font-size: 0.7rem;
 		font-style: italic;
 	}
