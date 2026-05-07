@@ -5,7 +5,10 @@
 	import {
 		importLicense,
 		needsCompanyNameInput,
-		getImportPreview
+		getImportPreview,
+		enrichProfileFromParent,
+		type InheritableField,
+		type ParentLicenseMatch
 	} from '$lib/services/licenseImport';
 	import { toastStore } from '$lib/stores/toast.svelte';
 	import Modal from './Modal.svelte';
@@ -30,6 +33,8 @@
 	let importResult = $state<ImportResult | null>(null);
 	let showFeatures = $state(false);
 	let showSkus = $state(false);
+	let parentMatch = $state<ParentLicenseMatch | null>(null);
+	let inheritedFields = $state<Set<InheritableField>>(new Set());
 
 	// Derived
 	let canParse = $derived(pastedText.trim().length > 0);
@@ -48,7 +53,12 @@
 		return true;
 	});
 	let pageName = $derived.by(() => (parsedLicense ? getPageNameForLicense(parsedLicense) : 'P1'));
-	let preview = $derived.by(() => (parsedLicense ? getImportPreview(parsedLicense) : null));
+	let preview = $derived.by(() =>
+		parsedLicense ? getImportPreview(parsedLicense, parentMatch?.companyId) : null
+	);
+	let parentPageName = $derived.by(() =>
+		parentMatch ? getPageNameForLicense(parentMatch.license) : ''
+	);
 
 	// Reset state when modal opens or closes
 	$effect(() => {
@@ -62,12 +72,16 @@
 			importResult = null;
 			showFeatures = false;
 			showSkus = false;
+			parentMatch = null;
+			inheritedFields = new Set();
 		} else {
 			// Also reset on close so stale state (e.g. stuck spinner) doesn't linger
 			modalState = 'paste';
 			parsedLicense = null;
 			parseError = null;
 			importResult = null;
+			parentMatch = null;
+			inheritedFields = new Set();
 		}
 	});
 
@@ -88,12 +102,26 @@
 				return;
 			}
 
-			parsedLicense = result.license;
-			maintenanceEndOverride = result.license.maintenanceEnd || '';
+			// For profiles, try to inherit missing fields from an already-imported parent NPK.
+			// No parent found → original license is used unchanged.
+			let licenseToUse = result.license;
+			parentMatch = null;
+			inheritedFields = new Set();
+			if (licenseToUse.isProfile) {
+				const enrichment = enrichProfileFromParent(licenseToUse);
+				if (enrichment) {
+					licenseToUse = enrichment.license;
+					parentMatch = enrichment.parent;
+					inheritedFields = enrichment.inheritedFields;
+				}
+			}
+
+			parsedLicense = licenseToUse;
+			maintenanceEndOverride = licenseToUse.maintenanceEnd || '';
 
 			// Pre-fill company name if available and valid
-			if (result.license.customer && result.license.customer !== 'Unknown') {
-				companyNameOverride = result.license.customer;
+			if (licenseToUse.customer && licenseToUse.customer !== 'Unknown') {
+				companyNameOverride = licenseToUse.customer;
 			} else {
 				companyNameOverride = '';
 			}
@@ -116,7 +144,7 @@
 					...parsedLicense!,
 					maintenanceEnd: maintenanceEndOverride.trim()
 				};
-				importResult = importLicense(licenseToImport, companyName);
+				importResult = importLicense(licenseToImport, companyName, parentMatch?.companyId);
 
 				modalState = 'results';
 
@@ -138,6 +166,8 @@
 		parseError = null;
 		companyNameOverride = '';
 		maintenanceEndOverride = '';
+		parentMatch = null;
+		inheritedFields = new Set();
 		modalState = 'paste';
 	}
 
@@ -209,6 +239,14 @@ HSM           Checked    5-axes indexial  Not Checked"
 		<!-- Preview of parsed data -->
 		<div class="preview-section">
 			{#if parsedLicense}
+				{#if parentMatch}
+					<div class="parent-banner">
+						<span class="parent-banner-label">Linked to existing license</span>
+						<span class="parent-banner-value">
+							{parentPageName} · {parentMatch.companyName}
+						</span>
+					</div>
+				{/if}
 				<div class="summary-card">
 					<div class="summary-row">
 						<span class="summary-label">Customer:</span>
@@ -221,7 +259,12 @@ HSM           Checked    5-axes indexial  Not Checked"
 								placeholder="Enter company name"
 							/>
 						{:else}
-							<span class="summary-value">{parsedLicense.customer}</span>
+							<span class="summary-value">
+								{parsedLicense.customer}
+								{#if inheritedFields.has('customer')}
+									<span class="inherited-hint">from {parentPageName}</span>
+								{/if}
+							</span>
 						{/if}
 					</div>
 					<div class="summary-row">
@@ -235,15 +278,21 @@ HSM           Checked    5-axes indexial  Not Checked"
 							{#if parsedLicense.isNetworkLicense}
 								<span class="net-badge">Network</span>
 							{/if}
+							{#if inheritedFields.has('isNetworkLicense')}
+								<span class="inherited-hint">from {parentPageName}</span>
+							{/if}
 						</span>
 					</div>
 					<div class="summary-row">
 						<span class="summary-label">Maintenance:</span>
 						<span class="summary-value">
 							{maintenanceRange}
+							{#if inheritedFields.has('maintenanceStart') || inheritedFields.has('maintenanceEnd')}
+								<span class="inherited-hint">from {parentPageName}</span>
+							{/if}
 						</span>
 					</div>
-					{#if parsedLicense.isProfile}
+					{#if parsedLicense.isProfile && !inheritedFields.has('maintenanceEnd')}
 						<div class="summary-row">
 							<span class="summary-label">Maintenance End Date:</span>
 							<input
@@ -256,7 +305,12 @@ HSM           Checked    5-axes indexial  Not Checked"
 					{/if}
 					<div class="summary-row">
 						<span class="summary-label">SolidCAM Version:</span>
-						<span class="summary-value">{parsedLicense.solidcamVersion || '-'}</span>
+						<span class="summary-value">
+							{parsedLicense.solidcamVersion || '-'}
+							{#if inheritedFields.has('solidcamVersion')}
+								<span class="inherited-hint">from {parentPageName}</span>
+							{/if}
+						</span>
 					</div>
 				</div>
 
@@ -543,6 +597,41 @@ HSM           Checked    5-axes indexial  Not Checked"
 	.company-input.required-empty {
 		border-color: var(--color-error);
 		background: rgba(239, 68, 68, 0.1);
+	}
+
+	.parent-banner {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		padding: var(--space-2) var(--space-3);
+		background: rgba(96, 165, 250, 0.08);
+		border: 1px solid rgba(96, 165, 250, 0.3);
+		border-radius: 6px;
+	}
+
+	.parent-banner-label {
+		font-size: 0.7rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: rgba(96, 165, 250, 0.9);
+	}
+
+	.parent-banner-value {
+		font-size: var(--text-sm);
+		color: rgba(255, 255, 255, 0.85);
+	}
+
+	.inherited-hint {
+		display: inline-block;
+		margin-left: 8px;
+		padding: 1px 6px;
+		background: rgba(96, 165, 250, 0.12);
+		border: 1px solid rgba(96, 165, 250, 0.25);
+		border-radius: 4px;
+		color: rgba(147, 197, 253, 0.95);
+		font-size: 0.7rem;
+		font-style: italic;
 	}
 
 	.net-badge {

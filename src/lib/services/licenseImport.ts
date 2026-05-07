@@ -42,10 +42,121 @@ export function needsCompanyNameInput(license: LicenseInfo): boolean {
 	return !customer || customer === 'Unknown' || customer.trim() === '';
 }
 
+export interface ParentLicenseMatch {
+	license: LicenseInfo;
+	companyId: string;
+	companyName: string;
+}
+
 /**
- * Get preview of what will be imported
+ * Find an already-imported parent license (NPK/NWD) for a profile.
+ *
+ * Matches the profile's productKey or dongleNo against any non-profile license
+ * stored on a company. When multiple candidates match (rare — happens if the
+ * same key was imported into different companies), returns the most recently
+ * imported one.
+ *
+ * Returns null when the input isn't a profile or no parent is found, so callers
+ * can fall back to the existing manual-entry flow.
  */
-export function getImportPreview(license: LicenseInfo): {
+export function findParentLicense(license: LicenseInfo): ParentLicenseMatch | null {
+	if (!license.isProfile) return null;
+
+	const targetKey = license.productKey?.trim() ?? '';
+	const targetDongle = license.dongleNo?.trim() ?? '';
+	if (!targetKey && !targetDongle) return null;
+
+	const matches: ParentLicenseMatch[] = [];
+	for (const company of companiesStore.all) {
+		for (const candidate of company.licenses ?? []) {
+			if (candidate.isProfile) continue;
+			const candidateKey = candidate.productKey?.trim() ?? '';
+			const candidateDongle = candidate.dongleNo?.trim() ?? '';
+			const keyMatch = !!targetKey && targetKey === candidateKey;
+			const dongleMatch = !!targetDongle && targetDongle === candidateDongle;
+			if (keyMatch || dongleMatch) {
+				matches.push({
+					license: candidate,
+					companyId: company.id,
+					companyName: company.name
+				});
+			}
+		}
+	}
+
+	if (matches.length === 0) return null;
+	if (matches.length === 1) return matches[0];
+
+	matches.sort((a, b) => (b.license.importedAt ?? 0) - (a.license.importedAt ?? 0));
+	return matches[0];
+}
+
+/** Field keys on LicenseInfo that can be inherited from a parent NPK */
+export type InheritableField =
+	| 'customer'
+	| 'maintenanceStart'
+	| 'maintenanceEnd'
+	| 'solidcamVersion'
+	| 'isNetworkLicense';
+
+export interface ProfileEnrichment {
+	license: LicenseInfo;
+	parent: ParentLicenseMatch;
+	inheritedFields: Set<InheritableField>;
+}
+
+/**
+ * Enrich a parsed profile license with values inherited from its parent NPK
+ * (if one exists in the system). Only fills fields the profile is missing —
+ * never overwrites populated values.
+ *
+ * Returns null when no parent is found, signaling callers to use the original
+ * license unchanged.
+ */
+export function enrichProfileFromParent(license: LicenseInfo): ProfileEnrichment | null {
+	const parent = findParentLicense(license);
+	if (!parent) return null;
+
+	const inherited = new Set<InheritableField>();
+	const enriched: LicenseInfo = { ...license };
+
+	const customerEmpty =
+		!enriched.customer || enriched.customer === 'Unknown' || !enriched.customer.trim();
+	if (customerEmpty && parent.license.customer && parent.license.customer !== 'Unknown') {
+		enriched.customer = parent.license.customer;
+		inherited.add('customer');
+	}
+	if (!enriched.maintenanceStart?.trim() && parent.license.maintenanceStart?.trim()) {
+		enriched.maintenanceStart = parent.license.maintenanceStart;
+		inherited.add('maintenanceStart');
+	}
+	if (!enriched.maintenanceEnd?.trim() && parent.license.maintenanceEnd?.trim()) {
+		enriched.maintenanceEnd = parent.license.maintenanceEnd;
+		inherited.add('maintenanceEnd');
+	}
+	if (!enriched.solidcamVersion?.trim() && parent.license.solidcamVersion?.trim()) {
+		enriched.solidcamVersion = parent.license.solidcamVersion;
+		inherited.add('solidcamVersion');
+	}
+	if (!enriched.isNetworkLicense && parent.license.isNetworkLicense) {
+		enriched.isNetworkLicense = true;
+		inherited.add('isNetworkLicense');
+	}
+
+	if (inherited.size === 0) return null;
+	return { license: enriched, parent, inheritedFields: inherited };
+}
+
+/**
+ * Get preview of what will be imported.
+ *
+ * `pinnedCompanyId` lets profile imports target the parent NPK's company
+ * directly, even if that company was renamed since the parent was imported.
+ */
+export function getImportPreview(
+	license: LicenseInfo,
+	pinnedCompanyId?: string
+): {
 	companyName: string;
 	isNewCompany: boolean;
 	existingCompanyId?: string;
@@ -57,7 +168,10 @@ export function getImportPreview(license: LicenseInfo): {
 	unmappedFeatures: string[];
 } {
 	const companyName = license.customer;
-	const existingCompany = companiesStore.findByName(companyName);
+	const pinnedCompany = pinnedCompanyId
+		? (companiesStore.all.find((c) => c.id === pinnedCompanyId) ?? null)
+		: null;
+	const existingCompany = pinnedCompany ?? companiesStore.findByName(companyName);
 	const pageName = getPageNameForLicense(license);
 
 	// Check if page exists in existing company
@@ -94,15 +208,27 @@ export function getImportPreview(license: LicenseInfo): {
 
 /**
  * Import a single license into the system
- * Creates or updates company and page, selects bits, adds SKUs
+ * Creates or updates company and page, selects bits, adds SKUs.
+ *
+ * `pinnedCompanyId` forces the import into a specific company (used for
+ * profile imports — points at the parent NPK's company so renames don't
+ * cause a duplicate company to be created).
  */
-export function importLicense(license: LicenseInfo, overrideCompanyName?: string): ImportResult {
+export function importLicense(
+	license: LicenseInfo,
+	overrideCompanyName?: string,
+	pinnedCompanyId?: string
+): ImportResult {
 	const companyName = overrideCompanyName || license.customer;
 	const errors: string[] = [];
 	const pageName = getPageNameForLicense(license);
 
-	// 1. Find or create company
-	let company = companiesStore.findByName(companyName);
+	// 1. Find or create company. Prefer the pinned id (profile parent) so the
+	// profile lands in the correct company even if it has been renamed.
+	let company =
+		(pinnedCompanyId
+			? (companiesStore.all.find((c) => c.id === pinnedCompanyId) ?? null)
+			: null) ?? companiesStore.findByName(companyName);
 	const isNewCompany = !company;
 
 	if (!company) {
