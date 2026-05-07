@@ -157,4 +157,43 @@
 		font-size: var(--text-lg);
 		color: rgba(255, 255, 255, 0.9);
 	}
+
+	/* Narrow viewport — visible checkbox shrinks with the surrounding text.
+	   The 44x44 ::after hit area stays full-size so touch targets are
+	   preserved. */
+	@media (max-width: 768px) {
+		.checkbox-input {
+			width: 18px;
+			height: 18px;
+		}
+
+		.checkbox-control {
+			width: 14px;
+			height: 14px;
+		}
+
+		.checkbox-control svg {
+			width: 8px;
+			height: 8px;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.checkbox-input {
+			width: 14px;
+			height: 14px;
+		}
+
+		.checkbox-control {
+			width: 12px;
+			height: 12px;
+			border-radius: 2px;
+		}
+
+		.checkbox-control svg {
+			width: 7px;
+			height: 7px;
+			stroke-width: 2.5;
+		}
+	}
 </style>
