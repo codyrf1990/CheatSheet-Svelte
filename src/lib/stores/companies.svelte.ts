@@ -5,6 +5,7 @@
  */
 
 import type { Company, Page, PageState, PackageState, LicenseInfo } from '$types';
+import { PACKAGE_STATE_VERSION } from '$types';
 import { deepCopy } from '$lib/utils/deepCopy';
 import { toastStore } from './toast.svelte';
 import { persistence } from './persistence.svelte';
@@ -105,7 +106,8 @@ function migratePackageState(oldState: unknown): Record<string, PackageState> {
 				customBits: state.customBits || [],
 				order: state.order || [],
 				looseBitsOrder: state.looseBitsOrder || [],
-				groupMembership: state.groupMembership || {}
+				groupMembership: state.groupMembership || {},
+				version: PACKAGE_STATE_VERSION
 			};
 			continue;
 		}
@@ -145,7 +147,8 @@ function migratePackageState(oldState: unknown): Record<string, PackageState> {
 			customBits: [],
 			order: [],
 			looseBitsOrder: [],
-			groupMembership: {}
+			groupMembership: {},
+			version: PACKAGE_STATE_VERSION
 		};
 	}
 

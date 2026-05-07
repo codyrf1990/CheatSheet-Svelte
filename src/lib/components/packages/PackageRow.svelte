@@ -219,18 +219,12 @@
 										disabled={!!SC_TURN_LOCKED.find((b) => disabledBits.has(b))}
 									/>
 								</span>
-								<span
+								<button
+									type="button"
 									class="bit-text"
-									role="button"
-									tabindex="0"
 									onclick={handleCodeCopy}
-									onkeydown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											e.preventDefault();
-											handleCodeCopy();
-										}
-									}}
-									data-copyable-bit>Turning + Backspindle</span
+									data-copyable-bit
+									aria-label="Copy Turning + Backspindle">Turning + Backspindle</button
 								>
 							</div>
 						</li>
@@ -320,6 +314,13 @@
 		line-height: 1.2;
 		cursor: pointer;
 		transition: color 150ms ease;
+		/* button reset */
+		background: none;
+		border: none;
+		padding: 0;
+		margin: 0;
+		font-family: inherit;
+		text-align: left;
 	}
 
 	.bit-text:hover {

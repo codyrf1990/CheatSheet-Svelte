@@ -74,7 +74,12 @@ export interface PackageState {
 	looseBitsOrder?: string[];
 	/** Maps bit name to masterId (or 'loose' for loose bits). Overrides static group membership. */
 	groupMembership?: Record<string, string>;
+	/** Schema version. Missing = pre-versioned legacy state; new states stamped with PACKAGE_STATE_VERSION. */
+	version?: number;
 }
+
+/** Current PackageState schema version. Bump when introducing migrations. */
+export const PACKAGE_STATE_VERSION = 1;
 
 export interface UserPrefsData {
 	customPanelItems: Record<string, string[]>;

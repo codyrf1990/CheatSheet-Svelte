@@ -6,6 +6,7 @@
 
 import { browser } from '$app/environment';
 import { persistence } from './persistence.svelte';
+import { deepCopy } from '$lib/utils/deepCopy';
 
 const STORAGE_KEY = 'solidcam-user-prefs';
 
@@ -298,11 +299,13 @@ function importData(data: unknown, updatedAt?: number): boolean {
 		packageGroupMembership?: Record<string, Record<string, string>>;
 	};
 
-	prefs.customPanelItems = payload.customPanelItems ?? {};
-	prefs.customPackageBits = payload.customPackageBits ?? {};
-	prefs.packageBitOrders = payload.packageBitOrders ?? {};
-	prefs.packageLooseBitOrders = payload.packageLooseBitOrders ?? {};
-	prefs.packageGroupMembership = payload.packageGroupMembership ?? {};
+	// Deep-copy so callers can't mutate the records we just adopted (and so
+	// future writes from the caller don't leak into store state).
+	prefs.customPanelItems = deepCopy(payload.customPanelItems ?? {});
+	prefs.customPackageBits = deepCopy(payload.customPackageBits ?? {});
+	prefs.packageBitOrders = deepCopy(payload.packageBitOrders ?? {});
+	prefs.packageLooseBitOrders = deepCopy(payload.packageLooseBitOrders ?? {});
+	prefs.packageGroupMembership = deepCopy(payload.packageGroupMembership ?? {});
 	prefs.updatedAt =
 		typeof updatedAt === 'number' && Number.isFinite(updatedAt) ? updatedAt : Date.now();
 	prefs = { ...prefs };

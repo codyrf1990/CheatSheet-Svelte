@@ -70,9 +70,10 @@ function snapshotPageSystem(): void {
 }
 
 function buildSyncPayload() {
-	if (!cachedPageSystem) {
-		snapshotPageSystem();
-	}
+	// Always snapshot at payload-build time so the pageSystem we send is
+	// consistent with the prefs we send — never a stale snapshot from an
+	// earlier change handler.
+	snapshotPageSystem();
 	const prefs: UserPrefsExport = userPrefsStore.exportData();
 	return {
 		pageSystem: cachedPageSystem!,
@@ -223,7 +224,7 @@ function queueCombinedSave(): void {
 
 function handlePageSystemChange(): void {
 	if (!autoSyncEnabled || !username) return;
-	snapshotPageSystem();
+	// Snapshot is taken inside buildSyncPayload() at queue time
 	queueCombinedSave();
 }
 
@@ -357,11 +358,14 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 		status = 'connected';
 		syncSession.transition('connected');
 
-		// Register reconnection handler so syncSession can auto-recover on network restore
+		// Register reconnection handler so syncSession can auto-recover on network restore.
+		// Capture the username for THIS session so a later disconnect or user switch
+		// can't trigger loadUserData(null) or load the wrong account.
+		const sessionUsername = trimmedName;
 		syncSession.setReconnectHandler(async () => {
-			if (!username) return false;
+			if (username !== sessionUsername) return false;
 			try {
-				await loadUserData(username);
+				await loadUserData(sessionUsername);
 				status = 'connected';
 				syncSession.transition('connected');
 				startAutoSync();

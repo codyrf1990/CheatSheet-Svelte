@@ -74,13 +74,6 @@
 		await copyToClipboard(group.label);
 	}
 
-	function handleLabelKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			handleLabelCopy();
-		}
-	}
-
 </script>
 
 <div
@@ -98,16 +91,15 @@
 					onchange={handleMasterToggle}
 					{disabled}
 				/>
-				<span
+				<button
+					type="button"
 					class="master-label"
-					role="button"
-					tabindex="0"
 					onclick={handleLabelCopy}
-					onkeydown={handleLabelKeydown}
 					data-copyable-bit
+					aria-label="Copy {group.label}"
 				>
 					{group.label}
-				</span>
+				</button>
 				<button
 					type="button"
 					class="expand-toggle"
@@ -138,17 +130,16 @@
 				onchange={handleMasterToggle}
 				{disabled}
 			/>
-			<span
+			<button
+				type="button"
 				class="master-label"
-				role="button"
-				tabindex="0"
 				onclick={handleLabelCopy}
-				onkeydown={handleLabelKeydown}
 				data-copyable-bit
 				use:tooltip={group.label}
+				aria-label="Copy {group.label}"
 			>
 				{group.label}
-			</span>
+			</button>
 			<button
 				type="button"
 				class="expand-toggle"
@@ -230,6 +221,13 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		/* button reset */
+		background: none;
+		border: none;
+		padding: 0;
+		margin: 0;
+		font-family: inherit;
+		text-align: left;
 	}
 
 	.master-label:hover {

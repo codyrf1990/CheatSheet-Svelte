@@ -87,7 +87,12 @@ export function findParentLicense(license: LicenseInfo): ParentLicenseMatch | nu
 	if (matches.length === 0) return null;
 	if (matches.length === 1) return matches[0];
 
-	matches.sort((a, b) => (b.license.importedAt ?? 0) - (a.license.importedAt ?? 0));
+	matches.sort((a, b) => {
+		const tDelta = (b.license.importedAt ?? 0) - (a.license.importedAt ?? 0);
+		if (tDelta !== 0) return tDelta;
+		// Tie on importedAt → fall back to companyName for deterministic ordering
+		return a.companyName.localeCompare(b.companyName);
+	});
 	return matches[0];
 }
 

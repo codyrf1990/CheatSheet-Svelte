@@ -21,9 +21,15 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
 // ── Online/offline detection ────────────────────────────────────────────────
 
-if (browser) {
+// HMR-safe: install listeners once per browser session. Without this guard,
+// every hot reload would stack a fresh pair of online/offline listeners.
+const SYNC_SESSION_LISTENERS_FLAG = '__syncSessionListenersInstalled' as const;
+type WindowWithFlag = Window & { [SYNC_SESSION_LISTENERS_FLAG]?: boolean };
+
+if (browser && !(window as WindowWithFlag)[SYNC_SESSION_LISTENERS_FLAG]) {
 	window.addEventListener('online', handleOnline);
 	window.addEventListener('offline', handleOffline);
+	(window as WindowWithFlag)[SYNC_SESSION_LISTENERS_FLAG] = true;
 }
 
 function handleOnline(): void {

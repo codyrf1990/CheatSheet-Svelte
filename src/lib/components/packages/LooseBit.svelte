@@ -43,13 +43,6 @@
 		}
 	}
 
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			handleCopy();
-		}
-	}
-
 	function handleWrapperKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
@@ -81,17 +74,16 @@
 				>
 					<Checkbox checked={isSelected} onchange={handleToggle} {disabled} />
 				</span>
-				<span
+				<button
+					type="button"
 					class="bit-text"
 					class:custom={isCustom}
-					role="button"
-					tabindex="0"
 					onclick={handleCopy}
-					onkeydown={handleKeydown}
 					data-copyable-bit
+					aria-label="Copy {bit}"
 					>{#if justCopied}<span class="copy-check">&#10003;</span>{:else}{#if isCustom}<span
 								class="custom-indicator">+</span
-							>{/if}{bit}{/if}</span
+							>{/if}{bit}{/if}</button
 				>
 			</div>
 		</Tooltip>
@@ -105,17 +97,16 @@
 			>
 				<Checkbox checked={isSelected} onchange={handleToggle} {disabled} />
 			</span>
-			<span
+			<button
+				type="button"
 				class="bit-text"
 				class:custom={isCustom}
-				role="button"
-				tabindex="0"
 				onclick={handleCopy}
-				onkeydown={handleKeydown}
 				data-copyable-bit
+				aria-label="Copy {bit}"
 				>{#if justCopied}<span class="copy-check">&#10003;</span>{:else}{#if isCustom}<span
 							class="custom-indicator">+</span
-						>{/if}{bit}{/if}</span
+						>{/if}{bit}{/if}</button
 			>
 		</div>
 	{/if}
@@ -168,6 +159,13 @@
 		line-height: 1.2;
 		cursor: pointer;
 		transition: color 150ms ease;
+		/* button reset */
+		background: none;
+		border: none;
+		padding: 0;
+		margin: 0;
+		font-family: inherit;
+		text-align: left;
 	}
 
 	.bit-text:hover {

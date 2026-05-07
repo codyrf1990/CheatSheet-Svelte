@@ -49,15 +49,24 @@
 	});
 	let canImport = $derived.by(() => {
 		if (!parsedLicense) return false;
-		if (needsCompanyName && !companyNameOverride.trim()) return false;
+		const customerEditable = needsCompanyName || inheritedFields.has('customer');
+		if (customerEditable && !companyNameOverride.trim()) return false;
 		return true;
 	});
 	let pageName = $derived.by(() => (parsedLicense ? getPageNameForLicense(parsedLicense) : 'P1'));
-	let preview = $derived.by(() =>
-		parsedLicense ? getImportPreview(parsedLicense, parentMatch?.companyId) : null
-	);
 	let parentPageName = $derived.by(() =>
 		parentMatch ? getPageNameForLicense(parentMatch.license) : ''
+	);
+	// Whether the user has changed the company-name input away from the
+	// inherited value. When true, drop the parent pin so import lands in the
+	// user-typed company instead.
+	let customerOverridden = $derived.by(() => {
+		if (!inheritedFields.has('customer') || !parsedLicense) return false;
+		return companyNameOverride.trim() !== parsedLicense.customer.trim();
+	});
+	let effectivePinnedId = $derived(customerOverridden ? undefined : parentMatch?.companyId);
+	let preview = $derived.by(() =>
+		parsedLicense ? getImportPreview(parsedLicense, effectivePinnedId) : null
 	);
 
 	// Reset state when modal opens or closes
@@ -139,12 +148,17 @@
 		// Small delay to show importing state
 		setTimeout(() => {
 			try {
-				const companyName = needsCompanyName ? companyNameOverride : parsedLicense!.customer;
+				// Use the typed name when the field was editable (manual entry OR
+				// overridden inheritance). Drop the parent pin when overridden so the
+				// import doesn't force the profile back into the parent's company.
+				const customerEditable = needsCompanyName || inheritedFields.has('customer');
+				const companyName = customerEditable ? companyNameOverride : parsedLicense!.customer;
+				const pinnedId = customerOverridden ? undefined : parentMatch?.companyId;
 				const licenseToImport: LicenseInfo = {
 					...parsedLicense!,
 					maintenanceEnd: maintenanceEndOverride.trim()
 				};
-				importResult = importLicense(licenseToImport, companyName, parentMatch?.companyId);
+				importResult = importLicense(licenseToImport, companyName, pinnedId);
 
 				modalState = 'results';
 
@@ -250,7 +264,7 @@ HSM           Checked    5-axes indexial  Not Checked"
 				<div class="summary-card">
 					<div class="summary-row">
 						<span class="summary-label">Customer:</span>
-						{#if needsCompanyName}
+						{#if needsCompanyName || inheritedFields.has('customer')}
 							<input
 								type="text"
 								class="company-input"
@@ -258,13 +272,13 @@ HSM           Checked    5-axes indexial  Not Checked"
 								bind:value={companyNameOverride}
 								placeholder="Enter company name"
 							/>
+							{#if inheritedFields.has('customer') && !customerOverridden}
+								<span class="inherited-hint">from {parentPageName}</span>
+							{:else if customerOverridden}
+								<span class="override-hint">will create new company</span>
+							{/if}
 						{:else}
-							<span class="summary-value">
-								{parsedLicense.customer}
-								{#if inheritedFields.has('customer')}
-									<span class="inherited-hint">from {parentPageName}</span>
-								{/if}
-							</span>
+							<span class="summary-value">{parsedLicense.customer}</span>
 						{/if}
 					</div>
 					<div class="summary-row">
@@ -630,6 +644,18 @@ HSM           Checked    5-axes indexial  Not Checked"
 		border: 1px solid rgba(96, 165, 250, 0.25);
 		border-radius: 4px;
 		color: rgba(147, 197, 253, 0.95);
+		font-size: 0.7rem;
+		font-style: italic;
+	}
+
+	.override-hint {
+		display: inline-block;
+		margin-left: 8px;
+		padding: 1px 6px;
+		background: rgba(245, 158, 11, 0.12);
+		border: 1px solid rgba(245, 158, 11, 0.3);
+		border-radius: 4px;
+		color: #fbbf24;
 		font-size: 0.7rem;
 		font-style: italic;
 	}

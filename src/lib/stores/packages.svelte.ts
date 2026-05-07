@@ -5,6 +5,7 @@
  */
 
 import type { PackageState, PageState } from '$types';
+import { PACKAGE_STATE_VERSION } from '$types';
 import { deepCopy } from '$lib/utils/deepCopy';
 import { userPrefsStore } from './userPrefs.svelte';
 
@@ -19,7 +20,8 @@ function createDefaultState(): PackageState {
 		selectedBits: [],
 		customBits: [],
 		order: [],
-		looseBitsOrder: []
+		looseBitsOrder: [],
+		version: PACKAGE_STATE_VERSION
 	};
 }
 
