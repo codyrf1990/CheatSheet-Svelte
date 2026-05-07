@@ -248,42 +248,56 @@
 	{#if modalState === 'paste'}
 		<!-- Paste step -->
 		<div class="paste-section">
-			<div class="kind-cards">
-				<div class="kind-card kind-solidcam">
-					<div class="kind-card-head">
-						<span class="kind-icon" aria-hidden="true">⚙</span>
-						<div>
-							<div class="kind-card-title">SolidCAM</div>
-							<div class="kind-card-sub">Dongle · NPK · SPK · Profile</div>
-						</div>
-					</div>
-					<p class="kind-card-body">
-						Paste the dongle or product-key page. For licenses with profiles, paste each profile separately.
-					</p>
-				</div>
-				<div class="kind-card kind-solidworks">
-					<div class="kind-card-head">
-						<span class="kind-icon" aria-hidden="true">▦</span>
-						<div>
-							<div class="kind-card-title">SolidWorks</div>
-							<div class="kind-card-sub">Standard · P&amp;A · Pro</div>
-						</div>
-					</div>
-					<p class="kind-card-body">
-						Paste a SOLIDWORKS license page. Auto-detected and pinned as a single <strong>SW</strong> tab on the matching company.
-					</p>
-				</div>
-			</div>
-
-			<div class="how-to">
-				<div class="how-to-title">Copy from Salesforce</div>
+			<!-- 1. Copy from Salesforce -->
+			<section class="note note-neutral">
+				<header class="note-head">
+					<span class="note-step" aria-hidden="true">1</span>
+					<span class="note-title">Copy from Salesforce</span>
+				</header>
 				<ol class="how-to-steps">
 					<li><strong>Printable View</strong> on the Salesforce page</li>
 					<li><kbd>Ctrl</kbd>+<kbd>A</kbd> · <kbd>Ctrl</kbd>+<kbd>C</kbd></li>
-					<li>Click below · <kbd>Ctrl</kbd>+<kbd>V</kbd></li>
+					<li>Click the box below · <kbd>Ctrl</kbd>+<kbd>V</kbd></li>
 				</ol>
-			</div>
+			</section>
 
+			<!-- 2. SolidCAM -->
+			<section class="note note-gold">
+				<header class="note-head">
+					<span class="note-icon" aria-hidden="true">⚙</span>
+					<span class="note-title">SolidCAM</span>
+					<span class="note-sub">Hardware Dongle · NPK · NWD · SPK</span>
+				</header>
+				<p class="note-body">
+					Paste any SolidCAM dongle or product-key page. The system detects the type, fills in maintenance dates and modules, and creates a tab using the dongle / key short code.
+				</p>
+			</section>
+
+			<!-- 3. Profiles -->
+			<section class="note note-purple">
+				<header class="note-head">
+					<span class="note-icon" aria-hidden="true">👥</span>
+					<span class="note-title">Profiles</span>
+					<span class="note-sub">Under an NPK or NWD</span>
+				</header>
+				<p class="note-body">
+					Import the top-level <strong>Network Product Key</strong> first, then paste each profile separately. Profiles <strong>auto-link</strong> to the parent and inherit the customer name, maintenance dates, and SolidCAM version — the customer field becomes read-only so a typo can't split the profile into a new company.
+				</p>
+			</section>
+
+			<!-- 4. SolidWorks -->
+			<section class="note note-red">
+				<header class="note-head">
+					<span class="note-icon" aria-hidden="true">▦</span>
+					<span class="note-title">SolidWorks</span>
+					<span class="note-sub">Standard · P&amp;A · Pro</span>
+				</header>
+				<p class="note-body">
+					Auto-detected. Creates a pinned <strong>SW</strong> tab at the front of the matching company and adds the right <code>-Maint</code> SKU (Standard, Networked, Pro, etc.) to that company's SolidWorks Maintenance panel. Re-importing the same serial updates in place.
+				</p>
+			</section>
+
+			<!-- 5. Paste area -->
 			<div class="paste-field">
 				<label class="paste-label" for="import-paste-textarea">Paste the page text</label>
 				<textarea
@@ -297,22 +311,6 @@
 				{#if parseError}
 					<p class="error-message" role="alert">{parseError}</p>
 				{/if}
-			</div>
-
-			<div class="tip-row">
-				<div class="tip tip-gold">
-					<span class="tip-icon" aria-hidden="true">💡</span>
-					<div class="tip-body">
-						<strong>Profiles:</strong> import the top-level <strong>Network Product Key</strong> first.
-						Profiles auto-link to the parent and inherit customer, maintenance dates, and version.
-					</div>
-				</div>
-				<div class="tip tip-sw">
-					<span class="tip-icon" aria-hidden="true">▦</span>
-					<div class="tip-body">
-						<strong>SolidWorks:</strong> creates a pinned <strong>SW</strong> tab and adds the matching maintenance SKU on that company's SolidWorks Maintenance panel.
-					</div>
-				</div>
 			</div>
 		</div>
 	{:else if modalState === 'parsing'}
@@ -636,151 +634,161 @@
 	.paste-section {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-4);
-	}
-
-	.kind-cards {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
 		gap: var(--space-3);
 	}
 
-	@media (max-width: 640px) {
-		.kind-cards {
-			grid-template-columns: 1fr;
-		}
+	.note {
+		padding: var(--space-2) var(--space-3);
+		background: rgba(0, 0, 0, 0.22);
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		border-left-width: 3px;
+		border-radius: 8px;
 	}
 
-	.kind-card {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-2);
-		padding: var(--space-3);
-		background: rgba(0, 0, 0, 0.25);
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 10px;
-		border-top-width: 2px;
+	.note-neutral {
+		border-left-color: rgba(255, 255, 255, 0.25);
 	}
 
-	.kind-card.kind-solidcam {
-		border-top-color: var(--color-solidcam-gold, #d4af37);
+	.note-gold {
+		border-left-color: var(--color-solidcam-gold, #d4af37);
+		background: rgba(212, 175, 55, 0.04);
 	}
 
-	.kind-card.kind-solidworks {
-		border-top-color: rgba(220, 38, 38, 0.7);
+	.note-purple {
+		border-left-color: rgba(168, 85, 247, 0.6);
+		background: rgba(168, 85, 247, 0.04);
 	}
 
-	.kind-card-head {
+	.note-red {
+		border-left-color: rgba(220, 38, 38, 0.65);
+		background: rgba(220, 38, 38, 0.04);
+	}
+
+	.note-head {
 		display: flex;
 		align-items: center;
-		gap: var(--space-3);
+		gap: var(--space-2);
+		margin-bottom: 6px;
 	}
 
-	.kind-icon {
-		display: flex;
+	.note-step {
+		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 32px;
-		height: 32px;
-		border-radius: 8px;
-		font-size: 1rem;
-		flex-shrink: 0;
-	}
-
-	.kind-solidcam .kind-icon {
-		background: rgba(212, 175, 55, 0.15);
-		color: var(--color-solidcam-gold, #d4af37);
-		border: 1px solid rgba(212, 175, 55, 0.35);
-	}
-
-	.kind-solidworks .kind-icon {
-		background: rgba(220, 38, 38, 0.15);
-		color: rgba(252, 165, 165, 0.95);
-		border: 1px solid rgba(220, 38, 38, 0.35);
-	}
-
-	.kind-card-title {
-		font-size: var(--text-sm);
-		font-weight: 600;
-		color: rgba(255, 255, 255, 0.9);
-		letter-spacing: 0.02em;
-	}
-
-	.kind-card-sub {
-		margin-top: 1px;
+		width: 22px;
+		height: 22px;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.08);
+		border: 1px solid rgba(255, 255, 255, 0.16);
 		font-size: 0.7rem;
-		color: rgba(255, 255, 255, 0.5);
-		letter-spacing: 0.02em;
-	}
-
-	.kind-card-body {
-		margin: 0;
-		font-size: 0.78rem;
-		line-height: 1.5;
-		color: rgba(255, 255, 255, 0.65);
-	}
-
-	.kind-card-body strong {
+		font-weight: 700;
 		color: rgba(255, 255, 255, 0.85);
-	}
-
-	.how-to {
-		display: flex;
-		align-items: center;
-		gap: var(--space-3);
-		padding: var(--space-2) var(--space-3);
-		background: rgba(255, 255, 255, 0.03);
-		border: 1px solid rgba(255, 255, 255, 0.06);
-		border-radius: 8px;
-		flex-wrap: wrap;
-	}
-
-	.how-to-title {
-		font-size: 0.7rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: rgba(255, 255, 255, 0.5);
 		flex-shrink: 0;
+	}
+
+	.note-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 22px;
+		height: 22px;
+		font-size: 0.95rem;
+		line-height: 1;
+		flex-shrink: 0;
+	}
+
+	.note-gold .note-icon {
+		color: var(--color-solidcam-gold, #d4af37);
+	}
+
+	.note-purple .note-icon {
+		color: rgba(216, 180, 254, 0.95);
+	}
+
+	.note-red .note-icon {
+		color: rgba(252, 165, 165, 0.95);
+	}
+
+	.note-title {
+		font-size: 0.85rem;
+		font-weight: 700;
+		color: rgba(255, 255, 255, 0.95);
+		letter-spacing: 0.01em;
+	}
+
+	.note-gold .note-title {
+		color: rgba(252, 211, 77, 0.95);
+	}
+
+	.note-purple .note-title {
+		color: rgba(216, 180, 254, 0.98);
+	}
+
+	.note-red .note-title {
+		color: rgba(252, 165, 165, 0.98);
+	}
+
+	.note-sub {
+		font-size: 0.7rem;
+		color: rgba(255, 255, 255, 0.5);
+		letter-spacing: 0.02em;
+	}
+
+	.note-body {
+		margin: 0;
+		padding-left: 30px;
+		font-size: 0.8rem;
+		line-height: 1.55;
+		color: rgba(255, 255, 255, 0.78);
+	}
+
+	.note-body strong {
+		color: rgba(255, 255, 255, 0.95);
+		font-weight: 600;
+	}
+
+	.note-body code {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+		font-size: 0.85em;
+		padding: 1px 5px;
+		background: rgba(255, 255, 255, 0.06);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 3px;
 	}
 
 	.how-to-steps {
 		margin: 0;
-		padding: 0;
+		padding: 0 0 0 30px;
 		list-style: none;
 		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--space-3);
-		font-size: 0.78rem;
-		color: rgba(255, 255, 255, 0.7);
-		counter-reset: step;
+		flex-direction: column;
+		gap: 4px;
+		font-size: 0.8rem;
+		line-height: 1.55;
+		color: rgba(255, 255, 255, 0.78);
+		counter-reset: how-step;
 	}
 
 	.how-to-steps li {
 		display: flex;
 		align-items: center;
-		gap: var(--space-2);
+		flex-wrap: wrap;
+		gap: 6px;
 	}
 
 	.how-to-steps li::before {
-		counter-increment: step;
-		content: counter(step);
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 18px;
-		height: 18px;
-		font-size: 0.65rem;
+		counter-increment: how-step;
+		content: counter(how-step) '.';
+		flex-shrink: 0;
+		font-size: 0.72rem;
 		font-weight: 700;
-		color: rgba(255, 255, 255, 0.6);
-		background: rgba(255, 255, 255, 0.06);
-		border: 1px solid rgba(255, 255, 255, 0.12);
-		border-radius: 50%;
+		color: rgba(255, 255, 255, 0.45);
+		min-width: 14px;
 	}
 
 	.how-to-steps strong {
-		color: rgba(255, 255, 255, 0.9);
+		color: rgba(255, 255, 255, 0.95);
+		font-weight: 600;
 	}
 
 	.how-to-steps kbd {
@@ -791,26 +799,27 @@
 		border-radius: 4px;
 		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
 		font-size: 0.72rem;
-		color: rgba(255, 255, 255, 0.85);
+		color: rgba(255, 255, 255, 0.9);
 	}
 
 	.paste-field {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-1);
+		margin-top: var(--space-1);
 	}
 
 	.paste-label {
-		font-size: 0.7rem;
-		font-weight: 600;
+		font-size: 0.72rem;
+		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
-		color: rgba(255, 255, 255, 0.55);
+		color: rgba(255, 255, 255, 0.6);
 	}
 
 	.paste-textarea {
 		width: 100%;
-		min-height: 200px;
+		min-height: 180px;
 		padding: var(--space-3);
 		background: rgba(0, 0, 0, 0.35);
 		border: 1px solid rgba(255, 255, 255, 0.16);
@@ -842,59 +851,6 @@
 		margin: 0;
 		color: #f87171;
 		font-size: var(--text-sm);
-	}
-
-	.tip-row {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: var(--space-2);
-	}
-
-	@media (max-width: 640px) {
-		.tip-row {
-			grid-template-columns: 1fr;
-		}
-	}
-
-	.tip {
-		display: flex;
-		gap: var(--space-2);
-		padding: var(--space-2) var(--space-3);
-		border-radius: 8px;
-		font-size: 0.78rem;
-		line-height: 1.5;
-	}
-
-	.tip-icon {
-		flex-shrink: 0;
-		font-size: 0.95rem;
-		line-height: 1.2;
-	}
-
-	.tip-body {
-		color: rgba(255, 255, 255, 0.78);
-	}
-
-	.tip-body strong {
-		color: rgba(255, 255, 255, 0.95);
-	}
-
-	.tip.tip-gold {
-		background: rgba(212, 175, 55, 0.06);
-		border: 1px solid rgba(212, 175, 55, 0.25);
-	}
-
-	.tip.tip-gold .tip-body strong {
-		color: rgba(252, 211, 77, 0.95);
-	}
-
-	.tip.tip-sw {
-		background: rgba(220, 38, 38, 0.06);
-		border: 1px solid rgba(220, 38, 38, 0.25);
-	}
-
-	.tip.tip-sw .tip-body strong {
-		color: rgba(252, 165, 165, 0.95);
 	}
 
 	/* ─── Loading state ─────────────────────────────────────── */

@@ -165,7 +165,9 @@
 		width: 100%;
 		max-width: 500px;
 		max-height: 90vh;
-		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
 
 		background: var(--modal-bg);
 		backdrop-filter: blur(12px);
@@ -174,24 +176,31 @@
 		box-shadow: var(--modal-shadow);
 	}
 
+	.modal-body {
+		flex: 1 1 auto;
+		overflow-y: auto;
+		min-height: 0;
+	}
+
 	.modal.wide {
-		max-width: 70vw;
-		height: 80vh;
-		overflow: hidden;
+		max-width: min(70vw, 720px);
+		max-height: min(85vh, 900px);
+	}
+
+	@media (max-width: 768px) {
+		.modal.wide {
+			max-width: 96vw;
+			max-height: 92vh;
+		}
 	}
 
 	.modal.full {
 		max-width: 95vw;
 		width: 95vw;
-		height: 90vh;
-		overflow: hidden;
-		display: flex;
-		flex-direction: column;
+		max-height: 90vh;
 	}
 
 	.modal.full .modal-body {
-		flex: 1;
-		overflow-y: auto;
 		padding: var(--space-4) calc(var(--space-4) + var(--space-2));
 	}
 
@@ -202,6 +211,7 @@
 		padding: calc(var(--space-4) + var(--space-1)) calc(var(--space-4) + var(--space-2));
 		background: var(--tile-header-bg);
 		border-bottom: var(--tile-header-border);
+		flex-shrink: 0;
 	}
 
 	.modal-title {
@@ -252,6 +262,7 @@
 		padding: var(--space-4) calc(var(--space-4) + var(--space-2));
 		background: var(--tile-header-bg);
 		border-top: var(--tile-header-border);
+		flex-shrink: 0;
 	}
 
 </style>
