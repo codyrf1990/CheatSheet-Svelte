@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { Loader2, LogOut, Settings, User } from 'lucide-svelte';
 	import type { SyncStatus } from '$types';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { tooltip } from '$lib/utils/tooltipAction';
@@ -76,11 +77,7 @@
 	<div class="user-avatar">
 		<div class="avatar-ring"></div>
 		<div class="avatar-inner">
-			<svg viewBox="0 0 24 24" fill="currentColor">
-				<path
-					d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-				/>
-			</svg>
+			<User size={18} strokeWidth={2} />
 		</div>
 	</div>
 	<div class="user-details">
@@ -93,25 +90,17 @@
 				aria-controls="user-settings-panel"
 				aria-label="User settings"
 			>
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<path
-						d="M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"
-					/>
-				</svg>
+				<Settings size={10} strokeWidth={2} />
 				Settings
 			</button>
 			<button class="change-link" onclick={onLogout}>
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-					<polyline points="16 17 21 12 16 7" />
-					<line x1="21" y1="12" x2="9" y2="12" />
-				</svg>
+				<LogOut size={10} strokeWidth={2} />
 				Sign out
 			</button>
 		</div>
 	</div>
 	<div class="sync-indicator" class:visible={status === 'syncing'} use:tooltip={'Syncing...'}>
-		<div class="sync-spinner"></div>
+		<Loader2 class="sync-spinner" size={14} strokeWidth={2.5} />
 	</div>
 
 	{#if settingsOpen}
@@ -293,13 +282,13 @@
 		}
 	}
 
-	.avatar-inner svg {
+	.avatar-inner :global(svg) {
 		width: 18px;
 		height: 18px;
 		transition: filter 200ms ease;
 	}
 
-	.user-container:hover .avatar-inner svg {
+	.user-container:hover .avatar-inner :global(svg) {
 		filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.4));
 	}
 
@@ -358,13 +347,13 @@
 		transform: scale(0.95);
 	}
 
-	.change-link svg {
+	.change-link :global(svg) {
 		width: 10px;
 		height: 10px;
 		transition: transform 150ms ease;
 	}
 
-	.change-link:hover svg {
+	.change-link:hover :global(svg) {
 		transform: translateX(2px);
 	}
 
@@ -419,13 +408,13 @@
 		transform: scale(0.95);
 	}
 
-	.settings-button svg {
+	.settings-button :global(svg) {
 		width: 10px;
 		height: 10px;
 		transition: transform 150ms ease;
 	}
 
-	.settings-button:hover svg {
+	.settings-button:hover :global(svg) {
 		transform: rotate(45deg);
 	}
 
@@ -543,14 +532,10 @@
 		transform: scale(1);
 	}
 
-	.sync-spinner {
-		width: 14px;
-		height: 14px;
-		border: 2px solid rgba(212, 175, 55, 0.2);
-		border-top-color: var(--color-solidcam-gold);
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
-		box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+	.sync-indicator :global(.sync-spinner) {
+		color: var(--color-solidcam-gold);
+		filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.35));
+		animation: spin 0.85s linear infinite;
 	}
 
 	@keyframes spin {

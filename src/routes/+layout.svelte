@@ -3,6 +3,7 @@
 	import { untrack } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
+	import { AlertTriangle } from 'lucide-svelte';
 	import { ToastContainer, Skeleton } from '$components/ui';
 	import { LoginScreen } from '$components/layout';
 	import { syncStore } from '$stores/sync.svelte';
@@ -78,9 +79,13 @@
 	{#if bootPhaseStore.isError}
 		<div class="loading-screen">
 			<div class="boot-error-card">
+				<span class="boot-error-icon" aria-hidden="true">
+					<AlertTriangle size={22} strokeWidth={2} />
+				</span>
 				<h1 class="boot-error-title">Unable to start</h1>
 				<p class="boot-error-message">
-					{bootPhaseStore.error || 'Something went wrong during startup.'}
+					{bootPhaseStore.error ||
+						"Check your connection and try again. If this keeps happening, refresh the page."}
 				</p>
 				<button class="boot-retry-btn" onclick={() => bootPhaseStore.retry()}>Try again</button>
 			</div>
@@ -240,49 +245,87 @@
 		border-radius: 9999px !important;
 	}
 
-	/* Boot error card */
+	/* Boot error card — matches login card geometry, with red accent */
 	.boot-error-card {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: 1rem;
 		width: 100%;
-		max-width: 380px;
+		max-width: 420px;
 		padding: 2.5rem 2rem;
-		background: rgba(20, 20, 28, 0.85);
-		border: 1px solid rgba(200, 16, 46, 0.2);
-		border-radius: 16px;
-		backdrop-filter: blur(20px);
+		background: linear-gradient(135deg, rgba(28, 28, 28, 0.94) 0%, rgba(12, 12, 12, 0.92) 100%);
+		border: 1px solid rgba(200, 16, 46, 0.22);
+		border-radius: 20px;
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		box-shadow:
+			0 30px 60px -20px rgba(0, 0, 0, 0.55),
+			0 12px 28px -8px rgba(0, 0, 0, 0.35),
+			inset 0 1px 0 rgba(255, 255, 255, 0.06),
+			inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 		text-align: center;
+		animation: fadeIn 350ms var(--ease-out-expo);
+	}
+
+	.boot-error-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
+		background: var(--red-a10);
+		border: 1px solid var(--red-a20);
+		color: #fca5a5;
+		margin-bottom: 0.25rem;
 	}
 
 	.boot-error-title {
-		font-size: 1.25rem;
-		font-weight: 700;
-		color: var(--color-solidcam-gold);
+		font-size: 1.125rem;
+		font-weight: 580;
+		letter-spacing: -0.012em;
+		color: var(--color-text-primary);
 		margin: 0;
 	}
 
 	.boot-error-message {
-		font-size: var(--text-lg);
-		color: rgba(255, 255, 255, 0.6);
+		font-size: 0.875rem;
+		font-weight: 420;
+		color: rgba(255, 255, 255, 0.62);
 		margin: 0;
-		line-height: 1.5;
+		line-height: 1.55;
+		max-width: 32ch;
 	}
 
 	.boot-retry-btn {
+		margin-top: 0.5rem;
 		padding: 0.625rem 1.5rem;
 		font-size: 0.9375rem;
-		font-weight: 500;
+		font-weight: 520;
 		color: #1a1a1a;
 		background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
 		border: none;
 		border-radius: 9999px;
 		cursor: pointer;
-		transition: filter 150ms ease;
+		box-shadow:
+			0 8px 20px rgba(212, 175, 55, 0.25),
+			inset 0 1px 0 rgba(255, 255, 255, 0.35);
+		transition:
+			filter 200ms var(--ease-out-quart),
+			box-shadow 250ms var(--ease-out-expo),
+			transform 200ms var(--ease-out-quart);
 	}
 
 	.boot-retry-btn:hover {
-		filter: brightness(1.1);
+		filter: brightness(1.06);
+		box-shadow:
+			0 12px 28px rgba(212, 175, 55, 0.35),
+			inset 0 1px 0 rgba(255, 255, 255, 0.4);
+		transform: translateY(-1px);
+	}
+
+	.boot-retry-btn:active {
+		transform: translateY(0);
 	}
 </style>

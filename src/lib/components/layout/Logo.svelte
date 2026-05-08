@@ -13,7 +13,7 @@
 	rel={external ? 'noopener noreferrer' : undefined}
 	class="logo-container"
 >
-	<img src="/images/solidcam-logo.png" alt="SolidCAM" class="logo" />
+	<img src="/img/solidcam-logo.svg" alt="SolidCAM" class="logo" />
 </a>
 
 <style>
@@ -27,13 +27,14 @@
 		position: relative;
 	}
 
-	/* Breathing red glow cloud under tagline */
+	/* Breathing red glow cloud under tagline — centered under logo at every viewport */
 	.logo-container::after {
 		content: '';
 		position: absolute;
 		bottom: 5%;
-		left: 0%;
-		right: -20%;
+		left: 50%;
+		width: 100%;
+		transform: translateX(-50%);
 		height: 35%;
 		background: radial-gradient(
 			ellipse 60% 80% at 50% 100%,
@@ -50,11 +51,11 @@
 		0%,
 		100% {
 			opacity: 0.7;
-			transform: scaleY(0.95);
+			transform: translateX(-50%) scaleY(0.95);
 		}
 		50% {
 			opacity: 1;
-			transform: scaleY(1.05);
+			transform: translateX(-50%) scaleY(1.05);
 		}
 	}
 
@@ -62,8 +63,7 @@
 		width: 100%;
 		height: auto;
 		filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-		transition: transform 200ms ease;
-		mix-blend-mode: lighten;
+		transition: transform 200ms var(--ease-out-quart);
 	}
 
 	.logo-container:hover .logo {
