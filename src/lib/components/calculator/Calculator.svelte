@@ -550,22 +550,41 @@
 
 	.calculator-display {
 		width: 100%;
-		padding: 0.375rem 0.5rem;
-		background: rgba(0, 0, 0, 0.4);
-		border: 1px solid rgba(255, 255, 255, 0.1);
+		padding: 0.45rem 0.6rem;
+		background:
+			linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.35) 100%);
+		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: var(--radius-sm);
-		font-family: 'JetBrains Mono', monospace;
+		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
 		font-size: 1.125rem;
 		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		letter-spacing: -0.005em;
 		color: var(--color-solidcam-gold, #d4af37);
 		text-align: right;
 		cursor: pointer;
-		transition: all 150ms ease;
+		text-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+		box-shadow:
+			inset 0 2px 4px rgba(0, 0, 0, 0.4),
+			inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+		transition:
+			background 200ms var(--ease-out-quart),
+			border-color 200ms var(--ease-out-quart),
+			box-shadow 280ms var(--ease-out-expo);
 	}
 
 	.calculator-display:hover {
-		background: rgba(0, 0, 0, 0.5);
-		border-color: rgba(212, 175, 55, 0.3);
+		border-color: var(--gold-a30);
+		box-shadow:
+			inset 0 2px 4px rgba(0, 0, 0, 0.4),
+			inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+			0 0 18px rgba(212, 175, 55, 0.18);
+	}
+
+	.calculator-display:active {
+		box-shadow:
+			inset 0 2px 4px rgba(0, 0, 0, 0.5),
+			inset 0 0 12px rgba(212, 175, 55, 0.15);
 	}
 
 	.error-hint {
@@ -584,55 +603,71 @@
 
 	.calc-btn {
 		padding: 0.5rem;
-		background: rgba(255, 255, 255, 0.08);
-		border: 1px solid rgba(255, 255, 255, 0.1);
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: var(--radius-sm);
 		font-family: inherit;
 		font-size: 0.85rem;
-		font-weight: 500;
+		font-weight: 540;
 		color: rgba(255, 255, 255, 0.9);
 		cursor: pointer;
-		transition: all 150ms ease;
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+		transition:
+			background 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart),
+			transform 100ms var(--ease-out-quart),
+			box-shadow 200ms var(--ease-out-expo);
 	}
 
 	.calc-btn:hover {
-		background: rgba(255, 255, 255, 0.15);
+		background: rgba(255, 255, 255, 0.1);
+		border-color: rgba(255, 255, 255, 0.16);
 	}
 
 	.calc-btn:active {
-		transform: scale(0.95);
+		transform: scale(0.96);
+		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
 	}
 
 	.calc-btn.clear {
-		background: rgba(200, 16, 46, 0.2);
-		border-color: rgba(200, 16, 46, 0.3);
-		color: #ff6666;
+		background: var(--red-a20);
+		border-color: var(--red-a30);
+		color: #fca5a5;
 	}
 
 	.calc-btn.clear:hover {
-		background: rgba(200, 16, 46, 0.3);
+		background: rgba(200, 16, 46, 0.28);
+		border-color: rgba(200, 16, 46, 0.45);
+		color: #fecaca;
 	}
 
 	.calc-btn.operation {
-		background: rgba(212, 175, 55, 0.15);
-		border-color: rgba(212, 175, 55, 0.25);
+		background: var(--gold-a10);
+		border-color: var(--gold-a30);
 		color: var(--color-solidcam-gold, #d4af37);
 	}
 
 	.calc-btn.operation:hover {
-		background: rgba(212, 175, 55, 0.25);
+		background: var(--gold-a20);
+		border-color: var(--gold-a45);
 	}
 
 	.calc-btn.equals {
-		background: var(--color-solidcam-gold, #d4af37);
+		background: linear-gradient(135deg, #e8c547 0%, #d4af37 100%);
 		border-color: var(--color-solidcam-gold, #d4af37);
 		color: #1a1a1a;
-		font-weight: 600;
+		font-weight: 700;
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.4),
+			0 4px 12px rgba(212, 175, 55, 0.25);
 	}
 
 	.calc-btn.equals:hover {
-		background: #e5c55a;
-		border-color: #e5c55a;
+		background: linear-gradient(135deg, #f0cc52 0%, #e3bd44 100%);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.45),
+			0 6px 18px rgba(212, 175, 55, 0.4);
 	}
 
 	.calculator-quick-row {
@@ -645,13 +680,16 @@
 	.calc-btn.quick-percent {
 		padding: 0.25rem;
 		font-size: 0.7rem;
-		background: rgba(212, 175, 55, 0.1);
-		border-color: rgba(212, 175, 55, 0.15);
-		color: rgba(212, 175, 55, 0.9);
+		background: var(--gold-a05);
+		border-color: var(--gold-a20);
+		color: rgba(212, 175, 55, 0.85);
+		box-shadow: none;
 	}
 
 	.calc-btn.quick-percent:hover {
-		background: rgba(212, 175, 55, 0.2);
+		background: var(--gold-a20);
+		border-color: var(--gold-a30);
+		color: var(--color-solidcam-gold);
 	}
 
 	/* Narrow viewport compaction */
