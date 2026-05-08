@@ -228,7 +228,7 @@ Import from Salesforce dongle page text (Ctrl+A, Ctrl+C). Parser: `src/lib/utils
 
 | Scenario               | Dongle No. | Net Dongle  | Page Name    |
 | ---------------------- | ---------- | ----------- | ------------ |
-| Hardware Dongle        | 5 digits   | Not Checked | `HW 77518`   |
+| Hardware Dongle        | 5 digits   | Not Checked | `HWD 77518`  |
 | Network Dongle (NWD)   | 5 digits   | Checked     | `NWD 77518`  |
 | Network Product Key    | >5 digits  | Checked     | `NPK 7452`   |
 | Standalone Product Key | >5 digits  | Not Checked | `SPK 8575`   |

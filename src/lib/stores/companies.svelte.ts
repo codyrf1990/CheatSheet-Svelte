@@ -164,30 +164,37 @@ function migratePackageState(oldState: unknown): Record<string, PackageState> {
 }
 
 /**
- * Compute the legacy (pre-2026-05) page name for a license. Used only by the
- * one-time migration that renames stored pages to the new format.
+ * Compute possible legacy page names for a license. Used by the one-time
+ * migration that renames stored pages to the current format. Returns ALL
+ * historical formats so users who loaded under any prior version still get
+ * migrated correctly.
  *
- * Old format differences vs current `getPageNameForLicense`:
- *   - Hardware Dongle: `<dongle>` (no "HW " prefix)
- *   - Network Product Key: `NPK <full-key>` (full key, not last-4)
+ * Legacy formats covered:
+ *   - Hardware Dongle: `<dongle>` (original) and `HW <dongle>` (intermediate)
+ *   - Network Product Key: `NPK <full-key>` (original, before last-4 truncation)
  */
-function legacyPageNameForLicense(license: LicenseInfo): string {
+function legacyPageNameVariants(license: LicenseInfo): string[] {
 	const noGcode = license.features?.includes('NO G-code') ?? false;
 	const suffix = noGcode ? ' No-Gcode' : '';
+	const variants: string[] = [];
 
-	if (license.isProfile && license.profileNo) return `P${license.profileNo}${suffix}`;
+	if (license.isProfile && license.profileNo) return variants; // Profile format never changed
 	if (license.productKey && license.productKey.length > 4) {
-		if (license.isNetworkLicense) return `NPK ${license.productKey}${suffix}`;
-		const last4 = license.productKey.slice(-4).toUpperCase();
-		return `SPK ${last4}${suffix}`;
+		if (license.isNetworkLicense) {
+			// Old: full key
+			variants.push(`NPK ${license.productKey}${suffix}`);
+		}
+		// SPK format never changed (always last-4)
+		return variants;
 	}
 	if (license.dongleNo && license.dongleNo.trim()) {
 		const dongle = license.dongleNo.trim();
-		if (license.isNetworkLicense) return `NWD ${dongle}${suffix}`;
-		return `${dongle}${suffix}`;
+		if (license.isNetworkLicense) return variants; // NWD format never changed
+		// Hardware: bare dongle (oldest), then "HW <dongle>" (intermediate)
+		variants.push(`${dongle}${suffix}`);
+		variants.push(`HW ${dongle}${suffix}`);
 	}
-	if (license.profileNo) return `P${license.profileNo}${suffix}`;
-	return `P1${suffix}`;
+	return variants;
 }
 
 /**
@@ -199,15 +206,17 @@ function migrateLegacyPageNames(company: Company): boolean {
 	if (!Array.isArray(company.pages) || !Array.isArray(company.licenses)) return false;
 	let changed = false;
 	for (const license of company.licenses) {
-		const oldName = legacyPageNameForLicense(license);
 		const newName = getPageNameForLicense(license);
-		if (oldName === newName) continue;
-		// Only rename if the old name still exists AND no page already uses the new name
-		const oldPage = company.pages.find((p) => p.name === oldName);
-		if (!oldPage) continue;
-		if (company.pages.some((p) => p.name === newName)) continue;
-		oldPage.name = newName;
-		changed = true;
+		const variants = legacyPageNameVariants(license).filter((v) => v !== newName);
+		if (variants.length === 0) continue;
+		for (const oldName of variants) {
+			const oldPage = company.pages.find((p) => p.name === oldName);
+			if (!oldPage) continue;
+			if (company.pages.some((p) => p.name === newName)) continue;
+			oldPage.name = newName;
+			changed = true;
+			break; // One license, one page
+		}
 	}
 	return changed;
 }
