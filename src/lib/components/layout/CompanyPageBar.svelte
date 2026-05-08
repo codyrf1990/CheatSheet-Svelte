@@ -1,4 +1,19 @@
 <script lang="ts">
+	import {
+		AlertTriangle,
+		Check,
+		ChevronDown,
+		Copy,
+		Download,
+		Loader2,
+		MonitorOff,
+		MoreVertical,
+		Pencil,
+		Plus,
+		RotateCcw,
+		Search,
+		Trash2
+	} from 'lucide-svelte';
 	import { companiesStore } from '$stores/companies.svelte';
 
 	import { syncStore } from '$stores/sync.svelte';
@@ -606,82 +621,20 @@
 					role="status"
 					aria-live="polite"
 				>
-					<svg viewBox="0 0 16 16" fill="none" width="12" height="12" aria-hidden="true">
-						{#if statusIndicator.icon === 'check'}
-							<circle cx="8" cy="8" r="6" fill="currentColor" opacity="0.2" />
-							<path
-								d="M5 8l2 2 4-4"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						{:else if statusIndicator.icon === 'spinner'}
-							<circle
-								cx="8"
-								cy="8"
-								r="6"
-								stroke="currentColor"
-								stroke-width="1.5"
-								stroke-dasharray="20 10"
-								stroke-linecap="round"
-							>
-								<animateTransform
-									attributeName="transform"
-									type="rotate"
-									from="0 8 8"
-									to="360 8 8"
-									dur="1s"
-									repeatCount="indefinite"
-								/>
-							</circle>
-						{:else if statusIndicator.icon === 'warning'}
-							<path
-								d="M8 3L2 13h12L8 3z"
-								stroke="currentColor"
-								stroke-width="1.2"
-								stroke-linejoin="round"
-							/>
-							<line
-								x1="8"
-								y1="7"
-								x2="8"
-								y2="10"
-								stroke="currentColor"
-								stroke-width="1.2"
-								stroke-linecap="round"
-							/>
-							<circle cx="8" cy="12" r="0.5" fill="currentColor" />
-						{:else if statusIndicator.icon === 'device'}
-							<rect
-								x="3"
-								y="4"
-								width="10"
-								height="7"
-								rx="1"
-								stroke="currentColor"
-								stroke-width="1.2"
-							/>
-							<line
-								x1="6"
-								y1="13"
-								x2="10"
-								y2="13"
-								stroke="currentColor"
-								stroke-width="1.2"
-								stroke-linecap="round"
-							/>
-						{:else}
-							<circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2" fill="none" />
-						{/if}
-					</svg>
+					{#if statusIndicator.icon === 'check'}
+						<Check size={12} strokeWidth={2.5} />
+					{:else if statusIndicator.icon === 'spinner'}
+						<Loader2 class="status-spinner" size={12} strokeWidth={2.5} />
+					{:else if statusIndicator.icon === 'warning'}
+						<AlertTriangle size={12} strokeWidth={2} />
+					{:else if statusIndicator.icon === 'device'}
+						<MonitorOff size={12} strokeWidth={2} />
+					{/if}
 				</span>
 			</Tooltip>
-			<svg class="chevron" class:open={dropdownOpen} viewBox="0 0 20 20" fill="currentColor">
-				<path
-					d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-				/>
-			</svg>
+			<span class="chevron" class:open={dropdownOpen} aria-hidden="true">
+				<ChevronDown size={14} strokeWidth={2.25} />
+			</span>
 		</button>
 	</div>
 
@@ -718,7 +671,7 @@
 					onclick={(e) => {
 						e.stopPropagation();
 						handleSWContextMenu(e);
-					}}>⋮</button
+					}}><MoreVertical size={12} strokeWidth={2.5} /></button
 				>
 			</div>
 		{/if}
@@ -761,7 +714,7 @@
 							onclick={(e) => {
 								e.stopPropagation();
 								handlePageContextMenu(e, page.id);
-							}}>⋮</button
+							}}><MoreVertical size={12} strokeWidth={2.5} /></button
 						>
 					</div>
 				{/if}
@@ -774,7 +727,7 @@
 				onclick={handleNewPage}
 				aria-label="Add new page"
 			>
-				+
+				<Plus size={14} strokeWidth={2.25} />
 			</button>
 		</Tooltip>
 	</div>
@@ -791,18 +744,7 @@
 					onclick={() => (showImportModal = true)}
 					aria-label="Import License"
 				>
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						width="14"
-						height="14"
-					>
-						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-						<polyline points="7 10 12 15 17 10" />
-						<line x1="12" y1="15" x2="12" y2="3" />
-					</svg>
+					<Download size={13} strokeWidth={2} />
 					Import
 				</button>
 			</Tooltip>
@@ -822,14 +764,17 @@
 	>
 		<!-- Search (fixed) -->
 		<div class="dropdown-header">
-			<input
-				type="search"
-				placeholder="Search companies..."
-				bind:value={searchQuery}
-				bind:this={searchInputRef}
-				class="search-input"
-				aria-label="Search companies"
-			/>
+			<div class="search-wrap">
+				<Search class="search-icon" size={13} strokeWidth={2} />
+				<input
+					type="search"
+					placeholder="Search companies..."
+					bind:value={searchQuery}
+					bind:this={searchInputRef}
+					class="search-input"
+					aria-label="Search companies"
+				/>
+			</div>
 		</div>
 
 		<!-- Scrollable List -->
@@ -881,8 +826,10 @@
 				type="button"
 				class="footer-btn footer-btn--new"
 				onclick={handleNewCompany}
-				aria-label="Create new company">+</button
+				aria-label="Create new company"
 			>
+				<Plus size={14} strokeWidth={2.5} />
+			</button>
 			<button type="button" class="footer-btn footer-btn--view" onclick={onViewAll}>
 				View All ({allCompanies.length})
 			</button>
@@ -899,54 +846,71 @@
 		style="left: {contextMenu.x}px; top: {contextMenu.y}px;"
 	>
 		{#if contextMenu.type === 'company'}
-			<button type="button" role="menuitem" onclick={handleRenameCompany}>Rename</button>
-			<button type="button" role="menuitem" onclick={handleDuplicateCompany}>Duplicate</button>
-			<button type="button" role="menuitem" onclick={handleImportLicense}>Import License</button>
-			<button type="button" role="menuitem" class="danger" onclick={handleDeleteCompany}
-				>Delete</button
-			>
+			<button type="button" role="menuitem" onclick={handleRenameCompany}>
+				<Pencil size={13} strokeWidth={2} /> Rename
+			</button>
+			<button type="button" role="menuitem" onclick={handleDuplicateCompany}>
+				<Copy size={13} strokeWidth={2} /> Duplicate
+			</button>
+			<button type="button" role="menuitem" onclick={handleImportLicense}>
+				<Download size={13} strokeWidth={2} /> Import License
+			</button>
+			<button type="button" role="menuitem" class="danger" onclick={handleDeleteCompany}>
+				<Trash2 size={13} strokeWidth={2} /> Delete
+			</button>
 			{#if import.meta.env.DEV}
 				<hr class="menu-divider" />
-				<button type="button" role="menuitem" class="danger" onclick={handleClearAllCompanies}
-					>DEV: Clear All</button
-				>
+				<button type="button" role="menuitem" class="danger" onclick={handleClearAllCompanies}>
+					<Trash2 size={13} strokeWidth={2} /> DEV: Clear All
+				</button>
 			{/if}
 		{:else if contextMenu.type === 'sw'}
-			<button type="button" role="menuitem" onclick={handleSWRename}>Rename</button>
+			<button type="button" role="menuitem" onclick={handleSWRename}>
+				<Pencil size={13} strokeWidth={2} /> Rename
+			</button>
 			{#if currentCompany?.swTabLabelOverride}
-				<button type="button" role="menuitem" onclick={handleSWResetLabel}>Reset to auto</button>
+				<button type="button" role="menuitem" onclick={handleSWResetLabel}>
+					<RotateCcw size={13} strokeWidth={2} /> Reset to auto
+				</button>
 			{/if}
-			<button type="button" role="menuitem" class="danger" onclick={handleSWDeleteAll}
-				>Remove all SolidWorks licenses</button
-			>
+			<button type="button" role="menuitem" class="danger" onclick={handleSWDeleteAll}>
+				<Trash2 size={13} strokeWidth={2} /> Remove all SolidWorks licenses
+			</button>
 		{:else}
-			<button type="button" role="menuitem" onclick={handleRenamePage}>Rename</button>
-			<button type="button" role="menuitem" onclick={handleDuplicatePage}>Duplicate</button>
+			<button type="button" role="menuitem" onclick={handleRenamePage}>
+				<Pencil size={13} strokeWidth={2} /> Rename
+			</button>
+			<button type="button" role="menuitem" onclick={handleDuplicatePage}>
+				<Copy size={13} strokeWidth={2} /> Duplicate
+			</button>
 			{#if !contextMenuLicense}
-				<button type="button" role="menuitem" onclick={handleCopyPageName}>Copy Page Name</button>
+				<button type="button" role="menuitem" onclick={handleCopyPageName}>
+					<Copy size={13} strokeWidth={2} /> Copy Page Name
+				</button>
 			{/if}
 			{#if contextMenuLicense?.isProfile}
 				{#if contextMenuPage?.licenseKey}
-					<button type="button" role="menuitem" onclick={handleCopyLicenseKey}
-						>Copy License Number</button
-					>
+					<button type="button" role="menuitem" onclick={handleCopyLicenseKey}>
+						<Copy size={13} strokeWidth={2} /> Copy License Number
+					</button>
 				{/if}
-				<button type="button" role="menuitem" onclick={handleCopyProfileName}
-					>Copy Profile Name</button
-				>
+				<button type="button" role="menuitem" onclick={handleCopyProfileName}>
+					<Copy size={13} strokeWidth={2} /> Copy Profile Name
+				</button>
 			{:else if contextMenuPage?.licenseKey}
 				{#if contextMenuLicense?.licenseType === 'dongle'}
-					<button type="button" role="menuitem" onclick={handleCopyLicenseKey}
-						>Copy Dongle Number</button
-					>
+					<button type="button" role="menuitem" onclick={handleCopyLicenseKey}>
+						<Copy size={13} strokeWidth={2} /> Copy Dongle Number
+					</button>
 				{:else}
-					<button type="button" role="menuitem" onclick={handleCopyLicenseKey}
-						>Copy Key</button
-					>
+					<button type="button" role="menuitem" onclick={handleCopyLicenseKey}>
+						<Copy size={13} strokeWidth={2} /> Copy Key
+					</button>
 				{/if}
 			{/if}
-			<button type="button" role="menuitem" class="danger" onclick={handleDeletePage}>Delete</button
-			>
+			<button type="button" role="menuitem" class="danger" onclick={handleDeletePage}>
+				<Trash2 size={13} strokeWidth={2} /> Delete
+			</button>
 		{/if}
 	</div>
 {/if}
@@ -1038,25 +1002,30 @@
 	.company-trigger {
 		display: flex;
 		align-items: center;
-		gap: 0.375rem;
+		gap: 0.4rem;
 		padding: 0.35rem 0.625rem;
-		background: rgba(255, 255, 255, 0.05);
+		background: rgba(255, 255, 255, 0.04);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 10px;
 		color: var(--color-text-primary);
 		font-size: var(--text-base);
 		font-weight: 500;
 		cursor: pointer;
-		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition:
+			background 200ms var(--ease-out-quart),
+			border-color 200ms var(--ease-out-quart),
+			box-shadow 280ms var(--ease-out-expo),
+			transform 200ms var(--ease-out-quart);
 	}
 
 	.company-trigger:hover {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
+		background: rgba(255, 255, 255, 0.08);
+		border-color: rgba(255, 255, 255, 0.16);
 		transform: translateY(-2px);
 		box-shadow:
-			0 4px 16px rgba(0, 0, 0, 0.25),
-			inset 0 1px 0 rgba(255, 255, 255, 0.1);
+			0 6px 20px rgba(0, 0, 0, 0.3),
+			0 0 22px rgba(212, 175, 55, 0.12),
+			inset 0 1px 0 rgba(255, 255, 255, 0.08);
 	}
 
 	.company-name {
@@ -1064,7 +1033,8 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-		font-weight: 600;
+		font-weight: 540;
+		letter-spacing: -0.01em;
 	}
 
 	.status-dot {
@@ -1073,11 +1043,22 @@
 		flex-shrink: 0;
 	}
 
+	.status-dot :global(.status-spinner) {
+		animation: status-spin 0.85s linear infinite;
+	}
+
+	@keyframes status-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
 	.chevron {
-		width: 16px;
-		height: 16px;
-		opacity: 0.6;
-		transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		opacity: 0.55;
+		transition: transform 250ms var(--ease-out-expo);
 	}
 
 	.chevron.open {
@@ -1143,23 +1124,47 @@
 		background: rgba(255, 255, 255, 0.25);
 	}
 
+	.search-wrap {
+		position: relative;
+		display: flex;
+		align-items: center;
+	}
+
+	.search-wrap :global(.search-icon) {
+		position: absolute;
+		left: 0.55rem;
+		top: 50%;
+		transform: translateY(-50%);
+		color: rgba(255, 255, 255, 0.4);
+		pointer-events: none;
+		transition: color 200ms var(--ease-out-quart);
+	}
+
+	.search-wrap:focus-within :global(.search-icon) {
+		color: var(--color-solidcam-gold);
+	}
+
 	.search-input {
 		width: 100%;
-		padding: 0.4rem 0.6rem;
-		background: rgba(255, 255, 255, 0.05);
+		padding: 0.4rem 0.6rem 0.4rem 1.85rem;
+		background: rgba(255, 255, 255, 0.04);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 6px;
 		color: var(--color-text-primary);
 		font-size: var(--text-sm);
-		transition: all 200ms ease;
+		transition:
+			border-color 200ms var(--ease-out-quart),
+			background 200ms var(--ease-out-quart),
+			box-shadow 250ms var(--ease-out-expo);
 	}
 
 	.search-input::placeholder {
-		color: rgba(255, 255, 255, 0.5);
+		color: rgba(255, 255, 255, 0.45);
 	}
 
 	.search-input:focus {
 		outline: none;
+		background: rgba(255, 255, 255, 0.06);
 		border-color: var(--color-solidcam-gold, #d4af37);
 		box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
 	}
@@ -1181,26 +1186,31 @@
 	.company-item {
 		display: block;
 		width: 100%;
-		padding: 0.4rem 0.5rem;
+		padding: 0.4rem 0.5rem 0.4rem 0.6rem;
 		background: transparent;
 		border: none;
+		border-left: 2px solid transparent;
 		border-radius: 6px;
-		color: rgba(255, 255, 255, 0.8);
+		color: rgba(255, 255, 255, 0.78);
 		font-size: var(--text-sm);
 		text-align: left;
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart),
+			border-left-color 200ms var(--ease-out-expo);
 	}
 
 	.company-item:hover {
-		background: rgba(255, 255, 255, 0.08);
+		background: rgba(255, 255, 255, 0.06);
 		color: var(--color-text-primary);
-		padding-left: 0.75rem;
+		border-left-color: var(--gold-a45);
 	}
 
 	.company-item.active {
-		background: rgba(212, 175, 55, 0.15);
+		background: var(--gold-a20);
 		color: var(--color-solidcam-gold, #d4af37);
+		border-left-color: var(--color-solidcam-gold);
 	}
 
 	.no-results {
@@ -1231,18 +1241,24 @@
 	}
 
 	.footer-btn--new {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 24px;
+		width: 28px;
+		height: 26px;
 		background: linear-gradient(145deg, #e8c547, #d4af37);
 		color: #1a1a1a;
-		font-weight: 700;
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+		transition:
+			transform 180ms var(--ease-out-quart),
+			box-shadow 250ms var(--ease-out-expo);
 	}
 
 	.footer-btn--new:hover {
-		transform: scale(1.05);
-		box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+		transform: translateY(-1px);
+		box-shadow:
+			0 4px 12px rgba(212, 175, 55, 0.4),
+			inset 0 1px 0 rgba(255, 255, 255, 0.4);
 	}
 
 	.footer-btn--view {
@@ -1290,36 +1306,56 @@
 	}
 
 	.page-tab {
-		padding: 0.25rem 0.5rem;
+		position: relative;
+		padding: 0.28rem 0.55rem;
 		background: transparent;
 		border: 1px solid transparent;
 		border-radius: 8px;
 		color: rgba(255, 255, 255, 0.6);
 		font-size: var(--text-sm);
 		font-weight: 500;
+		letter-spacing: -0.005em;
 		cursor: pointer;
-		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition:
+			background 180ms var(--ease-out-quart),
+			color 180ms var(--ease-out-quart),
+			border-color 180ms var(--ease-out-quart),
+			box-shadow 250ms var(--ease-out-expo);
 		white-space: nowrap;
 	}
 
 	.page-tab:hover {
-		background: rgba(255, 255, 255, 0.06);
-		color: rgba(255, 255, 255, 0.9);
+		background: rgba(255, 255, 255, 0.05);
+		color: rgba(255, 255, 255, 0.92);
 		border-color: rgba(255, 255, 255, 0.08);
 	}
 
 	.page-tab.active {
-		background: rgba(212, 175, 55, 0.25);
-		border-color: rgba(212, 175, 55, 0.3);
-		border-bottom: 2px solid var(--color-solidcam-gold, #d4af37);
+		background: var(--gold-a20);
+		border-color: var(--gold-a30);
 		color: var(--color-solidcam-gold, #d4af37);
-		box-shadow: 0 0 12px rgba(212, 175, 55, 0.1);
+		box-shadow:
+			0 0 14px rgba(212, 175, 55, 0.18),
+			inset 0 1px 0 rgba(255, 255, 255, 0.06);
+	}
+
+	/* Active tab gets a soft underline rail anchoring it to the content below */
+	.page-tab.active::after {
+		content: '';
+		position: absolute;
+		left: 12%;
+		right: 12%;
+		bottom: -3px;
+		height: 2px;
+		border-radius: 2px;
+		background: linear-gradient(90deg, transparent, var(--color-solidcam-gold), transparent);
+		box-shadow: 0 0 8px rgba(212, 175, 55, 0.45);
 	}
 
 	.page-tab.sw-tab {
 		color: rgba(248, 113, 113, 0.85);
-		border-left: 2px solid rgba(220, 38, 38, 0.5);
-		padding-left: 0.45rem;
+		border-left: 2px solid rgba(220, 38, 38, 0.45);
+		padding-left: 0.5rem;
 	}
 
 	.page-tab.sw-tab:hover {
@@ -1330,12 +1366,18 @@
 	}
 
 	.page-tab.sw-tab.active {
-		background: rgba(220, 38, 38, 0.18);
-		border-color: rgba(220, 38, 38, 0.35);
-		border-bottom: 2px solid rgba(220, 38, 38, 0.85);
+		background: rgba(220, 38, 38, 0.16);
+		border-color: rgba(220, 38, 38, 0.32);
 		border-left: 2px solid rgba(220, 38, 38, 0.85);
 		color: rgba(252, 165, 165, 1);
-		box-shadow: 0 0 12px rgba(220, 38, 38, 0.12);
+		box-shadow:
+			0 0 14px rgba(220, 38, 38, 0.18),
+			inset 0 1px 0 rgba(255, 255, 255, 0.06);
+	}
+
+	.page-tab.sw-tab.active::after {
+		background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 1), transparent);
+		box-shadow: 0 0 8px rgba(220, 38, 38, 0.5);
 	}
 
 	.page-tab-group {
@@ -1346,17 +1388,19 @@
 
 	.page-tab-menu-btn {
 		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		opacity: 0;
 		padding: 0.1rem 0.15rem;
 		margin-left: -0.15rem;
-		font-size: 0.7em;
 		line-height: 1;
-		color: rgba(255, 255, 255, 0.4);
+		color: rgba(255, 255, 255, 0.45);
 		background: none;
 		border: none;
 		border-radius: 4px;
 		cursor: pointer;
-		transition: opacity 150ms ease;
+		transition: opacity 150ms var(--ease-out-quart);
 	}
 
 	/* Expand touch target to 44x44 on touch devices only */
@@ -1395,14 +1439,17 @@
 	}
 
 	.page-tab.add-tab {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		color: rgba(255, 255, 255, 0.4);
-		font-size: var(--text-lg);
-		padding: 0.25rem 0.5rem;
+		padding: 0.28rem 0.45rem;
 	}
 
 	.page-tab.add-tab:hover {
 		color: var(--color-solidcam-gold, #d4af37);
-		background: rgba(212, 175, 55, 0.1);
+		background: var(--gold-a10);
+		border-color: var(--gold-a20);
 	}
 
 	.page-tab-input {
@@ -1427,25 +1474,31 @@
 	}
 
 	.quick-action-btn {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		gap: 0.35rem;
 		height: 26px;
-		padding: 0 0.5rem;
-		background: rgba(255, 255, 255, 0.05);
+		padding: 0 0.55rem;
+		background: rgba(255, 255, 255, 0.04);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 6px;
-		color: rgba(255, 255, 255, 0.5);
+		color: rgba(255, 255, 255, 0.62);
 		font-size: 0.7rem;
-		font-weight: 600;
+		font-weight: 540;
+		letter-spacing: 0.01em;
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 180ms var(--ease-out-quart),
+			border-color 180ms var(--ease-out-quart),
+			color 180ms var(--ease-out-quart),
+			box-shadow 250ms var(--ease-out-expo);
 	}
 
 	.quick-action-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.15);
+		background: var(--gold-a10);
+		border-color: var(--gold-a30);
 		color: var(--color-solidcam-gold, #d4af37);
+		box-shadow: 0 0 14px rgba(212, 175, 55, 0.18);
 	}
 
 	/* Context Menu */
@@ -1477,21 +1530,37 @@
 	}
 
 	.context-menu button {
-		display: block;
+		display: flex;
+		align-items: center;
+		gap: 0.55rem;
 		width: 100%;
-		padding: 0.625rem 1rem;
+		padding: 0.55rem 0.85rem;
 		background: transparent;
 		border: none;
-		color: rgba(255, 255, 255, 0.8);
+		border-left: 2px solid transparent;
+		color: rgba(255, 255, 255, 0.82);
 		font-size: var(--text-base);
 		text-align: left;
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart),
+			border-left-color 200ms var(--ease-out-expo);
+	}
+
+	.context-menu button :global(svg) {
+		flex-shrink: 0;
+		opacity: 0.7;
+		transition: opacity 150ms var(--ease-out-quart);
 	}
 
 	.context-menu button:hover {
-		background: rgba(255, 255, 255, 0.08);
-		padding-left: 1.25rem;
+		background: rgba(255, 255, 255, 0.06);
+		border-left-color: var(--gold-a45);
+	}
+
+	.context-menu button:hover :global(svg) {
+		opacity: 1;
 	}
 
 	.context-menu button:not(:last-child) {
@@ -1499,8 +1568,9 @@
 	}
 
 	.context-menu button.danger:hover {
-		background: rgba(239, 68, 68, 0.15);
+		background: rgba(239, 68, 68, 0.12);
 		color: var(--color-error);
+		border-left-color: var(--color-error);
 	}
 
 	.context-menu .menu-divider {
@@ -1614,7 +1684,7 @@
 			height: 16px;
 		}
 
-		.status-dot svg {
+		.status-dot :global(svg) {
 			width: 10px;
 			height: 10px;
 		}
