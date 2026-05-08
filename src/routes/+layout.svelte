@@ -66,6 +66,7 @@
 		muted
 		playsinline
 		disablepictureinpicture
+		preload="metadata"
 		class="absolute left-1/2 top-1/2 min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 object-cover"
 	>
 		<source src="/video/Particle.mp4" type="video/mp4" />
@@ -86,15 +87,28 @@
 		</div>
 	{:else if !initialized}
 		<div class="loading-screen">
+			<!-- Logo skeleton — pre-placed at the same position as the real logo
+			     so the boot → login transition is a fade in place -->
+			<div class="skeleton-logo">
+				<Skeleton width="100%" height="100%" />
+			</div>
+
 			<div class="skeleton-card">
-				<span class="boot-brand">CheatSheet</span>
-				<Skeleton variant="circular" width="44px" height="44px" />
 				<div class="skeleton-text-group">
-					<Skeleton width="120px" height="1.5rem" />
-					<Skeleton width="180px" height="0.875rem" />
+					<Skeleton width="160px" height="1.75rem" />
+					<Skeleton width="220px" height="0.95rem" />
 				</div>
-				<Skeleton width="100%" height="48px" class="skeleton-input" />
+				<div class="skeleton-input-row">
+					<Skeleton width="100%" height="48px" class="skeleton-input" />
+					<Skeleton variant="circular" width="20px" height="20px" />
+				</div>
 				<Skeleton width="100%" height="48px" class="skeleton-button" />
+				<div class="skeleton-footer-rule"></div>
+			</div>
+
+			<!-- Bottom brand skeleton — matches the real bottom-brand position -->
+			<div class="skeleton-bottom-brand">
+				<Skeleton width="140px" height="0.75rem" />
 			</div>
 		</div>
 	{:else if !isLoggedIn}
@@ -120,11 +134,11 @@
 		content: '';
 		position: absolute;
 		inset: 0;
-		background: linear-gradient(
-			180deg,
-			rgba(10, 10, 15, 0.4) 0%,
-			rgba(10, 10, 15, 0.2) 50%,
-			rgba(10, 10, 15, 0.5) 100%
+		background: radial-gradient(
+			ellipse at center,
+			transparent 0%,
+			rgba(10, 10, 15, 0.35) 60%,
+			rgba(10, 10, 15, 0.65) 100%
 		);
 		pointer-events: none;
 	}
@@ -157,20 +171,37 @@
 		justify-content: center;
 		min-height: 100vh;
 		padding: 2rem;
+		position: relative;
+	}
+
+	/* Logo skeleton — mirrors .logo-top in LoginScreen so the boot → login transition is a fade in place */
+	.skeleton-logo {
+		position: absolute;
+		top: 7%;
+		left: 50%;
+		transform: translateX(-50%);
+		width: clamp(296px, 35vw, 476px);
+		height: clamp(60px, 7vw, 96px);
+		padding: clamp(0.4rem, 1vw, 0.6rem);
+		border-radius: 14px;
 	}
 
 	.skeleton-card {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		gap: 1.5rem;
+		gap: 1.75rem;
 		width: 100%;
-		max-width: 380px;
+		max-width: 420px;
 		padding: 2rem;
-		background: rgba(20, 20, 28, 0.8);
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 16px;
-		backdrop-filter: blur(20px);
+		background: linear-gradient(135deg, rgba(28, 28, 28, 0.94) 0%, rgba(12, 12, 12, 0.92) 100%);
+		border: 1px solid rgba(255, 255, 255, 0.04);
+		border-radius: 20px;
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		box-shadow:
+			0 25px 50px rgba(0, 0, 0, 0.4),
+			0 10px 20px rgba(0, 0, 0, 0.2),
+			inset 0 1px 0 rgba(255, 255, 255, 0.03);
 	}
 
 	.skeleton-text-group {
@@ -180,23 +211,33 @@
 		gap: 0.5rem;
 	}
 
+	.skeleton-input-row {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.skeleton-footer-rule {
+		height: 1px;
+		width: 60%;
+		margin: 0.25rem auto 0;
+		background: linear-gradient(90deg, transparent, var(--gold-a30), transparent);
+	}
+
+	/* Bottom brand skeleton — mirrors .bottom-brand in LoginScreen */
+	.skeleton-bottom-brand {
+		position: absolute;
+		bottom: 1.5rem;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
 	:global(.skeleton-input) {
 		border-radius: 8px !important;
 	}
 
 	:global(.skeleton-button) {
-		border-radius: 10px !important;
-	}
-
-	/* Boot branding */
-	.boot-brand {
-		font-size: 1.25rem;
-		font-weight: 700;
-		letter-spacing: -0.02em;
-		background: linear-gradient(135deg, #ffffff 0%, #e8d59a 50%, #ffffff 100%);
-		-webkit-background-clip: text;
-		background-clip: text;
-		-webkit-text-fill-color: transparent;
+		border-radius: 9999px !important;
 	}
 
 	/* Boot error card */

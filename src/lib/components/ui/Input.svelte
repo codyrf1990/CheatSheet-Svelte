@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { AlertCircle } from 'lucide-svelte';
 
 	interface Props extends HTMLInputAttributes {
 		label?: string;
@@ -61,7 +62,10 @@
 		{/if}
 
 		{#if error}
-			<span id={errorId} class="input-error" role="alert">{error}</span>
+			<span id={errorId} class="input-error" role="alert">
+				<AlertCircle class="input-error-icon" size={13} strokeWidth={2.25} />
+				{error}
+			</span>
 		{/if}
 	</div>
 </div>
@@ -89,11 +93,22 @@
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-left: 3px solid transparent;
 		border-radius: 0.5rem;
-		transition: all 150ms ease;
+		transition:
+			border-color 200ms var(--ease-out-quart),
+			background-color 200ms var(--ease-out-quart),
+			box-shadow 250ms var(--ease-out-expo);
 	}
 
 	.input-field::placeholder {
-		color: rgba(255, 255, 255, 0.5);
+		color: rgba(255, 255, 255, 0.45);
+		transition:
+			color 200ms var(--ease-out-quart),
+			opacity 200ms var(--ease-out-quart);
+	}
+
+	.input-field:focus::placeholder {
+		color: rgba(255, 255, 255, 0.32);
+		opacity: 0.6;
 	}
 
 	/* Screen reader only */
@@ -112,8 +127,11 @@
 	.input-field:focus {
 		outline: none;
 		border-color: var(--color-solidcam-gold, #d4af37);
-		box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
-		transform: scale(1.01);
+		border-left-color: var(--color-solidcam-gold, #d4af37);
+		background-color: rgba(22, 22, 30, 0.85);
+		box-shadow:
+			0 0 0 3px rgba(212, 175, 55, 0.15),
+			0 0 24px -4px rgba(212, 175, 55, 0.2);
 	}
 
 	.input-field.has-error {
@@ -133,8 +151,15 @@
 	}
 
 	.input-error {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
 		font-size: var(--text-sm);
 		color: var(--color-error);
+	}
+
+	.input-error :global(.input-error-icon) {
+		flex-shrink: 0;
 	}
 
 	.required-indicator {
