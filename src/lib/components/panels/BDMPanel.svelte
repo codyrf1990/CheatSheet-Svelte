@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Check } from 'lucide-svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { panelsStore } from '$stores/panels.svelte';
 	import { Checkbox, Tooltip } from '$components/ui';
@@ -34,7 +35,7 @@
 				</div>
 				<ul class="item-list">
 					{#each section.items as item (item.sku + item.label)}
-						<li class="bdm-item">
+						<li class="bdm-item" class:selected={panelsStore.hasItem(BDM_PANEL_ID, item.sku)}>
 							<span class="item-check">
 								<Checkbox
 									checked={panelsStore.hasItem(BDM_PANEL_ID, item.sku)}
@@ -43,7 +44,7 @@
 							</span>
 							<Tooltip text="Click to copy {item.sku}">
 								<button type="button" class="sku-chip" onclick={() => copySku(item.sku)}>
-									{#if copiedSku === item.sku}<span class="copy-check">&#10003;</span
+									{#if copiedSku === item.sku}<span class="copy-check"><Check size={11} strokeWidth={3} /></span
 										>{:else}{item.sku}{/if}
 								</button>
 							</Tooltip>
@@ -117,11 +118,26 @@
 		gap: var(--space-0);
 		padding: var(--space-px) var(--space-0);
 		border-radius: var(--radius-2xs);
-		transition: background 150ms ease;
+		transition: background 150ms var(--ease-out-quart);
 	}
 
 	.bdm-item:hover {
 		background: var(--chip-bg-hover);
+	}
+
+	/* Selected state — soft gold tint on the chip + brighter label */
+	.bdm-item.selected .sku-chip {
+		background: var(--gold-a10);
+		border-color: var(--gold-a30);
+	}
+
+	.bdm-item.selected .item-label {
+		color: rgba(255, 255, 255, 0.85);
+	}
+
+	.bdm-item.selected:hover .sku-chip {
+		background: var(--gold-a20);
+		border-color: var(--gold-a45);
 	}
 
 	.item-check {
@@ -140,7 +156,10 @@
 		border-radius: var(--radius-2xs);
 		padding: var(--space-0) var(--space-0-5);
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart);
 		white-space: nowrap;
 		flex-shrink: 0;
 		line-height: 1.2;
@@ -151,7 +170,10 @@
 	}
 
 	.copy-check {
+		display: inline-flex;
+		align-items: center;
 		color: var(--color-success, #22c55e);
+		filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.35));
 	}
 
 	.item-label {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Info, X } from 'lucide-svelte';
 	import { Checkbox } from '$components/ui';
 	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { tooltip } from '$lib/utils/tooltipAction';
@@ -48,6 +49,7 @@
 
 <li
 	class="panel-item"
+	class:selected={showCheckbox && checked}
 	class:remove-mode={removeMode && isCustom}
 	class:custom={isCustom}
 	draggable={draggable && !removeMode}
@@ -66,15 +68,13 @@
 		</button>
 		{#if note}
 			<span class="item-note" use:tooltip={note}>
-				<svg viewBox="0 0 16 16" fill="currentColor" width="11" height="11" aria-hidden="true">
-					<path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"/>
-				</svg>
+				<Info size={11} strokeWidth={2.25} />
 			</span>
 		{/if}
 	</div>
 	{#if removeMode && isCustom}
 		<button type="button" class="item-remove-btn" onclick={handleRemove} aria-label="Remove {item}" use:tooltip={'Remove ' + item}>
-			&times;
+			<X size={11} strokeWidth={2.5} />
 		</button>
 	{/if}
 </li>
@@ -86,11 +86,23 @@
 		padding: var(--space-px) var(--space-0);
 		gap: var(--space-0);
 		border-radius: var(--radius-2xs);
-		transition: background-color 150ms ease;
+		transition: background-color 150ms var(--ease-out-quart);
 	}
 
 	.panel-item:hover {
 		background: var(--chip-bg-hover);
+	}
+
+	/* Selected state — soft gold tint on the chip's text-button */
+	.panel-item.selected .item-text {
+		background: var(--gold-a10);
+		border-color: var(--gold-a30);
+		color: rgba(255, 255, 255, 0.95);
+	}
+
+	.panel-item.selected:hover .item-text {
+		background: var(--gold-a20);
+		border-color: var(--gold-a45);
 	}
 
 	.panel-item[draggable='true'] {
@@ -122,17 +134,19 @@
 
 	.item-text {
 		padding: var(--space-0) var(--space-0-5);
-		background: transparent;
+		background: var(--chip-bg);
 		border: 1px solid var(--chip-border-color);
 		border-radius: var(--radius-2xs);
-		background: var(--chip-bg);
 		box-shadow: var(--chip-shadow);
 		font-family: 'JetBrains Mono', monospace;
 		font-size: var(--text-xs);
 		color: var(--chip-text-color);
 		line-height: 1.2;
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -171,22 +185,23 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 12px;
-		height: 12px;
+		width: 16px;
+		height: 16px;
 		padding: 0;
 		background: transparent;
 		border: none;
 		border-radius: var(--radius-2xs);
 		color: rgba(255, 255, 255, 0.4);
-		font-size: var(--text-xs);
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart);
 		flex-shrink: 0;
 	}
 
 	.item-remove-btn:hover {
-		background: rgba(200, 16, 46, 0.3);
-		color: #ff4444;
+		background: var(--red-a20);
+		color: #fca5a5;
 	}
 
 	/* Narrow viewport compaction */

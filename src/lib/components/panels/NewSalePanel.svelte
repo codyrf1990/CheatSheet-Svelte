@@ -308,7 +308,7 @@
 
 	.sku-row {
 		border-radius: var(--radius-2xs);
-		transition: background-color 150ms ease;
+		transition: background-color 150ms var(--ease-out-quart);
 	}
 
 	.sku-row:hover {
@@ -342,7 +342,10 @@
 		border-radius: var(--radius-2xs);
 		padding: var(--space-0) var(--space-0-5);
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart);
 		white-space: nowrap;
 		text-align: left;
 	}
@@ -352,8 +355,17 @@
 		border-color: var(--chip-border-color-strong);
 	}
 
+	/* Package marker — soft gold tint instead of a hard left border line */
 	.sku-code.is-package {
-		border-left: 2px solid rgba(212, 175, 55, 0.5);
+		background: var(--gold-a10);
+		border-color: var(--gold-a30);
+		color: var(--color-solidcam-gold);
+		font-weight: 540;
+	}
+
+	.sku-code.is-package:hover {
+		background: var(--gold-a20);
+		border-color: var(--gold-a45);
 	}
 
 	.sku-price-group {
@@ -421,12 +433,22 @@
 	}
 
 	.total-row {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: var(--space-1) var(--space-0-5);
+		padding: 0.45rem 0.55rem;
 		margin-top: var(--space-1);
-		border-top: 1px solid rgba(212, 175, 55, 0.3);
+		background: linear-gradient(
+			135deg,
+			rgba(212, 175, 55, 0.12) 0%,
+			rgba(212, 175, 55, 0.04) 100%
+		);
+		border: 1px solid var(--gold-a30);
+		border-radius: var(--radius-sm);
+		box-shadow:
+			0 0 16px rgba(212, 175, 55, 0.12),
+			inset 0 1px 0 rgba(255, 255, 255, 0.05);
 	}
 
 	.total-label {
@@ -434,34 +456,42 @@
 		font-weight: 600;
 		color: var(--color-solidcam-gold, #d4af37);
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.08em;
 	}
 
 	.total-price {
 		font-family: 'JetBrains Mono', monospace;
-		font-size: var(--text-sm);
+		font-size: var(--text-base);
 		font-weight: 700;
 		color: var(--color-solidcam-gold, #d4af37);
+		letter-spacing: -0.01em;
+		text-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
 	}
 
 	.total-row--account {
-		margin-top: 0;
-		border-top: 1px solid rgba(96, 165, 250, 0.2);
-		padding-top: var(--space-0-5);
+		margin-top: var(--space-0-5);
+		background: linear-gradient(
+			135deg,
+			rgba(96, 165, 250, 0.1) 0%,
+			rgba(96, 165, 250, 0.03) 100%
+		);
+		border-color: rgba(96, 165, 250, 0.28);
+		box-shadow:
+			0 0 14px rgba(96, 165, 250, 0.1),
+			inset 0 1px 0 rgba(255, 255, 255, 0.04);
 	}
 
 	.total-label--account {
 		color: #60a5fa;
-		font-weight: 500;
+		font-weight: 600;
 		font-size: var(--text-xs);
-		opacity: 0.85;
 	}
 
 	.total-price--account {
-		color: #60a5fa;
-		font-size: var(--text-xs);
-		font-weight: 600;
-		opacity: 0.85;
+		color: #93c5fd;
+		font-size: var(--text-sm);
+		font-weight: 700;
+		text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
 	}
 
 	/* Responsive */

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { ChevronDown, Minus, Plus } from 'lucide-svelte';
 	import { CollapseWrapper } from '$components/ui';
 	import { tooltip } from '$lib/utils/tooltipAction';
 
@@ -42,16 +43,9 @@
 <section class="panel tile" data-panel={id} data-panel-editable={editable ? 'true' : 'false'}>
 	<div class="panel-head">
 		<button type="button" class="panel-title-btn" onclick={handleCollapseToggle}>
-			<svg
-				class="collapse-icon"
-				class:rotated={collapsed}
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-			>
-				<path d="M19 9l-7 7-7-7" />
-			</svg>
+			<span class="collapse-icon" class:rotated={collapsed} aria-hidden="true">
+				<ChevronDown size={14} strokeWidth={2.25} />
+			</span>
 			<h2 class="panel-title">{title}</h2>
 		</button>
 		{#if editable}
@@ -63,7 +57,7 @@
 					aria-label="Add item to {title}"
 					use:tooltip={'Add item'}
 				>
-					+
+					<Plus size={14} strokeWidth={2.25} />
 				</button>
 				<button
 					type="button"
@@ -74,7 +68,7 @@
 					aria-label="Toggle delete mode for {title}"
 					use:tooltip={removeMode ? 'Done removing' : 'Remove items'}
 				>
-					&minus;
+					<Minus size={14} strokeWidth={2.25} />
 				</button>
 			</div>
 		{/if}
@@ -112,10 +106,11 @@
 	}
 
 	.collapse-icon {
-		width: 16px;
-		height: 16px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		color: rgba(255, 255, 255, 0.5);
-		transition: transform 200ms ease;
+		transition: transform 200ms var(--ease-out-expo);
 	}
 
 	.collapse-icon.rotated {
@@ -144,14 +139,15 @@
 		width: 26px;
 		height: 26px;
 		padding: 0;
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(255, 255, 255, 0.1);
+		background: rgba(255, 255, 255, 0.04);
+		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 6px;
-		color: rgba(255, 255, 255, 0.7);
-		font-size: 1.1rem;
-		font-weight: 500;
+		color: rgba(255, 255, 255, 0.72);
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart);
 	}
 
 	/* Expand touch target to 44x44 */
@@ -165,14 +161,21 @@
 	}
 
 	.panel-control-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: rgba(255, 255, 255, 0.9);
+		background: var(--gold-a10);
+		border-color: var(--gold-a30);
+		color: var(--color-solidcam-gold);
 	}
 
 	.panel-control-btn.active {
-		background: rgba(200, 16, 46, 0.2);
-		border-color: rgba(200, 16, 46, 0.4);
-		color: #ff6666;
+		background: var(--red-a20);
+		border-color: var(--red-a30);
+		color: #fca5a5;
+	}
+
+	.panel-control-btn.active:hover {
+		background: rgba(200, 16, 46, 0.28);
+		border-color: rgba(200, 16, 46, 0.45);
+		color: #fecaca;
 	}
 
 	.panel-body {
