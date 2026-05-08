@@ -2,6 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { tick } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
+	import { X } from 'lucide-svelte';
 	import { tooltip } from '$lib/utils/tooltipAction';
 
 	interface Props {
@@ -118,20 +119,7 @@
 			<div class="modal-header">
 				<h2 id="modal-title" class="modal-title">{title}</h2>
 				<button class="close-btn" onclick={onClose} aria-label="Close modal" use:tooltip={'Close'}>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="20"
-						height="20"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<line x1="18" y1="6" x2="6" y2="18"></line>
-						<line x1="6" y1="6" x2="18" y2="18"></line>
-					</svg>
+					<X size={18} strokeWidth={2.25} />
 				</button>
 			</div>
 
@@ -157,8 +145,10 @@
 		align-items: center;
 		justify-content: center;
 		padding: var(--space-4);
-		background: rgba(0, 0, 0, 0.8);
-		backdrop-filter: blur(4px);
+		background:
+			radial-gradient(ellipse at center, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.85) 100%);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
 	}
 
 	.modal {
@@ -229,12 +219,16 @@
 		justify-content: center;
 		width: 32px;
 		height: 32px;
-		border: none;
+		border: 1px solid transparent;
 		background: var(--chip-bg);
-		color: rgba(255, 255, 255, 0.5);
-		border-radius: var(--radius-xs);
+		color: rgba(255, 255, 255, 0.55);
+		border-radius: var(--radius-sm);
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart),
+			transform 150ms var(--ease-out-quart);
 	}
 
 	.close-btn::after {
@@ -247,8 +241,10 @@
 	}
 
 	.close-btn:hover {
-		background: var(--chip-bg-hover);
-		color: rgba(255, 255, 255, 0.8);
+		background: var(--red-a20);
+		border-color: var(--red-a30);
+		color: #fca5a5;
+		transform: rotate(90deg);
 	}
 
 	.modal-body {

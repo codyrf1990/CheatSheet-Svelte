@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Pencil, Search, Trash2 } from 'lucide-svelte';
 	import Modal from './Modal.svelte';
 	import { companiesStore } from '$stores/companies.svelte';
 	import { toastStore } from '$stores/toast.svelte';
@@ -178,6 +179,7 @@
 	<div class="companies-content">
 		<!-- Search (fixed) -->
 		<div class="search-container">
+			<Search class="search-icon" size={14} strokeWidth={2} />
 			<input
 				type="search"
 				placeholder="Search companies..."
@@ -257,16 +259,7 @@
 										aria-label="Rename {company.name}"
 										use:tooltip={'Rename'}
 									>
-										<svg
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											aria-hidden="true"
-										>
-											<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-											<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-										</svg>
+										<Pencil size={14} strokeWidth={2} />
 									</button>
 									<button
 										type="button"
@@ -276,18 +269,7 @@
 										use:tooltip={'Delete'}
 										disabled={allCompanies.length <= 1}
 									>
-										<svg
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2"
-											aria-hidden="true"
-										>
-											<polyline points="3 6 5 6 21 6" />
-											<path
-												d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-											/>
-										</svg>
+										<Trash2 size={14} strokeWidth={2} />
 									</button>
 								</div>
 							{/if}
@@ -317,26 +299,45 @@
 	}
 
 	.search-container {
+		position: relative;
 		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+	}
+
+	.search-container :global(.search-icon) {
+		position: absolute;
+		left: 0.7rem;
+		color: rgba(255, 255, 255, 0.4);
+		pointer-events: none;
+		transition: color 200ms var(--ease-out-quart);
+	}
+
+	.search-container:focus-within :global(.search-icon) {
+		color: var(--color-solidcam-gold);
 	}
 
 	.search-input {
 		width: 100%;
-		padding: 0.5rem 0.75rem;
-		background: rgba(255, 255, 255, 0.05);
+		padding: 0.5rem 0.75rem 0.5rem 2.1rem;
+		background: rgba(255, 255, 255, 0.04);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 8px;
 		color: var(--color-text-primary);
 		font-size: 0.8125rem;
-		transition: all 200ms ease;
+		transition:
+			border-color 200ms var(--ease-out-quart),
+			background 200ms var(--ease-out-quart),
+			box-shadow 250ms var(--ease-out-expo);
 	}
 
 	.search-input::placeholder {
-		color: rgba(255, 255, 255, 0.5);
+		color: rgba(255, 255, 255, 0.45);
 	}
 
 	.search-input:focus {
 		outline: none;
+		background: rgba(255, 255, 255, 0.06);
 		border-color: var(--color-solidcam-gold, #d4af37);
 		box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
 	}
@@ -457,7 +458,7 @@
 		border-color: rgba(239, 68, 68, 0.3);
 	}
 
-	.action-btn svg {
+	.action-btn :global(svg) {
 		width: 14px;
 		height: 14px;
 	}
