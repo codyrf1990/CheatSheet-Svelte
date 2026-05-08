@@ -14,6 +14,7 @@ import type {
 } from '$types';
 import { PACKAGE_STATE_VERSION } from '$types';
 import { deepCopy } from '$lib/utils/deepCopy';
+import { getPageNameForLicense } from '$lib/utils/licenseSelections';
 import { toastStore } from './toast.svelte';
 import { persistence } from './persistence.svelte';
 
@@ -160,6 +161,55 @@ function migratePackageState(oldState: unknown): Record<string, PackageState> {
 	}
 
 	return result;
+}
+
+/**
+ * Compute the legacy (pre-2026-05) page name for a license. Used only by the
+ * one-time migration that renames stored pages to the new format.
+ *
+ * Old format differences vs current `getPageNameForLicense`:
+ *   - Hardware Dongle: `<dongle>` (no "HW " prefix)
+ *   - Network Product Key: `NPK <full-key>` (full key, not last-4)
+ */
+function legacyPageNameForLicense(license: LicenseInfo): string {
+	const noGcode = license.features?.includes('NO G-code') ?? false;
+	const suffix = noGcode ? ' No-Gcode' : '';
+
+	if (license.isProfile && license.profileNo) return `P${license.profileNo}${suffix}`;
+	if (license.productKey && license.productKey.length > 4) {
+		if (license.isNetworkLicense) return `NPK ${license.productKey}${suffix}`;
+		const last4 = license.productKey.slice(-4).toUpperCase();
+		return `SPK ${last4}${suffix}`;
+	}
+	if (license.dongleNo && license.dongleNo.trim()) {
+		const dongle = license.dongleNo.trim();
+		if (license.isNetworkLicense) return `NWD ${dongle}${suffix}`;
+		return `${dongle}${suffix}`;
+	}
+	if (license.profileNo) return `P${license.profileNo}${suffix}`;
+	return `P1${suffix}`;
+}
+
+/**
+ * Walk a company's pages and rename any whose name matches a license's
+ * legacy format but not its current format. Idempotent — safe to call on
+ * every load. Returns true if anything changed (so callers can save).
+ */
+function migrateLegacyPageNames(company: Company): boolean {
+	if (!Array.isArray(company.pages) || !Array.isArray(company.licenses)) return false;
+	let changed = false;
+	for (const license of company.licenses) {
+		const oldName = legacyPageNameForLicense(license);
+		const newName = getPageNameForLicense(license);
+		if (oldName === newName) continue;
+		// Only rename if the old name still exists AND no page already uses the new name
+		const oldPage = company.pages.find((p) => p.name === oldName);
+		if (!oldPage) continue;
+		if (company.pages.some((p) => p.name === newName)) continue;
+		oldPage.name = newName;
+		changed = true;
+	}
+	return changed;
 }
 
 /**
@@ -749,6 +799,7 @@ function load(): void {
 			recentIds = loadedRecent;
 
 			// Migrate package state format in all pages (handles old format)
+			let nameChangesApplied = false;
 			for (const company of companies) {
 				if (!Array.isArray(company.pages)) continue;
 				for (const page of company.pages) {
@@ -759,7 +810,10 @@ function load(): void {
 						}
 					}
 				}
+				// Rename pages from legacy format ("77518" → "HW 77518", "NPK <full>" → "NPK <last-4>")
+				if (migrateLegacyPageNames(company)) nameChangesApplied = true;
 			}
+			if (nameChangesApplied) save();
 		} else {
 			// MIGRATION: Check for old structure
 			const oldData = persistence.get<{ pages?: Page[]; currentPageId?: string } | null>(

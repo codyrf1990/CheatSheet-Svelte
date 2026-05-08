@@ -34,14 +34,14 @@ export interface LicenseSelections {
  * Generate a meaningful page name from license info
  *
  * Naming conventions:
- * - Hardware Dongle (5-digit, no network): "77518"
+ * - Hardware Dongle (5-digit, no network): "HW 77518"
  * - Network Dongle (5-digit + network): "NWD 77518"
  * - Network Product Key (long key + network): "NPK 7452" (last 4 of key)
  * - Standalone Product Key (long key, no network): "SPK 7452" (last 4 of key)
  * - Profile only (no dongle, has profile number): "P5801", etc.
  *
  * Suffix:
- * - When "NO G-code" is checked, append " No-Gcode" (e.g. "67854 No-Gcode")
+ * - When "NO G-code" is checked, append " No-Gcode" (e.g. "HW 67854 No-Gcode")
  */
 export function getPageNameForLicense(license: LicenseInfo): string {
 	const noGcode = license.features?.includes('NO G-code') ?? false;
@@ -53,14 +53,12 @@ export function getPageNameForLicense(license: LicenseInfo): string {
 		return `P${license.profileNo}${suffix}`;
 	}
 
-	// Product Key: long product key number
+	// Product Key: long product key number — last 4 is the identifier in both cases
 	if (license.productKey && license.productKey.length > 4) {
-		if (license.isNetworkLicense) {
-			// Network Product Key — use full number (no profiles to distinguish, key IS the identifier)
-			return `NPK ${license.productKey}${suffix}`;
-		}
-		// Standalone Product Key — last 4 is enough (single user)
 		const last4 = license.productKey.slice(-4).toUpperCase();
+		if (license.isNetworkLicense) {
+			return `NPK ${last4}${suffix}`;
+		}
 		return `SPK ${last4}${suffix}`;
 	}
 
@@ -72,7 +70,7 @@ export function getPageNameForLicense(license: LicenseInfo): string {
 			return `NWD ${dongle}${suffix}`;
 		}
 		// Hardware Dongle (standalone)
-		return `${dongle}${suffix}`;
+		return `HW ${dongle}${suffix}`;
 	}
 
 	// Profile without proper identifier (shouldn't happen with parser fix)
