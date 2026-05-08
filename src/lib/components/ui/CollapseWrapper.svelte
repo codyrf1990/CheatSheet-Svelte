@@ -25,7 +25,7 @@
 	.collapse-wrapper {
 		display: grid;
 		grid-template-rows: 0fr;
-		transition: grid-template-rows var(--collapse-duration) cubic-bezier(0.4, 0, 0.2, 1);
+		transition: grid-template-rows var(--collapse-duration) var(--ease-out-expo);
 		overflow: hidden;
 	}
 

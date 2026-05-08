@@ -3,6 +3,7 @@
 	import { fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 	import { quintOut, quintIn } from 'svelte/easing';
+	import { AlertTriangle, Check, Info, X } from 'lucide-svelte';
 	import { tooltip } from '$lib/utils/tooltipAction';
 </script>
 
@@ -32,36 +33,18 @@
 			>
 				<span class="toast-icon">
 					{#if t.type === 'success'}
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-							<polyline points="20 6 9 17 4 12" />
-						</svg>
+						<Check size={12} strokeWidth={2.75} />
 					{:else if t.type === 'error'}
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-							<line x1="18" y1="6" x2="6" y2="18" />
-							<line x1="6" y1="6" x2="18" y2="18" />
-						</svg>
+						<X size={12} strokeWidth={2.75} />
 					{:else if t.type === 'warning'}
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-							<path
-								d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-							/>
-							<line x1="12" y1="9" x2="12" y2="13" />
-							<line x1="12" y1="17" x2="12.01" y2="17" />
-						</svg>
+						<AlertTriangle size={12} strokeWidth={2.5} />
 					{:else}
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-							<circle cx="12" cy="12" r="10" />
-							<line x1="12" y1="16" x2="12" y2="12" />
-							<line x1="12" y1="8" x2="12.01" y2="8" />
-						</svg>
+						<Info size={12} strokeWidth={2.5} />
 					{/if}
 				</span>
 				<span class="toast-message">{t.message}</span>
 				<button class="toast-close" onclick={() => toastStore.remove(t.id)} aria-label="Dismiss" use:tooltip={'Dismiss'}>
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<line x1="18" y1="6" x2="6" y2="18"></line>
-						<line x1="6" y1="6" x2="18" y2="18"></line>
-					</svg>
+					<X size={11} strokeWidth={2} />
 				</button>
 
 				<!-- Progress bar -->
@@ -117,9 +100,8 @@
 		flex-shrink: 0;
 	}
 
-	.toast-icon svg {
-		width: 12px;
-		height: 12px;
+	.toast-icon :global(svg) {
+		flex-shrink: 0;
 	}
 
 	/* Type-specific icon colors */
@@ -163,7 +145,10 @@
 		border-radius: 6px;
 		color: rgba(255, 255, 255, 0.5);
 		cursor: pointer;
-		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition:
+			background 200ms var(--ease-out-quart),
+			color 200ms var(--ease-out-quart),
+			transform 200ms var(--ease-out-quart);
 		flex-shrink: 0;
 	}
 
@@ -177,15 +162,10 @@
 		transform: translate(-50%, -50%);
 	}
 
-	.toast-close svg {
-		width: 11px;
-		height: 11px;
-	}
-
 	.toast-close:hover {
 		background: rgba(255, 255, 255, 0.1);
 		color: rgba(255, 255, 255, 0.9);
-		transform: scale(1.1);
+		transform: rotate(90deg);
 	}
 
 	.toast-close:active {

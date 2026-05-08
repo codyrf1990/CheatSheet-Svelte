@@ -257,7 +257,7 @@ button:focus-visible,
 a:focus-visible {
 	outline: 2px solid var(--color-solidcam-gold);
 	outline-offset: 2px;
-	box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
+	box-shadow: 0 0 0 4px var(--gold-a20);
 }
 
 input:focus-visible,
@@ -395,21 +395,32 @@ select:focus-visible {
 /* Global tooltip (singleton, portaled to body) */
 .app-tooltip {
 	position: fixed;
-	padding: 4px 10px;
+	padding: 5px 11px;
 	font-size: var(--text-sm);
+	font-weight: 500;
 	line-height: 1.4;
+	letter-spacing: -0.005em;
 	white-space: nowrap;
 	color: var(--color-text-primary);
-	background: #2a2a2a;
-	border: 1px solid rgba(255, 255, 255, 0.12);
+	background: linear-gradient(145deg, rgba(38, 38, 44, 0.98), rgba(24, 24, 30, 0.98));
+	border: 1px solid rgba(255, 255, 255, 0.08);
 	border-radius: 6px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+	box-shadow:
+		0 6px 16px rgba(0, 0, 0, 0.5),
+		0 2px 4px rgba(0, 0, 0, 0.3),
+		inset 0 1px 0 rgba(255, 255, 255, 0.05);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
 	pointer-events: none;
 	z-index: 9999;
 	opacity: 0;
-	transition: opacity 120ms ease;
+	transform: translateY(2px);
+	transition:
+		opacity 140ms var(--ease-out-quart),
+		transform 180ms var(--ease-out-expo);
 }
 
 .app-tooltip.visible {
 	opacity: 1;
+	transform: translateY(0);
 }
