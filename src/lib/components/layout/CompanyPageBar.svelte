@@ -91,27 +91,9 @@
 		}
 		const licenses = company.solidworksLicenses ?? [];
 		if (licenses.length === 0) return 'SW';
-		const abbrev = new Set<string>();
-		for (const lic of licenses) {
-			switch (lic.product) {
-				case 'Standard':
-					abbrev.add('Std');
-					break;
-				case 'Parts & Assemblies':
-					abbrev.add('P&A');
-					break;
-				case 'Parts':
-					abbrev.add('P');
-					break;
-				case 'Pro':
-					abbrev.add('Pro');
-					break;
-				default:
-					// Other / Unknown — keep raw fallback grouped
-					abbrev.add('?');
-			}
-		}
-		return `SW ${[...abbrev].join('/')}`;
+		const totalSeats = licenses.reduce((sum, lic) => sum + (lic.users ?? 0), 0);
+		if (totalSeats <= 0) return 'SW';
+		return `SW ${totalSeats} Seat${totalSeats === 1 ? '' : 's'}`;
 	});
 
 	// Status indicator with SVG icon key and differentiated states
