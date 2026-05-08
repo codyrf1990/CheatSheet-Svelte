@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { PackagePlus, Sparkles } from 'lucide-svelte';
 	import Modal from './Modal.svelte';
 	import Tooltip from './Tooltip.svelte';
 	import { packagesStore } from '$stores/packages.svelte';
@@ -201,20 +202,26 @@
 <Modal {open} {onClose} title="Upgrades — {skuMode === 'ms' ? 'Maintenance' : 'New Sale'}" size="wide">
 	{#if upgradeGroups.length === 0}
 		<div class="empty-state">
-			<p>All available packages and modules are already selected.</p>
+			<Sparkles size={36} strokeWidth={1.5} class="empty-icon" />
+			<p class="empty-title">Everything's selected.</p>
+			<p class="empty-sub">All available packages and modules are already on this quote.</p>
 		</div>
 	{:else}
 		<div class="upgrade-content">
 			{#each upgradeGroups as group (group.label)}
 				<section class="upgrade-group">
-					<h4 class="group-title">{group.label}</h4>
+					<h4 class="group-title">
+						<PackagePlus size={13} strokeWidth={2.25} />
+						<span>{group.label}</span>
+						<span class="group-count">{group.items.length}</span>
+					</h4>
 					<div class="item-list">
 						{#each group.items as item (item.sku)}
 							<div class="upgrade-item">
 								<div class="item-header">
 									<span class="item-name">{item.name}</span>
 									<div class="item-meta">
-										<Tooltip text="Click to copy">
+										<Tooltip text="Click to copy {skuMode === 'ms' ? item.maintSku : item.sku}">
 											<button
 												type="button"
 												class="item-sku"
@@ -246,11 +253,33 @@
 
 <style>
 	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
 		text-align: center;
-		padding: var(--space-4) var(--space-2);
-		color: rgba(255, 255, 255, 0.4);
-		font-size: var(--text-sm);
-		font-style: italic;
+		padding: 2.25rem var(--space-2) 1.5rem;
+	}
+
+	.empty-state :global(.empty-icon) {
+		color: var(--gold-a45);
+		margin-bottom: 0.25rem;
+	}
+
+	.empty-title {
+		margin: 0;
+		font-size: 1rem;
+		font-weight: 580;
+		color: rgba(255, 255, 255, 0.92);
+		letter-spacing: -0.012em;
+	}
+
+	.empty-sub {
+		margin: 0;
+		font-size: 0.8125rem;
+		color: rgba(255, 255, 255, 0.55);
+		max-width: 36ch;
+		line-height: 1.45;
 	}
 
 	.upgrade-content {
@@ -268,14 +297,36 @@
 	}
 
 	.group-title {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
 		font-size: 0.8125rem;
 		font-weight: 600;
 		color: var(--color-solidcam-gold);
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.06em;
 		margin: 0 0 0.625rem 0;
 		padding-bottom: 0.375rem;
-		border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+		border-bottom: 1px solid var(--gold-a30);
+	}
+
+	.group-count {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 22px;
+		height: 18px;
+		padding: 0 0.4rem;
+		margin-left: auto;
+		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0;
+		text-transform: none;
+		background: var(--gold-a10);
+		border: 1px solid var(--gold-a30);
+		border-radius: 9999px;
+		color: var(--color-solidcam-gold);
 	}
 
 	.item-list {
@@ -285,10 +336,18 @@
 	}
 
 	.upgrade-item {
-		padding: 0.625rem 0.75rem;
+		padding: 0.65rem 0.8rem;
 		background: rgba(255, 255, 255, 0.03);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 8px;
+		transition:
+			background 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart);
+	}
+
+	.upgrade-item:hover {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: rgba(255, 255, 255, 0.14);
 	}
 
 	.item-header {
@@ -301,71 +360,89 @@
 
 	.item-name {
 		font-size: 0.8125rem;
-		font-weight: 600;
+		font-weight: 580;
+		letter-spacing: -0.005em;
 		color: rgba(255, 255, 255, 0.95);
 	}
 
 	.item-meta {
 		display: flex;
 		align-items: center;
-		gap: 0.625rem;
+		gap: 0.5rem;
 	}
 
+	/* SKU chip — gold, consistent with the rest of the app (was bright red) */
 	.item-sku {
-		background: rgba(200, 16, 46, 0.2);
-		color: #f87171;
-		padding: 0.125rem 0.375rem;
+		background: var(--gold-a10);
+		color: var(--color-solidcam-gold);
+		padding: 0.18rem 0.45rem;
 		border-radius: 4px;
 		font-size: 0.6875rem;
-		font-family: 'JetBrains Mono', monospace;
-		border: none;
+		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
+		border: 1px solid var(--gold-a30);
 		cursor: pointer;
-		transition: background 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart);
 	}
 
 	.item-sku:hover {
-		background: rgba(200, 16, 46, 0.4);
+		background: var(--gold-a20);
+		border-color: var(--gold-a45);
 	}
 
 	.item-price {
-		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.75rem;
+		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
+		font-variant-numeric: tabular-nums;
+		font-size: 0.78rem;
 		font-weight: 600;
-		color: #4ade80;
+		color: rgba(255, 255, 255, 0.85);
 		white-space: nowrap;
 	}
 
 	.item-desc {
-		margin: 0.375rem 0 0 0;
+		margin: 0.4rem 0 0 0;
 		font-size: 0.75rem;
 		color: rgba(255, 255, 255, 0.55);
-		line-height: 1.4;
+		line-height: 1.45;
 	}
 
+	/* Total bar — same vamp vocabulary as NewSalePanel */
 	.total-bar {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0.75rem;
-		margin-top: 0.5rem;
-		background: rgba(212, 175, 55, 0.08);
-		border: 1px solid rgba(212, 175, 55, 0.25);
-		border-radius: 8px;
+		padding: 0.6rem 0.85rem;
+		margin-top: 0.65rem;
+		background: linear-gradient(
+			135deg,
+			rgba(212, 175, 55, 0.14) 0%,
+			rgba(212, 175, 55, 0.05) 100%
+		);
+		border: 1px solid var(--gold-a30);
+		border-radius: var(--radius-sm);
+		box-shadow:
+			0 0 18px rgba(212, 175, 55, 0.14),
+			inset 0 1px 0 rgba(255, 255, 255, 0.05);
 	}
 
 	.total-label {
 		font-size: 0.8125rem;
-		font-weight: 700;
+		font-weight: 600;
 		color: var(--color-solidcam-gold, #d4af37);
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.08em;
 	}
 
 	.total-price {
-		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.9375rem;
+		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
+		font-variant-numeric: tabular-nums;
+		font-size: 1rem;
 		font-weight: 700;
-		color: #4ade80;
+		color: var(--color-solidcam-gold, #d4af37);
+		letter-spacing: -0.01em;
+		text-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
 	}
 
 </style>

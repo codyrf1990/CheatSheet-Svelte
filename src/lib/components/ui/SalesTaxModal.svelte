@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { AlertCircle, CheckCircle2, Globe, ShieldCheck } from 'lucide-svelte';
 	import Modal from './Modal.svelte';
 
 	interface Props {
@@ -32,7 +33,11 @@
 	<div class="sales-tax-content">
 		<!-- Required States -->
 		<section class="tax-section">
-			<h4 class="section-title section-title--required">States Required to Collect Sales Tax</h4>
+			<h4 class="section-title section-title--required">
+				<CheckCircle2 size={14} strokeWidth={2.25} />
+				<span>Required to Collect</span>
+				<span class="state-count">{requiredStates.length}</span>
+			</h4>
 			<div class="states-grid">
 				{#each requiredStates as state (state)}
 					<span class="state-tag state-tag--required">{state}</span>
@@ -42,7 +47,11 @@
 
 		<!-- Exempt States -->
 		<section class="tax-section">
-			<h4 class="section-title section-title--exempt">States Exempt from Sales Tax</h4>
+			<h4 class="section-title section-title--exempt">
+				<ShieldCheck size={14} strokeWidth={2.25} />
+				<span>Exempt</span>
+				<span class="state-count">{exemptStates.length}</span>
+			</h4>
 			<div class="states-grid">
 				{#each exemptStates as state (state)}
 					<span class="state-tag state-tag--exempt">{state}</span>
@@ -52,7 +61,10 @@
 
 		<!-- Exception States -->
 		<section class="tax-section">
-			<h4 class="section-title section-title--exception">Exception States</h4>
+			<h4 class="section-title section-title--exception">
+				<AlertCircle size={14} strokeWidth={2.25} />
+				<span>Exceptions</span>
+			</h4>
 			<div class="exception-note">
 				<strong>California</strong> — Certain products and services exempt
 			</div>
@@ -60,7 +72,10 @@
 
 		<!-- International -->
 		<section class="tax-section">
-			<h4 class="section-title">International</h4>
+			<h4 class="section-title">
+				<Globe size={14} strokeWidth={2.25} />
+				<span>International</span>
+			</h4>
 			<p class="info-note">Canada customers pay their own local and province taxes.</p>
 		</section>
 	</div>
@@ -80,13 +95,36 @@
 	}
 
 	.section-title {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
 		font-size: 0.8125rem;
 		font-weight: 600;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.06em;
 		padding-bottom: 0.375rem;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 		margin: 0;
+		color: rgba(255, 255, 255, 0.7);
+	}
+
+	.state-count {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 22px;
+		height: 18px;
+		padding: 0 0.4rem;
+		margin-left: auto;
+		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0;
+		text-transform: none;
+		background: rgba(255, 255, 255, 0.06);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 9999px;
+		color: rgba(255, 255, 255, 0.65);
 	}
 
 	.section-title--required {
@@ -94,9 +132,21 @@
 		border-bottom-color: rgba(74, 222, 128, 0.3);
 	}
 
+	.section-title--required .state-count {
+		background: rgba(74, 222, 128, 0.12);
+		border-color: rgba(74, 222, 128, 0.3);
+		color: #4ade80;
+	}
+
 	.section-title--exempt {
 		color: #60a5fa;
 		border-bottom-color: rgba(96, 165, 250, 0.3);
+	}
+
+	.section-title--exempt .state-count {
+		background: rgba(96, 165, 250, 0.12);
+		border-color: rgba(96, 165, 250, 0.3);
+		color: #60a5fa;
 	}
 
 	.section-title--exception {
@@ -115,7 +165,9 @@
 		border-radius: 999px;
 		font-size: 0.75rem;
 		font-weight: 500;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart);
 	}
 
 	.state-tag--required {

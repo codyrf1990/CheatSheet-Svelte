@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { FileCog, GraduationCap, LayoutGrid, Settings2, Wrench } from 'lucide-svelte';
 	import Modal from './Modal.svelte';
 
 	interface Props {
@@ -28,12 +29,12 @@
 		buttons?.[next]?.focus();
 	}
 
-	const tabs: { id: TabId; label: string }[] = [
-		{ id: 'overview', label: 'Overview' },
-		{ id: 'milling', label: 'Milling' },
-		{ id: 'other', label: 'Other Modules' },
-		{ id: 'training', label: 'Training' },
-		{ id: 'posts', label: 'Post Processors' }
+	const tabs = [
+		{ id: 'overview' as const, label: 'Overview', Icon: LayoutGrid },
+		{ id: 'milling' as const, label: 'Milling', Icon: Settings2 },
+		{ id: 'other' as const, label: 'Other Modules', Icon: Wrench },
+		{ id: 'training' as const, label: 'Training', Icon: GraduationCap },
+		{ id: 'posts' as const, label: 'Post Processors', Icon: FileCog }
 	];
 
 	// Data structures for cleaner rendering
@@ -245,6 +246,7 @@
 	<!-- Tabs -->
 	<div class="tabs-container" role="tablist" aria-label="Product categories">
 		{#each tabs as tab (tab.id)}
+			{@const Icon = tab.Icon}
 			<button
 				role="tab"
 				class="tab-btn"
@@ -254,7 +256,8 @@
 				onclick={() => (activeTab = tab.id)}
 				onkeydown={handleTabKeydown}
 			>
-				{tab.label}
+				<Icon size={13} strokeWidth={2} />
+				<span>{tab.label}</span>
 			</button>
 		{/each}
 	</div>
@@ -504,33 +507,59 @@
 	.tabs-container {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.25rem;
-		padding-bottom: 0.75rem;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		gap: 0.3rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 		margin-bottom: 1rem;
 	}
 
 	.tab-btn {
-		padding: 0.5rem 0.875rem;
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.45rem 0.7rem;
 		font-size: 0.75rem;
-		font-weight: 500;
+		font-weight: 540;
+		letter-spacing: -0.005em;
 		color: rgba(255, 255, 255, 0.6);
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 6px;
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 8px;
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 180ms var(--ease-out-quart),
+			border-color 180ms var(--ease-out-quart),
+			color 180ms var(--ease-out-quart),
+			box-shadow 250ms var(--ease-out-expo);
 	}
 
 	.tab-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: rgba(255, 255, 255, 0.9);
+		background: rgba(255, 255, 255, 0.06);
+		color: rgba(255, 255, 255, 0.92);
+		border-color: rgba(255, 255, 255, 0.14);
 	}
 
 	.tab-btn.active {
-		background: rgba(212, 175, 55, 0.2);
+		background: var(--gold-a20);
 		color: var(--color-solidcam-gold);
-		border-color: rgba(212, 175, 55, 0.4);
+		border-color: var(--gold-a30);
+		box-shadow:
+			0 0 14px rgba(212, 175, 55, 0.18),
+			inset 0 1px 0 rgba(255, 255, 255, 0.06);
+	}
+
+	/* Active tab gets a soft underline rail anchoring it to the panel below */
+	.tab-btn.active::after {
+		content: '';
+		position: absolute;
+		left: 12%;
+		right: 12%;
+		bottom: -7px;
+		height: 2px;
+		border-radius: 2px;
+		background: linear-gradient(90deg, transparent, var(--color-solidcam-gold), transparent);
+		box-shadow: 0 0 8px rgba(212, 175, 55, 0.45);
 	}
 
 	.tab-content {
@@ -552,10 +581,10 @@
 		font-weight: 600;
 		color: var(--color-solidcam-gold);
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.06em;
 		margin: 0 0 0.625rem 0;
 		padding-bottom: 0.375rem;
-		border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+		border-bottom: 1px solid var(--gold-a30);
 	}
 
 	.data-table {
@@ -591,12 +620,13 @@
 	}
 
 	.table-row code {
-		background: rgba(212, 175, 55, 0.12);
+		background: var(--gold-a10);
+		border: 1px solid var(--gold-a30);
 		color: var(--color-solidcam-gold, #d4af37);
 		padding: 0.125rem 0.375rem;
 		border-radius: 4px;
 		font-size: 0.6875rem;
-		font-family: 'JetBrains Mono', monospace;
+		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
 	}
 
 	.table-row strong {
@@ -625,12 +655,13 @@
 	}
 
 	.code-item code {
-		background: rgba(212, 175, 55, 0.12);
+		background: var(--gold-a10);
+		border: 1px solid var(--gold-a30);
 		color: var(--color-solidcam-gold, #d4af37);
 		padding: 0.125rem 0.375rem;
 		border-radius: 4px;
 		font-size: 0.6875rem;
-		font-family: 'JetBrains Mono', monospace;
+		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
 	}
 
 	.code-item span {
@@ -684,12 +715,13 @@
 	}
 
 	.module-header code {
-		background: rgba(212, 175, 55, 0.12);
+		background: var(--gold-a10);
+		border: 1px solid var(--gold-a30);
 		color: var(--color-solidcam-gold, #d4af37);
 		padding: 0.125rem 0.375rem;
 		border-radius: 4px;
 		font-size: 0.6875rem;
-		font-family: 'JetBrains Mono', monospace;
+		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
 	}
 
 	.module-item p {

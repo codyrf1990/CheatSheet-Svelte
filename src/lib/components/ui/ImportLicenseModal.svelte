@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CheckCircle2, XCircle } from 'lucide-svelte';
 	import type { LicenseInfo, ImportResult, SolidWorksLicenseInfo } from '$lib/types';
 	import { parseSalesforceText } from '$lib/utils/salesforceParser';
 	import { isSolidWorksText, parseSolidWorksText } from '$lib/utils/solidworksParser';
@@ -526,16 +527,9 @@
 				>
 					<div class="result-hero-icon">
 						{#if importResult.success}
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-								<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-								<polyline points="22,4 12,14.01 9,11.01" />
-							</svg>
+							<CheckCircle2 size={28} strokeWidth={2.25} />
 						{:else}
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-								<circle cx="12" cy="12" r="10" />
-								<line x1="15" y1="9" x2="9" y2="15" />
-								<line x1="9" y1="9" x2="15" y2="15" />
-							</svg>
+							<XCircle size={28} strokeWidth={2.25} />
 						{/if}
 					</div>
 					<div class="result-hero-text">
@@ -1300,9 +1294,8 @@
 		flex-shrink: 0;
 	}
 
-	.result-hero-icon svg {
-		width: 28px;
-		height: 28px;
+	.result-hero-icon :global(svg) {
+		flex-shrink: 0;
 	}
 
 	.result-success .result-hero-icon {
