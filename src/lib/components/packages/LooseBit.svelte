@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Check, X } from 'lucide-svelte';
 	import { Checkbox, Tooltip } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
@@ -59,6 +60,7 @@
 <li
 	class="loose-bit"
 	class:custom={isCustom}
+	class:selected={isSelected}
 	class:remove-mode={removeMode && isCustom}
 	class:disabled-bit={disabled}
 	data-bit={bit}
@@ -81,7 +83,7 @@
 					onclick={handleCopy}
 					data-copyable-bit
 					aria-label="Copy {bit}"
-					>{#if justCopied}<span class="copy-check">&#10003;</span>{:else}{#if isCustom}<span
+					>{#if justCopied}<span class="copy-check"><Check size={11} strokeWidth={3} /></span>{:else}{#if isCustom}<span
 								class="custom-indicator">+</span
 							>{/if}{bit}{/if}</button
 				>
@@ -112,7 +114,7 @@
 	{/if}
 	{#if removeMode && isCustom}
 		<button type="button" class="bit-remove-btn" onclick={handleRemove} aria-label="Remove {bit}" use:tooltip={'Remove ' + bit}>
-			&times;
+			<X size={11} strokeWidth={2.5} />
 		</button>
 	{/if}
 </li>
@@ -127,12 +129,29 @@
 		background: var(--chip-bg);
 		border: 1px solid var(--chip-border-color);
 		box-shadow: var(--chip-shadow);
-		transition: background-color 150ms ease;
+		transition:
+			background-color 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart);
 	}
 
 	.loose-bit:hover {
 		background-color: var(--chip-bg-hover);
 		border-color: var(--chip-border-color-strong);
+	}
+
+	/* Selected state — soft gold tint so checked bits read at a glance */
+	.loose-bit.selected {
+		background-color: var(--gold-a10);
+		border-color: var(--gold-a30);
+	}
+
+	.loose-bit.selected:hover {
+		background-color: var(--gold-a20);
+		border-color: var(--gold-a45);
+	}
+
+	.loose-bit.selected .bit-text {
+		color: rgba(255, 255, 255, 0.95);
 	}
 
 	.loose-bit.disabled-bit {
@@ -177,7 +196,10 @@
 	}
 
 	.copy-check {
+		display: inline-flex;
+		align-items: center;
 		color: var(--color-success, #22c55e);
+		filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.35));
 	}
 
 	.custom-indicator {
@@ -194,21 +216,22 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 14px;
-		height: 14px;
+		width: 16px;
+		height: 16px;
 		padding: 0;
 		background: transparent;
 		border: none;
 		border-radius: var(--radius-2xs);
 		color: rgba(255, 255, 255, 0.4);
-		font-size: var(--text-sm);
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart);
 	}
 
 	.bit-remove-btn:hover {
-		background: rgba(200, 16, 46, 0.2);
-		color: var(--color-solidcam-red);
+		background: var(--red-a20);
+		color: #fca5a5;
 	}
 
 	/* Narrow viewport compaction */

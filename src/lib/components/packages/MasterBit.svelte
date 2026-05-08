@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PackageGroup } from '$types';
+	import { ChevronDown } from 'lucide-svelte';
 	import { Checkbox, CollapseWrapper, Tooltip } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
@@ -108,17 +109,9 @@
 					aria-controls="subbits-{group.masterId}"
 					aria-label="{expanded ? 'Collapse' : 'Expand'} {group.label}"
 				>
-					<svg
-						class="expand-icon"
-						class:rotated={!expanded}
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						aria-hidden="true"
-					>
-						<path d="M19 9l-7 7-7-7" />
-					</svg>
+					<span class="expand-icon" class:rotated={!expanded} aria-hidden="true">
+						<ChevronDown size={12} strokeWidth={2.25} />
+					</span>
 				</button>
 			</div>
 		</Tooltip>
@@ -149,17 +142,9 @@
 				aria-label="{expanded ? 'Collapse' : 'Expand'} {group.label}"
 				use:tooltip={expanded ? 'Collapse' : 'Expand'}
 			>
-				<svg
-					class="expand-icon"
-					class:rotated={!expanded}
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					aria-hidden="true"
-				>
-					<path d="M19 9l-7 7-7-7" />
-				</svg>
+				<span class="expand-icon" class:rotated={!expanded} aria-hidden="true">
+					<ChevronDown size={12} strokeWidth={2.25} />
+				</span>
 			</button>
 		</div>
 	{/if}
@@ -246,19 +231,22 @@
 		border-radius: var(--radius-2xs);
 		color: rgba(255, 255, 255, 0.5);
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart);
 		flex-shrink: 0;
 	}
 
 	.expand-toggle:hover {
 		background: rgba(255, 255, 255, 0.1);
-		color: rgba(255, 255, 255, 0.8);
+		color: rgba(255, 255, 255, 0.85);
 	}
 
 	.expand-icon {
-		width: 12px;
-		height: 12px;
-		transition: transform 200ms ease;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transition: transform 200ms var(--ease-out-expo);
 	}
 
 	.expand-icon.rotated {

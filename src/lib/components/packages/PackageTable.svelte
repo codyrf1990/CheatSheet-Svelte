@@ -182,7 +182,7 @@
 
 	.upgrades-btn {
 		font-size: 0.6rem;
-		font-weight: 700;
+		font-weight: 600;
 		padding: 2px 7px;
 		border-radius: 4px;
 		cursor: pointer;
@@ -190,15 +190,19 @@
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
 		line-height: 1.3;
-		background: rgba(212, 175, 55, 0.12);
+		background: var(--gold-a10);
 		color: var(--color-solidcam-gold, #d4af37);
-		border: 1px solid rgba(212, 175, 55, 0.3);
-		transition: all 150ms ease;
+		border: 1px solid var(--gold-a30);
+		transition:
+			background 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart),
+			box-shadow 250ms var(--ease-out-expo);
 	}
 
 	.upgrades-btn:hover {
-		background: rgba(212, 175, 55, 0.22);
-		border-color: rgba(212, 175, 55, 0.5);
+		background: var(--gold-a20);
+		border-color: var(--gold-a45);
+		box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
 	}
 
 	.upgrades-btn-ms {
@@ -210,6 +214,7 @@
 	.upgrades-btn-ms:hover {
 		background: rgba(59, 130, 246, 0.22);
 		border-color: rgba(59, 130, 246, 0.5);
+		box-shadow: 0 0 12px rgba(59, 130, 246, 0.22);
 	}
 
 	.maintenance-range {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Package } from '$types';
+	import { Check } from 'lucide-svelte';
 	import { Checkbox } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
 	import { panelsStore } from '$stores/panels.svelte';
@@ -180,7 +181,7 @@
 			{/if}
 			<div>
 				<button type="button" class="code-btn package-code" onclick={handleCodeCopy} use:tooltip={'Click to copy ' + pkg.code}>
-					{#if codeCopied}<span class="copy-check">&#10003;</span>{:else}{pkg.code}{/if}
+					{#if codeCopied}<span class="copy-check"><Check size={13} strokeWidth={3} /></span>{:else}{pkg.code}{/if}
 				</button>
 				<span class="package-description">{pkg.description}</span>
 			</div>
@@ -200,7 +201,7 @@
 				</span>
 			{/if}
 			<button type="button" class="code-btn maint-code" onclick={handleMaintCopy} use:tooltip={'Click to copy ' + pkg.maintenance}>
-				{#if maintCopied}<span class="copy-check">&#10003;</span>{:else}{pkg.maintenance}{/if}
+				{#if maintCopied}<span class="copy-check"><Check size={13} strokeWidth={3} /></span>{:else}{pkg.maintenance}{/if}
 			</button>
 		</div>
 	</td>
@@ -270,10 +271,11 @@
 <style>
 	.package-row {
 		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+		transition: background 180ms var(--ease-out-quart);
 	}
 
 	.package-row:hover {
-		background: rgba(255, 255, 255, 0.02);
+		background: rgba(255, 255, 255, 0.025);
 	}
 
 	.pkg-cell {
@@ -313,7 +315,7 @@
 		color: var(--chip-text-color);
 		line-height: 1.2;
 		cursor: pointer;
-		transition: color 150ms ease;
+		transition: color 150ms var(--ease-out-quart);
 		/* button reset */
 		background: none;
 		border: none;
@@ -343,7 +345,7 @@
 		color: var(--color-solidcam-gold, #d4af37);
 		letter-spacing: 0.02em;
 		line-height: 1.2;
-		transition: color 150ms ease;
+		transition: color 150ms var(--ease-out-quart);
 	}
 
 	.package-code:hover {
@@ -351,7 +353,10 @@
 	}
 
 	.copy-check {
+		display: inline-flex;
+		align-items: center;
 		color: var(--color-success, #22c55e);
+		filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.4));
 	}
 
 	.package-description {
@@ -385,7 +390,7 @@
 		color: var(--chip-text-muted);
 		line-height: 1.2;
 		cursor: pointer;
-		transition: color 150ms ease;
+		transition: color 150ms var(--ease-out-quart);
 	}
 
 	.maint-code:hover {

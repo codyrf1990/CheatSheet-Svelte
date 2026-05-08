@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Check } from 'lucide-svelte';
 	import { Checkbox, Tooltip } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
 	import { toastStore } from '$stores/toast.svelte';
@@ -52,6 +53,7 @@
 <li
 	class="sub-bit"
 	class:custom={isCustom}
+	class:selected={isSelected}
 	class:disabled-bit={disabled}
 	data-bit={bit}
 	data-parent={masterId}
@@ -74,7 +76,7 @@
 					onclick={handleCopy}
 					data-copyable-bit
 					aria-label="Copy {bit}"
-					>{#if justCopied}<span class="copy-check">&#10003;</span>{:else}{#if isCustom}<span
+					>{#if justCopied}<span class="copy-check"><Check size={11} strokeWidth={3} /></span>{:else}{#if isCustom}<span
 								class="custom-indicator">+</span
 							>{/if}{bit}{/if}</button
 				>
@@ -113,7 +115,9 @@
 		padding: var(--space-0) var(--space-1);
 		border-radius: var(--radius-2xs);
 		border: 1px solid transparent;
-		transition: background-color 150ms ease;
+		transition:
+			background-color 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart);
 		min-width: 0;
 	}
 
@@ -121,6 +125,21 @@
 		background-color: var(--chip-bg-hover);
 		border-color: var(--chip-border-color);
 		box-shadow: var(--chip-shadow);
+	}
+
+	/* Selected state — soft gold tint so checked bits read at a glance */
+	.sub-bit.selected {
+		background-color: var(--gold-a05);
+		border-color: var(--gold-a20);
+	}
+
+	.sub-bit.selected:hover {
+		background-color: var(--gold-a10);
+		border-color: var(--gold-a30);
+	}
+
+	.sub-bit.selected .bit-text {
+		color: rgba(255, 255, 255, 0.95);
 	}
 
 	.sub-bit.disabled-bit {
@@ -162,7 +181,10 @@
 	}
 
 	.copy-check {
+		display: inline-flex;
+		align-items: center;
 		color: var(--color-success, #22c55e);
+		filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.35));
 	}
 
 	.bit-text.custom {
