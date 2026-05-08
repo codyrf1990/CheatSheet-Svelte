@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { Loader2, LogOut, Settings, User } from 'lucide-svelte';
+	import { LogOut, Settings, User } from 'lucide-svelte';
 	import type { SyncStatus } from '$types';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { tooltip } from '$lib/utils/tooltipAction';
@@ -79,6 +79,7 @@
 		<div class="avatar-inner">
 			<User size={18} strokeWidth={2} />
 		</div>
+		<span class="avatar-status-dot" aria-hidden="true"></span>
 	</div>
 	<div class="user-details">
 		<span class="user-name" use:tooltip={username || 'User'}>{username || 'User'}</span>
@@ -99,9 +100,11 @@
 			</button>
 		</div>
 	</div>
-	<div class="sync-indicator" class:visible={status === 'syncing'} use:tooltip={'Syncing...'}>
-		<Loader2 class="sync-spinner" size={14} strokeWidth={2.5} />
-	</div>
+	<!-- Sync status is now indicated by the container's animated outer edge —
+	     see the .user-container::after rule for the rotating gold comet. -->
+	{#if status === 'syncing'}
+		<span class="sr-only" use:tooltip={'Syncing...'}>Syncing</span>
+	{/if}
 
 	{#if settingsOpen}
 		<div
@@ -130,85 +133,165 @@
 </div>
 
 <style>
+	/* Animated angle for the syncing comet that runs around the container border */
+	@property --user-sync-angle {
+		syntax: '<angle>';
+		initial-value: 0deg;
+		inherits: false;
+	}
+
 	.user-container {
 		position: relative;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.375rem 0.625rem;
-		border-radius: 10px;
-		background: rgba(32, 32, 38, 0.3);
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-		border: 1px solid rgba(255, 255, 255, 0.06);
+		padding: 0.4rem 0.7rem;
+		border-radius: 12px;
+		background: linear-gradient(135deg, rgba(28, 28, 32, 0.7) 0%, rgba(16, 16, 20, 0.65) 100%);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
 		box-shadow:
-			0 4px 12px rgba(0, 0, 0, 0.15),
-			0 1px 3px rgba(0, 0, 0, 0.1),
-			inset 0 1px 0 rgba(255, 255, 255, 0.04);
+			0 6px 18px rgba(0, 0, 0, 0.28),
+			0 1px 3px rgba(0, 0, 0, 0.12),
+			inset 0 1px 0 rgba(255, 255, 255, 0.05),
+			inset 0 -1px 0 rgba(0, 0, 0, 0.25);
 		transition:
-			transform 200ms ease,
-			box-shadow 200ms ease,
-			background 200ms ease;
+			transform 220ms var(--ease-out-quart),
+			box-shadow 280ms var(--ease-out-expo),
+			background 220ms var(--ease-out-quart);
+	}
+
+	/* ::before — static gradient stroke (gold → red), the resting "frame" */
+	.user-container::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		padding: 1.5px;
+		background: linear-gradient(
+			135deg,
+			rgba(212, 175, 55, 0.55) 0%,
+			rgba(255, 255, 255, 0.08) 35%,
+			rgba(255, 255, 255, 0.02) 65%,
+			rgba(200, 16, 46, 0.4) 100%
+		);
+		-webkit-mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
+		pointer-events: none;
+		transition: background 350ms var(--ease-out-expo);
+	}
+
+	/* ::after — the sync "comet": a bright arc that rotates around the perimeter */
+	.user-container::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		padding: 1.5px;
+		background: conic-gradient(
+			from var(--user-sync-angle, 0deg),
+			transparent 0deg,
+			transparent 250deg,
+			rgba(212, 175, 55, 0.4) 290deg,
+			rgba(212, 175, 55, 1) 320deg,
+			rgba(212, 175, 55, 0.5) 345deg,
+			transparent 360deg
+		);
+		-webkit-mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 250ms var(--ease-out-quart);
+		filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.45));
 	}
 
 	.user-container:hover {
-		background: rgba(40, 40, 48, 0.5);
 		transform: translateY(-2px);
+		background: linear-gradient(135deg, rgba(34, 34, 40, 0.78) 0%, rgba(20, 20, 26, 0.72) 100%);
 		box-shadow:
-			0 8px 20px rgba(0, 0, 0, 0.2),
-			0 2px 6px rgba(0, 0, 0, 0.15),
-			0 0 20px rgba(212, 175, 55, 0.1),
-			inset 0 1px 0 rgba(255, 255, 255, 0.06);
+			0 12px 28px rgba(0, 0, 0, 0.35),
+			0 2px 6px rgba(0, 0, 0, 0.18),
+			0 0 26px rgba(212, 175, 55, 0.18),
+			inset 0 1px 0 rgba(255, 255, 255, 0.07),
+			inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 	}
 
-	/* Status-aware container styles */
-	.user-container.status-connected {
-		box-shadow:
-			0 4px 12px rgba(0, 0, 0, 0.15),
-			0 1px 3px rgba(0, 0, 0, 0.1),
-			0 0 0 1px rgba(212, 175, 55, 0.15),
-			inset 0 1px 0 rgba(255, 255, 255, 0.04);
+	/* ======== Status states ======== */
+
+	/* Syncing — comet sweep around the perimeter, faster avatar ring */
+	.user-container.status-syncing::after {
+		opacity: 1;
+		animation: userSyncSweep 1.4s linear infinite;
 	}
 
-	.user-container.status-syncing {
-		animation: containerPulse 2s ease-in-out infinite;
+	@keyframes userSyncSweep {
+		to {
+			--user-sync-angle: 360deg;
+		}
+	}
+
+	/* Error — swap the resting border to red and add a soft red halo */
+	.user-container.status-error::before {
+		background: linear-gradient(
+			135deg,
+			rgba(200, 16, 46, 0.55) 0%,
+			rgba(255, 90, 100, 0.15) 35%,
+			rgba(200, 16, 46, 0.55) 100%
+		);
 	}
 
 	.user-container.status-error {
 		box-shadow:
-			0 4px 12px rgba(0, 0, 0, 0.15),
-			0 1px 3px rgba(0, 0, 0, 0.1),
-			0 0 0 1px rgba(200, 16, 46, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.04);
+			0 6px 18px rgba(0, 0, 0, 0.28),
+			0 1px 3px rgba(0, 0, 0, 0.12),
+			0 0 22px rgba(200, 16, 46, 0.18),
+			inset 0 1px 0 rgba(255, 255, 255, 0.05),
+			inset 0 -1px 0 rgba(0, 0, 0, 0.25);
 	}
 
+	/* Disconnected — muted */
 	.user-container.status-disconnected {
-		opacity: 0.7;
+		opacity: 0.65;
 	}
 
-	@keyframes containerPulse {
-		0%,
-		100% {
-			box-shadow:
-				0 4px 12px rgba(0, 0, 0, 0.15),
-				0 1px 3px rgba(0, 0, 0, 0.1),
-				0 0 0 1px rgba(212, 175, 55, 0.15),
-				inset 0 1px 0 rgba(255, 255, 255, 0.04);
-		}
-		50% {
-			box-shadow:
-				0 4px 12px rgba(0, 0, 0, 0.15),
-				0 1px 3px rgba(0, 0, 0, 0.1),
-				0 0 0 2px rgba(212, 175, 55, 0.25),
-				0 0 12px rgba(212, 175, 55, 0.15),
-				inset 0 1px 0 rgba(255, 255, 255, 0.04);
-		}
+	.user-container.status-disconnected::before {
+		background: linear-gradient(
+			135deg,
+			rgba(255, 255, 255, 0.18) 0%,
+			rgba(255, 255, 255, 0.04) 50%,
+			rgba(255, 255, 255, 0.18) 100%
+		);
+	}
+
+	/* Screen-reader only utility (used for the "Syncing" announcement) */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	.user-avatar {
 		position: relative;
-		width: 32px;
-		height: 32px;
+		width: 34px;
+		height: 34px;
 		flex-shrink: 0;
 	}
 
@@ -216,35 +299,85 @@
 		position: absolute;
 		inset: -2px;
 		border-radius: 50%;
-		background: conic-gradient(from 0deg, #d4af37, #c8102e, #d4af37);
-		animation: avatarRingSpin 8s linear infinite;
-		opacity: 0.6;
-		transition: opacity 300ms ease;
+		background: conic-gradient(from 135deg, #d4af37, #c8102e, #8a6d1f, #d4af37);
+		opacity: 0.55;
+		transition:
+			opacity 300ms var(--ease-out-quart),
+			background 350ms var(--ease-out-expo),
+			animation 300ms var(--ease-out-quart);
 	}
 
-	/* Status-aware ring */
+	/* Status-aware ring — animation only kicks in for syncing */
 	.status-connected .avatar-ring {
-		opacity: 0.8;
+		opacity: 0.7;
 	}
 
 	.status-syncing .avatar-ring {
+		opacity: 0.95;
 		animation: avatarRingSpin 3s linear infinite;
-		opacity: 0.9;
 	}
 
 	.status-disconnected .avatar-ring {
-		opacity: 0.3;
-		animation-play-state: paused;
+		opacity: 0.25;
+		background: conic-gradient(from 135deg, #555, #333, #555);
 	}
 
 	.status-error .avatar-ring {
-		background: conic-gradient(from 0deg, #c8102e, #8b0000, #c8102e);
-		opacity: 0.8;
+		background: conic-gradient(from 135deg, #c8102e, #8b0000, #c8102e);
+		opacity: 0.85;
 	}
 
 	@keyframes avatarRingSpin {
 		to {
 			transform: rotate(360deg);
+		}
+	}
+
+	/* Status dot — small bottom-right indicator on the avatar */
+	.avatar-status-dot {
+		position: absolute;
+		bottom: -2px;
+		right: -2px;
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		border: 2px solid rgba(20, 20, 25, 1);
+		background: rgba(120, 120, 130, 0.9);
+		z-index: 2;
+		transition:
+			background 250ms var(--ease-out-quart),
+			box-shadow 300ms var(--ease-out-expo);
+	}
+
+	.status-connected .avatar-status-dot {
+		background: #22c55e;
+		box-shadow: 0 0 8px rgba(34, 197, 94, 0.55);
+	}
+
+	.status-syncing .avatar-status-dot {
+		background: var(--color-solidcam-gold);
+		box-shadow: 0 0 10px rgba(212, 175, 55, 0.7);
+		animation: dotPulse 1.4s ease-in-out infinite;
+	}
+
+	.status-error .avatar-status-dot {
+		background: #ef4444;
+		box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+	}
+
+	.status-disconnected .avatar-status-dot {
+		background: rgba(120, 120, 130, 0.6);
+	}
+
+	@keyframes dotPulse {
+		0%,
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+		50% {
+			transform: scale(1.2);
+			opacity: 0.85;
 		}
 	}
 
@@ -300,11 +433,12 @@
 	}
 
 	.user-name {
-		font-size: 0.8rem;
-		font-weight: 600;
+		font-size: 0.8125rem;
+		font-weight: 540;
+		letter-spacing: -0.012em;
 		color: var(--color-text-primary);
-		line-height: 1.3;
-		max-width: 100px;
+		line-height: 1.25;
+		max-width: 110px;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
