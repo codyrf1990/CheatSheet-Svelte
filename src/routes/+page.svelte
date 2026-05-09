@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { Boxes, ChevronDown, ExternalLink, Receipt } from 'lucide-svelte';
 	import { Header, CompanyPageBar } from '$components/layout';
 	import { PackageTable } from '$components/packages';
 	import SolidWorksLicenseView from '$components/packages/SolidWorksLicenseView.svelte';
@@ -313,17 +314,13 @@
 							onclick={() => (skuPanelOpen = !skuPanelOpen)}
 							aria-label={skuPanelOpen ? 'Collapse SKU panel' : 'Expand SKU panel'}
 						>
-							<svg
+							<span
 								class="collapse-chevron"
 								class:open={skuPanelOpen}
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
 								aria-hidden="true"
 							>
-								<path d="M19 9l-7 7-7-7" />
-							</svg>
+								<ChevronDown size={14} strokeWidth={2.25} />
+							</span>
 						</button>
 					</div>
 					<CollapseWrapper open={skuPanelOpen}>
@@ -387,19 +384,13 @@
 	>
 		<button class="dropdown-item" role="menuitem" onclick={handleSalesTax}>
 			<span class="dropdown-icon" aria-hidden="true">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<path
-						d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"
-					/>
-				</svg>
+				<Receipt size={13} strokeWidth={2} />
 			</span>
 			Sales Tax Guide
 		</button>
 		<button class="dropdown-item" role="menuitem" onclick={handleCurrentProducts}>
 			<span class="dropdown-icon" aria-hidden="true">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-				</svg>
+				<Boxes size={13} strokeWidth={2} />
 			</span>
 			Current Products
 		</button>
@@ -425,11 +416,7 @@
 				onclick={closeCFTools}
 			>
 				<span class="dropdown-icon" aria-hidden="true">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-						<polyline points="15 3 21 3 21 9" />
-						<line x1="10" y1="14" x2="21" y2="3" />
-					</svg>
+					<ExternalLink size={13} strokeWidth={2} />
 				</span>
 				{link.label}
 			</a>
@@ -539,10 +526,11 @@
 	}
 
 	.collapse-chevron {
-		width: 12px;
-		height: 12px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		transform: rotate(0deg);
-		transition: transform 200ms ease;
+		transition: transform 200ms var(--ease-out-expo);
 	}
 
 	.collapse-chevron.open {
@@ -595,26 +583,31 @@
 
 	.mode-pill-btn {
 		font-size: var(--text-xs);
-		font-weight: 700;
+		font-weight: 600;
 		padding: var(--space-0-5) var(--space-1);
 		background: transparent;
 		border: none;
 		color: rgba(255, 255, 255, 0.5);
 		cursor: pointer;
-		transition: all 150ms ease;
 		letter-spacing: 0.04em;
+		transition:
+			background 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart),
+			box-shadow 200ms var(--ease-out-expo);
 	}
 
 	.mode-pill-btn:hover {
-		color: rgba(255, 255, 255, 0.65);
+		color: rgba(255, 255, 255, 0.7);
 		background: rgba(255, 255, 255, 0.06);
 	}
 
 	/* BDM active — gold */
 	.mode-pill-active-bdm {
-		background: rgba(212, 175, 55, 0.18);
+		background: var(--gold-a20);
 		color: var(--color-solidcam-gold, #d4af37);
-		box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.3);
+		box-shadow:
+			inset 0 0 0 1px var(--gold-a30),
+			0 0 10px rgba(212, 175, 55, 0.18);
 	}
 
 	/* svelte-ignore css_unused_selector */
@@ -626,7 +619,9 @@
 	.mode-pill-active-ms {
 		background: rgba(59, 130, 246, 0.18);
 		color: #60a5fa;
-		box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.3);
+		box-shadow:
+			inset 0 0 0 1px rgba(59, 130, 246, 0.3),
+			0 0 10px rgba(59, 130, 246, 0.18);
 	}
 
 	/* svelte-ignore css_unused_selector */
@@ -660,7 +655,7 @@
 	@keyframes menuFadeIn {
 		from {
 			opacity: 0;
-			transform: translateY(-8px);
+			transform: translateY(-6px);
 		}
 		to {
 			opacity: 1;
@@ -671,23 +666,28 @@
 	.dropdown-item {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.55rem;
 		width: 100%;
 		padding: var(--space-2) var(--space-3);
 		font-size: var(--text-xs);
-		color: rgba(255, 255, 255, 0.8);
+		font-weight: 500;
+		color: rgba(255, 255, 255, 0.82);
 		background: transparent;
 		border: none;
+		border-left: 2px solid transparent;
 		text-align: left;
 		text-decoration: none;
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart),
+			border-left-color 200ms var(--ease-out-expo);
 	}
 
 	.dropdown-item:hover {
-		background: rgba(212, 175, 55, 0.15);
+		background: var(--gold-a10);
 		color: var(--color-solidcam-gold);
-		padding-left: 0.9rem;
+		border-left-color: var(--color-solidcam-gold);
 	}
 
 	.dropdown-item:not(:last-child) {
@@ -695,18 +695,12 @@
 	}
 
 	.dropdown-icon {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 14px;
-		height: 14px;
 		flex-shrink: 0;
 		opacity: 0.7;
-	}
-
-	.dropdown-icon svg {
-		width: 12px;
-		height: 12px;
+		transition: opacity 150ms var(--ease-out-quart);
 	}
 
 	.dropdown-item:hover .dropdown-icon {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { KeyRound, Trash2 } from 'lucide-svelte';
 	import type { SolidWorksLicenseInfo } from '$types';
 	import { companiesStore } from '$stores/companies.svelte';
 	import { toastStore } from '$stores/toast.svelte';
@@ -66,6 +67,9 @@
 
 <div class="sw-view">
 	<div class="sw-view-header">
+		<span class="sw-view-icon" aria-hidden="true">
+			<KeyRound size={16} strokeWidth={2.25} />
+		</span>
 		<h2 class="sw-view-title">SolidWorks Licenses</h2>
 		<p class="sw-view-subtitle">
 			{licenses.length} license{licenses.length === 1 ? '' : 's'} on this company
@@ -93,7 +97,7 @@
 									aria-label="Remove SolidWorks license {license.serialNumber}"
 									onclick={() => handleRemove(license.serialNumber)}
 								>
-									×
+									<Trash2 size={13} strokeWidth={2} />
 								</button>
 							</Tooltip>
 						</div>
@@ -193,16 +197,28 @@
 
 	.sw-view-header {
 		display: flex;
-		align-items: baseline;
-		gap: var(--space-3);
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.sw-view-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		background: rgba(220, 38, 38, 0.14);
+		border: 1px solid rgba(220, 38, 38, 0.32);
+		color: rgba(252, 165, 165, 0.95);
 	}
 
 	.sw-view-title {
 		margin: 0;
 		font-size: 1rem;
-		font-weight: 600;
+		font-weight: 580;
+		letter-spacing: -0.012em;
 		color: rgba(252, 165, 165, 0.95);
-		letter-spacing: 0.02em;
 	}
 
 	.sw-view-subtitle {
@@ -229,10 +245,23 @@
 		flex-direction: column;
 		gap: var(--space-3);
 		padding: var(--space-3) var(--space-4);
-		background: rgba(0, 0, 0, 0.35);
+		background:
+			linear-gradient(135deg, rgba(20, 20, 24, 0.55) 0%, rgba(12, 12, 16, 0.55) 100%);
 		border: 1px solid rgba(255, 255, 255, 0.06);
 		border-left: 3px solid rgba(220, 38, 38, 0.55);
-		border-radius: 8px;
+		border-radius: 10px;
+		box-shadow:
+			0 4px 12px rgba(0, 0, 0, 0.25),
+			inset 0 1px 0 rgba(255, 255, 255, 0.04);
+		transition:
+			background 200ms var(--ease-out-quart),
+			border-color 200ms var(--ease-out-quart);
+	}
+
+	.sw-card:hover {
+		background:
+			linear-gradient(135deg, rgba(26, 26, 30, 0.6) 0%, rgba(16, 16, 20, 0.6) 100%);
+		border-color: rgba(255, 255, 255, 0.1);
 	}
 
 	.sw-card-head {
@@ -300,19 +329,21 @@
 		align-items: center;
 		justify-content: center;
 		background: transparent;
-		border: 1px solid rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 6px;
 		color: rgba(255, 255, 255, 0.5);
-		font-size: 1rem;
 		line-height: 1;
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart),
+			color 150ms var(--ease-out-quart);
 	}
 
 	.sw-remove-btn:hover,
 	.sw-remove-btn:focus-visible {
-		background: rgba(220, 38, 38, 0.15);
-		border-color: rgba(220, 38, 38, 0.5);
+		background: var(--red-a20);
+		border-color: var(--red-a30);
 		color: rgba(252, 165, 165, 1);
 		outline: none;
 	}
@@ -343,7 +374,8 @@
 	}
 
 	.sw-value.mono {
-		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+		font-variant-numeric: tabular-nums;
 		font-size: 0.8rem;
 		word-break: break-all;
 	}
@@ -359,7 +391,8 @@
 		margin: 0;
 		text-align: left;
 		cursor: pointer;
-		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+		font-variant-numeric: tabular-nums;
 	}
 
 	.sw-value.copyable:hover {

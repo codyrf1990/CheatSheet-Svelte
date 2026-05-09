@@ -44,7 +44,12 @@
 		font-weight: 500;
 		border-radius: 9999px;
 		cursor: pointer;
-		transition: all 150ms ease;
+		transition:
+			background 150ms var(--ease-out-quart),
+			border-color 150ms var(--ease-out-quart),
+			box-shadow 250ms var(--ease-out-expo),
+			transform 150ms var(--ease-out-quart),
+			filter 150ms var(--ease-out-quart);
 		border: none;
 	}
 
