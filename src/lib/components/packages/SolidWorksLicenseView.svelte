@@ -1,11 +1,17 @@
 <script lang="ts">
-	import { KeyRound, Trash2 } from 'lucide-svelte';
+	import { AlertTriangle, KeyRound, Trash2 } from 'lucide-svelte';
 	import type { SolidWorksLicenseInfo } from '$types';
 	import { companiesStore } from '$stores/companies.svelte';
 	import { toastStore } from '$stores/toast.svelte';
-	import { Tooltip } from '$components/ui';
+	import { Button, Modal, Tooltip } from '$components/ui';
 	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { solidworksMaintSku } from '$lib/services/licenseImport';
+
+	// Delete-confirmation modal state
+	let deleteSerial = $state<string | null>(null);
+	let deleteLicense = $derived.by(() =>
+		deleteSerial ? (licenses.find((l) => l.serialNumber === deleteSerial) ?? null) : null
+	);
 
 	interface Props {
 		companyId: string;
@@ -53,15 +59,24 @@
 		await copyToClipboard(serial, 'Serial copied');
 	}
 
-	function handleRemove(serial: string) {
-		const ok = confirm(`Remove SolidWorks license ${serial.slice(-8)}? This cannot be undone.`);
-		if (!ok) return;
+	function requestRemove(serial: string) {
+		deleteSerial = serial;
+	}
+
+	function cancelRemove() {
+		deleteSerial = null;
+	}
+
+	function confirmRemove() {
+		if (!deleteSerial) return;
+		const serial = deleteSerial;
 		const removed = companiesStore.removeSolidWorksLicense(companyId, serial);
 		if (removed) {
 			toastStore.success('SolidWorks license removed');
 		} else {
 			toastStore.error('Could not remove license');
 		}
+		deleteSerial = null;
 	}
 </script>
 
@@ -95,7 +110,7 @@
 									type="button"
 									class="sw-remove-btn"
 									aria-label="Remove SolidWorks license {license.serialNumber}"
-									onclick={() => handleRemove(license.serialNumber)}
+									onclick={() => requestRemove(license.serialNumber)}
 								>
 									<Trash2 size={13} strokeWidth={2} />
 								</button>
@@ -184,6 +199,48 @@
 	{/if}
 </div>
 
+<!-- Delete confirmation modal -->
+{#snippet deleteFooter()}
+	<div class="dialog-actions">
+		<Button variant="ghost" size="sm" onclick={cancelRemove}>Cancel</Button>
+		<Button variant="danger" size="sm" onclick={confirmRemove}>Remove License</Button>
+	</div>
+{/snippet}
+
+<Modal
+	open={deleteSerial !== null}
+	onClose={cancelRemove}
+	title="Remove SolidWorks License"
+	footer={deleteFooter}
+>
+	<div class="confirm-body">
+		<span class="confirm-icon" aria-hidden="true">
+			<AlertTriangle size={22} strokeWidth={2} />
+		</span>
+		<p class="confirm-message">
+			Remove this SolidWorks license? This can't be undone — the serial number, subscription dates, and maintenance SKU will be cleared from this company.
+		</p>
+		{#if deleteLicense}
+			<dl class="confirm-details">
+				<div class="confirm-row">
+					<dt>Product</dt>
+					<dd>{deleteLicense.productRaw || deleteLicense.product}</dd>
+				</div>
+				<div class="confirm-row">
+					<dt>Serial</dt>
+					<dd class="mono">{deleteLicense.serialNumber}</dd>
+				</div>
+				{#if deleteLicense.account}
+					<div class="confirm-row">
+						<dt>Account</dt>
+						<dd>{deleteLicense.account}</dd>
+					</div>
+				{/if}
+			</dl>
+		{/if}
+	</div>
+</Modal>
+
 <style>
 	.sw-view {
 		display: flex;
@@ -246,7 +303,7 @@
 		gap: var(--space-3);
 		padding: var(--space-3) var(--space-4);
 		background:
-			linear-gradient(135deg, rgba(20, 20, 24, 0.55) 0%, rgba(12, 12, 16, 0.55) 100%);
+			linear-gradient(135deg, rgba(28, 28, 32, 0.92) 0%, rgba(16, 16, 20, 0.9) 100%);
 		border: 1px solid rgba(255, 255, 255, 0.06);
 		border-left: 3px solid rgba(220, 38, 38, 0.55);
 		border-radius: 10px;
@@ -260,7 +317,7 @@
 
 	.sw-card:hover {
 		background:
-			linear-gradient(135deg, rgba(26, 26, 30, 0.6) 0%, rgba(16, 16, 20, 0.6) 100%);
+			linear-gradient(135deg, rgba(34, 34, 38, 0.94) 0%, rgba(20, 20, 24, 0.92) 100%);
 		border-color: rgba(255, 255, 255, 0.1);
 	}
 
@@ -466,5 +523,84 @@
 	.sw-card-foot {
 		font-size: 0.7rem;
 		color: rgba(255, 255, 255, 0.35);
+	}
+
+	/* Delete-confirmation modal body */
+	.confirm-body {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
+		text-align: center;
+	}
+
+	.confirm-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
+		background: var(--red-a10);
+		border: 1px solid var(--red-a20);
+		color: #fca5a5;
+	}
+
+	.confirm-message {
+		margin: 0;
+		font-size: 0.9rem;
+		color: rgba(255, 255, 255, 0.78);
+		line-height: 1.5;
+		max-width: 42ch;
+	}
+
+	.confirm-details {
+		width: 100%;
+		max-width: 360px;
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		margin: 0.5rem 0 0;
+		padding: 0.65rem 0.85rem;
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: var(--radius-sm);
+		text-align: left;
+	}
+
+	.confirm-row {
+		display: grid;
+		grid-template-columns: 80px 1fr;
+		gap: 0.75rem;
+		align-items: center;
+	}
+
+	.confirm-row dt {
+		font-size: 0.7rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: rgba(255, 255, 255, 0.45);
+		margin: 0;
+	}
+
+	.confirm-row dd {
+		margin: 0;
+		font-size: 0.8125rem;
+		color: rgba(255, 255, 255, 0.92);
+		word-break: break-word;
+	}
+
+	.confirm-row dd.mono {
+		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
+		font-variant-numeric: tabular-nums;
+		font-size: 0.78rem;
+	}
+
+	.dialog-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--space-2);
+		width: 100%;
 	}
 </style>
