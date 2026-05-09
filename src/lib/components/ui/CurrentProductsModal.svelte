@@ -263,10 +263,13 @@
 	</div>
 
 	<!-- Tab Content -->
+	<!-- translate="no" so Chrome's auto-translator doesn't garble SKU codes
+	     and brand names like "SC-Mill", "iMach2D", "SOLIDWORKS". -->
 	<div
 		class="tab-content"
 		role="tabpanel"
 		aria-label={tabs.find((t) => t.id === activeTab)?.label || 'Content'}
+		translate="no"
 	>
 		{#if activeTab === 'overview'}
 			<!-- Overview Tab -->

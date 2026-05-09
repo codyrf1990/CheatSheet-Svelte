@@ -516,7 +516,7 @@
 			<p class="loading-text">Importing license…</p>
 		</div>
 	{:else if modalState === 'results'}
-		<div class="results-section">
+		<div class="results-section" translate="no">
 			{#if importResult}
 				{@const isSW = importResult.isSolidWorks ?? false}
 				<div

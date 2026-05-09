@@ -395,7 +395,7 @@
 	}
 </script>
 
-<section class="panel calculator-panel tile" data-panel="calculator" aria-label="Price calculator">
+<section class="panel calculator-panel tile" data-panel="calculator" aria-label="Price calculator" translate="no">
 	<div class="panel-head">
 		<h2 class="panel-title">Calculator</h2>
 	</div>

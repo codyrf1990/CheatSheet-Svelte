@@ -165,7 +165,7 @@
 
 </script>
 
-<tr class="package-row" data-package={pkg.code}>
+<tr class="package-row" data-package={pkg.code} translate="no">
 	<td class="pkg-cell">
 		<div class="pkg-header">
 			{#if packageToggleDef}

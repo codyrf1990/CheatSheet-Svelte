@@ -60,7 +60,7 @@
 
 </script>
 
-<section class="maintenance-panel tile">
+<section class="maintenance-panel tile" translate="no">
 	<div class="panel-body">
 		<!-- Maintenance SKUs Section -->
 		<div class="section">

@@ -207,7 +207,7 @@
 			<p class="empty-sub">All available packages and modules are already on this quote.</p>
 		</div>
 	{:else}
-		<div class="upgrade-content">
+		<div class="upgrade-content" translate="no">
 			{#each upgradeGroups as group (group.label)}
 				<section class="upgrade-group">
 					<h4 class="group-title">

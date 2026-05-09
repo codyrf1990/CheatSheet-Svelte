@@ -154,7 +154,7 @@
 	}
 </script>
 
-<section class="new-sale-panel tile">
+<section class="new-sale-panel tile" translate="no">
 	<div class="panel-body">
 		{#if skuMode === 'ms'}
 			<!-- MS mode: same items as BDM but show maintSku + maintPrice -->

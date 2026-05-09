@@ -65,7 +65,7 @@
 	}
 </script>
 
-<div class="sw-view">
+<div class="sw-view" translate="no">
 	<div class="sw-view-header">
 		<span class="sw-view-icon" aria-hidden="true">
 			<KeyRound size={16} strokeWidth={2.25} />

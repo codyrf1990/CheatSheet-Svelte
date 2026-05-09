@@ -642,7 +642,7 @@
 	<div class="divider"></div>
 
 	<!-- Page Tabs -->
-	<div class="page-tabs" role="tablist" aria-label="Company pages">
+	<div class="page-tabs" role="tablist" aria-label="Company pages" translate="no">
 		{#if currentCompany && hasSW}
 			<div class="page-tab-group">
 				<Tooltip

@@ -26,7 +26,7 @@
 	}
 </script>
 
-<section class="bdm-panel">
+<section class="bdm-panel" translate="no">
 	<div class="panel-body">
 		{#each BDM_SECTIONS as section (section.id)}
 			<div class="bdm-section">
