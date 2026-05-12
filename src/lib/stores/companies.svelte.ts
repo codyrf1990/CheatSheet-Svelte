@@ -654,7 +654,7 @@ function renamePage(pageId: string, newName: string): boolean {
 	const page = company.pages.find((p) => p.id === pageId);
 	if (!page) return false;
 
-	page.name = newName.substring(0, 8); // Max 8 chars
+	page.name = newName.substring(0, 32);
 	company.updatedAt = Date.now();
 	companies = [...companies];
 	save();
