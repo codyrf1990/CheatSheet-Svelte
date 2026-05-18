@@ -185,8 +185,8 @@ export function getLicenseSelections(license: LicenseInfo): LicenseSelections {
 
 			// Normalize level value for comparison
 			const levelLower = sim5xLevel.toLowerCase();
-			const is3Axis = levelLower === '3 axis' || levelLower === '1' || levelLower === '3axis';
-			const is34Axis = levelLower === '3/4 axis' || levelLower === '3/4axis';
+			const is3Axis = levelLower === '3 axis' || levelLower === '1' || levelLower === '3axis' || levelLower === '3-axis';
+			const is34Axis = levelLower === '3/4 axis' || levelLower === '3/4axis' || levelLower === '3/4-axis';
 			const isBlank = sim5xLevel === '';
 			const isUnknown = !is3Axis && !is34Axis && !isBlank;
 			const isBlankOrUnknown = isBlank || isUnknown;

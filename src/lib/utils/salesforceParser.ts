@@ -215,7 +215,7 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 	// Any other value indicates parse error - default to blank
 	const sim5xLevelRaw =
 		extractField(text, 'Sim 5x Level') || extractField(text, 'Sim5xLevel') || '';
-	const validSim5xLevels = ['', '3 axis', '3/4 axis', '1', '3axis', '3/4axis'];
+	const validSim5xLevels = ['', '3 axis', '3/4 axis', '1', '3axis', '3/4axis', '3-axis', '3/4-axis'];
 	const sim5xLevel = validSim5xLevels.includes(sim5xLevelRaw.toLowerCase()) ? sim5xLevelRaw : ''; // Invalid value = treat as blank
 
 	// Determine if this is a network license
