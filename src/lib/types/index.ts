@@ -165,6 +165,7 @@ export interface LicenseInfo {
 	profileUsers?: number; // Number of users on this profile (from "Profile Users" field)
 	actualUsers?: number; // Number of users on the license itself (from "Actual Users" field)
 	sim5xLevel?: string; // Sim 5x Level value: "3 Axis", "3/4 Axis", or blank
+	noHss?: boolean; // Profile-only: "No HSS" checked = customer has no HSS bit
 
 	// Maintenance
 	maintenanceType: string; // 'SC', 'SC+SW', etc.

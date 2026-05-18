@@ -177,9 +177,18 @@ export function getLicenseSelections(license: LicenseInfo): LicenseSelections {
 			bitsByPackage['SC-Mill-5Axis'] = existingBits.filter((bit) => !removeSet.has(bit));
 		};
 
+		// No HSS flag — profile explicitly excludes HSS; actively remove it from selection and state
+		if (license.noHss) {
+			bitsByPackage['SC-Mill'] = (bitsByPackage['SC-Mill'] ?? []).filter((b) => b !== 'HSS');
+			if (!removedBitsByPackage['SC-Mill']) removedBitsByPackage['SC-Mill'] = [];
+			if (!removedBitsByPackage['SC-Mill'].includes('HSS')) {
+				removedBitsByPackage['SC-Mill'].push('HSS');
+			}
+		}
+
 		if (hasSim5x) {
-			// All Sim 5x levels require HSS bit
-			if (!bitsByPackage['SC-Mill'].includes('HSS')) {
+			// All Sim 5x levels require HSS bit — unless No HSS is flagged on this profile
+			if (!license.noHss && !bitsByPackage['SC-Mill'].includes('HSS')) {
 				bitsByPackage['SC-Mill'].push('HSS');
 			}
 

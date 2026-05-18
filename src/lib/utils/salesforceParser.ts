@@ -210,6 +210,9 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 
 	const isProfile = !!(profileNo || profileName);
 
+	// Profile-only "No HSS" flag — when checked it means HSS is excluded from this profile
+	const noHss = isProfile ? extractChecked(text, 'No HSS') : false;
+
 	// Extract Sim 5x Level for profile datasets
 	// Valid values: "3 Axis", "3/4 Axis", "1", or blank
 	// Any other value indicates parse error - default to blank
@@ -287,6 +290,7 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 		profileUsers,
 		actualUsers,
 		sim5xLevel: sim5xLevel || undefined, // "3 Axis", "3/4 Axis", or undefined if blank
+		noHss: noHss || undefined,
 		maintenanceType,
 		maintenanceStart,
 		maintenanceEnd,
@@ -381,6 +385,7 @@ export function parseSalesforceText(text: string): ParseResult {
 		profileUsers: headerInfo.profileUsers,
 		actualUsers: headerInfo.actualUsers,
 		sim5xLevel: headerInfo.sim5xLevel,
+		noHss: headerInfo.noHss,
 		maintenanceType: headerInfo.maintenanceType || '',
 		maintenanceStart: headerInfo.maintenanceStart || '',
 		maintenanceEnd: headerInfo.maintenanceEnd || '',
