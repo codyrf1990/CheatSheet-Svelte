@@ -191,12 +191,26 @@ export function getLicenseSelections(license: LicenseInfo): LicenseSelections {
 			const isUnknown = !is3Axis && !is34Axis && !isBlank;
 			const isBlankOrUnknown = isBlank || isUnknown;
 
+			// Helper: push bits into removedBitsByPackage so re-imports clear existing page state
+			const mark5AxisRemoved = (bits: string[]): void => {
+				if (!removedBitsByPackage['SC-Mill-5Axis']) {
+					removedBitsByPackage['SC-Mill-5Axis'] = [];
+				}
+				for (const bit of bits) {
+					if (!removedBitsByPackage['SC-Mill-5Axis'].includes(bit)) {
+						removedBitsByPackage['SC-Mill-5Axis'].push(bit);
+					}
+				}
+			};
+
 			if (is3Axis) {
 				// Sim 5x = 1, Level "3 Axis" or "1": HSS only (no 5-axis bits)
 				removeSim5xBits(true);
+				mark5AxisRemoved([...sim5xBits, 'Sim4x']);
 			} else if (is34Axis) {
 				// Sim 5x = 1, Level "3/4 Axis": HSS + Sim4x
 				removeSim5xBits();
+				mark5AxisRemoved(sim5xBits);
 				// Also add Sim4x bit
 				if (!bitsByPackage['SC-Mill-5Axis']) {
 					bitsByPackage['SC-Mill-5Axis'] = [];
