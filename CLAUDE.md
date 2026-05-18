@@ -247,9 +247,14 @@ Import from Salesforce dongle page text (Ctrl+A, Ctrl+C). Parser: `src/lib/utils
 | 1      | "3/4 Axis" | Sim4x bit + Sim4x-Maint       |
 | 1      | Blank      | All 5-axis bits + Sim5x-Maint |
 
+> **Salesforce quirk:** Level field sometimes uses hyphens instead of spaces (`"3/4-axis"`, `"3-axis"`). The parser normalises these — no special handling needed.
+
+4. **No HSS flag** (profiles only) - When `No HSS` is checked, HSS bit is actively removed and the Sim 5x level logic is blocked from adding it back. Stored as `license.noHss` on `LicenseInfo`.
+
 ### Key Files
 
 - `src/lib/utils/salesforceParser.ts` - Parse Salesforce text
 - `src/lib/utils/featureMapper.ts` - Map features to bits/SKUs
+- `src/lib/utils/licenseSelections.ts` - Bit/SKU selection logic (profile Sim5x + No HSS handling)
 - `src/lib/services/licenseImport.ts` - Import orchestration
 - `src/lib/components/ui/ImportLicenseModal.svelte` - UI

@@ -55,7 +55,7 @@ The profile dataset uses different naming for C-axes:
 
 **Applies to Profile-based dongles only.**
 
-**All Sim 5x levels get:** HSS bit (SC-Mill) + HSS-Maint
+**All Sim 5x levels get:** HSS bit (SC-Mill) + HSS-Maint *(unless No HSS is flagged — see §4)*
 
 | Sim 5x Bit      | Sim 5x Level    | Additional                    | Notes                           |
 | --------------- | --------------- | ----------------------------- | ------------------------------- |
@@ -63,6 +63,8 @@ The profile dataset uses different naming for C-axes:
 | 1 (Checked)     | "3 Axis" or "1" | (HSS only)                    | Restricted to 3-axis HSS        |
 | 1 (Checked)     | "3/4 Axis"      | Sim4x bit + Sim4x-Maint       | Allows 4-axis simultaneous      |
 | 1 (Checked)     | Blank / empty   | All 5-axis bits + Sim5x-Maint | Unrestricted — they have it all |
+
+> **Salesforce quirk:** The Level field sometimes uses hyphens instead of spaces — `"3/4-axis"` and `"3-axis"` are treated identically to `"3/4 Axis"` and `"3 Axis"`. Both the parser valid-list and the comparison checks include these variants.
 
 **"All 5-axis bits" includes:**
 
@@ -78,6 +80,17 @@ The profile dataset uses different naming for C-axes:
 - Sim 5x Level blank → HSS-Maint + Sim5x-Maint
 - Sim 5x Level "3/4 Axis" → HSS-Maint + Sim4x-Maint
 - Sim 5x Level "3 Axis" → HSS-Maint only
+
+### 4. No HSS Flag
+
+**Applies to Profile-based dongles only.**
+
+When `No HSS` is checked on a profile page it means the customer does not have HSS. The import:
+
+- Actively removes the HSS bit from SC-Mill (clears existing page state too)
+- Blocks the Sim 5x level logic from adding HSS back
+
+Stored as `license.noHss: boolean` on `LicenseInfo`. Detected in `salesforceParser.ts`, applied in `licenseSelections.ts`.
 
 ---
 
