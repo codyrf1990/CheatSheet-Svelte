@@ -232,7 +232,7 @@
 					left: rect.left
 				};
 			}
-		}, 220);
+		}, 140);
 	}
 
 	async function handleCompanyDoubleClick(e: MouseEvent) {
