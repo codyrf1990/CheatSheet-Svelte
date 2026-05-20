@@ -209,19 +209,43 @@
 		dialogType === 'rename-sw' ? true : dialogInput.trim().length > 0
 	);
 
+	// Delay single-click open so a double-click (copy) can pre-empt it.
+	let companyClickTimer: ReturnType<typeof setTimeout> | null = null;
+
 	function toggleDropdown(e: MouseEvent) {
 		e.stopPropagation();
-		dropdownOpen = !dropdownOpen;
-		if (dropdownOpen) {
-			searchQuery = '';
-			// Calculate position from trigger button
-			const button = e.currentTarget as HTMLElement;
-			const rect = button.getBoundingClientRect();
-			dropdownPosition = {
-				top: rect.bottom + 8,
-				left: rect.left
-			};
+		const button = e.currentTarget as HTMLElement;
+		const rect = button.getBoundingClientRect();
+
+		if (companyClickTimer) {
+			clearTimeout(companyClickTimer);
+			companyClickTimer = null;
 		}
+
+		companyClickTimer = setTimeout(() => {
+			companyClickTimer = null;
+			dropdownOpen = !dropdownOpen;
+			if (dropdownOpen) {
+				searchQuery = '';
+				dropdownPosition = {
+					top: rect.bottom + 8,
+					left: rect.left
+				};
+			}
+		}, 220);
+	}
+
+	async function handleCompanyDoubleClick(e: MouseEvent) {
+		e.stopPropagation();
+		e.preventDefault();
+		if (companyClickTimer) {
+			clearTimeout(companyClickTimer);
+			companyClickTimer = null;
+		}
+		if (dropdownOpen) closeDropdown();
+		const name = currentCompany?.name;
+		if (!name) return;
+		await copyToClipboard(name, 'Company name copied');
 	}
 
 	function closeDropdown() {
@@ -606,12 +630,18 @@
 			class="company-trigger"
 			bind:this={dropdownTriggerRef}
 			onclick={toggleDropdown}
+			ondblclick={handleCompanyDoubleClick}
 			oncontextmenu={handleCompanyContextMenu}
 			aria-expanded={dropdownOpen}
 			aria-haspopup="listbox"
 			aria-label="Select company, currently {currentCompany?.name || 'none'}"
 		>
-			<Tooltip text={currentCompany?.name || 'No Company'} position="bottom">
+			<Tooltip
+				text={currentCompany?.name
+					? `${currentCompany.name} — double-click to copy name`
+					: 'No Company'}
+				position="bottom"
+			>
 				<span class="company-name">{currentCompany?.name || 'No Company'}</span>
 			</Tooltip>
 			<Tooltip text={statusIndicator.title} position="bottom">
