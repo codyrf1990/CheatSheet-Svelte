@@ -44,8 +44,6 @@
 	let dropdownOpen = $state(false);
 	let dropdownPosition = $state({ top: 0, left: 0 });
 	let searchQuery = $state('');
-	let editingPageId = $state<string | null>(null);
-	let editingPageName = $state('');
 	let dropdownTriggerRef = $state<HTMLButtonElement | null>(null);
 	let searchInputRef = $state<HTMLInputElement | null>(null);
 	let dialogType = $state<
@@ -431,28 +429,78 @@
 		closeContextMenu();
 	}
 
-	// Double-click to rename page
-	function handlePageDoubleClick(pageId: string, pageName: string) {
-		editingPageId = pageId;
-		editingPageName = pageName;
+	// Build a labelled license string for a given page, e.g.:
+	//   "Hardware Dongle:\n77518"
+	//   "Network Product Key:\n0000-0000-0000"
+	//   "Profile:\nProfile-1234"
+	// Returns null if no license/key can be resolved.
+	function buildPageLicenseCopyText(pageId: string): string | null {
+		const company = currentCompany;
+		if (!company) return null;
+		const page = company.pages.find((p) => p.id === pageId);
+		if (!page) return null;
+
+		const licenses = company.licenses ?? [];
+		let license = null as (typeof licenses)[number] | null;
+		if (licenses.length > 0) {
+			const matching = licenses.filter((l) => getPageNameForLicense(l) === page.name);
+			if (matching.length === 1) {
+				license = matching[0];
+			} else if (matching.length > 1) {
+				license = matching.reduce((acc, l) => (l.importedAt > acc.importedAt ? l : acc));
+			} else if (licenses.length === 1) {
+				license = licenses[0];
+			}
+		}
+
+		if (license?.isProfile && license.profileNo) {
+			return `Profile:\nProfile-${license.profileNo}`;
+		}
+
+		const number = license?.productKey || license?.dongleNo || page.licenseKey;
+		if (!number) return null;
+
+		let label = 'License';
+		if (license) {
+			if (license.licenseType === 'product-key') {
+				label = license.isNetworkLicense ? 'Network Product Key' : 'Standalone Product Key';
+			} else {
+				label = license.isNetworkLicense ? 'Network Dongle' : 'Hardware Dongle';
+			}
+		}
+		return `${label}:\n${number}`;
 	}
 
-	function handlePageRenameSubmit() {
-		if (editingPageId && editingPageName.trim()) {
-			companiesStore.renamePage(editingPageId, editingPageName.trim());
+	// Double-click page tab: copy license info (rename remains via right-click / ⋮ menu).
+	async function handlePageDoubleClick(e: MouseEvent, pageId: string) {
+		e.stopPropagation();
+		e.preventDefault();
+		const text = buildPageLicenseCopyText(pageId);
+		if (!text) {
+			toastStore.error('No license to copy');
+			return;
 		}
-		editingPageId = null;
-		editingPageName = '';
+		await copyToClipboard(text, 'License copied');
 	}
 
-	function handlePageRenameKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter') {
-			handlePageRenameSubmit();
-		} else if (e.key === 'Escape') {
-			editingPageId = null;
-			editingPageName = '';
+	// Double-click SW tab: copy all SolidWorks licenses on the company.
+	async function handleSWDoubleClick(e: MouseEvent) {
+		e.stopPropagation();
+		e.preventDefault();
+		const licenses = currentCompany?.solidworksLicenses ?? [];
+		if (licenses.length === 0) {
+			toastStore.error('No SolidWorks license to copy');
+			return;
 		}
+		const text = licenses
+			.map((lic) => {
+				const label = `SolidWorks ${lic.product}`;
+				return `${label}:\n${lic.serialNumber}`;
+			})
+			.join('\n\n');
+		await copyToClipboard(text, 'SolidWorks license copied');
 	}
+
 
 	function closeDialog() {
 		dialogType = null;
@@ -676,7 +724,7 @@
 		{#if currentCompany && hasSW}
 			<div class="page-tab-group">
 				<Tooltip
-					text="SolidWorks licenses on this company — right-click for options"
+					text="SolidWorks licenses — double-click to copy, right-click for options"
 					position="bottom"
 				>
 					<button
@@ -687,6 +735,7 @@
 						aria-selected={swActive}
 						tabindex={swActive ? 0 : -1}
 						onclick={handleSWSelect}
+						ondblclick={handleSWDoubleClick}
 						oncontextmenu={handleSWContextMenu}
 						onkeydown={handlePageTabKeydown}
 					>
@@ -707,47 +756,34 @@
 		{/if}
 		{#if currentCompany}
 			{#each currentCompany.pages as page (page.id)}
-				{#if editingPageId === page.id}
-					<!-- svelte-ignore a11y_autofocus -->
-					<input
-						type="text"
-						class="page-tab-input"
-						bind:value={editingPageName}
-						onblur={handlePageRenameSubmit}
-						onkeydown={handlePageRenameKeydown}
-						aria-label="Page name"
-						autofocus
-					/>
-				{:else}
-					<div class="page-tab-group">
-						<Tooltip text="{page.name} — double-click to rename" position="bottom">
-							<button
-								type="button"
-								role="tab"
-								class="page-tab"
-								class:active={!swActive && page.id === currentCompany.currentPageId}
-								aria-selected={!swActive && page.id === currentCompany.currentPageId}
-								tabindex={!swActive && page.id === currentCompany.currentPageId ? 0 : -1}
-								onclick={() => handlePageSelect(page.id)}
-								ondblclick={() => handlePageDoubleClick(page.id, page.name)}
-								oncontextmenu={(e) => handlePageContextMenu(e, page.id)}
-								onkeydown={handlePageTabKeydown}
-							>
-								{page.name}
-							</button>
-						</Tooltip>
+				<div class="page-tab-group">
+					<Tooltip text="{page.name} — double-click to copy license" position="bottom">
 						<button
 							type="button"
-							class="page-tab-menu-btn"
-							tabindex={0}
-							aria-label="Options for {page.name}"
-							onclick={(e) => {
-								e.stopPropagation();
-								handlePageContextMenu(e, page.id);
-							}}><MoreVertical size={12} strokeWidth={2.5} /></button
+							role="tab"
+							class="page-tab"
+							class:active={!swActive && page.id === currentCompany.currentPageId}
+							aria-selected={!swActive && page.id === currentCompany.currentPageId}
+							tabindex={!swActive && page.id === currentCompany.currentPageId ? 0 : -1}
+							onclick={() => handlePageSelect(page.id)}
+							ondblclick={(e) => handlePageDoubleClick(e, page.id)}
+							oncontextmenu={(e) => handlePageContextMenu(e, page.id)}
+							onkeydown={handlePageTabKeydown}
 						>
-					</div>
-				{/if}
+							{page.name}
+						</button>
+					</Tooltip>
+					<button
+						type="button"
+						class="page-tab-menu-btn"
+						tabindex={0}
+						aria-label="Options for {page.name}"
+						onclick={(e) => {
+							e.stopPropagation();
+							handlePageContextMenu(e, page.id);
+						}}><MoreVertical size={12} strokeWidth={2.5} /></button
+					>
+				</div>
 			{/each}
 		{/if}
 		<Tooltip text="Add a new page — each page is a separate license or quote" position="bottom">
@@ -1480,21 +1516,6 @@
 		color: var(--color-solidcam-gold, #d4af37);
 		background: var(--gold-a10);
 		border-color: var(--gold-a20);
-	}
-
-	.page-tab-input {
-		padding: 0.375rem 0.625rem;
-		background: rgba(255, 255, 255, 0.1);
-		border: 1px solid var(--color-solidcam-gold, #d4af37);
-		border-radius: 8px;
-		color: var(--color-text-primary);
-		font-size: var(--text-base);
-		width: 70px;
-		box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
-	}
-
-	.page-tab-input:focus {
-		outline: none;
 	}
 
 	.quick-actions {
