@@ -453,8 +453,9 @@
 			}
 		}
 
+		// Profile: just the identifier (matches right-click "Copy Profile Name").
 		if (license?.isProfile && license.profileNo) {
-			return `Profile:\nProfile-${license.profileNo}`;
+			return `Profile-${license.profileNo}`;
 		}
 
 		const number = license?.productKey || license?.dongleNo || page.licenseKey;
@@ -468,13 +469,47 @@
 				label = license.isNetworkLicense ? 'Network Dongle' : 'Hardware Dongle';
 			}
 		}
-		return `${label}:\n${number}`;
+		// Only network licenses (NPK / NWD) get the user-count suffix.
+		const suffix = license?.isNetworkLicense ? formatUsersSuffix(license.actualUsers) : '';
+		return `${label}:\n${number}${suffix}`;
+	}
+
+	function formatUsersSuffix(count: number | undefined): string {
+		if (count === undefined || count <= 0) return '';
+		return ` ~ ${count} ${count === 1 ? 'User' : 'Users'}`;
+	}
+
+	// Debounce single-click on tabs so a double-click (copy) doesn't also switch the page.
+	let tabClickTimer: ReturnType<typeof setTimeout> | null = null;
+
+	function clearTabClickTimer() {
+		if (tabClickTimer) {
+			clearTimeout(tabClickTimer);
+			tabClickTimer = null;
+		}
+	}
+
+	function handlePageTabClick(pageId: string) {
+		clearTabClickTimer();
+		tabClickTimer = setTimeout(() => {
+			tabClickTimer = null;
+			handlePageSelect(pageId);
+		}, 180);
+	}
+
+	function handleSWTabClick() {
+		clearTabClickTimer();
+		tabClickTimer = setTimeout(() => {
+			tabClickTimer = null;
+			handleSWSelect();
+		}, 180);
 	}
 
 	// Double-click page tab: copy license info (rename remains via right-click / ⋮ menu).
 	async function handlePageDoubleClick(e: MouseEvent, pageId: string) {
 		e.stopPropagation();
 		e.preventDefault();
+		clearTabClickTimer();
 		const text = buildPageLicenseCopyText(pageId);
 		if (!text) {
 			toastStore.error('No license to copy');
@@ -487,6 +522,7 @@
 	async function handleSWDoubleClick(e: MouseEvent) {
 		e.stopPropagation();
 		e.preventDefault();
+		clearTabClickTimer();
 		const licenses = currentCompany?.solidworksLicenses ?? [];
 		if (licenses.length === 0) {
 			toastStore.error('No SolidWorks license to copy');
@@ -734,7 +770,7 @@
 						class:active={swActive}
 						aria-selected={swActive}
 						tabindex={swActive ? 0 : -1}
-						onclick={handleSWSelect}
+						onclick={handleSWTabClick}
 						ondblclick={handleSWDoubleClick}
 						oncontextmenu={handleSWContextMenu}
 						onkeydown={handlePageTabKeydown}
@@ -765,7 +801,7 @@
 							class:active={!swActive && page.id === currentCompany.currentPageId}
 							aria-selected={!swActive && page.id === currentCompany.currentPageId}
 							tabindex={!swActive && page.id === currentCompany.currentPageId ? 0 : -1}
-							onclick={() => handlePageSelect(page.id)}
+							onclick={() => handlePageTabClick(page.id)}
 							ondblclick={(e) => handlePageDoubleClick(e, page.id)}
 							oncontextmenu={(e) => handlePageContextMenu(e, page.id)}
 							onkeydown={handlePageTabKeydown}
