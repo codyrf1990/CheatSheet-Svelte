@@ -528,11 +528,19 @@
 			toastStore.error('No SolidWorks license to copy');
 			return;
 		}
-		const text = licenses
-			.map((lic) => {
-				const label = `SolidWorks ${lic.product}`;
-				return `${label}:\n${lic.serialNumber}`;
-			})
+		// Group serial numbers by product type so same-type licenses stack
+		// under one label instead of repeating it.
+		const order: string[] = [];
+		const byProduct = new Map<string, string[]>();
+		for (const lic of licenses) {
+			if (!byProduct.has(lic.product)) {
+				byProduct.set(lic.product, []);
+				order.push(lic.product);
+			}
+			byProduct.get(lic.product)!.push(lic.serialNumber);
+		}
+		const text = order
+			.map((product) => `SolidWorks ${product}:\n${byProduct.get(product)!.join('\n')}`)
 			.join('\n\n');
 		await copyToClipboard(text, 'SolidWorks license copied');
 	}
