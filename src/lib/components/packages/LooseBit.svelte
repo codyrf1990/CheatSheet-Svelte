@@ -6,7 +6,6 @@
 	import { toastStore } from '$stores/toast.svelte';
 	import { tooltip } from '$lib/utils/tooltipAction';
 	import { copyToClipboard } from '$lib/utils/clipboard';
-	import { SKU_LOOKUP } from '$lib/data/skuData';
 
 	interface Props {
 		bit: string;
@@ -38,11 +37,7 @@
 	}
 
 	async function handleCopy() {
-		const maintSku =
-			userPrefsStore.skuTabMode === 'ms'
-				? SKU_LOOKUP[`${packageCode}::${bit}`]?.maintSku
-				: undefined;
-		const ok = await copyToClipboard(maintSku ?? bit);
+		const ok = await copyToClipboard(bit);
 		if (ok) {
 			justCopied = true;
 			setTimeout(() => (justCopied = false), 1500);

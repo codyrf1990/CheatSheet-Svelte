@@ -2,10 +2,8 @@
 	import { Check } from 'lucide-svelte';
 	import { Checkbox, Tooltip } from '$components/ui';
 	import { packagesStore } from '$stores/packages.svelte';
-	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
-	import { SKU_LOOKUP } from '$lib/data/skuData';
 
 	interface Props {
 		bit: string;
@@ -37,11 +35,7 @@
 	}
 
 	async function handleCopy() {
-		const maintSku =
-			userPrefsStore.skuTabMode === 'ms'
-				? SKU_LOOKUP[`${packageCode}::${bit}`]?.maintSku
-				: undefined;
-		const ok = await copyToClipboard(maintSku ?? bit, false);
+		const ok = await copyToClipboard(bit, false);
 		if (ok) {
 			justCopied = true;
 			setTimeout(() => (justCopied = false), 1500);

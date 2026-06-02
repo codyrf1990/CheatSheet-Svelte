@@ -6,7 +6,6 @@
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
-	import { SKU_LOOKUP } from '$lib/data/skuData';
 	import { applyOrder } from '$lib/utils/order';
 	import { tooltip } from '$lib/utils/tooltipAction';
 	import SubBit from './SubBit.svelte';
@@ -73,11 +72,7 @@
 	}
 
 	async function handleLabelCopy() {
-		const maintSku =
-			userPrefsStore.skuTabMode === 'ms'
-				? SKU_LOOKUP[`${packageCode}::PACKAGE`]?.maintSku
-				: undefined;
-		await copyToClipboard(maintSku ?? group.label);
+		await copyToClipboard(group.label);
 	}
 
 </script>
