@@ -291,31 +291,98 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 3px;
+		gap: 0;
 	}
 
-	/* Clean, confident title — no glow, no gradient. The gold lives in the
-	   ampersand and the hairline only. */
+	/* Clean, confident title. The excitement is a specular glint — a narrow
+	   band of light that sweeps across the text every few seconds, like a
+	   reflection passing over embossed metal. The fill is white the rest of
+	   the time; no static yellow. */
 	.header-title {
 		font-size: clamp(0.85rem, 1.5vw, 1.25rem);
 		font-weight: 640;
-		color: var(--color-text-primary);
 		margin: 0;
+		line-height: 1.25;
 		text-align: center;
 		letter-spacing: -0.012em;
-		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+		background: linear-gradient(
+			105deg,
+			#f1f1f3 0%,
+			#f1f1f3 42%,
+			#ffffff 47%,
+			#ffe9a8 50%,
+			#ffffff 53%,
+			#f1f1f3 58%,
+			#f1f1f3 100%
+		);
+		background-size: 320% 100%;
+		background-position: 130% 0;
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+		filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
+		animation: titleGlint 7s var(--ease-smooth-curve) infinite;
+	}
+
+	/* Sweep occupies ~a quarter of the cycle; the rest is calm white */
+	@keyframes titleGlint {
+		0% {
+			background-position: 130% 0;
+		}
+		22% {
+			background-position: -130% 0;
+		}
+		100% {
+			background-position: -130% 0;
+		}
 	}
 
 	.title-amp {
-		color: var(--color-solidcam-gold);
+		-webkit-text-fill-color: var(--color-solidcam-gold);
 		font-weight: 540;
 	}
 
-	/* Gold hairline — same motif as the login title rule */
+	/* Gold hairline with a comet that runs its length after each text glint */
 	.title-underline {
+		position: relative;
 		height: 1px;
 		width: clamp(80px, 38%, 180px);
+		margin-top: 1px;
 		background: linear-gradient(90deg, transparent, var(--gold-a45), transparent);
+		overflow: visible;
+	}
+
+	.title-underline::after {
+		content: '';
+		position: absolute;
+		top: -1px;
+		left: 0;
+		width: 34px;
+		height: 3px;
+		border-radius: 3px;
+		background: linear-gradient(90deg, transparent, #ffe9a8, transparent);
+		box-shadow: 0 0 8px rgba(212, 175, 55, 0.7);
+		opacity: 0;
+		animation: underlineComet 7s var(--ease-smooth-curve) infinite;
+	}
+
+	@keyframes underlineComet {
+		0%,
+		18% {
+			left: 0;
+			opacity: 0;
+		}
+		24% {
+			opacity: 1;
+		}
+		42% {
+			left: calc(100% - 34px);
+			opacity: 0;
+		}
+		100% {
+			left: calc(100% - 34px);
+			opacity: 0;
+		}
 	}
 
 	.header-nav {
