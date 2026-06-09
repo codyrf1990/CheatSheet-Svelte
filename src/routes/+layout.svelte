@@ -76,7 +76,6 @@
 	<!-- Aurora re-light: huge drifting color fields blended over the video.
 	     screen blend keeps the particles visible underneath. -->
 	<div class="aurora aurora-red"></div>
-	<div class="aurora aurora-gold"></div>
 	<div class="aurora aurora-ember"></div>
 </div>
 
@@ -171,15 +170,6 @@
 		left: -12%;
 		background: radial-gradient(circle, rgba(200, 16, 46, 0.5) 0%, transparent 65%);
 		animation: auroraDrift 38s ease-in-out infinite;
-	}
-
-	.aurora-gold {
-		width: 52vw;
-		height: 58vh;
-		top: 28%;
-		right: -14%;
-		background: radial-gradient(circle, rgba(212, 175, 55, 0.34) 0%, transparent 65%);
-		animation: auroraDrift 46s ease-in-out infinite reverse;
 	}
 
 	.aurora-ember {
