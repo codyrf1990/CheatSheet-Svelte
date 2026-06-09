@@ -469,13 +469,17 @@
 		overflow: hidden;
 	}
 
-	/* Inner panels share the outer tile — strip their own tile styling */
+	/* Inner panels share the outer tile — strip their own tile styling.
+	   backdrop-filter included: a nested blur re-blurs the wrapper surface
+	   and shifts the card's apparent transparency. */
 	.sku-under-wrapper :global(.bdm-panel),
 	.sku-under-wrapper :global(.maintenance-panel) {
 		background: transparent;
 		border: none;
 		box-shadow: none;
 		border-radius: 0;
+		backdrop-filter: none;
+		-webkit-backdrop-filter: none;
 	}
 
 	.sku-collapse-bar {
@@ -541,6 +545,8 @@
 		border: none;
 		box-shadow: none;
 		border-radius: 0;
+		backdrop-filter: none;
+		-webkit-backdrop-filter: none;
 	}
 
 	.quote-header {

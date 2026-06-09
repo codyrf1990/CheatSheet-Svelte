@@ -177,7 +177,9 @@
 	}
 </script>
 
-<section class="new-sale-panel tile" translate="no">
+<!-- No .tile here: the quote tile provides the surface; .tile's backdrop blur
+     would re-blur the wrapper and shift this card's apparent transparency -->
+<section class="new-sale-panel" translate="no">
 	<div class="panel-body">
 		{#if skuMode === 'ms'}
 			<!-- MS mode: same items as BDM but show maintSku + maintPrice -->

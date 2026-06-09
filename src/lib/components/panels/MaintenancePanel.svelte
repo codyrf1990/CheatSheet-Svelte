@@ -59,7 +59,9 @@
 	}
 </script>
 
-<section class="maintenance-panel tile" translate="no">
+<!-- No .tile here: the wrapper provides the surface; .tile's backdrop blur
+     would re-blur the wrapper and shift this card's apparent transparency -->
+<section class="maintenance-panel" translate="no">
 	<div class="panel-body">
 		<!-- Maintenance SKUs Section -->
 		<div class="section">
