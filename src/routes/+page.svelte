@@ -495,7 +495,7 @@
 	}
 
 	.sku-panel-label-ms {
-		color: #60a5fa;
+		color: var(--accent-sky);
 	}
 
 	.sku-collapse-btn {
@@ -560,7 +560,7 @@
 	}
 
 	.quote-label-ms {
-		color: #60a5fa;
+		color: var(--accent-sky);
 	}
 
 	/* Mode pill — BDM | MS segmented control */
@@ -609,7 +609,7 @@
 	/* MS active — blue */
 	.mode-pill-active-ms {
 		background: rgba(59, 130, 246, 0.18);
-		color: #60a5fa;
+		color: var(--accent-sky);
 		box-shadow:
 			inset 0 0 0 1px rgba(59, 130, 246, 0.3),
 			0 0 10px rgba(59, 130, 246, 0.18);
@@ -631,13 +631,13 @@
 		position: fixed;
 		min-width: 160px;
 		background: linear-gradient(145deg, rgba(32, 32, 38, 0.98), rgba(24, 24, 30, 0.98));
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 10px;
+		border: 1px solid var(--border-mid);
+		border-radius: var(--radius-md);
 		box-shadow:
 			0 12px 32px rgba(0, 0, 0, 0.4),
-			0 4px 12px rgba(0, 0, 0, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.05);
+			var(--elev-3);
 		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
 		z-index: 1000;
 		overflow: hidden;
 		animation: menuFadeIn 150ms cubic-bezier(0.4, 0, 0.2, 1);

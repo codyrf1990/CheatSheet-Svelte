@@ -556,14 +556,13 @@
 		min-width: 180px;
 		padding: 0.75rem;
 		background: rgba(28, 28, 34, 0.95);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 10px;
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		border: 1px solid var(--border-mid);
+		border-radius: var(--radius-md);
 		box-shadow:
 			0 8px 24px rgba(0, 0, 0, 0.3),
-			0 2px 8px rgba(0, 0, 0, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.04);
+			var(--elev-2);
 		z-index: 1000;
 		animation: panelSlideIn 150ms ease;
 	}

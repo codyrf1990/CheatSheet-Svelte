@@ -303,8 +303,8 @@
 		padding: 0.625rem 1.5rem;
 		font-size: 0.9375rem;
 		font-weight: 520;
-		color: #1a1a1a;
-		background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+		color: var(--color-on-gold);
+		background: var(--gradient-gold);
 		border: none;
 		border-radius: 9999px;
 		cursor: pointer;

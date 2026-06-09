@@ -384,7 +384,7 @@
 
 	/* Per-link colour — icon at rest, full link on hover */
 	.nav-red .nav-icon {
-		color: #f87171;
+		color: var(--accent-rose);
 	}
 	.nav-red:hover {
 		background: rgba(200, 16, 46, 0.18);
@@ -397,7 +397,7 @@
 	}
 
 	.nav-purple .nav-icon {
-		color: #c084fc;
+		color: var(--accent-violet);
 	}
 	.nav-purple:hover {
 		background: rgba(147, 51, 234, 0.18);
@@ -410,7 +410,7 @@
 	}
 
 	.nav-blue .nav-icon {
-		color: #60a5fa;
+		color: var(--accent-sky);
 	}
 	.nav-blue:hover {
 		background: rgba(59, 130, 246, 0.18);
@@ -423,7 +423,7 @@
 	}
 
 	.nav-orange .nav-icon {
-		color: #fb923c;
+		color: var(--accent-amber);
 	}
 	.nav-orange:hover {
 		background: rgba(249, 115, 22, 0.18);
