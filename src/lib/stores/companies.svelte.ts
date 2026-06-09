@@ -17,6 +17,7 @@ import { deepCopy } from '$lib/utils/deepCopy';
 import { getPageNameForLicense } from '$lib/utils/licenseSelections';
 import { toastStore } from './toast.svelte';
 import { persistence } from './persistence.svelte';
+import { CompanySchema, StringArraySchema } from '$lib/schemas/persisted';
 
 // localStorage keys (must match original for migration)
 const CURRENT_COMPANY_KEY = 'solidcam-current-company-id';
@@ -802,12 +803,33 @@ function load(): void {
 	try {
 		const currentId = persistence.getString(CURRENT_COMPANY_KEY);
 		const loadedCompanies = persistence.get<Company[] | null>(COMPANIES_STORAGE_KEY, null);
-		const loadedFavorites = persistence.get<string[]>(FAVORITES_STORAGE_KEY, []);
-		const loadedRecent = persistence.get<string[]>(RECENT_STORAGE_KEY, []);
+		const loadedFavorites = StringArraySchema.parse(
+			persistence.get<string[]>(FAVORITES_STORAGE_KEY, [])
+		);
+		const loadedRecent = StringArraySchema.parse(persistence.get<string[]>(RECENT_STORAGE_KEY, []));
 
-		if (loadedCompanies) {
+		if (loadedCompanies && Array.isArray(loadedCompanies)) {
+			// Validate structural essentials per company; drop only the ones that
+			// fail so one corrupt entry can't take down the whole list. The schema
+			// is loose — license/SW/package data passes through untouched.
+			const validCompanies: Company[] = [];
+			for (const candidate of loadedCompanies) {
+				const result = CompanySchema.safeParse(candidate);
+				if (result.success) {
+					// Loose schema passes page.state etc. through unvalidated, so its
+					// inferred type is narrower than Company — the data is intact though
+					validCompanies.push(result.data as unknown as Company);
+				} else {
+					const label =
+						candidate && typeof candidate === 'object'
+							? `${candidate.id ?? '?'} (${candidate.name ?? 'unnamed'})`
+							: String(candidate);
+					console.warn(`[CompaniesStore] Dropping corrupt stored company ${label}:`, result.error);
+				}
+			}
+
 			// Load new structure
-			companies = loadedCompanies;
+			companies = validCompanies;
 			currentCompanyId =
 				currentId && companies.find((c) => c.id === currentId)
 					? currentId

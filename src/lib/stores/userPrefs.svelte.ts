@@ -7,6 +7,7 @@
 import { browser } from '$app/environment';
 import { persistence } from './persistence.svelte';
 import { deepCopy } from '$lib/utils/deepCopy';
+import { UserPrefsSchema } from '$lib/schemas/persisted';
 
 const STORAGE_KEY = 'solidcam-user-prefs';
 
@@ -44,22 +45,12 @@ function loadPrefs(): UserPrefs {
 
 	const parsed = persistence.get<Record<string, unknown> | null>(STORAGE_KEY, null);
 	if (parsed) {
-		const updatedAt =
-			typeof parsed.updatedAt === 'number' && Number.isFinite(parsed.updatedAt)
-				? parsed.updatedAt
-				: Date.now();
-		return {
-			customPanelItems: (parsed.customPanelItems as Record<string, string[]>) ?? {},
-			customPackageBits: (parsed.customPackageBits as Record<string, string[]>) ?? {},
-			backgroundVideoPaused: (parsed.backgroundVideoPaused as boolean) ?? false,
-			repName: (parsed.repName as string) || '',
-			skuTabMode: (parsed.skuTabMode as 'bdm' | 'ms') || 'bdm',
-			updatedAt,
-			packageBitOrders: (parsed.packageBitOrders as Record<string, string[]>) ?? {},
-			packageLooseBitOrders: (parsed.packageLooseBitOrders as Record<string, string[]>) ?? {},
-			packageGroupMembership:
-				(parsed.packageGroupMembership as Record<string, Record<string, string>>) ?? {}
-		};
+		// Per-field .catch() fallbacks mean one corrupt field never discards the rest
+		const result = UserPrefsSchema.safeParse(parsed);
+		if (result.success) {
+			return result.data;
+		}
+		console.warn('[UserPrefsStore] Stored prefs failed validation, using defaults:', result.error);
 	}
 
 	return createDefaultPrefs();

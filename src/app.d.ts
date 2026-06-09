@@ -8,6 +8,13 @@ declare global {
 		// interface PageState {}
 		// interface Platform {}
 	}
+
+	// One-time-setup flags that must survive HMR module re-execution in dev,
+	// so they live on window instead of module scope.
+	interface Window {
+		__scToastVisibilityListener__?: boolean;
+		__syncSessionListenersInstalled?: boolean;
+	}
 }
 
 export {};

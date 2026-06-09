@@ -55,7 +55,7 @@
 		if (!browser || !settingsOpen) return;
 
 		function handleOutsideClick(event: PointerEvent) {
-			if (containerRef && !containerRef.contains(event.target as Node)) {
+			if (containerRef && event.target instanceof Node && !containerRef.contains(event.target)) {
 				settingsOpen = false;
 				actionsVisible = false;
 			}

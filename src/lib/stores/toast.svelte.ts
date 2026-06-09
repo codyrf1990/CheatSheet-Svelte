@@ -104,9 +104,8 @@ export const toastStore = {
 // Pause all toasts when tab is hidden (2026 best practice)
 // Uses browser guard for SSR safety; one-time setup outside reactive path.
 // Window flag prevents listener stacking during HMR re-execution in dev.
-const TOAST_LISTENER_FLAG = '__scToastVisibilityListener__';
-if (browser && !(window as unknown as Record<string, unknown>)[TOAST_LISTENER_FLAG]) {
-	(window as unknown as Record<string, unknown>)[TOAST_LISTENER_FLAG] = true;
+if (browser && !window.__scToastVisibilityListener__) {
+	window.__scToastVisibilityListener__ = true;
 	document.addEventListener('visibilitychange', () => {
 		if (document.hidden) {
 			document.documentElement.classList.add('toast-paused');
