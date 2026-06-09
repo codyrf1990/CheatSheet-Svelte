@@ -98,6 +98,8 @@
 		cursor: inherit;
 	}
 
+	/* TASTE TEST: indicator lamp. Off = recessed dark socket set into the
+	   panel; on = lit gold lamp. Round, like a machine status light. */
 	.checkbox-control {
 		position: relative;
 		display: flex;
@@ -105,9 +107,13 @@
 		justify-content: center;
 		width: 20px;
 		height: 20px;
-		background: rgba(18, 18, 26, 0.8);
-		border: 1px solid rgba(255, 255, 255, 0.4);
-		border-radius: var(--radius-xs);
+		background: radial-gradient(circle at 50% 35%, #1c1c22 0%, #0d0d11 80%);
+		border: 1px solid rgba(255, 255, 255, 0.22);
+		border-radius: 50%;
+		box-shadow:
+			inset 0 2px 4px rgba(0, 0, 0, 0.7),
+			inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+			0 1px 0 rgba(255, 255, 255, 0.07);
 		transition: all 150ms ease;
 		flex-shrink: 0;
 		pointer-events: none;
@@ -128,14 +134,16 @@
 		color: var(--color-on-gold);
 	}
 
-	/* Checked state — lit up so selections pop out of the sea of checkboxes */
+	/* Lit lamp — bright gold core with a hot center and a halo into the panel */
 	.checkbox-control.checked,
 	.checkbox-control.indeterminate {
-		background: var(--gradient-gold);
-		border-color: var(--color-solidcam-gold);
+		background: radial-gradient(circle at 50% 38%, #ffe9a8 0%, #e3c258 38%, #b8941f 100%);
+		border-color: rgba(255, 233, 168, 0.7);
 		box-shadow:
-			0 0 9px rgba(212, 175, 55, 0.5),
-			0 0 3px rgba(212, 175, 55, 0.4);
+			0 0 10px rgba(212, 175, 55, 0.65),
+			0 0 4px rgba(212, 175, 55, 0.5),
+			inset 0 1px 2px rgba(255, 255, 255, 0.55),
+			inset 0 -2px 3px rgba(120, 90, 10, 0.5);
 		animation: checkPop 280ms var(--ease-spring);
 	}
 

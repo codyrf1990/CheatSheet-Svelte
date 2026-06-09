@@ -92,6 +92,7 @@
 		width: 100%;
 	}
 
+	/* Machined surface comes from the global tile tokens */
 	.main-table {
 		width: 100%;
 		overflow: hidden;
@@ -139,7 +140,7 @@
 		text-transform: uppercase;
 		letter-spacing: var(--tile-title-tracking);
 		color: var(--tile-title-color);
-		text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+		text-shadow: var(--text-engraved);
 		position: relative;
 		z-index: 1;
 	}

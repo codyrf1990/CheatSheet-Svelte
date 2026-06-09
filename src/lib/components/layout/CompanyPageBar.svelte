@@ -1060,7 +1060,7 @@
 		/* Same surface as the tiles below — one material across the page */
 		background: var(--tile-bg);
 		border: var(--tile-border);
-		border-radius: 12px;
+		border-radius: var(--tile-radius);
 		backdrop-filter: blur(var(--glass-blur));
 		-webkit-backdrop-filter: blur(var(--glass-blur));
 		box-shadow: var(--tile-shadow);

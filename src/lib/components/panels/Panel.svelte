@@ -124,6 +124,7 @@
 		letter-spacing: var(--tile-title-tracking);
 		text-transform: uppercase;
 		color: var(--tile-title-color);
+		text-shadow: var(--text-engraved);
 	}
 
 	.panel-controls {

@@ -553,12 +553,13 @@
 		gap: 0.25rem;
 	}
 
+	/* Machine readout — a window recessed into the panel, lit gold digits */
 	.calculator-display {
 		width: 100%;
 		padding: 0.45rem 0.6rem;
-		background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.35) 100%);
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: var(--radius-sm);
+		background: linear-gradient(180deg, rgba(0, 0, 0, 0.62) 0%, rgba(8, 7, 2, 0.5) 100%);
+		border: 1px solid rgba(0, 0, 0, 0.55);
+		border-radius: var(--radius-xs);
 		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
 		font-size: 1.125rem;
 		font-weight: 600;
@@ -567,10 +568,11 @@
 		color: var(--color-solidcam-gold, #d4af37);
 		text-align: right;
 		cursor: pointer;
-		text-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+		text-shadow: 0 0 14px rgba(212, 175, 55, 0.4);
 		box-shadow:
-			inset 0 2px 4px rgba(0, 0, 0, 0.4),
-			inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+			inset 0 3px 7px rgba(0, 0, 0, 0.6),
+			inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+			0 1px 0 rgba(255, 255, 255, 0.08);
 		transition:
 			background 200ms var(--ease-out-quart),
 			border-color 200ms var(--ease-out-quart),

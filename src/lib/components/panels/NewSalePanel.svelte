@@ -310,10 +310,20 @@
 </section>
 
 <style>
+	/* Job ticket — clean machined panel; the receipt feel comes from the mono
+	   type, the line rhythm and the hairline before the total. No dots. */
 	.new-sale-panel {
 		flex: 0 0 auto;
 		display: flex;
 		flex-direction: column;
+		background: linear-gradient(180deg, #232228 0%, #1a191f 100%);
+		border: 1px solid rgba(255, 255, 255, 0.13);
+		border-radius: var(--radius-sm);
+		box-shadow:
+			0 14px 30px rgba(0, 0, 0, 0.45),
+			inset 0 1px 0 rgba(255, 255, 255, 0.12),
+			inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+		backdrop-filter: none;
 	}
 
 	.panel-body {
@@ -477,8 +487,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0.45rem 0.55rem;
-		margin-top: var(--space-1);
+		padding: 0.5rem 0.55rem 0.4rem;
+		margin-top: calc(var(--space-2) + 4px);
 		background: linear-gradient(135deg, rgba(212, 175, 55, 0.16) 0%, rgba(212, 175, 55, 0.05) 100%);
 		border: 1px solid var(--gold-a30);
 		border-radius: var(--radius-sm);
@@ -486,6 +496,17 @@
 			0 0 20px rgba(212, 175, 55, 0.16),
 			inset 0 1px 0 rgba(255, 255, 255, 0.07);
 		transition: box-shadow 300ms var(--ease-out-expo);
+	}
+
+	/* Gold hairline above the total — same motif as the header/login rules */
+	.total-row::before {
+		content: '';
+		position: absolute;
+		top: calc(-1 * var(--space-2) + 1px);
+		left: 4px;
+		right: 4px;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, var(--gold-a45), transparent);
 	}
 
 	/* Money moment — the row flares gold when the amount changes */
