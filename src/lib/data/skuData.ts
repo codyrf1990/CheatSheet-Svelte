@@ -252,6 +252,7 @@ export const MAINT_TO_BDM: Record<string, string> = {
 	'SC-4Op-Sim-Maint': 'SC-4Op-Sim',
 	'Swiss-Maint': 'SC-Swiss',
 	'MTS-Maint': 'SC-MTS',
+	'SimTurn-Maint': 'SC-SimTurn',
 	// Network license
 	'Lic-Net-Maint': 'Lic-Net',
 	// SolidWorks

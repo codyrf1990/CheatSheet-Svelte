@@ -88,7 +88,7 @@ export const SKU_MAP: Record<string, string> = {
 	// Turning modules
 	'Swiss-Type': 'Swiss-Maint',
 	'Multi Turret Sync': 'MTS-Maint',
-	'Sim. Turning': 'MTS-Maint', // Included in MTS
+	'Sim. Turning': 'SimTurn-Maint', // Free with MTS — tracked separately to spot upgrade gaps
 
 	// 5-Axis standalone modules
 	'MultiBlade 5x': 'Multiblade-Maint',
@@ -268,4 +268,3 @@ export function groupByPackage(mappedFeatures: MappedFeature[]): Record<string, 
 export function getUniqueSkus(mappedSkus: MappedSku[]): string[] {
 	return [...new Set(mappedSkus.map((s) => s.sku))];
 }
-

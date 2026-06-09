@@ -32,6 +32,7 @@ export const panels: Panel[] = [
 			'SC-4Op-Sim-Maint',
 			'Sim4x-Maint',
 			'Sim5x-Maint',
+			'SimTurn-Maint',
 			'SolidShop-Editor-Maint',
 			'SolidShop-Sim-Maint',
 			'Swiss-Maint',
