@@ -99,7 +99,7 @@
 	}
 </script>
 
-<header>
+<header class="header-shell">
 	<SmokedGlassCard padding="none" class="header">
 		<!-- Column 1: Logo -->
 		<div class="header-logo">
@@ -204,6 +204,15 @@
 		gap: clamp(0.4rem, 1.5vw, 0.75rem);
 		align-items: center;
 		padding: clamp(0.2rem, 0.5vw, 0.4rem);
+	}
+
+	/* Match the re-lit tile surfaces below (the card's own bg is darker) */
+	.header-shell :global(.header) {
+		background: var(--tile-bg);
+		border: var(--tile-border);
+		box-shadow: var(--tile-shadow);
+		backdrop-filter: blur(var(--glass-blur));
+		-webkit-backdrop-filter: blur(var(--glass-blur));
 	}
 
 	/* Subtle animated border glow - very slow */

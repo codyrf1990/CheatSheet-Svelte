@@ -1057,13 +1057,13 @@
 		align-items: center;
 		gap: var(--space-2);
 		padding: 0.3rem 0.625rem;
-		background: linear-gradient(145deg, rgba(24, 24, 30, 0.85) 0%, rgba(18, 18, 24, 0.9) 100%);
-		border: 1px solid rgba(255, 255, 255, 0.06);
+		/* Same surface as the tiles below — one material across the page */
+		background: var(--tile-bg);
+		border: var(--tile-border);
 		border-radius: 12px;
-		backdrop-filter: blur(8px);
-		box-shadow:
-			0 4px 16px rgba(0, 0, 0, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.03);
+		backdrop-filter: blur(var(--glass-blur));
+		-webkit-backdrop-filter: blur(var(--glass-blur));
+		box-shadow: var(--tile-shadow);
 	}
 
 	/* Subtle animated border shimmer */
@@ -1394,7 +1394,10 @@
 		align-items: center;
 		gap: var(--space-1);
 		flex: 1;
+		/* Horizontal scroll only — overflow-x:auto alone would force a
+		   vertical scrollbar too whenever content runs 1px tall */
 		overflow-x: auto;
+		overflow-y: hidden;
 		padding: 0;
 		z-index: 1;
 	}
