@@ -667,10 +667,4 @@
 		filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.35));
 		animation: spin 0.85s linear infinite;
 	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
-	}
 </style>

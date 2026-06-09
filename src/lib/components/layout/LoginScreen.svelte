@@ -414,19 +414,6 @@
 		animation: shake 0.3s var(--ease-out-quart);
 	}
 
-	@keyframes shake {
-		0%,
-		100% {
-			transform: translateX(0);
-		}
-		25% {
-			transform: translateX(-4px);
-		}
-		75% {
-			transform: translateX(4px);
-		}
-	}
-
 	:global(.submit-btn) {
 		width: 100%;
 		min-width: 160px;
@@ -525,12 +512,6 @@
 		flex-shrink: 0;
 		color: rgba(0, 0, 0, 0.85);
 		animation: spin 0.85s linear infinite;
-	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
 	}
 
 	/* Footer hairline rule — replaces the 3-dot decoration */

@@ -56,6 +56,51 @@
 	--red-a20: rgba(200, 16, 46, 0.2);
 	--red-a30: rgba(200, 16, 46, 0.3);
 
+	/* Canonical Gradients — the ONE source for every filled brand surface */
+	--gradient-gold: linear-gradient(135deg, #e3c258 0%, #d4af37 48%, #b8941f 100%);
+	--gradient-gold-soft: linear-gradient(135deg, var(--gold-a20), var(--gold-a10));
+	--gradient-red: linear-gradient(135deg, #c8102e 0%, #8b0000 100%);
+	--gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+	--gradient-orange: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+	--color-on-gold: #1a1a1a; /* dark text on gold/orange fills */
+
+	/* Nav Accent Colors (Header external links) */
+	--accent-rose: #f87171;
+	--accent-violet: #c084fc;
+	--accent-sky: #60a5fa;
+	--accent-amber: #fb923c;
+
+	/* Glass Tiers — white-overlay strengths for interactive surfaces */
+	--glass-t1: rgba(255, 255, 255, 0.03);
+	--glass-t2: rgba(255, 255, 255, 0.05);
+	--glass-t3: rgba(255, 255, 255, 0.08);
+
+	/* Border Tiers */
+	--border-soft: rgba(255, 255, 255, 0.06);
+	--border-mid: rgba(255, 255, 255, 0.08);
+	--border-strong: rgba(255, 255, 255, 0.12);
+
+	/* Elevation — consistent key-light-from-above: top sheen + ambient depth */
+	--elev-1: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+	--elev-2: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+	--elev-3:
+		0 24px 60px rgba(0, 0, 0, 0.55), 0 0 80px -40px var(--gold-a10),
+		inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+	/* Badge System — one pill language, accent varies per modifier */
+	--badge-radius: 9999px;
+	--badge-font: var(--text-2xs);
+	--badge-weight: 600;
+	--badge-tracking: 0.06em;
+	--badge-pad: 1px 7px;
+
+	/* Typography Treatment */
+	--tracking-micro: 0.08em; /* uppercase micro-labels */
+	--tracking-tight: -0.015em;
+
+	/* Interactive row hover (data tables) */
+	--row-hover-bg: linear-gradient(90deg, var(--gold-a05), rgba(255, 255, 255, 0.03) 35%);
+
 	/* Premium Shadows - darker for more depth */
 	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
 	--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
@@ -223,34 +268,106 @@ a {
 
 /* CompanyPageBar cluster button variants (global so they style Button component output) */
 .cluster-btn--add {
-	background: linear-gradient(135deg, #e2c15b 0%, #b4891c 100%);
-	color: #1a1a1a;
+	background: var(--gradient-gold);
+	color: var(--color-on-gold);
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .cluster-btn--remove {
-	background: rgba(255, 255, 255, 0.08);
+	background: var(--glass-t3);
 	color: rgba(255, 255, 255, 0.85);
 }
 
 .cluster-btn--remove.is-active {
-	background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+	background: var(--gradient-danger);
 	color: #fff;
 }
 
 .cluster-btn--order {
-	background: rgba(255, 255, 255, 0.08);
+	background: var(--glass-t3);
 	color: rgba(255, 255, 255, 0.88);
 }
 
 .cluster-btn--order.is-active {
-	background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
-	color: #1a1a1a;
+	background: var(--gradient-gold);
+	color: var(--color-on-gold);
 }
 
 .cluster-btn--reset {
-	background: rgba(255, 255, 255, 0.06);
+	background: var(--border-soft);
 	color: rgba(255, 255, 255, 0.7);
+}
+
+/* Badge System — unified pill language for all small status markers.
+   Shape/weight/padding identical everywhere; only the accent color varies. */
+.badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: var(--badge-pad);
+	font-size: var(--badge-font);
+	font-weight: var(--badge-weight);
+	letter-spacing: var(--badge-tracking);
+	line-height: 1.5;
+	border-radius: var(--badge-radius);
+	background: var(--glass-t1);
+	border: 1px solid var(--border-mid);
+	color: var(--chip-text-color);
+	white-space: nowrap;
+}
+
+.badge--gold {
+	background: var(--gold-a10);
+	border-color: var(--gold-a30);
+	color: var(--color-solidcam-gold);
+}
+
+.badge--info {
+	background: rgba(96, 165, 250, 0.1);
+	border-color: rgba(96, 165, 250, 0.3);
+	color: var(--accent-sky);
+}
+
+.badge--red {
+	background: var(--red-a10);
+	border-color: var(--red-a30);
+	color: #fca5a5;
+}
+
+.badge--neutral {
+	background: var(--glass-t2);
+	border-color: var(--border-mid);
+	color: var(--chip-text-muted);
+}
+
+/* Native selects — styled to match the design system instead of browser default */
+select {
+	appearance: none;
+	-webkit-appearance: none;
+	padding: 4px 26px 4px 9px;
+	font-family: var(--font-system);
+	font-size: var(--text-sm);
+	color: var(--color-text-primary);
+	background-color: var(--glass-t1);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 8px center;
+	border: 1px solid var(--border-mid);
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	transition:
+		border-color 150ms var(--ease-out-quart),
+		background-color 150ms var(--ease-out-quart);
+}
+
+select:hover {
+	background-color: var(--glass-t2);
+	border-color: var(--border-strong);
+}
+
+select option {
+	background: var(--color-bg-secondary);
+	color: var(--color-text-primary);
 }
 
 button:focus-visible,
@@ -370,6 +487,37 @@ select:focus-visible {
 	}
 	50% {
 		box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+	}
+}
+
+/* Shared keyframes — referenced from component styles; do not redeclare locally */
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes shake {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	25% {
+		transform: translateX(-4px);
+	}
+	75% {
+		transform: translateX(4px);
+	}
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
 	}
 }
 
