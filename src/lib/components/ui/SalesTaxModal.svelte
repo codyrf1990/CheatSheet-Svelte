@@ -139,14 +139,14 @@
 	}
 
 	.section-title--exempt {
-		color: #60a5fa;
+		color: var(--accent-sky);
 		border-bottom-color: rgba(96, 165, 250, 0.3);
 	}
 
 	.section-title--exempt .state-count {
 		background: rgba(96, 165, 250, 0.12);
 		border-color: rgba(96, 165, 250, 0.3);
-		color: #60a5fa;
+		color: var(--accent-sky);
 	}
 
 	.section-title--exception {
@@ -182,7 +182,7 @@
 
 	.state-tag--exempt {
 		background: rgba(96, 165, 250, 0.15);
-		color: #60a5fa;
+		color: var(--accent-sky);
 		border: 1px solid rgba(96, 165, 250, 0.3);
 	}
 

@@ -171,10 +171,11 @@
 		overflow: hidden;
 
 		background: var(--modal-bg);
-		backdrop-filter: blur(12px);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
 		border: var(--modal-border);
 		border-radius: var(--modal-radius);
-		box-shadow: var(--modal-shadow);
+		box-shadow: var(--modal-shadow), var(--elev-3);
 	}
 
 	.modal-body {
@@ -206,6 +207,7 @@
 	}
 
 	.modal-header {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -213,6 +215,18 @@
 		background: var(--tile-header-bg);
 		border-bottom: var(--tile-header-border);
 		flex-shrink: 0;
+	}
+
+	/* Gold hairline accent under the header */
+	.modal-header::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: -1px;
+		height: 1px;
+		background: linear-gradient(90deg, var(--gold-a30), var(--gold-a05) 40%, transparent 70%);
+		pointer-events: none;
 	}
 
 	.modal-title {

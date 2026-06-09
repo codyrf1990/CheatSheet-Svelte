@@ -518,10 +518,10 @@
 
 	.new-company-btn {
 		padding: 0.5rem 1rem;
-		background: linear-gradient(145deg, #e8c547, #d4af37, #b8941f);
+		background: var(--gradient-gold);
 		border: none;
 		border-radius: 8px;
-		color: #1a1a1a;
+		color: var(--color-on-gold);
 		font-size: 0.8125rem;
 		font-weight: 600;
 		cursor: pointer;

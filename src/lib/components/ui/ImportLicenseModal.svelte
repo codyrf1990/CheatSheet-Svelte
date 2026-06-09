@@ -839,7 +839,7 @@
 
 	.error-message {
 		margin: 0;
-		color: #f87171;
+		color: var(--accent-rose);
 		font-size: var(--text-sm);
 	}
 
@@ -1309,7 +1309,7 @@
 
 	.result-error .result-hero-icon {
 		background: rgba(239, 68, 68, 0.18);
-		color: #f87171;
+		color: var(--accent-rose);
 	}
 
 	.result-hero-text {
@@ -1386,7 +1386,7 @@
 		margin-bottom: var(--space-2);
 		font-size: 0.78rem;
 		font-weight: 600;
-		color: #f87171;
+		color: var(--accent-rose);
 	}
 
 	.errors-list {

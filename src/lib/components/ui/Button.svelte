@@ -93,80 +93,78 @@
 
 	/* Primary - SolidCAM Red */
 	.btn-primary {
-		background: linear-gradient(135deg, #c8102e 0%, #8b0000 100%);
+		background: var(--gradient-red);
 		color: white;
 		box-shadow:
 			0 8px 20px rgba(200, 16, 46, 0.3),
-			0 0 0 0 rgba(200, 16, 46, 0);
+			inset 0 1px 0 rgba(255, 255, 255, 0.2);
 	}
 
 	.btn-primary:hover {
 		box-shadow:
 			0 12px 28px rgba(200, 16, 46, 0.4),
-			0 0 20px rgba(200, 16, 46, 0.2);
+			0 0 20px rgba(200, 16, 46, 0.2),
+			inset 0 1px 0 rgba(255, 255, 255, 0.25);
 	}
 
 	/* Gold - Premium accent */
 	.btn-gold {
-		background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
-		color: #1a1a1a;
+		background: var(--gradient-gold);
+		color: var(--color-on-gold);
 		box-shadow:
 			0 8px 20px rgba(212, 175, 55, 0.25),
-			0 0 0 0 rgba(212, 175, 55, 0);
+			inset 0 1px 0 rgba(255, 255, 255, 0.28);
 	}
 
 	.btn-gold:hover {
 		box-shadow:
 			0 12px 28px rgba(212, 175, 55, 0.35),
-			0 0 25px rgba(212, 175, 55, 0.25);
+			0 0 25px rgba(212, 175, 55, 0.25),
+			inset 0 1px 0 rgba(255, 255, 255, 0.32);
 	}
 
 	/* Orange - Warning/attention */
 	.btn-orange {
-		background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+		background: var(--gradient-orange);
 		color: white;
 		box-shadow:
 			0 8px 20px rgba(249, 115, 22, 0.25),
-			0 0 0 0 rgba(249, 115, 22, 0);
+			inset 0 1px 0 rgba(255, 255, 255, 0.22);
 	}
 
 	.btn-orange:hover {
 		box-shadow:
 			0 12px 28px rgba(249, 115, 22, 0.35),
-			0 0 20px rgba(249, 115, 22, 0.2);
+			0 0 20px rgba(249, 115, 22, 0.2),
+			inset 0 1px 0 rgba(255, 255, 255, 0.26);
 	}
 
 	/* Ghost - Subtle, transparent */
 	.btn-ghost {
 		background: transparent;
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		border: 1px solid var(--border-strong);
 		color: rgba(255, 255, 255, 0.85);
 	}
 
 	.btn-ghost:hover {
-		background: rgba(255, 255, 255, 0.05);
+		background: var(--glass-t2);
 		border-color: rgba(255, 255, 255, 0.2);
 		box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
 	}
 
 	/* Danger - Destructive actions */
 	.btn-danger {
-		background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+		background: var(--gradient-danger);
 		color: white;
 		box-shadow:
 			0 8px 20px rgba(239, 68, 68, 0.25),
-			0 0 0 0 rgba(239, 68, 68, 0);
+			inset 0 1px 0 rgba(255, 255, 255, 0.22);
 	}
 
 	.btn-danger:hover {
 		box-shadow:
 			0 12px 28px rgba(239, 68, 68, 0.35),
-			0 0 20px rgba(239, 68, 68, 0.2);
-	}
-
-	/* Focus state for accessibility */
-	.btn:focus-visible {
-		outline: 2px solid rgba(212, 175, 55, 0.8);
-		outline-offset: 2px;
+			0 0 20px rgba(239, 68, 68, 0.2),
+			inset 0 1px 0 rgba(255, 255, 255, 0.26);
 	}
 </style>

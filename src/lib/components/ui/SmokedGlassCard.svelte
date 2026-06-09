@@ -55,8 +55,7 @@
 		/* Deep shadow for grounding */
 		box-shadow:
 			0 25px 50px rgba(0, 0, 0, 0.4),
-			0 10px 20px rgba(0, 0, 0, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.03);
+			var(--elev-2);
 	}
 
 	/* Focus states for cards that might be interactive */

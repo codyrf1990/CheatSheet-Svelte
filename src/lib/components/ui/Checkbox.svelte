@@ -107,7 +107,7 @@
 		height: 20px;
 		background: rgba(18, 18, 26, 0.8);
 		border: 1px solid rgba(255, 255, 255, 0.4);
-		border-radius: var(--radius-2xs);
+		border-radius: var(--radius-xs);
 		transition: all 150ms ease;
 		flex-shrink: 0;
 		pointer-events: none;
@@ -125,13 +125,13 @@
 	.checkbox-control svg {
 		width: 10px;
 		height: 10px;
-		color: #1a1a1a;
+		color: var(--color-on-gold);
 	}
 
 	/* Checked state */
 	.checkbox-control.checked,
 	.checkbox-control.indeterminate {
-		background: var(--color-solidcam-gold);
+		background: var(--gradient-gold);
 		border-color: var(--color-solidcam-gold);
 	}
 
@@ -143,7 +143,7 @@
 	.checkbox-wrapper:not(.disabled):hover .checkbox-control.checked,
 	.checkbox-wrapper:not(.disabled):hover .checkbox-control.indeterminate {
 		border-color: #e5c55a;
-		background: #e5c55a;
+		filter: brightness(1.1);
 	}
 
 	/* Focus state */

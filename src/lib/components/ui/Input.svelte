@@ -86,13 +86,12 @@
 	.input-field {
 		width: 100%;
 		padding: calc(var(--space-2) + var(--space-0)) calc(var(--space-3) + var(--space-0));
-		padding-left: calc(var(--space-3) + var(--space-0) - 2px);
 		font-size: var(--text-xl);
 		color: var(--color-text-primary);
+		caret-color: var(--color-solidcam-gold);
 		background-color: rgba(18, 18, 26, 0.8);
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-left: 3px solid transparent;
-		border-radius: 0.5rem;
+		border: 1px solid var(--border-mid);
+		border-radius: var(--radius-sm);
 		transition:
 			border-color 200ms var(--ease-out-quart),
 			background-color 200ms var(--ease-out-quart),
@@ -127,7 +126,6 @@
 	.input-field:focus {
 		outline: none;
 		border-color: var(--color-solidcam-gold, #d4af37);
-		border-left-color: var(--color-solidcam-gold, #d4af37);
 		background-color: rgba(22, 22, 30, 0.85);
 		box-shadow:
 			0 0 0 3px rgba(212, 175, 55, 0.15),
@@ -168,10 +166,8 @@
 		margin-left: var(--space-1);
 	}
 
-	/* Enhanced error state with red left border */
 	.has-error .input-field {
 		border-color: var(--color-error);
-		border-left-color: var(--color-error);
 	}
 
 	.has-error .input-field:focus {
