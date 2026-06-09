@@ -110,15 +110,19 @@
 
 	/* Tile Surfaces — machined instrument panels: brushed dark metal with a
 	   directional grain, milled bright top edge, tight chamfered corners */
+	/* Brushed grain + a gentle diagonal sheen over a FLAT base. No vertical
+	   fade: a fade makes each panel's brightness depend on its own height,
+	   so short and tall panels never match at their seams. */
 	--tile-bg:
 		repeating-linear-gradient(
 			90deg,
-			rgba(255, 255, 255, 0.014) 0px,
-			rgba(255, 255, 255, 0.014) 1px,
+			rgba(255, 255, 255, 0.04) 0px,
+			rgba(255, 255, 255, 0.04) 1px,
 			transparent 1px,
 			transparent 3px
 		),
-		linear-gradient(180deg, #26262c 0%, #1b1b21 55%, #15151a 100%);
+		linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+		linear-gradient(#1f1f25, #1f1f25);
 	--tile-border: 1px solid rgba(255, 255, 255, 0.14);
 	--tile-shadow:
 		0 22px 44px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16),
@@ -136,12 +140,13 @@
 	--menu-bg:
 		repeating-linear-gradient(
 			90deg,
-			rgba(255, 255, 255, 0.012) 0px,
-			rgba(255, 255, 255, 0.012) 1px,
+			rgba(255, 255, 255, 0.035) 0px,
+			rgba(255, 255, 255, 0.035) 1px,
 			transparent 1px,
 			transparent 3px
 		),
-		linear-gradient(180deg, #2c2c33 0%, #1e1e24 100%);
+		linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0%, transparent 55%),
+		linear-gradient(#26262d, #26262d);
 	--menu-border: 1px solid rgba(255, 255, 255, 0.16);
 	--menu-shadow:
 		0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.14),
@@ -164,12 +169,13 @@
 	--modal-bg:
 		repeating-linear-gradient(
 			90deg,
-			rgba(255, 255, 255, 0.012) 0px,
-			rgba(255, 255, 255, 0.012) 1px,
+			rgba(255, 255, 255, 0.035) 0px,
+			rgba(255, 255, 255, 0.035) 1px,
 			transparent 1px,
 			transparent 3px
 		),
-		linear-gradient(180deg, #26262c 0%, #17171c 100%);
+		linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0%, transparent 55%),
+		linear-gradient(#222228, #222228);
 	--modal-border: 1px solid rgba(255, 255, 255, 0.15);
 	--modal-shadow:
 		0 50px 120px rgba(0, 0, 0, 0.65), 0 18px 40px rgba(0, 0, 0, 0.35),
