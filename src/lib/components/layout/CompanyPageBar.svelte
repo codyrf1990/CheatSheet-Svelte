@@ -1083,36 +1083,6 @@
 		box-shadow: var(--tile-shadow);
 	}
 
-	/* Subtle animated border shimmer */
-	.company-page-bar::before {
-		content: '';
-		position: absolute;
-		inset: -1px;
-		background: linear-gradient(
-			90deg,
-			transparent 0%,
-			rgba(212, 175, 55, 0.15) 25%,
-			rgba(200, 16, 46, 0.1) 50%,
-			rgba(212, 175, 55, 0.15) 75%,
-			transparent 100%
-		);
-		background-size: 200% 100%;
-		animation: barBorderShimmer 20s linear infinite;
-		border-radius: inherit;
-		z-index: 0;
-		opacity: 0.4;
-		pointer-events: none;
-	}
-
-	@keyframes barBorderShimmer {
-		0% {
-			background-position: 200% 0;
-		}
-		100% {
-			background-position: -200% 0;
-		}
-	}
-
 	/* Company Dropdown */
 	.company-dropdown {
 		position: relative;
