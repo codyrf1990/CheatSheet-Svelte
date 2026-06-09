@@ -474,7 +474,7 @@
 	}
 
 	.total-label--account {
-		color: #60a5fa;
+		color: var(--accent-sky);
 		font-weight: 600;
 		font-size: var(--text-xs);
 	}

@@ -658,9 +658,9 @@
 	}
 
 	.calc-btn.equals {
-		background: linear-gradient(135deg, #e8c547 0%, #d4af37 100%);
+		background: var(--gradient-gold);
 		border-color: var(--color-solidcam-gold, #d4af37);
-		color: #1a1a1a;
+		color: var(--color-on-gold);
 		font-weight: 700;
 		box-shadow:
 			inset 0 1px 0 rgba(255, 255, 255, 0.4),

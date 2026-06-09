@@ -330,10 +330,10 @@
 
 	.sw-product-badge {
 		padding: 2px 10px;
-		border-radius: 999px;
+		border-radius: var(--badge-radius);
 		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.04em;
+		font-weight: var(--badge-weight);
+		letter-spacing: var(--badge-tracking);
 		text-transform: uppercase;
 		white-space: nowrap;
 	}

@@ -1349,7 +1349,7 @@
 		justify-content: center;
 		width: 28px;
 		height: 26px;
-		background: linear-gradient(145deg, #e8c547, #d4af37);
+		background: var(--gradient-gold);
 		color: var(--color-on-gold);
 		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
 		transition:

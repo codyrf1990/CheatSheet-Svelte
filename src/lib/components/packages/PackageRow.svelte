@@ -279,11 +279,14 @@
 <style>
 	.package-row {
 		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-		transition: background 180ms var(--ease-out-quart);
+		transition:
+			background 180ms var(--ease-out-quart),
+			box-shadow 180ms var(--ease-out-quart);
 	}
 
 	.package-row:hover {
-		background: rgba(255, 255, 255, 0.025);
+		background: var(--row-hover-bg);
+		box-shadow: inset 2px 0 0 var(--gold-a30);
 	}
 
 	.pkg-cell {
@@ -335,6 +338,9 @@
 
 	.bit-text:hover {
 		color: var(--chip-text-hover);
+		text-decoration: underline;
+		text-decoration-color: var(--gold-a45);
+		text-underline-offset: 2px;
 	}
 
 	.code-btn {
@@ -358,6 +364,9 @@
 
 	.package-code:hover {
 		color: #e5c55a;
+		text-decoration: underline;
+		text-decoration-color: var(--gold-a45);
+		text-underline-offset: 2px;
 	}
 
 	.copy-check {
@@ -403,6 +412,9 @@
 
 	.maint-code:hover {
 		color: var(--chip-text-hover);
+		text-decoration: underline;
+		text-decoration-color: var(--gold-a45);
+		text-underline-offset: 2px;
 	}
 
 	.bits-cell {

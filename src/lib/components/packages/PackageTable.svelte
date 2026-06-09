@@ -208,7 +208,7 @@
 
 	.upgrades-btn-ms {
 		background: rgba(59, 130, 246, 0.12);
-		color: #60a5fa;
+		color: var(--accent-sky);
 		border-color: rgba(59, 130, 246, 0.3);
 	}
 
@@ -218,41 +218,35 @@
 		box-shadow: 0 0 12px rgba(59, 130, 246, 0.22);
 	}
 
-	.maintenance-range {
-		padding: 2px 7px;
-		border-radius: 4px;
-		background: rgba(255, 255, 255, 0.06);
-		border: 1px solid rgba(255, 255, 255, 0.12);
-		font-size: 0.6rem;
-		font-weight: 600;
-		text-transform: none;
-		letter-spacing: 0.02em;
-		color: rgba(255, 255, 255, 0.7);
+	/* Header badges — one pill language (badge tokens), accent varies per badge */
+	.maintenance-range,
+	.version-badge,
+	.profile-users-badge {
+		padding: var(--badge-pad);
+		border-radius: var(--badge-radius);
+		font-size: var(--badge-font);
+		font-weight: var(--badge-weight);
+		letter-spacing: var(--badge-tracking);
 		white-space: nowrap;
+	}
+
+	.maintenance-range {
+		background: var(--glass-t2);
+		border: 1px solid var(--border-strong);
+		text-transform: none;
+		color: rgba(255, 255, 255, 0.7);
 	}
 
 	.version-badge {
-		padding: 2px 7px;
-		border-radius: 4px;
 		background: rgba(59, 130, 246, 0.12);
 		border: 1px solid rgba(59, 130, 246, 0.3);
-		font-size: 0.6rem;
-		font-weight: 600;
-		letter-spacing: 0.02em;
-		color: rgba(96, 165, 250, 0.9);
-		white-space: nowrap;
+		color: var(--accent-sky);
 	}
 
 	.profile-users-badge {
-		padding: 2px 7px;
-		border-radius: 4px;
 		background: rgba(139, 92, 246, 0.12);
 		border: 1px solid rgba(139, 92, 246, 0.3);
-		font-size: 0.6rem;
-		font-weight: 600;
-		letter-spacing: 0.02em;
 		color: rgba(167, 139, 250, 0.9);
-		white-space: nowrap;
 	}
 
 	/* Hide Package column on narrow screens */
