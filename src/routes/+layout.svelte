@@ -144,11 +144,15 @@
 		content: '';
 		position: absolute;
 		inset: 0;
+		/* Kept gentle: panels are 92% opaque, so the backdrop is the only thing
+		   giving them their slight transparency — crushing the edges to black
+		   makes edge panels (page bar, calculator) read as a different, opaque
+		   material than center panels (table). */
 		background: radial-gradient(
 			ellipse at center,
 			transparent 0%,
-			rgba(10, 10, 15, 0.35) 60%,
-			rgba(10, 10, 15, 0.65) 100%
+			rgba(10, 10, 15, 0.18) 60%,
+			rgba(10, 10, 15, 0.38) 100%
 		);
 		pointer-events: none;
 	}
