@@ -109,8 +109,10 @@
 		<!-- Column 2: Title and Nav (centered) -->
 		<div class="header-content">
 			<div class="title-container">
-				<div class="title-glow" aria-hidden="true"></div>
-				<h1 class="header-title">Packages &amp; Maintenance Cheat Sheet</h1>
+				<h1 class="header-title">
+					Packages <span class="title-amp">&amp;</span> Maintenance Cheat Sheet
+				</h1>
+				<div class="title-underline" aria-hidden="true"></div>
 			</div>
 
 			<nav class="header-nav" aria-label="Main navigation">
@@ -189,13 +191,6 @@
 </header>
 
 <style>
-	/* Animated gradient angle for the title sheen */
-	@property --header-title-angle {
-		syntax: '<angle>';
-		initial-value: 135deg;
-		inherits: false;
-	}
-
 	:global(.header) {
 		position: relative;
 		z-index: 100; /* Above content below so settings popover isn't clipped */
@@ -293,50 +288,34 @@
 	.title-container {
 		position: relative;
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+		gap: 3px;
 	}
 
-	.title-glow {
-		position: absolute;
-		inset: -20px -40px;
-		background: radial-gradient(ellipse at center, var(--gold-a20) 0%, transparent 70%);
-		pointer-events: none;
-		opacity: 0.8;
-	}
-
+	/* Clean, confident title — no glow, no gradient. The gold lives in the
+	   ampersand and the hairline only. */
 	.header-title {
 		font-size: clamp(0.85rem, 1.5vw, 1.25rem);
-		font-weight: 580;
+		font-weight: 640;
 		color: var(--color-text-primary);
 		margin: 0;
 		text-align: center;
-		letter-spacing: -0.02em;
-		background: linear-gradient(
-			var(--header-title-angle, 135deg),
-			#ffffff 0%,
-			#ffd76a 42%,
-			#d4af37 52%,
-			#ffd76a 62%,
-			#ffffff 100%
-		);
-		-webkit-background-clip: text;
-		background-clip: text;
-		-webkit-text-fill-color: transparent;
-		filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.25)) drop-shadow(0 1px 0 rgba(0, 0, 0, 0.5));
-		position: relative;
-		z-index: 1;
-		animation: headerTitleSheen 10s ease-in-out infinite;
+		letter-spacing: -0.012em;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
 	}
 
-	@keyframes headerTitleSheen {
-		0%,
-		100% {
-			--header-title-angle: 110deg;
-		}
-		50% {
-			--header-title-angle: 165deg;
-		}
+	.title-amp {
+		color: var(--color-solidcam-gold);
+		font-weight: 540;
+	}
+
+	/* Gold hairline — same motif as the login title rule */
+	.title-underline {
+		height: 1px;
+		width: clamp(80px, 38%, 180px);
+		background: linear-gradient(90deg, transparent, var(--gold-a45), transparent);
 	}
 
 	.header-nav {
