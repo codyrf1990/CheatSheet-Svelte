@@ -620,6 +620,16 @@
 		}
 	}
 
+	// License-type tag for page tabs: "HWD 77518" → [HWD] 77518 etc.
+	// Profiles are P + 4+ digits; short P-names (P1, P2…) are plain pages.
+	function pageTag(name: string): { key: string; rest: string } | null {
+		const m = name.match(/^(HWD|HW|NWD|NPK|SPK)\s+(.*)$/);
+		if (m) return { key: m[1], rest: m[2] };
+		const p = name.match(/^P(\d{4,}.*)$/);
+		if (p) return { key: 'P', rest: p[1] };
+		return null;
+	}
+
 	// Auto-focus search input when dropdown opens
 	$effect(() => {
 		if (dropdownOpen && searchInputRef) {
@@ -794,6 +804,7 @@
 		{/if}
 		{#if currentCompany}
 			{#each currentCompany.pages as page (page.id)}
+				{@const tag = pageTag(page.name)}
 				<div class="page-tab-group">
 					<Tooltip text="{page.name} — double-click to copy license" position="bottom">
 						<button
@@ -808,7 +819,13 @@
 							oncontextmenu={(e) => handlePageContextMenu(e, page.id)}
 							onkeydown={handlePageTabKeydown}
 						>
-							{page.name}
+							{#if tag}
+								<span class="tab-type tab-type--{tag.key.toLowerCase()}" aria-hidden="true"
+									>{tag.key}</span
+								>{tag.rest}
+							{:else}
+								{page.name}
+							{/if}
 						</button>
 					</Tooltip>
 					<button
@@ -1405,6 +1422,51 @@
 	.page-tabs::-webkit-scrollbar-thumb {
 		background: rgba(255, 255, 255, 0.1);
 		border-radius: 2px;
+	}
+
+	/* License-type stamps — each license kind wears its color on the tab */
+	.tab-type {
+		display: inline-block;
+		padding: 0 4px;
+		margin-right: 4px;
+		font-size: 0.55rem;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		line-height: 1.5;
+		border-radius: 3px;
+		border: 1px solid;
+		vertical-align: 1px;
+	}
+
+	.tab-type--hwd,
+	.tab-type--hw {
+		color: var(--color-solidcam-gold);
+		background: var(--gold-a10);
+		border-color: var(--gold-a30);
+	}
+
+	.tab-type--nwd {
+		color: var(--accent-sky);
+		background: rgba(96, 165, 250, 0.1);
+		border-color: rgba(96, 165, 250, 0.3);
+	}
+
+	.tab-type--npk {
+		color: var(--accent-violet);
+		background: rgba(192, 132, 252, 0.1);
+		border-color: rgba(192, 132, 252, 0.3);
+	}
+
+	.tab-type--spk {
+		color: #4ade80;
+		background: rgba(74, 222, 128, 0.1);
+		border-color: rgba(74, 222, 128, 0.3);
+	}
+
+	.tab-type--p {
+		color: var(--accent-amber);
+		background: rgba(251, 146, 60, 0.1);
+		border-color: rgba(251, 146, 60, 0.32);
 	}
 
 	.page-tab {

@@ -103,14 +103,14 @@
 		}
 	});
 
-	// Parse handler
+	// Parse handler — the delay is theater: the parse itself is instant, the
+	// scan animation makes the recognition step visible
 	function handleParse() {
 		if (!canParse) return;
 
 		modalState = 'parsing';
 		parseError = null;
 
-		// Small delay to show parsing state
 		setTimeout(() => {
 			// SolidWorks branch — sniff first so SolidCAM parser doesn't false-fail
 			if (isSolidWorksText(pastedText)) {
@@ -162,7 +162,7 @@
 			}
 
 			modalState = 'preview';
-		}, 100);
+		}, 1400);
 	}
 
 	// Import handler
@@ -314,15 +314,24 @@
 			</div>
 		</div>
 	{:else if modalState === 'parsing'}
-		<div class="loading-state">
-			<div class="spinner"></div>
-			<p class="loading-text">Parsing license data…</p>
+		<!-- Scanner: the pasted text gets swept by a scan line while the
+		     recognition steps tick off. Pure presentation — the parse is instant. -->
+		<div class="scan-stage" aria-label="Scanning pasted license text">
+			<div class="scan-window">
+				<pre class="scan-text">{pastedText.slice(0, 1500)}</pre>
+				<div class="scan-line" aria-hidden="true"></div>
+			</div>
+			<ul class="scan-steps" aria-hidden="true">
+				<li class="scan-step" style="--step-i: 0">Reading page format</li>
+				<li class="scan-step" style="--step-i: 1">Identifying license type</li>
+				<li class="scan-step" style="--step-i: 2">Extracting modules &amp; dates</li>
+			</ul>
 		</div>
 	{:else if modalState === 'preview'}
 		<div class="preview-section">
 			{#if parsedSWLicense}
 				<!-- SolidWorks preview -->
-				<div class="hero hero-sw">
+				<div class="hero hero-sw reveal" style="--reveal-i: 0">
 					<div class="hero-icon" aria-hidden="true">▦</div>
 					<div class="hero-text">
 						<div class="hero-eyebrow">SolidWorks · {parsedSWLicense.product}</div>
@@ -338,7 +347,7 @@
 					</div>
 				</div>
 
-				<div class="field-grid">
+				<div class="field-grid reveal" style="--reveal-i: 1">
 					<div class="field">
 						<span class="field-label">Account</span>
 						{#if needsSWAccount}
@@ -382,14 +391,14 @@
 				</div>
 
 				{#if swMaintSkuPreview}
-					<div class="action-banner action-positive">
+					<div class="action-banner action-positive reveal" style="--reveal-i: 6">
 						<span class="action-icon" aria-hidden="true">✓</span>
 						<span class="action-text">
 							<strong>{swMaintSkuPreview}</strong> will be added to the SolidWorks Maintenance panel.
 						</span>
 					</div>
 				{:else}
-					<div class="action-banner action-warn">
+					<div class="action-banner action-warn reveal" style="--reveal-i: 6">
 						<span class="action-icon" aria-hidden="true">!</span>
 						<span class="action-text">
 							No matching maintenance SKU for this product — license stored, no SKU added.
@@ -399,7 +408,7 @@
 			{:else if parsedLicense}
 				<!-- SolidCAM preview -->
 				{#if parentMatch}
-					<div class="link-banner">
+					<div class="link-banner reveal" style="--reveal-i: 0">
 						<span class="link-banner-label">Linked to existing license</span>
 						<span class="link-banner-value">
 							{parentPageName} · {parentMatch.companyName}
@@ -407,7 +416,7 @@
 					</div>
 				{/if}
 
-				<div class="hero hero-sc">
+				<div class="hero hero-sc reveal" style="--reveal-i: 0">
 					<div class="hero-icon" aria-hidden="true">⚙</div>
 					<div class="hero-text">
 						<div class="hero-eyebrow">SolidCAM · {parsedLicense.displayType}</div>
@@ -432,7 +441,7 @@
 					</div>
 				</div>
 
-				<div class="field-grid">
+				<div class="field-grid reveal" style="--reveal-i: 1">
 					<div class="field">
 						<span class="field-label">
 							Maintenance
@@ -472,7 +481,7 @@
 					{/if}
 				</div>
 
-				<div class="features-section">
+				<div class="features-section reveal" style="--reveal-i: 5">
 					<button
 						class="collapsible-toggle"
 						onclick={() => (showFeatures = !showFeatures)}
@@ -580,7 +589,7 @@
 				{/if}
 
 				{#if importResult.importedSkuList?.length}
-					<div class="features-section">
+					<div class="features-section reveal" style="--reveal-i: 5">
 						<button
 							class="collapsible-toggle"
 							onclick={() => (showSkus = !showSkus)}
@@ -841,6 +850,147 @@
 		margin: 0;
 		color: var(--accent-rose);
 		font-size: var(--text-sm);
+	}
+
+	/* ─── Scanner (parsing state) ────────────────────────────── */
+
+	.scan-stage {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+		min-height: 220px;
+	}
+
+	.scan-window {
+		position: relative;
+		height: 150px;
+		overflow: hidden;
+		background: rgba(0, 0, 0, 0.35);
+		border: 1px solid var(--border-mid);
+		border-radius: var(--radius-sm);
+	}
+
+	.scan-text {
+		margin: 0;
+		padding: var(--space-2) var(--space-3);
+		font-family: var(--font-mono);
+		font-size: 0.6rem;
+		line-height: 1.5;
+		color: rgba(255, 255, 255, 0.3);
+		white-space: pre-wrap;
+		word-break: break-all;
+	}
+
+	/* The sweep — a gold scan line with a light wake, twice over the window */
+	.scan-line {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		height: 36px;
+		background: linear-gradient(180deg, transparent 0%, var(--gold-a10) 70%, var(--gold-a45) 100%);
+		border-bottom: 2px solid var(--color-solidcam-gold);
+		box-shadow: 0 2px 16px rgba(212, 175, 55, 0.55);
+		animation: scanSweep 0.7s var(--ease-smooth-curve) 2;
+	}
+
+	@keyframes scanSweep {
+		from {
+			transform: translateY(-40px);
+		}
+		to {
+			transform: translateY(150px);
+		}
+	}
+
+	.scan-steps {
+		list-style: none;
+		margin: 0;
+		padding: 0 var(--space-1);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+	}
+
+	.scan-step {
+		position: relative;
+		padding-left: 18px;
+		font-size: var(--text-sm);
+		color: rgba(255, 255, 255, 0.75);
+		opacity: 0;
+		animation: stepIn 300ms var(--ease-out-quart) forwards;
+		animation-delay: calc(var(--step-i) * 420ms + 150ms);
+	}
+
+	/* Checkmark ticks in slightly after its line appears */
+	.scan-step::before {
+		content: '✓';
+		position: absolute;
+		left: 0;
+		color: var(--color-solidcam-gold);
+		opacity: 0;
+		animation: stepIn 200ms var(--ease-out-quart) forwards;
+		animation-delay: calc(var(--step-i) * 420ms + 420ms);
+	}
+
+	@keyframes stepIn {
+		from {
+			opacity: 0;
+			transform: translateX(-4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+
+	/* ─── Preview reveal — recognized fields light up in sequence ── */
+
+	.preview-section .reveal {
+		opacity: 0;
+		animation: fieldReveal 380ms var(--ease-out-quart) forwards;
+		animation-delay: calc(var(--reveal-i, 0) * 110ms);
+	}
+
+	.preview-section .field {
+		opacity: 0;
+		animation: fieldReveal 320ms var(--ease-out-quart) forwards;
+	}
+
+	.preview-section .field:nth-child(1) {
+		animation-delay: 240ms;
+	}
+	.preview-section .field:nth-child(2) {
+		animation-delay: 330ms;
+	}
+	.preview-section .field:nth-child(3) {
+		animation-delay: 420ms;
+	}
+	.preview-section .field:nth-child(4) {
+		animation-delay: 510ms;
+	}
+	.preview-section .field:nth-child(5) {
+		animation-delay: 600ms;
+	}
+	.preview-section .field:nth-child(6) {
+		animation-delay: 690ms;
+	}
+
+	@keyframes fieldReveal {
+		0% {
+			opacity: 0;
+			transform: translateY(6px);
+		}
+		55% {
+			opacity: 1;
+			transform: translateY(0);
+			box-shadow: 0 0 14px rgba(212, 175, 55, 0.22);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+			box-shadow: none;
+		}
 	}
 
 	/* ─── Loading state ─────────────────────────────────────── */

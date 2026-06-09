@@ -17,18 +17,19 @@ async function login(page: Page, username?: string) {
 
 type Toast = { type: string; message: string };
 
-/** Read toast messages directly from the store — bypasses DOM timing issues. */
+/** Read toasts from the rendered DOM. (A dynamic import of the store module
+ *  gets a separate empty instance under Vite — module identity isn't stable
+ *  from page.evaluate, so the DOM is the reliable source.) Waits a beat so
+ *  an async copy/toast pipeline has time to render. */
 async function getToasts(page: Page): Promise<Toast[]> {
-	return page.evaluate(async () => {
-		const path = '/src/lib/stores/toast.svelte.ts';
-		const mod = (await Function('p', 'return import(p)')(path)) as {
-			toastStore: { all: { type: string; message: string }[] };
-		};
-		return mod.toastStore.all.map((t: { type: string; message: string }) => ({
-			type: t.type,
-			message: t.message
-		}));
-	});
+	await page.waitForTimeout(350);
+	return page.evaluate(() =>
+		[...document.querySelectorAll('.toast')].map((el) => ({
+			type:
+				[...el.classList].find((c) => c.startsWith('toast-'))?.replace('toast-', '') ?? 'unknown',
+			message: el.querySelector('.toast-message')?.textContent?.trim() ?? ''
+		}))
+	);
 }
 
 /** Trigger our outer .checkbox-wrapper onclick on a disabled bit (found by tooltip text). */
