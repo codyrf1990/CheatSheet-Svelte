@@ -110,50 +110,28 @@
 
 	/* Tile Surfaces — machined instrument panels: brushed dark metal with a
 	   directional grain, milled bright top edge, tight chamfered corners */
-	/* Two-tone brushed grain (highlight + shadow pairs) over a FLAT base.
-	   NOTHING position-dependent: no fades, no one-shot sheens — any layer
-	   that varies by position makes a panel's band and body look like
-	   different materials depending on the panel's size. */
-	--tile-bg:
-		repeating-linear-gradient(
-			90deg,
-			rgba(255, 255, 255, 0.045) 0px,
-			rgba(255, 255, 255, 0.045) 1px,
-			rgba(0, 0, 0, 0.22) 1px,
-			rgba(0, 0, 0, 0.22) 2px,
-			transparent 2px,
-			transparent 4px
-		),
-		linear-gradient(#202026, #202026);
-	--tile-border: 1px solid rgba(255, 255, 255, 0.14);
+	/* Clean flat surface — no texture, no fades. Slightly translucent so the
+	   backdrop blur gives a hint of depth over the background. Uniform at
+	   any panel size by construction. */
+	--tile-bg: rgba(30, 30, 37, 0.92);
+	--tile-border: 1px solid rgba(255, 255, 255, 0.1);
 	--tile-shadow:
-		0 22px 44px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16),
-		inset 0 -1px 0 rgba(0, 0, 0, 0.6), inset 1px 0 0 rgba(255, 255, 255, 0.05),
-		inset -1px 0 0 rgba(0, 0, 0, 0.4);
+		0 22px 44px rgba(0, 0, 0, 0.48), 0 8px 18px rgba(0, 0, 0, 0.26),
+		inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 	--tile-radius: var(--radius-sm);
 	/* Title strips share the panel metal — divider only, no separate surface */
 	--tile-header-bg: transparent;
 	--tile-header-border: 1px solid rgba(255, 255, 255, 0.09);
-	/* Engraved-into-metal text: dark cut above, light catch below */
-	--text-engraved: 0 -1px 0 rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 255, 255, 0.12);
+	/* Title/label depth on the clean surface — soft shadow only */
+	--text-engraved: 0 1px 2px rgba(0, 0, 0, 0.5);
 
-	/* Floating machined surfaces (menus, popovers, toasts, tooltips) —
-	   same metal, slightly lighter because they sit above the panels */
-	--menu-bg:
-		repeating-linear-gradient(
-			90deg,
-			rgba(255, 255, 255, 0.045) 0px,
-			rgba(255, 255, 255, 0.045) 1px,
-			rgba(0, 0, 0, 0.22) 1px,
-			rgba(0, 0, 0, 0.22) 2px,
-			transparent 2px,
-			transparent 4px
-		),
-		linear-gradient(#27272e, #27272e);
-	--menu-border: 1px solid rgba(255, 255, 255, 0.16);
+	/* Floating surfaces (menus, popovers, toasts, tooltips) — clean, one
+	   step lighter than the panels because they sit above them */
+	--menu-bg: rgba(40, 40, 47, 0.97);
+	--menu-border: 1px solid rgba(255, 255, 255, 0.14);
 	--menu-shadow:
-		0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.14),
-		inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+		0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1),
+		inset 0 -1px 0 rgba(0, 0, 0, 0.4);
 	--tile-title-size: var(--text-sm);
 	--tile-title-weight: 600;
 	--tile-title-tracking: 0.08em;
@@ -168,22 +146,12 @@
 	--chip-text-muted: rgba(255, 255, 255, 0.65);
 	--chip-text-hover: var(--color-solidcam-gold, #d4af37);
 
-	/* Modal Surfaces — machined like the tiles, larger panel so deeper shadow */
-	--modal-bg:
-		repeating-linear-gradient(
-			90deg,
-			rgba(255, 255, 255, 0.045) 0px,
-			rgba(255, 255, 255, 0.045) 1px,
-			rgba(0, 0, 0, 0.22) 1px,
-			rgba(0, 0, 0, 0.22) 2px,
-			transparent 2px,
-			transparent 4px
-		),
-		linear-gradient(#23232a, #23232a);
-	--modal-border: 1px solid rgba(255, 255, 255, 0.15);
+	/* Modal Surfaces — clean like the tiles, larger panel so deeper shadow */
+	--modal-bg: rgba(36, 36, 43, 0.97);
+	--modal-border: 1px solid rgba(255, 255, 255, 0.12);
 	--modal-shadow:
 		0 50px 120px rgba(0, 0, 0, 0.65), 0 18px 40px rgba(0, 0, 0, 0.35),
-		inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+		inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
 	--modal-radius: var(--radius-md);
 	--modal-title-size: 1rem;
 	--modal-title-weight: 600;
