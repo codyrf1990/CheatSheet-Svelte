@@ -172,11 +172,20 @@ function migratePackageState(oldState: unknown): Record<string, PackageState> {
  * Legacy formats covered:
  *   - Hardware Dongle: `<dongle>` (original) and `HW <dongle>` (intermediate)
  *   - Network Product Key: `NPK <full-key>` (original, before last-4 truncation)
+ *   - Editor seats: current name without the trailing " Editor" (suffix added later)
  */
 function legacyPageNameVariants(license: LicenseInfo): string[] {
 	const noGcode = license.features?.includes('NO G-code') ?? false;
-	const suffix = noGcode ? ' No-Gcode' : '';
+	const editor = license.features?.includes('Editor Mode') ?? false;
+	const suffix = `${noGcode ? ' No-Gcode' : ''}${editor ? ' Editor' : ''}`;
 	const variants: string[] = [];
+
+	// "Editor" suffix is new — pages imported before it lack the trailing " Editor".
+	// Register the current name minus that suffix so the migration renames them.
+	if (editor) {
+		const current = getPageNameForLicense(license);
+		variants.push(current.slice(0, current.length - ' Editor'.length));
+	}
 
 	if (license.isProfile && license.profileNo) return variants; // Profile format never changed
 	if (license.productKey && license.productKey.length > 4) {

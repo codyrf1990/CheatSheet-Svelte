@@ -40,12 +40,15 @@ export interface LicenseSelections {
  * - Standalone Product Key (long key, no network): "SPK 7452" (last 4 of key)
  * - Profile only (no dongle, has profile number): "P5801", etc.
  *
- * Suffix:
+ * Suffixes (combinable):
  * - When "NO G-code" is checked, append " No-Gcode" (e.g. "HWD 67854 No-Gcode")
+ * - When "Editor Mode" is checked (Editor / SolidCAM for Operators seat),
+ *   append " Editor" (e.g. "SPK 795B Editor")
  */
 export function getPageNameForLicense(license: LicenseInfo): string {
 	const noGcode = license.features?.includes('NO G-code') ?? false;
-	const suffix = noGcode ? ' No-Gcode' : '';
+	const editor = license.features?.includes('Editor Mode') ?? false;
+	const suffix = `${noGcode ? ' No-Gcode' : ''}${editor ? ' Editor' : ''}`;
 
 	// Profile: always use profile identifier, regardless of dongle/product key
 	// Profiles have a Profile-XXXX identifier that takes priority over everything
@@ -194,8 +197,13 @@ export function getLicenseSelections(license: LicenseInfo): LicenseSelections {
 
 			// Normalize level value for comparison
 			const levelLower = sim5xLevel.toLowerCase();
-			const is3Axis = levelLower === '3 axis' || levelLower === '1' || levelLower === '3axis' || levelLower === '3-axis';
-			const is34Axis = levelLower === '3/4 axis' || levelLower === '3/4axis' || levelLower === '3/4-axis';
+			const is3Axis =
+				levelLower === '3 axis' ||
+				levelLower === '1' ||
+				levelLower === '3axis' ||
+				levelLower === '3-axis';
+			const is34Axis =
+				levelLower === '3/4 axis' || levelLower === '3/4axis' || levelLower === '3/4-axis';
 			const isBlank = sim5xLevel === '';
 			const isUnknown = !is3Axis && !is34Axis && !isBlank;
 			const isBlankOrUnknown = isBlank || isUnknown;
