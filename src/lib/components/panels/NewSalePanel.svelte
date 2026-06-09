@@ -310,20 +310,16 @@
 </section>
 
 <style>
-	/* Job ticket — clean machined panel; the receipt feel comes from the mono
-	   type, the line rhythm and the hairline before the total. No dots. */
+	/* Job ticket — transparent over the machined quote tile so it shares the
+	   metal; the receipt feel comes from the mono type, the line rhythm and
+	   the hairline before the total. */
 	.new-sale-panel {
 		flex: 0 0 auto;
 		display: flex;
 		flex-direction: column;
-		background: linear-gradient(180deg, #232228 0%, #1a191f 100%);
-		border: 1px solid rgba(255, 255, 255, 0.13);
-		border-radius: var(--radius-sm);
-		box-shadow:
-			0 14px 30px rgba(0, 0, 0, 0.45),
-			inset 0 1px 0 rgba(255, 255, 255, 0.12),
-			inset 0 -1px 0 rgba(0, 0, 0, 0.55);
-		backdrop-filter: none;
+		background: transparent;
+		border: none;
+		box-shadow: none;
 	}
 
 	.panel-body {

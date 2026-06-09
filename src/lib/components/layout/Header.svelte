@@ -201,13 +201,13 @@
 		padding: clamp(0.2rem, 0.5vw, 0.4rem);
 	}
 
-	/* Match the re-lit tile surfaces below (the card's own bg is darker) */
+	/* Same machined surface as the tiles below — including the corner radius,
+	   so the header doesn't read as its own separate material */
 	.header-shell :global(.header) {
 		background: var(--tile-bg);
 		border: var(--tile-border);
+		border-radius: var(--tile-radius);
 		box-shadow: var(--tile-shadow);
-		backdrop-filter: blur(var(--glass-blur));
-		-webkit-backdrop-filter: blur(var(--glass-blur));
 	}
 
 	/* Subtle animated border glow - very slow */
