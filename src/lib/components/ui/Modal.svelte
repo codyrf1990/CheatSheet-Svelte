@@ -236,6 +236,7 @@
 		font-weight: var(--modal-title-weight);
 		letter-spacing: var(--modal-title-tracking);
 		color: var(--tile-title-color);
+		text-shadow: var(--text-engraved);
 		margin: 0;
 	}
 

@@ -1175,14 +1175,10 @@
 		flex-direction: column;
 		min-width: 220px;
 		max-height: 320px;
-		background: linear-gradient(145deg, rgba(32, 32, 38, 0.98), rgba(24, 24, 30, 0.98));
-		border: 1px solid var(--border-mid);
-		border-radius: var(--radius-md);
-		box-shadow:
-			0 12px 32px rgba(0, 0, 0, 0.4),
-			var(--elev-3);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
+		background: var(--menu-bg);
+		border: var(--menu-border);
+		border-radius: var(--radius-sm);
+		box-shadow: var(--menu-shadow);
 		z-index: 1000;
 		animation: dropdownFadeIn 150ms cubic-bezier(0.4, 0, 0.2, 1);
 	}
@@ -1596,14 +1592,10 @@
 	.context-menu {
 		position: fixed;
 		min-width: 140px;
-		background: linear-gradient(145deg, rgba(32, 32, 38, 0.98), rgba(24, 24, 30, 0.98));
-		border: 1px solid var(--border-mid);
-		border-radius: var(--radius-md);
-		box-shadow:
-			0 12px 40px rgba(0, 0, 0, 0.5),
-			var(--elev-3);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
+		background: var(--menu-bg);
+		border: var(--menu-border);
+		border-radius: var(--radius-sm);
+		box-shadow: var(--menu-shadow);
 		z-index: 2000;
 		overflow: hidden;
 		animation: contextMenuFadeIn 150ms cubic-bezier(0.4, 0, 0.2, 1);

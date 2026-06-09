@@ -82,14 +82,10 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.45rem 0.625rem;
-		background: linear-gradient(145deg, rgba(32, 32, 38, 0.98), rgba(24, 24, 30, 0.98));
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 10px;
-		box-shadow:
-			0 8px 24px rgba(0, 0, 0, 0.35),
-			0 2px 8px rgba(0, 0, 0, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.04);
-		backdrop-filter: blur(16px);
+		background: var(--menu-bg);
+		border: var(--menu-border);
+		border-radius: var(--radius-sm);
+		box-shadow: var(--menu-shadow);
 		overflow: hidden;
 	}
 

@@ -142,15 +142,12 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.4rem 0.7rem;
-		border-radius: 12px;
-		background: linear-gradient(135deg, rgba(28, 28, 32, 0.7) 0%, rgba(16, 16, 20, 0.65) 100%);
-		backdrop-filter: blur(10px);
-		-webkit-backdrop-filter: blur(10px);
+		border-radius: var(--radius-sm);
+		background: var(--menu-bg);
 		box-shadow:
 			0 6px 18px rgba(0, 0, 0, 0.28),
-			0 1px 3px rgba(0, 0, 0, 0.12),
-			inset 0 1px 0 rgba(255, 255, 255, 0.05),
-			inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+			inset 0 1px 0 rgba(255, 255, 255, 0.12),
+			inset 0 -1px 0 rgba(0, 0, 0, 0.45);
 		transition:
 			transform 220ms var(--ease-out-quart),
 			box-shadow 280ms var(--ease-out-expo),
@@ -215,13 +212,11 @@
 
 	.user-container:hover {
 		transform: translateY(-2px);
-		background: linear-gradient(135deg, rgba(34, 34, 40, 0.78) 0%, rgba(20, 20, 26, 0.72) 100%);
 		box-shadow:
 			0 12px 28px rgba(0, 0, 0, 0.35),
-			0 2px 6px rgba(0, 0, 0, 0.18),
 			0 0 26px rgba(212, 175, 55, 0.18),
-			inset 0 1px 0 rgba(255, 255, 255, 0.07),
-			inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+			inset 0 1px 0 rgba(255, 255, 255, 0.16),
+			inset 0 -1px 0 rgba(0, 0, 0, 0.45);
 	}
 
 	/* ======== Status states ======== */
@@ -345,20 +340,27 @@
 			box-shadow 300ms var(--ease-out-expo);
 	}
 
+	/* Status lamps — hot center + glow, like machine panel indicators */
 	.status-connected .avatar-status-dot {
-		background: #22c55e;
-		box-shadow: 0 0 8px rgba(34, 197, 94, 0.55);
+		background: radial-gradient(circle at 50% 38%, #a7f3c4 0%, #22c55e 55%, #15803d 100%);
+		box-shadow:
+			0 0 8px rgba(34, 197, 94, 0.65),
+			inset 0 1px 1px rgba(255, 255, 255, 0.5);
 	}
 
 	.status-syncing .avatar-status-dot {
-		background: var(--color-solidcam-gold);
-		box-shadow: 0 0 10px rgba(212, 175, 55, 0.7);
+		background: radial-gradient(circle at 50% 38%, #ffe9a8 0%, #d4af37 55%, #9c7c1a 100%);
+		box-shadow:
+			0 0 10px rgba(212, 175, 55, 0.8),
+			inset 0 1px 1px rgba(255, 255, 255, 0.5);
 		animation: dotPulse 1.4s ease-in-out infinite;
 	}
 
 	.status-error .avatar-status-dot {
-		background: #ef4444;
-		box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+		background: radial-gradient(circle at 50% 38%, #fca5a5 0%, #ef4444 55%, #b91c1c 100%);
+		box-shadow:
+			0 0 10px rgba(239, 68, 68, 0.7),
+			inset 0 1px 1px rgba(255, 255, 255, 0.45);
 	}
 
 	.status-disconnected .avatar-status-dot {
@@ -555,14 +557,10 @@
 		right: 0;
 		min-width: 180px;
 		padding: 0.75rem;
-		background: rgba(28, 28, 34, 0.95);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
-		border: 1px solid var(--border-mid);
-		border-radius: var(--radius-md);
-		box-shadow:
-			0 8px 24px rgba(0, 0, 0, 0.3),
-			var(--elev-2);
+		background: var(--menu-bg);
+		border: var(--menu-border);
+		border-radius: var(--radius-sm);
+		box-shadow: var(--menu-shadow);
 		z-index: 1000;
 		animation: panelSlideIn 150ms ease;
 	}

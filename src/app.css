@@ -129,6 +129,22 @@
 	--tile-header-border: 1px solid rgba(255, 255, 255, 0.09);
 	/* Engraved-into-metal text: dark cut above, light catch below */
 	--text-engraved: 0 -1px 0 rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 255, 255, 0.12);
+
+	/* Floating machined surfaces (menus, popovers, toasts, tooltips) —
+	   same metal, slightly lighter because they sit above the panels */
+	--menu-bg:
+		repeating-linear-gradient(
+			90deg,
+			rgba(255, 255, 255, 0.012) 0px,
+			rgba(255, 255, 255, 0.012) 1px,
+			transparent 1px,
+			transparent 3px
+		),
+		linear-gradient(180deg, #2c2c33 0%, #1e1e24 100%);
+	--menu-border: 1px solid rgba(255, 255, 255, 0.16);
+	--menu-shadow:
+		0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.14),
+		inset 0 -1px 0 rgba(0, 0, 0, 0.55);
 	--tile-title-size: var(--text-sm);
 	--tile-title-weight: 600;
 	--tile-title-tracking: 0.08em;
@@ -143,11 +159,21 @@
 	--chip-text-muted: rgba(255, 255, 255, 0.65);
 	--chip-text-hover: var(--color-solidcam-gold, #d4af37);
 
-	/* Modal Surfaces */
-	--modal-bg: linear-gradient(135deg, rgba(24, 24, 28, 0.98) 0%, rgba(10, 10, 14, 0.97) 100%);
-	--modal-border: 1px solid rgba(255, 255, 255, 0.08);
-	--modal-shadow: 0 50px 120px rgba(0, 0, 0, 0.65), 0 18px 40px rgba(0, 0, 0, 0.35);
-	--modal-radius: var(--radius-xl);
+	/* Modal Surfaces — machined like the tiles, larger panel so deeper shadow */
+	--modal-bg:
+		repeating-linear-gradient(
+			90deg,
+			rgba(255, 255, 255, 0.012) 0px,
+			rgba(255, 255, 255, 0.012) 1px,
+			transparent 1px,
+			transparent 3px
+		),
+		linear-gradient(180deg, #26262c 0%, #17171c 100%);
+	--modal-border: 1px solid rgba(255, 255, 255, 0.15);
+	--modal-shadow:
+		0 50px 120px rgba(0, 0, 0, 0.65), 0 18px 40px rgba(0, 0, 0, 0.35),
+		inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+	--modal-radius: var(--radius-md);
 	--modal-title-size: 1rem;
 	--modal-title-weight: 600;
 	--modal-title-tracking: 0.02em;
@@ -562,15 +588,13 @@ select:focus-visible {
 	letter-spacing: -0.005em;
 	white-space: nowrap;
 	color: var(--color-text-primary);
-	background: linear-gradient(145deg, rgba(38, 38, 44, 0.98), rgba(24, 24, 30, 0.98));
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	border-radius: 6px;
+	background: var(--menu-bg);
+	border: var(--menu-border);
+	border-radius: var(--radius-xs);
 	box-shadow:
 		0 6px 16px rgba(0, 0, 0, 0.5),
-		0 2px 4px rgba(0, 0, 0, 0.3),
-		inset 0 1px 0 rgba(255, 255, 255, 0.05);
-	backdrop-filter: blur(8px);
-	-webkit-backdrop-filter: blur(8px);
+		inset 0 1px 0 rgba(255, 255, 255, 0.12),
+		inset 0 -1px 0 rgba(0, 0, 0, 0.45);
 	pointer-events: none;
 	z-index: 9999;
 	opacity: 0;
