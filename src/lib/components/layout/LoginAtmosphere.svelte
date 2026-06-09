@@ -16,6 +16,12 @@
 	}));
 </script>
 
+<!-- Page vignette — gently darkens the edges so the card pops -->
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- Slow rotating conic gold halo, centered behind the login card -->
+<div class="card-halo" aria-hidden="true"></div>
+
 <!-- Ambient glow blobs -->
 <div class="ambient-glow ambient-1" aria-hidden="true"></div>
 <div class="ambient-glow ambient-2" aria-hidden="true"></div>
@@ -33,6 +39,52 @@
 </div>
 
 <style>
+	/* ======== Vignette ======== */
+	.vignette {
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(
+			ellipse 70% 60% at 50% 50%,
+			transparent 55%,
+			rgba(0, 0, 0, 0.32) 100%
+		);
+		pointer-events: none;
+	}
+
+	/* ======== Card halo ======== */
+	/* Very-low-alpha conic gold sweep rotating behind the card center */
+	.card-halo {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: min(620px, 90vw);
+		aspect-ratio: 1;
+		transform: translate(-50%, -50%);
+		background: conic-gradient(
+			from 0deg,
+			transparent 0deg,
+			rgba(212, 175, 55, 0.05) 70deg,
+			rgba(212, 175, 55, 0.1) 120deg,
+			transparent 200deg,
+			rgba(200, 16, 46, 0.04) 280deg,
+			transparent 360deg
+		);
+		border-radius: 50%;
+		filter: blur(48px);
+		pointer-events: none;
+		animation: haloRotate 32s linear infinite;
+		will-change: transform;
+	}
+
+	@keyframes haloRotate {
+		from {
+			transform: translate(-50%, -50%) rotate(0deg);
+		}
+		to {
+			transform: translate(-50%, -50%) rotate(360deg);
+		}
+	}
+
 	/* ======== Ambient glows ======== */
 	.ambient-glow {
 		position: absolute;

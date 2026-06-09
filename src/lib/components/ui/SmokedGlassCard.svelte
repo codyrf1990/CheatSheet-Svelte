@@ -65,20 +65,34 @@
 	}
 
 	/* ======== Hero variant ======== */
-	/* Used on the login card. Adds: gradient-stroke border (mask-composite),
-	   upgraded inner highlight stack, and a subtle SVG noise overlay for grain. */
+	/* Used on the login card. Adds: slowly rotating gradient-stroke border
+	   (mask-composite), deeper blur so the particle video reads through,
+	   upgraded inner highlight stack, gold ambience, and SVG noise grain. */
 
 	.smoked-glass--hero {
 		border: none;
+		background: linear-gradient(135deg, rgba(22, 22, 22, 0.95) 0%, rgba(8, 8, 8, 0.93) 100%);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
 		box-shadow:
 			0 30px 60px -20px rgba(0, 0, 0, 0.55),
 			0 12px 28px -8px rgba(0, 0, 0, 0.35),
-			inset 0 1px 0 rgba(255, 255, 255, 0.06),
+			0 0 120px -50px var(--gold-a20),
+			inset 0 1px 0 rgba(255, 255, 255, 0.08),
 			inset 0 -1px 0 rgba(0, 0, 0, 0.3),
 			inset 0 0 24px rgba(255, 255, 255, 0.015);
 	}
 
-	/* Gradient-stroke border via mask-composite — 1px gold→red sweep around the card */
+	/* Animated angle for the rotating border sweep. Older browsers without
+	   @property support fall back to a static 135deg gradient gracefully. */
+	@property --hero-border-angle {
+		syntax: '<angle>';
+		initial-value: 135deg;
+		inherits: false;
+	}
+
+	/* Gradient-stroke border via mask-composite — 1px gold→red sweep that
+	   slowly rotates around the card */
 	.smoked-glass--hero::before {
 		content: '';
 		position: absolute;
@@ -86,7 +100,7 @@
 		border-radius: inherit;
 		padding: 1px;
 		background: linear-gradient(
-			135deg,
+			var(--hero-border-angle, 135deg),
 			rgba(212, 175, 55, 0.55) 0%,
 			rgba(255, 255, 255, 0.08) 35%,
 			rgba(255, 255, 255, 0.02) 65%,
@@ -101,6 +115,13 @@
 		-webkit-mask-composite: xor;
 		mask-composite: exclude;
 		pointer-events: none;
+		animation: heroBorderSweep 14s linear infinite;
+	}
+
+	@keyframes heroBorderSweep {
+		to {
+			--hero-border-angle: 495deg;
+		}
 	}
 
 	/* Subtle noise grain — inline SVG turbulence, no asset request */

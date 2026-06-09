@@ -264,11 +264,11 @@
 		height: 35%;
 		background: radial-gradient(
 			ellipse 60% 80% at 50% 100%,
-			rgba(200, 16, 46, 0.8) 0%,
-			rgba(200, 16, 46, 0.4) 40%,
+			rgba(200, 16, 46, 0.88) 0%,
+			rgba(200, 16, 46, 0.44) 40%,
 			transparent 70%
 		);
-		filter: blur(12px);
+		filter: blur(10px);
 		animation: glow-breathe 3s ease-in-out infinite;
 		pointer-events: none;
 	}
@@ -362,10 +362,19 @@
 		letter-spacing: -0.022em;
 		color: var(--color-text-primary);
 		margin: 0;
-		background: linear-gradient(var(--title-angle, 135deg), #ffffff 0%, #d4af37 100%);
+		background: linear-gradient(
+			var(--title-angle, 135deg),
+			#ffffff 0%,
+			#f3dc8a 38%,
+			#d4af37 52%,
+			#f3dc8a 66%,
+			#ffffff 100%
+		);
 		-webkit-background-clip: text;
 		background-clip: text;
 		-webkit-text-fill-color: transparent;
+		/* Letterpress depth — text-shadow is invisible with transparent fill */
+		filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.55));
 		animation: titleSheen 9s ease-in-out infinite;
 	}
 
@@ -526,9 +535,25 @@
 	.bottom-brand {
 		position: absolute;
 		bottom: 1.5rem;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
 		opacity: 0;
 		transform: translateY(10px);
 		transition: all 0.8s var(--ease-out-expo) 0.4s;
+	}
+
+	/* Flanking gold hairlines — mirrors the title/footer rules */
+	.bottom-brand::before,
+	.bottom-brand::after {
+		content: '';
+		height: 1px;
+		width: 42px;
+		background: linear-gradient(90deg, transparent, var(--gold-a30));
+	}
+
+	.bottom-brand::after {
+		background: linear-gradient(90deg, var(--gold-a30), transparent);
 	}
 
 	.bottom-brand.mounted {
