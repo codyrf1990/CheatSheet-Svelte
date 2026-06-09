@@ -388,6 +388,13 @@
 		border-color: var(--chip-border-color-strong);
 	}
 
+	/* Copy feedback — gold flash on click */
+	.sku-code:active {
+		background: var(--gold-a20);
+		border-color: var(--gold-a45);
+		box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+	}
+
 	/* Package marker — soft gold tint instead of a hard left border line */
 	.sku-code.is-package {
 		background: var(--gold-a10);

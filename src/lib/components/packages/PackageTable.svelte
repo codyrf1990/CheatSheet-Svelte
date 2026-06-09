@@ -77,8 +77,8 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each packages as pkg (pkg.code)}
-					<PackageRow {pkg} />
+				{#each packages as pkg, i (pkg.code)}
+					<PackageRow {pkg} index={i} />
 				{/each}
 			</tbody>
 		</table>

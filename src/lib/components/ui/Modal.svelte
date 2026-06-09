@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { tick } from 'svelte';
-	import { fade, fly } from 'svelte/transition';
+	import { fade, scale } from 'svelte/transition';
+	import { backOut } from 'svelte/easing';
 	import { X } from 'lucide-svelte';
 	import { tooltip } from '$lib/utils/tooltipAction';
 
@@ -118,7 +119,7 @@
 			class:wide={size === 'wide'}
 			class:full={size === 'full'}
 			bind:this={modalRef}
-			transition:fly={{ y: 24, duration: 300 }}
+			transition:scale={{ start: 0.92, duration: 320, easing: backOut }}
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby={titleId}
@@ -158,8 +159,9 @@
 			rgba(0, 0, 0, 0.65) 0%,
 			rgba(0, 0, 0, 0.85) 100%
 		);
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
+		/* Desaturate the app behind so the modal owns the stage */
+		backdrop-filter: blur(10px) saturate(0.55);
+		-webkit-backdrop-filter: blur(10px) saturate(0.55);
 	}
 
 	.modal {

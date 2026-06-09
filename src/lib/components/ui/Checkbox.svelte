@@ -128,11 +128,27 @@
 		color: var(--color-on-gold);
 	}
 
-	/* Checked state */
+	/* Checked state — lit up so selections pop out of the sea of checkboxes */
 	.checkbox-control.checked,
 	.checkbox-control.indeterminate {
 		background: var(--gradient-gold);
 		border-color: var(--color-solidcam-gold);
+		box-shadow:
+			0 0 9px rgba(212, 175, 55, 0.5),
+			0 0 3px rgba(212, 175, 55, 0.4);
+		animation: checkPop 280ms var(--ease-spring);
+	}
+
+	@keyframes checkPop {
+		0% {
+			transform: scale(0.8);
+		}
+		55% {
+			transform: scale(1.14);
+		}
+		100% {
+			transform: scale(1);
+		}
 	}
 
 	/* Hover state */

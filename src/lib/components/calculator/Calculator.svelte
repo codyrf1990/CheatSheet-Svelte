@@ -615,13 +615,16 @@
 		font-weight: 540;
 		color: rgba(255, 255, 255, 0.9);
 		cursor: pointer;
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+		/* Raised keycap: lit top edge + a hard under-edge it can press into */
+		box-shadow:
+			0 2px 0 rgba(0, 0, 0, 0.45),
+			inset 0 1px 0 rgba(255, 255, 255, 0.07);
 		transition:
 			background 150ms var(--ease-out-quart),
 			border-color 150ms var(--ease-out-quart),
 			color 150ms var(--ease-out-quart),
-			transform 100ms var(--ease-out-quart),
-			box-shadow 200ms var(--ease-out-expo);
+			transform 90ms var(--ease-out-quart),
+			box-shadow 120ms var(--ease-out-quart);
 	}
 
 	.calc-btn:hover {
@@ -630,8 +633,11 @@
 	}
 
 	.calc-btn:active {
-		transform: scale(0.96);
-		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+		/* Key press: travel down onto the under-edge */
+		transform: translateY(2px);
+		box-shadow:
+			0 0 0 rgba(0, 0, 0, 0.45),
+			inset 0 2px 4px rgba(0, 0, 0, 0.3);
 	}
 
 	.calc-btn.clear {

@@ -19,9 +19,20 @@
 
 	interface Props {
 		pkg: Package;
+		index?: number;
 	}
 
-	let { pkg }: Props = $props();
+	let { pkg, index = 0 }: Props = $props();
+
+	// Identity rail color per package — makes packages scannable at a glance
+	const RAIL_COLORS: Record<string, string> = {
+		'SC-Mill': '212, 175, 55', // gold — the flagship
+		'SC-Turn': '96, 165, 250', // sky
+		'SC-Mill-Adv': '192, 132, 252', // violet
+		'SC-Mill-3D': '74, 222, 128', // green
+		'SC-Mill-5Axis': '248, 113, 113' // rose
+	};
+	const railRgb = $derived(RAIL_COLORS[pkg.code] ?? '212, 175, 55');
 
 	// Package master toggle state
 	let packageToggleDef = $derived(PACKAGE_TOGGLE_BITS[pkg.code]);
@@ -164,7 +175,12 @@
 	}
 </script>
 
-<tr class="package-row" data-package={pkg.code} translate="no">
+<tr
+	class="package-row"
+	data-package={pkg.code}
+	translate="no"
+	style="--rail-rgb: {railRgb}; --row-i: {index};"
+>
 	<td class="pkg-cell">
 		<div class="pkg-header">
 			{#if packageToggleDef}
@@ -279,14 +295,30 @@
 <style>
 	.package-row {
 		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+		/* Identity rail — each package wears its color down the left edge */
+		box-shadow: inset 3px 0 0 rgba(var(--rail-rgb), 0.45);
 		transition:
 			background 180ms var(--ease-out-quart),
 			box-shadow 180ms var(--ease-out-quart);
+		/* Staggered entrance */
+		animation: rowEnter 360ms var(--ease-out-expo) both;
+		animation-delay: calc(var(--row-i, 0) * 55ms);
+	}
+
+	@keyframes rowEnter {
+		from {
+			opacity: 0;
+			transform: translateY(7px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
 	.package-row:hover {
-		background: var(--row-hover-bg);
-		box-shadow: inset 2px 0 0 var(--gold-a30);
+		background: linear-gradient(90deg, rgba(var(--rail-rgb), 0.07), rgba(255, 255, 255, 0.03) 40%);
+		box-shadow: inset 3px 0 0 rgba(var(--rail-rgb), 0.95);
 	}
 
 	.pkg-cell {
@@ -341,6 +373,14 @@
 		text-decoration: underline;
 		text-decoration-color: var(--gold-a45);
 		text-underline-offset: 2px;
+	}
+
+	/* Copy feedback — gold flash on click */
+	.bit-text:active,
+	.maint-code:active,
+	.package-code:active {
+		text-shadow: 0 0 12px rgba(212, 175, 55, 0.7);
+		color: var(--color-solidcam-gold);
 	}
 
 	.code-btn {
