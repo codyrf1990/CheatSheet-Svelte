@@ -63,7 +63,13 @@
 				<Checkbox {checked} onchange={handleCheckboxChange} />
 			</span>
 		{/if}
-		<button type="button" class="item-text" class:custom={isCustom} onclick={handleCopy} use:tooltip={note || item}>
+		<button
+			type="button"
+			class="item-text"
+			class:custom={isCustom}
+			onclick={handleCopy}
+			use:tooltip={note || item}
+		>
 			{#if isCustom}<span class="custom-indicator">+</span>{/if}{item}
 		</button>
 		{#if note}
@@ -73,7 +79,13 @@
 		{/if}
 	</div>
 	{#if removeMode && isCustom}
-		<button type="button" class="item-remove-btn" onclick={handleRemove} aria-label="Remove {item}" use:tooltip={'Remove ' + item}>
+		<button
+			type="button"
+			class="item-remove-btn"
+			onclick={handleRemove}
+			aria-label="Remove {item}"
+			use:tooltip={'Remove ' + item}
+		>
 			<X size={11} strokeWidth={2.5} />
 		</button>
 	{/if}

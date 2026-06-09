@@ -55,7 +55,7 @@ The profile dataset uses different naming for C-axes:
 
 **Applies to Profile-based dongles only.**
 
-**All Sim 5x levels get:** HSS bit (SC-Mill) + HSS-Maint *(unless No HSS is flagged — see §4)*
+**All Sim 5x levels get:** HSS bit (SC-Mill) + HSS-Maint _(unless No HSS is flagged — see §4)_
 
 | Sim 5x Bit      | Sim 5x Level    | Additional                    | Notes                           |
 | --------------- | --------------- | ----------------------------- | ------------------------------- |

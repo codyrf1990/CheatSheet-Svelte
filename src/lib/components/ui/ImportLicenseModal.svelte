@@ -181,18 +181,12 @@
 				} else {
 					// When customer was inherited from a parent NPK, always trust the
 					// parent — never let a typo split the profile into a new company.
-					const companyName = needsCompanyName
-						? companyNameOverride
-						: parsedLicense!.customer;
+					const companyName = needsCompanyName ? companyNameOverride : parsedLicense!.customer;
 					const licenseToImport: LicenseInfo = {
 						...parsedLicense!,
 						maintenanceEnd: maintenanceEndOverride.trim()
 					};
-					importResult = importLicense(
-						licenseToImport,
-						companyName,
-						parentMatch?.companyId
-					);
+					importResult = importLicense(licenseToImport, companyName, parentMatch?.companyId);
 				}
 
 				modalState = 'results';
@@ -270,7 +264,8 @@
 					<span class="note-sub">Dongle · NPK · NWD · SPK</span>
 				</header>
 				<p class="note-body">
-					Paste a SolidCAM dongle or product-key page. The tool reads it and creates a tab with the modules and maintenance dates already filled in.
+					Paste a SolidCAM dongle or product-key page. The tool reads it and creates a tab with the
+					modules and maintenance dates already filled in.
 				</p>
 			</section>
 
@@ -282,7 +277,9 @@
 					<span class="note-sub">Always import the parent NPK first</span>
 				</header>
 				<p class="note-body">
-					If a license has profiles, paste the main <strong>Network Product Key</strong> first, then paste each profile separately. Profiles fill in the customer name, dates, and version automatically from the parent — you don't have to type anything.
+					If a license has profiles, paste the main <strong>Network Product Key</strong> first, then paste
+					each profile separately. Profiles fill in the customer name, dates, and version automatically
+					from the parent — you don't have to type anything.
 				</p>
 			</section>
 
@@ -294,7 +291,9 @@
 					<span class="note-sub">Standard · Parts &amp; Assemblies · Pro</span>
 				</header>
 				<p class="note-body">
-					You can paste SolidWorks license pages here too — the tool detects them automatically. It adds a small <strong>SW</strong> tab at the front of the matching company and the right SolidWorks maintenance SKU.
+					You can paste SolidWorks license pages here too — the tool detects them automatically. It
+					adds a small <strong>SW</strong> tab at the front of the matching company and the right SolidWorks
+					maintenance SKU.
 				</p>
 			</section>
 
@@ -499,7 +498,9 @@
 					class:action-positive={preview && preview.isNewPage}
 					class:action-info={preview && !preview.isNewPage}
 				>
-					<span class="action-icon" aria-hidden="true">{preview && preview.isNewPage ? '+' : '↻'}</span>
+					<span class="action-icon" aria-hidden="true"
+						>{preview && preview.isNewPage ? '+' : '↻'}</span
+					>
 					<span class="action-text">
 						{#if preview && !preview.isNewPage}
 							Page <strong>{pageName}</strong> already exists — this import will update it.
@@ -587,7 +588,9 @@
 							aria-expanded={showSkus}
 						>
 							<span class="collapsible-label">
-								{importResult.importedSkuList.length} SKU{importResult.importedSkuList.length === 1 ? '' : 's'} imported
+								{importResult.importedSkuList.length} SKU{importResult.importedSkuList.length === 1
+									? ''
+									: 's'} imported
 							</span>
 							<span class="collapsible-icon" class:open={showSkus} aria-hidden="true">▶</span>
 						</button>
@@ -814,7 +817,9 @@
 		font-size: 0.8rem;
 		line-height: 1.5;
 		resize: vertical;
-		transition: border-color 150ms ease, box-shadow 150ms ease;
+		transition:
+			border-color 150ms ease,
+			box-shadow 150ms ease;
 	}
 
 	.paste-textarea:focus {

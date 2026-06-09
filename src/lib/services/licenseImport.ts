@@ -236,9 +236,8 @@ export function importLicense(
 	// 1. Find or create company. Prefer the pinned id (profile parent) so the
 	// profile lands in the correct company even if it has been renamed.
 	let company =
-		(pinnedCompanyId
-			? (companiesStore.all.find((c) => c.id === pinnedCompanyId) ?? null)
-			: null) ?? companiesStore.findByName(companyName);
+		(pinnedCompanyId ? (companiesStore.all.find((c) => c.id === pinnedCompanyId) ?? null) : null) ??
+		companiesStore.findByName(companyName);
 	const isNewCompany = !company;
 
 	if (!company) {

@@ -21,6 +21,7 @@
 	import { Button, Input, Modal, ImportLicenseModal, Tooltip } from '$components/ui';
 	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { getPageNameForLicense } from '$lib/utils/licenseSelections';
+	import { menuKeyNav } from '$lib/utils/menuKeyNav';
 
 	interface Props {
 		onViewAllCompanies?: () => void;
@@ -137,9 +138,7 @@
 	});
 
 	let isConfirmDialog = $derived(
-		dialogType === 'delete-company' ||
-			dialogType === 'delete-page' ||
-			dialogType === 'delete-sw'
+		dialogType === 'delete-company' || dialogType === 'delete-page' || dialogType === 'delete-sw'
 	);
 	let dialogTitle = $derived.by(() => {
 		switch (dialogType) {
@@ -250,7 +249,6 @@
 		dropdownOpen = false;
 		searchQuery = '';
 	}
-
 
 	function handleCompanySelect(companyId: string) {
 		companiesStore.switchTo(companyId);
@@ -545,7 +543,6 @@
 		await copyToClipboard(text, 'SolidWorks license copied');
 	}
 
-
 	function closeDialog() {
 		dialogType = null;
 		dialogTargetId = null;
@@ -586,9 +583,7 @@
 		if (dialogType === 'rename-sw') {
 			if (!dialogTargetId) return;
 			companiesStore.setSolidWorksTabLabel(dialogTargetId, dialogInput);
-			toastStore.success(
-				dialogInput.trim().length === 0 ? 'SW tab label reset' : 'SW tab renamed'
-			);
+			toastStore.success(dialogInput.trim().length === 0 ? 'SW tab label reset' : 'SW tab renamed');
 			closeDialog();
 			return;
 		}
@@ -616,7 +611,6 @@
 			closeDialog();
 			return;
 		}
-
 	}
 
 	function handleDialogInputKeydown(e: KeyboardEvent) {
@@ -842,8 +836,6 @@
 		</Tooltip>
 	</div>
 
-
-
 	<!-- Quick Actions -->
 	{#if currentCompany}
 		<div class="quick-actions">
@@ -954,6 +946,7 @@
 		role="menu"
 		aria-label={contextMenu.type === 'company' ? 'Company actions' : 'Page actions'}
 		style="left: {contextMenu.x}px; top: {contextMenu.y}px;"
+		use:menuKeyNav={{ onClose: closeContextMenu }}
 	>
 		{#if contextMenu.type === 'company'}
 			<button type="button" role="menuitem" onclick={handleRenameCompany}>

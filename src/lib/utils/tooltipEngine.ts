@@ -36,7 +36,7 @@ function ensureTipEl(): HTMLDivElement {
 function positionTip(node: HTMLElement, position: 'top' | 'bottom'): void {
 	const tip = ensureTipEl();
 	const rect = node.getBoundingClientRect();
-	let x = rect.left + rect.width / 2;
+	const x = rect.left + rect.width / 2;
 
 	if (position === 'bottom') {
 		tip.style.cssText = `left:${x}px;top:${rect.bottom + 6}px;transform:translateX(-50%)`;

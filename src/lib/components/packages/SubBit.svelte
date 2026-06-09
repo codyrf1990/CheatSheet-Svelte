@@ -76,9 +76,8 @@
 					onclick={handleCopy}
 					data-copyable-bit
 					aria-label="Copy {bit}"
-					>{#if justCopied}<span class="copy-check"><Check size={11} strokeWidth={3} /></span>{:else}{#if isCustom}<span
-								class="custom-indicator">+</span
-							>{/if}{bit}{/if}</button
+					>{#if justCopied}<span class="copy-check"><Check size={11} strokeWidth={3} /></span
+						>{:else}{#if isCustom}<span class="custom-indicator">+</span>{/if}{bit}{/if}</button
 				>
 			</div>
 		</Tooltip>
@@ -147,7 +146,7 @@
 		cursor: not-allowed;
 	}
 
-.checkbox-wrapper {
+	.checkbox-wrapper {
 		display: flex;
 		align-items: center;
 	}

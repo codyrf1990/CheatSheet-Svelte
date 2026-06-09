@@ -788,5 +788,4 @@
 	.tier-info li {
 		margin: 0.125rem 0;
 	}
-
 </style>

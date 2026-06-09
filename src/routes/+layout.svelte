@@ -85,7 +85,7 @@
 				<h1 class="boot-error-title">Unable to start</h1>
 				<p class="boot-error-message">
 					{bootPhaseStore.error ||
-						"Check your connection and try again. If this keeps happening, refresh the page."}
+						'Check your connection and try again. If this keeps happening, refresh the page.'}
 				</p>
 				<button class="boot-retry-btn" onclick={() => bootPhaseStore.retry()}>Try again</button>
 			</div>

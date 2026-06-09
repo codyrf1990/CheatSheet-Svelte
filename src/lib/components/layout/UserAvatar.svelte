@@ -107,13 +107,9 @@
 	{/if}
 
 	{#if settingsOpen}
-		<div
-			id="user-settings-panel"
-			class="settings-panel"
-			role="dialog"
-			aria-modal="true"
-			aria-label="User settings"
-		>
+		<!-- Non-modal popover: role="group", not dialog — it doesn't trap focus
+		     and the rest of the page stays interactive -->
+		<div id="user-settings-panel" class="settings-panel" role="group" aria-label="User settings">
 			<div class="settings-header">Settings</div>
 			<label class="settings-toggle">
 				<span class="toggle-label">Pause background</span>

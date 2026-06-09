@@ -36,11 +36,36 @@
 	}: Props = $props();
 
 	const navLinks = [
-		{ label: 'Main Support', href: 'https://us.solidcam.com/contact-support/', color: 'red' as const, Icon: LifeBuoy },
-		{ label: 'Ticket Site', href: 'https://solidcamsupport.com/', color: 'red' as const, Icon: Ticket },
-		{ label: 'University', href: 'https://www.youtube.com/c/SolidCAMUniversity', color: 'purple' as const, Icon: GraduationCap },
-		{ label: 'Academy', href: 'https://elearning-solidcam.talentlms.com/', color: 'blue' as const, Icon: BookOpen },
-		{ label: 'ChatBot', href: 'https://www.solidcamchat.com/', color: 'orange' as const, Icon: MessageCircle }
+		{
+			label: 'Main Support',
+			href: 'https://us.solidcam.com/contact-support/',
+			color: 'red' as const,
+			Icon: LifeBuoy
+		},
+		{
+			label: 'Ticket Site',
+			href: 'https://solidcamsupport.com/',
+			color: 'red' as const,
+			Icon: Ticket
+		},
+		{
+			label: 'University',
+			href: 'https://www.youtube.com/c/SolidCAMUniversity',
+			color: 'purple' as const,
+			Icon: GraduationCap
+		},
+		{
+			label: 'Academy',
+			href: 'https://elearning-solidcam.talentlms.com/',
+			color: 'blue' as const,
+			Icon: BookOpen
+		},
+		{
+			label: 'ChatBot',
+			href: 'https://www.solidcamchat.com/',
+			color: 'orange' as const,
+			Icon: MessageCircle
+		}
 	];
 
 	function handleOperationsClick(e: MouseEvent) {
@@ -244,7 +269,12 @@
 		margin: 0;
 		text-align: center;
 		letter-spacing: -0.02em;
-		background: linear-gradient(var(--header-title-angle, 135deg), #ffffff 0%, #e8d59a 50%, #ffffff 100%);
+		background: linear-gradient(
+			var(--header-title-angle, 135deg),
+			#ffffff 0%,
+			#e8d59a 50%,
+			#ffffff 100%
+		);
 		-webkit-background-clip: text;
 		background-clip: text;
 		-webkit-text-fill-color: transparent;

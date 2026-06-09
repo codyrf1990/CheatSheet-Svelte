@@ -16,6 +16,10 @@
 
 	let { open = $bindable(), onClose, title, children, footer, size = 'default' }: Props = $props();
 
+	// Unique per instance — a static id would collide when multiple modals exist
+	const uid = $props.id();
+	const titleId = `modal-title-${uid}`;
+
 	let modalRef: HTMLElement | null = $state(null);
 	let previouslyFocusedElement: HTMLElement | null = null;
 
@@ -41,8 +45,15 @@
 						target.focus();
 					} else {
 						// Fallback: focus first focusable anywhere in modal
-						const fallback = modalRef!.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-						fallback[0]?.focus();
+						const fallback = modalRef.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+						if (fallback.length > 0) {
+							fallback[0].focus();
+						} else {
+							// Nothing focusable at all — focus the container so keyboard
+							// users aren't stranded behind the overlay
+							console.warn('[Modal] No focusable element found; focusing modal container');
+							modalRef.focus();
+						}
 					}
 				}
 			});
@@ -100,24 +111,21 @@
 
 {#if open}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<div
-		class="modal-overlay"
-		transition:fade={{ duration: 200 }}
-		onclick={handleBackdropClick}
-		role="dialog"
-		aria-modal="true"
-		aria-labelledby="modal-title"
-		tabindex="-1"
-	>
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="modal-overlay" transition:fade={{ duration: 200 }} onclick={handleBackdropClick}>
 		<div
 			class="modal"
 			class:wide={size === 'wide'}
 			class:full={size === 'full'}
 			bind:this={modalRef}
 			transition:fly={{ y: 24, duration: 300 }}
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby={titleId}
+			tabindex="-1"
 		>
 			<div class="modal-header">
-				<h2 id="modal-title" class="modal-title">{title}</h2>
+				<h2 id={titleId} class="modal-title">{title}</h2>
 				<button class="close-btn" onclick={onClose} aria-label="Close modal" use:tooltip={'Close'}>
 					<X size={18} strokeWidth={2.25} />
 				</button>
@@ -145,8 +153,11 @@
 		align-items: center;
 		justify-content: center;
 		padding: var(--space-4);
-		background:
-			radial-gradient(ellipse at center, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.85) 100%);
+		background: radial-gradient(
+			ellipse at center,
+			rgba(0, 0, 0, 0.65) 0%,
+			rgba(0, 0, 0, 0.85) 100%
+		);
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
 	}
@@ -260,5 +271,4 @@
 		border-top: var(--tile-header-border);
 		flex-shrink: 0;
 	}
-
 </style>

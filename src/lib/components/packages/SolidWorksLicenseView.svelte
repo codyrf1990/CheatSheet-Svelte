@@ -35,7 +35,9 @@
 		}
 	}
 
-	function expirationStatus(end: string): { label: string; tone: 'expired' | 'soon' | 'ok' } | null {
+	function expirationStatus(
+		end: string
+	): { label: string; tone: 'expired' | 'soon' | 'ok' } | null {
 		if (!end) return null;
 		const parsed = new Date(end);
 		if (Number.isNaN(parsed.getTime())) return null;
@@ -218,7 +220,8 @@
 			<AlertTriangle size={22} strokeWidth={2} />
 		</span>
 		<p class="confirm-message">
-			Remove this SolidWorks license? This can't be undone — the serial number, subscription dates, and maintenance SKU will be cleared from this company.
+			Remove this SolidWorks license? This can't be undone — the serial number, subscription dates,
+			and maintenance SKU will be cleared from this company.
 		</p>
 		{#if deleteLicense}
 			<dl class="confirm-details">
@@ -302,8 +305,7 @@
 		flex-direction: column;
 		gap: var(--space-3);
 		padding: var(--space-3) var(--space-4);
-		background:
-			linear-gradient(135deg, rgba(28, 28, 32, 0.92) 0%, rgba(16, 16, 20, 0.9) 100%);
+		background: linear-gradient(135deg, rgba(28, 28, 32, 0.92) 0%, rgba(16, 16, 20, 0.9) 100%);
 		border: 1px solid rgba(255, 255, 255, 0.06);
 		border-left: 3px solid rgba(220, 38, 38, 0.55);
 		border-radius: 10px;
@@ -316,8 +318,7 @@
 	}
 
 	.sw-card:hover {
-		background:
-			linear-gradient(135deg, rgba(34, 34, 38, 0.94) 0%, rgba(20, 20, 24, 0.92) 100%);
+		background: linear-gradient(135deg, rgba(34, 34, 38, 0.94) 0%, rgba(20, 20, 24, 0.92) 100%);
 		border-color: rgba(255, 255, 255, 0.1);
 	}
 

@@ -226,13 +226,13 @@ Import from Salesforce dongle page text (Ctrl+A, Ctrl+C). Parser: `src/lib/utils
 
 ### License Scenarios
 
-| Scenario               | Dongle No. | Net Dongle  | Page Name    |
-| ---------------------- | ---------- | ----------- | ------------ |
-| Hardware Dongle        | 5 digits   | Not Checked | `HWD 77518`  |
-| Network Dongle (NWD)   | 5 digits   | Checked     | `NWD 77518`  |
-| Network Product Key    | >5 digits  | Checked     | `NPK 7452`   |
-| Standalone Product Key | >5 digits  | Not Checked | `SPK 8575`   |
-| Profile Only           | Profile #  | NPK/NWD     | `P5801`      |
+| Scenario               | Dongle No. | Net Dongle  | Page Name   |
+| ---------------------- | ---------- | ----------- | ----------- |
+| Hardware Dongle        | 5 digits   | Not Checked | `HWD 77518` |
+| Network Dongle (NWD)   | 5 digits   | Checked     | `NWD 77518` |
+| Network Product Key    | >5 digits  | Checked     | `NPK 7452`  |
+| Standalone Product Key | >5 digits  | Not Checked | `SPK 8575`  |
+| Profile Only           | Profile #  | NPK/NWD     | `P5801`     |
 
 ### Profile Special Handling
 

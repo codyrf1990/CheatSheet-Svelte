@@ -43,7 +43,12 @@
 					{/if}
 				</span>
 				<span class="toast-message">{t.message}</span>
-				<button class="toast-close" onclick={() => toastStore.remove(t.id)} aria-label="Dismiss" use:tooltip={'Dismiss'}>
+				<button
+					class="toast-close"
+					onclick={() => toastStore.remove(t.id)}
+					aria-label="Dismiss"
+					use:tooltip={'Dismiss'}
+				>
 					<X size={11} strokeWidth={2} />
 				</button>
 

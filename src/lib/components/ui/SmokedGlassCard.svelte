@@ -32,8 +32,7 @@
 </script>
 
 <div
-	class="smoked-glass {paddings[padding]} {glows[glow]} rounded-[20px] {variant ===
-		'hero'
+	class="smoked-glass {paddings[padding]} {glows[glow]} rounded-[20px] {variant === 'hero'
 		? 'smoked-glass--hero'
 		: ''} {className}"
 >

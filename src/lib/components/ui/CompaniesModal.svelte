@@ -230,7 +230,9 @@
 							>
 								<span class="company-name" use:tooltip={company.name}>{company.name}</span>
 								{#if company.id === currentCompany?.id}
-									<span class="current-badge" use:tooltip={'Currently selected company'}>Current</span>
+									<span class="current-badge" use:tooltip={'Currently selected company'}
+										>Current</span
+									>
 								{/if}
 							</button>
 							{#if deleteConfirmId === company.id}
@@ -350,7 +352,6 @@
 		gap: 0.25rem;
 		padding-right: 0.25rem;
 	}
-
 
 	.company-row {
 		display: flex;

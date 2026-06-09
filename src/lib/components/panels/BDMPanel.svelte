@@ -44,7 +44,8 @@
 							</span>
 							<Tooltip text="Click to copy {item.sku}">
 								<button type="button" class="sku-chip" onclick={() => copySku(item.sku)}>
-									{#if copiedSku === item.sku}<span class="copy-check"><Check size={11} strokeWidth={3} /></span
+									{#if copiedSku === item.sku}<span class="copy-check"
+											><Check size={11} strokeWidth={3} /></span
 										>{:else}{item.sku}{/if}
 								</button>
 							</Tooltip>

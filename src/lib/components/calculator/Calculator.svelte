@@ -395,7 +395,12 @@
 	}
 </script>
 
-<section class="panel calculator-panel tile" data-panel="calculator" aria-label="Price calculator" translate="no">
+<section
+	class="panel calculator-panel tile"
+	data-panel="calculator"
+	aria-label="Price calculator"
+	translate="no"
+>
 	<div class="panel-head">
 		<h2 class="panel-title">Calculator</h2>
 	</div>
@@ -551,8 +556,7 @@
 	.calculator-display {
 		width: 100%;
 		padding: 0.45rem 0.6rem;
-		background:
-			linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.35) 100%);
+		background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.35) 100%);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: var(--radius-sm);
 		font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;

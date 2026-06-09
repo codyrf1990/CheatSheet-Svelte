@@ -66,7 +66,8 @@
 								{#if profileUsers != null}
 									<Tooltip text="Profile users (seats)">
 										<span class="profile-users-badge">
-											{profileUsers} {profileUsers === 1 ? 'user' : 'users'}
+											{profileUsers}
+											{profileUsers === 1 ? 'user' : 'users'}
 										</span>
 									</Tooltip>
 								{/if}

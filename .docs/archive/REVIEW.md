@@ -10,16 +10,19 @@
 ## Phase 1: Import Flow (Highest Impact)
 
 ### ImportLicenseModal — Paste Step
+
 - [x] Expand instructions into numbered steps with context
 - [x] Add "what to expect" note so BDMs know what the import does
 - [x] Improve placeholder text with clearer example
 
 ### ImportLicenseModal — Preview Step
+
 - [x] Rename "Dongle No:" to "License Number" (parser already detects type)
 - [x] Clarify "features found" toggle → "licensed modules found"
 - [x] Review "Will create/update page" info box language — made more conversational
 
 ### ImportLicenseModal — Results Step
+
 - [x] Rename "Bits Selected" → "Modules Selected"
 - [x] Review import success/failure messaging — clear as-is
 
@@ -28,22 +31,28 @@
 ## Phase 2: Modal Cleanliness Pass
 
 ### SalesTaxModal
+
 - [x] Update hardcoded "2025" year — now dynamic via `new Date().getFullYear()`
 
 ### AddSkuModal
+
 - [x] Removed — dead code, nothing referenced it (orphaned after edit mode removal)
 
 ### CompaniesModal
+
 - [x] Reviewed — already clean (search, rename, delete, "Current" badge all clear)
 
 ### CurrentProductsModal
+
 - [x] "SW Bundles" → "SOLIDWORKS Bundles"
 - [x] Tab labels verified (Overview, Milling, Other Modules, Training, Post Processors — all clear)
 
 ### WhatLeftModal (Upgrades)
+
 - [x] Mode indicator clear — title shows "Upgrades — New Sale" or "Upgrades — Maintenance"
 
 ### CompanyPageBar
+
 - [x] Context menu labels verified — Rename, Duplicate, Import License, Delete, Copy Page Name, Copy License Key all clear
 
 ---

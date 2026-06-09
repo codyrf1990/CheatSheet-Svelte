@@ -83,9 +83,8 @@
 					onclick={handleCopy}
 					data-copyable-bit
 					aria-label="Copy {bit}"
-					>{#if justCopied}<span class="copy-check"><Check size={11} strokeWidth={3} /></span>{:else}{#if isCustom}<span
-								class="custom-indicator">+</span
-							>{/if}{bit}{/if}</button
+					>{#if justCopied}<span class="copy-check"><Check size={11} strokeWidth={3} /></span
+						>{:else}{#if isCustom}<span class="custom-indicator">+</span>{/if}{bit}{/if}</button
 				>
 			</div>
 		</Tooltip>
@@ -113,7 +112,13 @@
 		</div>
 	{/if}
 	{#if removeMode && isCustom}
-		<button type="button" class="bit-remove-btn" onclick={handleRemove} aria-label="Remove {bit}" use:tooltip={'Remove ' + bit}>
+		<button
+			type="button"
+			class="bit-remove-btn"
+			onclick={handleRemove}
+			aria-label="Remove {bit}"
+			use:tooltip={'Remove ' + bit}
+		>
 			<X size={11} strokeWidth={2.5} />
 		</button>
 	{/if}
@@ -159,7 +164,7 @@
 		cursor: not-allowed;
 	}
 
-.checkbox-wrapper {
+	.checkbox-wrapper {
 		display: flex;
 		align-items: center;
 	}

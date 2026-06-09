@@ -199,7 +199,12 @@
 	);
 </script>
 
-<Modal {open} {onClose} title="Upgrades — {skuMode === 'ms' ? 'Maintenance' : 'New Sale'}" size="wide">
+<Modal
+	{open}
+	{onClose}
+	title="Upgrades — {skuMode === 'ms' ? 'Maintenance' : 'New Sale'}"
+	size="wide"
+>
 	{#if upgradeGroups.length === 0}
 		<div class="empty-state">
 			<Sparkles size={36} strokeWidth={1.5} class="empty-icon" />
@@ -415,11 +420,7 @@
 		justify-content: space-between;
 		padding: 0.6rem 0.85rem;
 		margin-top: 0.65rem;
-		background: linear-gradient(
-			135deg,
-			rgba(212, 175, 55, 0.14) 0%,
-			rgba(212, 175, 55, 0.05) 100%
-		);
+		background: linear-gradient(135deg, rgba(212, 175, 55, 0.14) 0%, rgba(212, 175, 55, 0.05) 100%);
 		border: 1px solid var(--gold-a30);
 		border-radius: var(--radius-sm);
 		box-shadow:
@@ -444,5 +445,4 @@
 		letter-spacing: -0.01em;
 		text-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
 	}
-
 </style>

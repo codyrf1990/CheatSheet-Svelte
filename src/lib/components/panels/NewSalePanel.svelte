@@ -439,11 +439,7 @@
 		justify-content: space-between;
 		padding: 0.45rem 0.55rem;
 		margin-top: var(--space-1);
-		background: linear-gradient(
-			135deg,
-			rgba(212, 175, 55, 0.12) 0%,
-			rgba(212, 175, 55, 0.04) 100%
-		);
+		background: linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(212, 175, 55, 0.04) 100%);
 		border: 1px solid var(--gold-a30);
 		border-radius: var(--radius-sm);
 		box-shadow:
@@ -470,11 +466,7 @@
 
 	.total-row--account {
 		margin-top: var(--space-0-5);
-		background: linear-gradient(
-			135deg,
-			rgba(96, 165, 250, 0.1) 0%,
-			rgba(96, 165, 250, 0.03) 100%
-		);
+		background: linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(96, 165, 250, 0.03) 100%);
 		border-color: rgba(96, 165, 250, 0.28);
 		box-shadow:
 			0 0 14px rgba(96, 165, 250, 0.1),

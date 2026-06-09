@@ -184,8 +184,7 @@ function mergeCompanyData(local: LocalData, cloud: LocalData): LocalData {
 				cc.solidworksLicenses
 			);
 			// Preserve whichever side has the more recent SW tab label override
-			const labelWinnerSide =
-				(lc.updatedAt ?? 0) >= (cc.updatedAt ?? 0) ? lc : cc;
+			const labelWinnerSide = (lc.updatedAt ?? 0) >= (cc.updatedAt ?? 0) ? lc : cc;
 			if (labelWinnerSide.swTabLabelOverride) {
 				winner.swTabLabelOverride = labelWinnerSide.swTabLabelOverride;
 			} else {

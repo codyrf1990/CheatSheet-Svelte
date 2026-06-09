@@ -57,7 +57,6 @@
 	function isCustomItem(panelId: string, item: string): boolean {
 		return userPrefsStore.isCustomPanelItem(panelId, item);
 	}
-
 </script>
 
 <section class="maintenance-panel tile" translate="no">

@@ -261,9 +261,7 @@
 	/>
 
 	<!-- Company & Pages Bar -->
-	<CompanyPageBar
-		onViewAllCompanies={() => (showCompaniesModal = true)}
-	/>
+	<CompanyPageBar onViewAllCompanies={() => (showCompaniesModal = true)} />
 
 	<!-- Main Content Area -->
 	<div class="content-area">
@@ -284,10 +282,7 @@
 				<!-- SKU panel under table -->
 				<div class="sku-under-wrapper tile">
 					<div class="sku-collapse-bar tile-header">
-						<span
-							class="sku-panel-label"
-							class:sku-panel-label-ms={effectiveSkuTabMode === 'ms'}
-						>
+						<span class="sku-panel-label" class:sku-panel-label-ms={effectiveSkuTabMode === 'ms'}>
 							{effectiveSkuTabMode === 'bdm' ? 'New Sale SKUs' : 'Maintenance SKUs'}
 						</span>
 						<div class="mode-pill" role="group" aria-label="View mode">
@@ -314,11 +309,7 @@
 							onclick={() => (skuPanelOpen = !skuPanelOpen)}
 							aria-label={skuPanelOpen ? 'Collapse SKU panel' : 'Expand SKU panel'}
 						>
-							<span
-								class="collapse-chevron"
-								class:open={skuPanelOpen}
-								aria-hidden="true"
-							>
+							<span class="collapse-chevron" class:open={skuPanelOpen} aria-hidden="true">
 								<ChevronDown size={14} strokeWidth={2.25} />
 							</span>
 						</button>

@@ -17,12 +17,7 @@
 		disabledReason?: string;
 	}
 
-	let {
-		group,
-		packageCode,
-		disabled = false,
-		disabledReason = ''
-	}: Props = $props();
+	let { group, packageCode, disabled = false, disabledReason = '' }: Props = $props();
 
 	// Local state for expand/collapse
 	let expanded = $state(true);
@@ -74,7 +69,6 @@
 	async function handleLabelCopy() {
 		await copyToClipboard(group.label);
 	}
-
 </script>
 
 <div
@@ -264,7 +258,7 @@
 		min-height: 24px;
 	}
 
-/* Narrow viewport compaction */
+	/* Narrow viewport compaction */
 	@media (max-width: 768px) {
 		.master-header {
 			padding: var(--space-0-5) var(--space-1);

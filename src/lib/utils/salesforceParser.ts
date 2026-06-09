@@ -110,7 +110,7 @@ export function validateSalesforceText(text: string): ValidationResult {
 	if (isProfileText && text.includes('Show Section - InformationInformation')) {
 		return {
 			valid: false,
-			error: 'Make sure the Information section isn\'t collapsed and re-copy.'
+			error: "Make sure the Information section isn't collapsed and re-copy."
 		};
 	}
 
@@ -218,7 +218,16 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 	// Any other value indicates parse error - default to blank
 	const sim5xLevelRaw =
 		extractField(text, 'Sim 5x Level') || extractField(text, 'Sim5xLevel') || '';
-	const validSim5xLevels = ['', '3 axis', '3/4 axis', '1', '3axis', '3/4axis', '3-axis', '3/4-axis'];
+	const validSim5xLevels = [
+		'',
+		'3 axis',
+		'3/4 axis',
+		'1',
+		'3axis',
+		'3/4axis',
+		'3-axis',
+		'3/4-axis'
+	];
 	const sim5xLevel = validSim5xLevels.includes(sim5xLevelRaw.toLowerCase()) ? sim5xLevelRaw : ''; // Invalid value = treat as blank
 
 	// Determine if this is a network license
@@ -369,6 +378,24 @@ export function parseSalesforceText(text: string): ParseResult {
 	// Parse features
 	const features = parseCheckedFeatures(text);
 	const notCheckedFeatures = parseNotCheckedFeatures(text);
+
+	// Drift detection: these patterns suggest Salesforce changed its page format.
+	// Warnings only — parsing proceeds with whatever was extracted.
+	if (features.length === 0 && notCheckedFeatures.length === 0) {
+		console.warn(
+			'[SalesforceParser] Text validated as a Salesforce page but zero features matched — page format may have changed'
+		);
+	}
+	if (!headerInfo.customer) {
+		console.warn(
+			'[SalesforceParser] Customer field came back empty — header field layout may have changed'
+		);
+	}
+	if (!headerInfo.dongleNo && !headerInfo.isProfile) {
+		console.warn(
+			'[SalesforceParser] Dongle No. came back empty on a non-profile page — header field layout may have changed'
+		);
+	}
 
 	// Build complete LicenseInfo
 	const license: LicenseInfo = {

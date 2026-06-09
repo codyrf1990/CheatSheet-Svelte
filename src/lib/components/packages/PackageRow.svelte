@@ -162,7 +162,6 @@
 			setTimeout(() => (maintCopied = false), 1500);
 		}
 	}
-
 </script>
 
 <tr class="package-row" data-package={pkg.code} translate="no">
@@ -180,8 +179,14 @@
 				</span>
 			{/if}
 			<div>
-				<button type="button" class="code-btn package-code" onclick={handleCodeCopy} use:tooltip={'Click to copy ' + pkg.code}>
-					{#if codeCopied}<span class="copy-check"><Check size={13} strokeWidth={3} /></span>{:else}{pkg.code}{/if}
+				<button
+					type="button"
+					class="code-btn package-code"
+					onclick={handleCodeCopy}
+					use:tooltip={'Click to copy ' + pkg.code}
+				>
+					{#if codeCopied}<span class="copy-check"><Check size={13} strokeWidth={3} /></span
+						>{:else}{pkg.code}{/if}
 				</button>
 				<span class="package-description">{pkg.description}</span>
 			</div>
@@ -200,8 +205,14 @@
 					/>
 				</span>
 			{/if}
-			<button type="button" class="code-btn maint-code" onclick={handleMaintCopy} use:tooltip={'Click to copy ' + pkg.maintenance}>
-				{#if maintCopied}<span class="copy-check"><Check size={13} strokeWidth={3} /></span>{:else}{pkg.maintenance}{/if}
+			<button
+				type="button"
+				class="code-btn maint-code"
+				onclick={handleMaintCopy}
+				use:tooltip={'Click to copy ' + pkg.maintenance}
+			>
+				{#if maintCopied}<span class="copy-check"><Check size={13} strokeWidth={3} /></span
+					>{:else}{pkg.maintenance}{/if}
 			</button>
 		</div>
 	</td>
@@ -245,10 +256,7 @@
 					</div>
 				{/if}
 				{#if hasLooseBits}
-					<div
-						class="loose-bits-section"
-						class:has-groups={hasGroups}
-					>
+					<div class="loose-bits-section" class:has-groups={hasGroups}>
 						<ul class="loose-bits">
 							{#each allLooseBits as bit (bit)}
 								<LooseBit
@@ -437,7 +445,7 @@
 		border-top: 1px solid var(--chip-border-color);
 	}
 
-.loose-bits {
+	.loose-bits {
 		list-style: none;
 		margin: 0;
 		padding: 0;

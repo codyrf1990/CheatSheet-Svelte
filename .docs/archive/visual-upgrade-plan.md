@@ -20,18 +20,18 @@ A phased, screen-by-screen polish pass. **Functionality is preserved exactly** �
 
 ## Approach (recommended phasing)
 
-| Phase | Surface | Why this order |
-|-|-|-|
-| 1 | Login screen | First impression. Self-contained, low risk. |
-| 2 | Boot/loading skeleton | Pairs with Phase 1 — same entry experience. |
-| 3 | Background system + global tokens | Foundation everything else sits on. Refine once, benefit everywhere. |
-| 4 | Header (logo, nav, user) | Persistent on every screen. |
-| 5 | Company/Page bar | Persistent. Dense interaction zone. |
-| 6 | Package table (Master/Sub/Loose bits) | Core surface. Highest visual weight. |
-| 7 | SKU + Quote panels (BDM / Maintenance / NewSale) | Secondary read surface. |
-| 8 | Calculator | Discrete widget. |
-| 9 | Modals (Sales Tax, Current Products, Companies, What's Left, Import License) | Final polish for overlay surfaces. |
-| 10 | Micro-interactions sweep (toasts, tooltips, focus rings, skeletons, empty states) | Final unifying pass. |
+| Phase | Surface                                                                           | Why this order                                                       |
+| ----- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 1     | Login screen                                                                      | First impression. Self-contained, low risk.                          |
+| 2     | Boot/loading skeleton                                                             | Pairs with Phase 1 — same entry experience.                          |
+| 3     | Background system + global tokens                                                 | Foundation everything else sits on. Refine once, benefit everywhere. |
+| 4     | Header (logo, nav, user)                                                          | Persistent on every screen.                                          |
+| 5     | Company/Page bar                                                                  | Persistent. Dense interaction zone.                                  |
+| 6     | Package table (Master/Sub/Loose bits)                                             | Core surface. Highest visual weight.                                 |
+| 7     | SKU + Quote panels (BDM / Maintenance / NewSale)                                  | Secondary read surface.                                              |
+| 8     | Calculator                                                                        | Discrete widget.                                                     |
+| 9     | Modals (Sales Tax, Current Products, Companies, What's Left, Import License)      | Final polish for overlay surfaces.                                   |
+| 10    | Micro-interactions sweep (toasts, tooltips, focus rings, skeletons, empty states) | Final unifying pass.                                                 |
 
 Each phase: audit details (below) → make changes → I demo → you smoke test in browser → commit phase.
 
@@ -57,6 +57,7 @@ Each phase: audit details (below) → make changes → I demo → you smoke test
 - Mount-in animation (fade + lift) on logo, card, bottom brand
 
 ### Strengths
+
 - Lots of layered atmosphere already
 - Good motion vocabulary (mount, breathe, shake, success pop)
 - Accessible (autofocus, autocomplete, aria-labels, focus rings)
@@ -85,6 +86,7 @@ Each phase: audit details (below) → make changes → I demo → you smoke test
 **File:** `src/routes/+layout.svelte` (`.skeleton-card`, `.boot-error-card`)
 
 ### What's there now
+
 - Centered glass card with brand wordmark + skeleton placeholders for avatar, title, subtitle, input, button
 - Boot error card with "Try again" gold button
 
@@ -103,6 +105,7 @@ Each phase: audit details (below) → make changes → I demo → you smoke test
 **Files:** `src/app.css`, `src/routes/+layout.svelte` (`.video-bg`)
 
 ### What's there now
+
 - `Particle.mp4` looping muted video, fixed full-bleed at `z-index: -10`
 - Linear-gradient `::after` overlay for legibility (40% → 20% → 50%)
 - Tokens for glass, tile, modal, chip surfaces; gold/red brand; semantic colors; spacing & type scales
@@ -124,12 +127,14 @@ Each phase: audit details (below) → make changes → I demo → you smoke test
 **File:** `src/lib/components/layout/Header.svelte`
 
 ### What's there now
+
 - SolidCAM logo (left)
 - 5 nav links with colored icons (Main Support, Ticket Site, University, Academy, ChatBot)
 - Operations + CF Tools dropdown buttons
 - User avatar with sync status + logout
 
 ### Polish checklist
+
 - [ ] **Visual density** — header has many entry points. Group: brand | external links | tools | user. Add subtle dividers between groups.
 - [ ] **Icon set** — mixed colors per link is loud. Try a single muted icon style with a colored dot indicator instead.
 - [ ] **Dropdown buttons** — `Operations` and `CF Tools` are plain text. Add a chevron + treat them as primary tool entries, distinct from external links.
@@ -145,6 +150,7 @@ Each phase: audit details (below) → make changes → I demo → you smoke test
 **File:** `src/lib/components/layout/CompanyPageBar.svelte` (~50+ lines, dense)
 
 ### What's there now
+
 - Current company display with dropdown (search, recents, all companies, favorite)
 - Page tabs (rename, delete, copy)
 - Cluster buttons: Add / Remove / Order / Reset (gold/red gradients in app.css)
@@ -152,6 +158,7 @@ Each phase: audit details (below) → make changes → I demo → you smoke test
 - New company / new page dialogs
 
 ### Polish checklist
+
 - [ ] **Cluster button visual hierarchy** — currently active states use gold/red gradients. Verify the inactive states read as buttons, not chips.
 - [ ] **Tab affordance** — page tabs need a clearer "active" indicator (underline, glow, or filled bg) and a clear hover state for inactive ones.
 - [ ] **Dropdown polish** — consider a search-with-instant-filter pattern with a "Recent" pinned section.
@@ -166,6 +173,7 @@ Each phase: audit details (below) → make changes → I demo → you smoke test
 **Files:** `PackageTable.svelte`, `MasterBit.svelte`, `SubBit.svelte`, `LooseBit.svelte`, `PackageRow.svelte`
 
 ### Polish checklist (preview)
+
 - [ ] **Table grain** — define a single rhythm: row height, sub-row indent, divider color, hover/selected/disabled states.
 - [ ] **Bit selection visual language** — make selected/unselected/locked obvious from 4 ft away.
 - [ ] **Header row** — gold accent is good; verify contrast at narrow viewport.
@@ -180,6 +188,7 @@ Each phase: audit details (below) → make changes → I demo → you smoke test
 **Files:** `BDMPanel.svelte`, `MaintenancePanel.svelte`, `NewSalePanel.svelte`, `Panel.svelte`, `PanelItem.svelte`, `EditablePanel.svelte`
 
 ### Polish checklist (preview)
+
 - [ ] **Mode pill (BDM | MS)** — gold vs blue is good. Make the transition between modes smoother (cross-fade not snap).
 - [ ] **Currency rendering** — confirm `font-mono` + `tabular-nums` is applied everywhere money appears.
 - [ ] **Editable cells** — clear hover affordance, clean save/cancel pattern.
@@ -193,6 +202,7 @@ Each phase: audit details (below) → make changes → I demo → you smoke test
 **File:** `src/lib/components/calculator/Calculator.svelte`
 
 ### Polish checklist (preview)
+
 - [ ] **Tile rhythm** — match the rest of the sidebar tiles in spacing and header style.
 - [ ] **Input ergonomics** — currency input with live formatting.
 - [ ] **Result clarity** — answer should feel like the destination, not just another row.
@@ -206,6 +216,7 @@ Each phase: audit details (below) → make changes → I demo → you smoke test
 **Files:** `Modal.svelte` (base), `SalesTaxModal.svelte`, `CurrentProductsModal.svelte`, `CompaniesModal.svelte`, `WhatLeftModal.svelte`, `ImportLicenseModal.svelte`
 
 ### Polish checklist (preview)
+
 - [ ] **Backdrop** — single shared backdrop style (blur + dim).
 - [ ] **Title bar** — single icon + title pattern across all modals.
 - [ ] **Footer actions** — primary/secondary button placement consistent (primary right).
@@ -221,6 +232,7 @@ Each phase: audit details (below) → make changes → I demo → you smoke test
 **Files:** `Toast`, `Tooltip`, `Skeleton`, `Checkbox`, `CollapseWrapper`, `Button`, `Input` (+ focus rings everywhere)
 
 ### Polish checklist (preview)
+
 - [ ] **Toast** — entrance, stack behavior, dismiss timing, type colors.
 - [ ] **Tooltip** — singleton portal good; verify positioning at viewport edges.
 - [ ] **Skeleton** — single shimmer style across the app.
@@ -235,12 +247,14 @@ Each phase: audit details (below) → make changes → I demo → you smoke test
 ## What I'll touch (and won't)
 
 ✅ I will:
+
 - Edit visual styling (CSS, classes, motion, layout)
 - Refactor large component files into focused pieces if it helps readability — without changing behavior
 - Consolidate design tokens in `app.css`
 - Tighten copy in headings, hints, errors
 
 🚫 I won't (without explicit go-ahead):
+
 - Change any data model, store API, or sync logic
 - Touch the SolidCAM v1 site (`main` branch)
 - Add new features or remove existing ones

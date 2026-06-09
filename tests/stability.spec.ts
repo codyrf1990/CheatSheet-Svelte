@@ -122,8 +122,6 @@ test.describe('Local-first sync fallback', () => {
 
 		// Sync status should show error/offline indicator (tooltip trigger with warning/error icon)
 		// Tooltips are portaled to body on hover, so check the status dot has a warning color
-		await expect(
-			page.locator('.status-dot').first()
-		).toBeVisible({ timeout: 5_000 });
+		await expect(page.locator('.status-dot').first()).toBeVisible({ timeout: 5_000 });
 	});
 });
