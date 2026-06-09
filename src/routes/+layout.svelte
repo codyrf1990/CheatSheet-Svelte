@@ -72,6 +72,12 @@
 	>
 		<source src="/video/Particle.mp4" type="video/mp4" />
 	</video>
+
+	<!-- Aurora re-light: huge drifting color fields blended over the video.
+	     screen blend keeps the particles visible underneath. -->
+	<div class="aurora aurora-red"></div>
+	<div class="aurora aurora-gold"></div>
+	<div class="aurora aurora-ember"></div>
 </div>
 
 <!-- Content Gate -->
@@ -146,6 +152,59 @@
 			rgba(10, 10, 15, 0.65) 100%
 		);
 		pointer-events: none;
+	}
+
+	/* Aurora color fields — transform-only animation, GPU friendly */
+	.aurora {
+		position: absolute;
+		border-radius: 50%;
+		filter: blur(90px);
+		mix-blend-mode: screen;
+		pointer-events: none;
+		will-change: transform;
+	}
+
+	.aurora-red {
+		width: 62vw;
+		height: 62vh;
+		top: -18%;
+		left: -12%;
+		background: radial-gradient(circle, rgba(200, 16, 46, 0.5) 0%, transparent 65%);
+		animation: auroraDrift 38s ease-in-out infinite;
+	}
+
+	.aurora-gold {
+		width: 52vw;
+		height: 58vh;
+		top: 28%;
+		right: -14%;
+		background: radial-gradient(circle, rgba(212, 175, 55, 0.34) 0%, transparent 65%);
+		animation: auroraDrift 46s ease-in-out infinite reverse;
+	}
+
+	.aurora-ember {
+		width: 46vw;
+		height: 42vh;
+		bottom: -20%;
+		left: 22%;
+		background: radial-gradient(circle, rgba(170, 30, 44, 0.42) 0%, transparent 65%);
+		animation: auroraDrift 52s ease-in-out infinite 8s;
+	}
+
+	@keyframes auroraDrift {
+		0%,
+		100% {
+			transform: translate(0, 0) scale(1);
+		}
+		30% {
+			transform: translate(6vw, 4vh) scale(1.12);
+		}
+		60% {
+			transform: translate(-4vw, -3vh) scale(0.94);
+		}
+		80% {
+			transform: translate(3vw, -5vh) scale(1.06);
+		}
 	}
 
 	/* Skip link - visible only when focused */

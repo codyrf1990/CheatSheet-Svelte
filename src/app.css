@@ -108,15 +108,16 @@
 	--shadow-glow-red: 0 0 20px rgba(200, 16, 46, 0.15);
 	--shadow-glow-gold: 0 0 20px rgba(212, 175, 55, 0.15);
 
-	/* Tile Surfaces */
-	--tile-bg: linear-gradient(135deg, rgba(26, 26, 30, 0.95) 0%, rgba(10, 10, 12, 0.92) 100%);
-	--tile-border: 1px solid rgba(255, 255, 255, 0.05);
+	/* Tile Surfaces — v2 re-light: tiles sit visibly ABOVE the background,
+	   with a brighter top edge catching the key light */
+	--tile-bg: linear-gradient(160deg, rgba(40, 40, 48, 0.92) 0%, rgba(20, 20, 26, 0.9) 100%);
+	--tile-border: 1px solid rgba(255, 255, 255, 0.1);
 	--tile-shadow:
-		0 22px 44px rgba(0, 0, 0, 0.42), 0 8px 18px rgba(0, 0, 0, 0.22),
-		inset 0 1px 0 rgba(255, 255, 255, 0.04);
+		0 22px 44px rgba(0, 0, 0, 0.48), 0 8px 18px rgba(0, 0, 0, 0.26), 0 0 60px -30px var(--gold-a20),
+		inset 0 1px 0 rgba(255, 255, 255, 0.09), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 	--tile-radius: var(--radius-lg);
-	--tile-header-bg: rgba(255, 255, 255, 0.035);
-	--tile-header-border: 1px solid rgba(255, 255, 255, 0.07);
+	--tile-header-bg: rgba(255, 255, 255, 0.05);
+	--tile-header-border: 1px solid rgba(255, 255, 255, 0.09);
 	--tile-title-size: var(--text-sm);
 	--tile-title-weight: 600;
 	--tile-title-tracking: 0.08em;

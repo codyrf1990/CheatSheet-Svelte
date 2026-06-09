@@ -226,6 +226,40 @@
 		opacity: 0.35;
 	}
 
+	/* Brand strip — glowing SolidCAM-red edge along the bottom of the header */
+	:global(.header)::after {
+		content: '';
+		position: absolute;
+		left: 4%;
+		right: 4%;
+		bottom: -2px;
+		height: 2px;
+		border-radius: 2px;
+		background: linear-gradient(
+			90deg,
+			transparent 0%,
+			rgba(200, 16, 46, 0.7) 18%,
+			rgba(255, 80, 100, 0.9) 50%,
+			rgba(200, 16, 46, 0.7) 82%,
+			transparent 100%
+		);
+		box-shadow:
+			0 0 14px rgba(200, 16, 46, 0.55),
+			0 4px 24px rgba(200, 16, 46, 0.3);
+		pointer-events: none;
+		animation: brandStripPulse 5s ease-in-out infinite;
+	}
+
+	@keyframes brandStripPulse {
+		0%,
+		100% {
+			opacity: 0.75;
+		}
+		50% {
+			opacity: 1;
+		}
+	}
+
 	@keyframes borderShimmer {
 		0% {
 			background-position: 200% 0;
@@ -257,9 +291,9 @@
 	.title-glow {
 		position: absolute;
 		inset: -20px -40px;
-		background: radial-gradient(ellipse at center, var(--gold-a10) 0%, transparent 70%);
+		background: radial-gradient(ellipse at center, var(--gold-a20) 0%, transparent 70%);
 		pointer-events: none;
-		opacity: 0.6;
+		opacity: 0.8;
 	}
 
 	.header-title {
@@ -272,12 +306,15 @@
 		background: linear-gradient(
 			var(--header-title-angle, 135deg),
 			#ffffff 0%,
-			#e8d59a 50%,
+			#ffd76a 42%,
+			#d4af37 52%,
+			#ffd76a 62%,
 			#ffffff 100%
 		);
 		-webkit-background-clip: text;
 		background-clip: text;
 		-webkit-text-fill-color: transparent;
+		filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.25)) drop-shadow(0 1px 0 rgba(0, 0, 0, 0.5));
 		position: relative;
 		z-index: 1;
 		animation: headerTitleSheen 10s ease-in-out infinite;
@@ -382,7 +419,29 @@
 		transform: translateX(0);
 	}
 
-	/* Per-link colour — icon at rest, full link on hover */
+	/* Per-link colour — backlit at rest (tinted glass + colored under-edge),
+	   full glow on hover */
+	.nav-red {
+		background: rgba(200, 16, 46, 0.08);
+		border-color: rgba(200, 16, 46, 0.18);
+		box-shadow: inset 0 -1px 0 rgba(200, 16, 46, 0.3);
+	}
+	.nav-purple {
+		background: rgba(147, 51, 234, 0.08);
+		border-color: rgba(147, 51, 234, 0.18);
+		box-shadow: inset 0 -1px 0 rgba(147, 51, 234, 0.3);
+	}
+	.nav-blue {
+		background: rgba(59, 130, 246, 0.08);
+		border-color: rgba(59, 130, 246, 0.18);
+		box-shadow: inset 0 -1px 0 rgba(59, 130, 246, 0.3);
+	}
+	.nav-orange {
+		background: rgba(249, 115, 22, 0.08);
+		border-color: rgba(249, 115, 22, 0.18);
+		box-shadow: inset 0 -1px 0 rgba(249, 115, 22, 0.3);
+	}
+
 	.nav-red .nav-icon {
 		color: var(--accent-rose);
 	}

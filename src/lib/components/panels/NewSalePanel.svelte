@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { Tween } from 'svelte/motion';
+	import { cubicOut } from 'svelte/easing';
+	import { fly } from 'svelte/transition';
 	import { packagesStore } from '$stores/packages.svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { Tooltip } from '$components/ui';
@@ -149,6 +152,26 @@
 		return '$' + price.toLocaleString('en-US');
 	}
 
+	// Totals count up to their new value instead of jumping
+	const totalTween = Tween.of(() => total, { duration: 550, easing: cubicOut });
+	const maintTween = Tween.of(() => maintTotal, { duration: 550, easing: cubicOut });
+	const accountTween = Tween.of(() => accountTotal, { duration: 550, easing: cubicOut });
+
+	// Gold pulse on the total row whenever the amount changes
+	let totalPulse = $state(false);
+	let pulseTimer: ReturnType<typeof setTimeout> | null = null;
+	$effect(() => {
+		// Track both modes' totals so either change triggers the pulse
+		void total;
+		void maintTotal;
+		totalPulse = true;
+		if (pulseTimer) clearTimeout(pulseTimer);
+		pulseTimer = setTimeout(() => (totalPulse = false), 650);
+		return () => {
+			if (pulseTimer) clearTimeout(pulseTimer);
+		};
+	});
+
 	async function handleCopySku(sku: string) {
 		await copyToClipboard(sku, `Copied ${sku}`);
 	}
@@ -166,7 +189,11 @@
 						{@const savings = line.subEntries
 							? line.subEntries.reduce((s, e) => s + e.maintPrice, 0) - line.entry.maintPrice
 							: 0}
-						<li class="sku-row" class:has-sub={line.subEntries?.length}>
+						<li
+							class="sku-row"
+							class:has-sub={line.subEntries?.length}
+							in:fly={{ x: 14, duration: 250, easing: cubicOut }}
+						>
 							<div class="sku-main-row">
 								<Tooltip text="Click to copy {line.entry.maintSku}">
 									<button
@@ -206,14 +233,16 @@
 						</li>
 					{/each}
 				</ul>
-				<div class="total-row">
+				<div class="total-row" class:total-pulse={totalPulse}>
 					<span class="total-label">Maint Total</span>
-					<span class="total-price">{formatPrice(maintTotal)}</span>
+					<span class="total-price">{formatPrice(Math.round(maintTween.current))}</span>
 				</div>
 				{#if accountTotal > 0}
 					<div class="total-row total-row--account">
 						<span class="total-label total-label--account">Account Total</span>
-						<span class="total-price total-price--account">{formatPrice(accountTotal)}</span>
+						<span class="total-price total-price--account"
+							>{formatPrice(Math.round(accountTween.current))}</span
+						>
 					</div>
 				{/if}
 			{/if}
@@ -227,7 +256,11 @@
 						{@const savings = line.subEntries
 							? line.subEntries.reduce((s, e) => s + e.price, 0) - line.entry.price
 							: 0}
-						<li class="sku-row" class:has-sub={line.subEntries?.length}>
+						<li
+							class="sku-row"
+							class:has-sub={line.subEntries?.length}
+							in:fly={{ x: 14, duration: 250, easing: cubicOut }}
+						>
 							<div class="sku-main-row">
 								<Tooltip text="Click to copy {line.entry.sku}">
 									<button
@@ -267,9 +300,9 @@
 						</li>
 					{/each}
 				</ul>
-				<div class="total-row">
+				<div class="total-row" class:total-pulse={totalPulse}>
 					<span class="total-label">Total</span>
-					<span class="total-price">{formatPrice(total)}</span>
+					<span class="total-price">{formatPrice(Math.round(totalTween.current))}</span>
 				</div>
 			{/if}
 		{/if}
@@ -439,12 +472,37 @@
 		justify-content: space-between;
 		padding: 0.45rem 0.55rem;
 		margin-top: var(--space-1);
-		background: linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(212, 175, 55, 0.04) 100%);
+		background: linear-gradient(135deg, rgba(212, 175, 55, 0.16) 0%, rgba(212, 175, 55, 0.05) 100%);
 		border: 1px solid var(--gold-a30);
 		border-radius: var(--radius-sm);
 		box-shadow:
-			0 0 16px rgba(212, 175, 55, 0.12),
-			inset 0 1px 0 rgba(255, 255, 255, 0.05);
+			0 0 20px rgba(212, 175, 55, 0.16),
+			inset 0 1px 0 rgba(255, 255, 255, 0.07);
+		transition: box-shadow 300ms var(--ease-out-expo);
+	}
+
+	/* Money moment — the row flares gold when the amount changes */
+	.total-row.total-pulse {
+		animation: totalFlare 650ms var(--ease-out-expo);
+	}
+
+	@keyframes totalFlare {
+		0% {
+			box-shadow:
+				0 0 20px rgba(212, 175, 55, 0.16),
+				inset 0 1px 0 rgba(255, 255, 255, 0.07);
+		}
+		35% {
+			box-shadow:
+				0 0 34px rgba(212, 175, 55, 0.5),
+				0 0 8px rgba(212, 175, 55, 0.4),
+				inset 0 1px 0 rgba(255, 255, 255, 0.14);
+		}
+		100% {
+			box-shadow:
+				0 0 20px rgba(212, 175, 55, 0.16),
+				inset 0 1px 0 rgba(255, 255, 255, 0.07);
+		}
 	}
 
 	.total-label {
@@ -457,11 +515,14 @@
 
 	.total-price {
 		font-family: 'JetBrains Mono', monospace;
-		font-size: var(--text-base);
+		font-size: var(--text-xl);
 		font-weight: 700;
+		font-variant-numeric: tabular-nums;
 		color: var(--color-solidcam-gold, #d4af37);
 		letter-spacing: -0.01em;
-		text-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+		text-shadow:
+			0 0 18px rgba(212, 175, 55, 0.45),
+			0 0 6px rgba(212, 175, 55, 0.25);
 	}
 
 	.total-row--account {
