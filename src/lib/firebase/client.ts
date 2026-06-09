@@ -25,14 +25,41 @@ function getFirebaseConfig() {
 	};
 }
 
+const REQUIRED_ENV_VARS = {
+	apiKey: 'VITE_FIREBASE_API_KEY',
+	authDomain: 'VITE_FIREBASE_AUTH_DOMAIN',
+	projectId: 'VITE_FIREBASE_PROJECT_ID',
+	appId: 'VITE_FIREBASE_APP_ID'
+} as const;
+
+function getMissingConfigVars(): string[] {
+	const config = getFirebaseConfig();
+	return (Object.keys(REQUIRED_ENV_VARS) as Array<keyof typeof REQUIRED_ENV_VARS>)
+		.filter((key) => !config[key])
+		.map((key) => REQUIRED_ENV_VARS[key]);
+}
+
+let configErrorLogged = false;
+
 /**
  * Get Firebase app instance (lazy initialization)
- * Returns null during SSR
+ * Returns null during SSR or when required env vars are missing
  */
 export function getApp(): FirebaseApp | null {
 	if (!browser) return null;
 
 	if (!app) {
+		const missing = getMissingConfigVars();
+		if (missing.length > 0) {
+			if (!configErrorLogged) {
+				configErrorLogged = true;
+				console.error(
+					`[Firebase] Missing or empty env vars: ${missing.join(', ')} — cloud sync disabled, running in local-only mode`
+				);
+			}
+			return null;
+		}
+
 		const existingApps = getApps();
 		if (existingApps.length > 0) {
 			app = existingApps[0];
@@ -65,6 +92,5 @@ export function getDb(): Firestore | null {
  * Check if Firebase is configured
  */
 export function isFirebaseConfigured(): boolean {
-	const config = getFirebaseConfig();
-	return !!(config.apiKey && config.projectId);
+	return getMissingConfigVars().length === 0;
 }

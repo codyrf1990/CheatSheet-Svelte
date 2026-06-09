@@ -23,7 +23,10 @@ export interface SyncPayload {
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 let pendingData: SyncPayload | null = null;
 let pendingUsername: string | null = null;
-let pendingCallback: ((success: boolean, error?: Error) => void) | null = null;
+let pendingCallbacks: Array<(success: boolean, error?: Error) => void> = [];
+
+// Serializes all writes so a flush can never interleave with an in-flight debounced write
+let writeChain: Promise<unknown> = Promise.resolve();
 
 /**
  * Normalize username for document ID
@@ -114,6 +117,42 @@ export async function saveUserDataImmediate(
 }
 
 /**
+ * Dispatch the pending save onto the write chain.
+ * Clears pending state synchronously (no double-fire) and notifies every queued callback.
+ */
+function dispatchPending(): Promise<boolean> {
+	if (!pendingUsername || !pendingData) {
+		return Promise.resolve(true);
+	}
+
+	if (saveTimeout) {
+		clearTimeout(saveTimeout);
+		saveTimeout = null;
+	}
+
+	const dataToSave = pendingData;
+	const usernameToSave = pendingUsername;
+	const callbacks = pendingCallbacks;
+
+	pendingData = null;
+	pendingUsername = null;
+	pendingCallbacks = [];
+
+	const result = writeChain.then(async () => {
+		try {
+			const success = await saveUserDataImmediate(usernameToSave, dataToSave);
+			for (const cb of callbacks) cb(success);
+			return success;
+		} catch (err) {
+			for (const cb of callbacks) cb(false, err as Error);
+			return false;
+		}
+	});
+	writeChain = result;
+	return result;
+}
+
+/**
  * Queue a save operation (debounced)
  * Multiple calls within DEBOUNCE_MS will be merged into one write.
  */
@@ -122,36 +161,33 @@ export function queueSave(
 	payload: SyncPayload,
 	onComplete?: (success: boolean, error?: Error) => void
 ): void {
-	// Store latest data and callback
+	// A pending save for a different user must not be dropped — write it out first
+	if (pendingUsername !== null && pendingUsername !== username) {
+		void dispatchPending();
+	}
+
+	// Each payload is a full snapshot, so last-write-wins — but userPrefs is optional,
+	// so carry it forward if the newer snapshot omits what an earlier one included
+	if (pendingData?.userPrefs && !payload.userPrefs) {
+		payload = {
+			...payload,
+			userPrefs: pendingData.userPrefs,
+			userPrefsUpdatedAt: pendingData.userPrefsUpdatedAt
+		};
+	}
+
 	pendingData = payload;
 	pendingUsername = username;
-	pendingCallback = onComplete ?? null;
+	if (onComplete) {
+		pendingCallbacks.push(onComplete);
+	}
 
-	// Clear existing timeout
 	if (saveTimeout) {
 		clearTimeout(saveTimeout);
 	}
-
-	// Set new timeout
-	saveTimeout = setTimeout(async () => {
-		if (!pendingUsername || !pendingData) return;
-
-		const dataToSave = pendingData;
-		const usernameToSave = pendingUsername;
-		const cb = pendingCallback;
-
-		// Clear pending state
-		pendingData = null;
-		pendingUsername = null;
-		pendingCallback = null;
+	saveTimeout = setTimeout(() => {
 		saveTimeout = null;
-
-		try {
-			const success = await saveUserDataImmediate(usernameToSave, dataToSave);
-			cb?.(success);
-		} catch (err) {
-			cb?.(false, err as Error);
-		}
+		void dispatchPending();
 	}, DEBOUNCE_MS);
 }
 
@@ -163,12 +199,12 @@ export function cancelPendingSave(): void {
 		clearTimeout(saveTimeout);
 		saveTimeout = null;
 	}
-	// Fire callback as a clean cancel (no error) so callers can reset status
-	const cb = pendingCallback;
-	pendingCallback = null;
+	// Fire callbacks as a clean cancel (no error) so callers can reset status
+	const callbacks = pendingCallbacks;
+	pendingCallbacks = [];
 	pendingData = null;
 	pendingUsername = null;
-	cb?.(false);
+	for (const cb of callbacks) cb(false);
 }
 
 /**
@@ -176,30 +212,10 @@ export function cancelPendingSave(): void {
  */
 export async function flushPendingSave(): Promise<boolean> {
 	if (!pendingUsername || !pendingData) {
-		return true; // Nothing to flush
+		// Nothing new to write, but wait out any in-flight write so callers
+		// (e.g. disconnect) know the last save actually landed
+		await writeChain;
+		return true;
 	}
-
-	// Clear timeout
-	if (saveTimeout) {
-		clearTimeout(saveTimeout);
-		saveTimeout = null;
-	}
-
-	const dataToSave = pendingData;
-	const usernameToSave = pendingUsername;
-	const cb = pendingCallback;
-
-	// Clear pending state before async work to prevent double-fire
-	pendingCallback = null;
-	pendingData = null;
-	pendingUsername = null;
-
-	try {
-		const success = await saveUserDataImmediate(usernameToSave, dataToSave);
-		cb?.(success);
-		return success;
-	} catch (err) {
-		cb?.(false, err as Error);
-		return false;
-	}
+	return dispatchPending();
 }
