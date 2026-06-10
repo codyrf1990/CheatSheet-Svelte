@@ -60,9 +60,7 @@ await page.screenshot({
 await page.keyboard.press('Escape');
 await page.waitForTimeout(200);
 const closedByEsc = !(await page.locator('.user-dropdown').isVisible());
-const focusedLabel = await page.evaluate(() =>
-	document.activeElement?.getAttribute('aria-label')
-);
+const focusedLabel = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
 console.log('Escape closes:', closedByEsc ? 'OK' : 'FAIL', '| focus on:', focusedLabel);
 
 // 6. Arrow-key nav from the trigger

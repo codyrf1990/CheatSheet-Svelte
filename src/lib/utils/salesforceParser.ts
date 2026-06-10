@@ -11,6 +11,8 @@ import { FEATURE_MAP, SKU_MAP } from './featureMapper';
 export interface ParseResult {
 	license: LicenseInfo | null;
 	parseError?: string;
+	/** Non-fatal issues found while parsing — shown to the user so they can verify manually */
+	parseWarnings?: string[];
 }
 
 export interface ValidationResult {
@@ -143,7 +145,9 @@ function isProductKey(dongleNo: string): boolean {
 /**
  * Parse header information from Salesforce text
  */
-export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
+export function parseHeaderInfo(
+	text: string
+): Partial<LicenseInfo> & { sim5xLevelRejected?: string } {
 	const dongleNo = extractField(text, 'Dongle No.');
 	const serialNo = extractField(text, 'Serial No.');
 	const customer = extractField(text, 'Customer');
@@ -228,7 +232,11 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 		'3-axis',
 		'3/4-axis'
 	];
-	const sim5xLevel = validSim5xLevels.includes(sim5xLevelRaw.toLowerCase()) ? sim5xLevelRaw : ''; // Invalid value = treat as blank
+	const sim5xLevelValid = validSim5xLevels.includes(sim5xLevelRaw.toLowerCase());
+	const sim5xLevel = sim5xLevelValid ? sim5xLevelRaw : ''; // Invalid value = treat as blank
+	// Surface rejected values instead of silently dropping them — a typo'd level
+	// changes which 5-axis bits get selected, so the user must be told
+	const sim5xLevelRejected = sim5xLevelValid ? undefined : sim5xLevelRaw;
 
 	// Determine if this is a network license
 	const isNetwork = extractChecked(text, 'Net Dongle');
@@ -299,6 +307,7 @@ export function parseHeaderInfo(text: string): Partial<LicenseInfo> {
 		profileUsers,
 		actualUsers,
 		sim5xLevel: sim5xLevel || undefined, // "3 Axis", "3/4 Axis", or undefined if blank
+		sim5xLevelRejected,
 		noHss: noHss || undefined,
 		maintenanceType,
 		maintenanceStart,
@@ -376,8 +385,21 @@ export function parseSalesforceText(text: string): ParseResult {
 	const headerInfo = parseHeaderInfo(text);
 
 	// Parse features
-	const features = parseCheckedFeatures(text);
+	const rawFeatures = parseCheckedFeatures(text);
 	const notCheckedFeatures = parseNotCheckedFeatures(text);
+	const parseWarnings: string[] = [];
+
+	// A feature listed as BOTH Checked and Not Checked (duplicate rows from a
+	// Salesforce copy glitch) is ambiguous — leave it unselected and tell the
+	// user, rather than picking a side silently
+	const notCheckedSet = new Set(notCheckedFeatures);
+	const conflicted = rawFeatures.filter((f) => notCheckedSet.has(f));
+	const features = rawFeatures.filter((f) => !notCheckedSet.has(f));
+	if (conflicted.length > 0) {
+		parseWarnings.push(
+			`${conflicted.join(', ')} appeared as both Checked and Not Checked in the pasted text — left unselected, please verify manually.`
+		);
+	}
 
 	// Drift detection: these patterns suggest Salesforce changed its page format.
 	// Warnings only — parsing proceeds with whatever was extracted.
@@ -423,7 +445,15 @@ export function parseSalesforceText(text: string): ParseResult {
 		sourceFileName: 'salesforce-paste'
 	};
 
-	return { license };
+	// A typo'd Sim 5x Level changes which 5-axis bits get selected — warn instead
+	// of silently treating it as blank
+	if (headerInfo.sim5xLevelRejected) {
+		parseWarnings.push(
+			`Sim 5x Level "${headerInfo.sim5xLevelRejected}" wasn't recognized and was ignored — double-check the 5-axis selections.`
+		);
+	}
+
+	return { license, parseWarnings: parseWarnings.length > 0 ? parseWarnings : undefined };
 }
 
 /**

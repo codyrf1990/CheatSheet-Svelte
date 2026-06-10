@@ -28,7 +28,10 @@ const shots = {
 	'table-top': '.main-table'
 };
 for (const [name, sel] of Object.entries(shots)) {
-	await page.locator(sel).first().screenshot({ path: `${OUT}/${name}.png` });
+	await page
+		.locator(sel)
+		.first()
+		.screenshot({ path: `${OUT}/${name}.png` });
 }
 await browser.close();
 console.log('crops written to', OUT);

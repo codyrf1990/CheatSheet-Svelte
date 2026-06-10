@@ -33,6 +33,7 @@
 	let pastedText = $state('');
 	let parsedLicense = $state<LicenseInfo | null>(null);
 	let parseError = $state<string | null>(null);
+	let parseWarnings = $state<string[]>([]);
 	let companyNameOverride = $state('');
 	let maintenanceEndOverride = $state('');
 	let importResult = $state<ImportResult | null>(null);
@@ -81,6 +82,7 @@
 			pastedText = '';
 			parsedLicense = null;
 			parseError = null;
+			parseWarnings = [];
 			companyNameOverride = '';
 			maintenanceEndOverride = '';
 			importResult = null;
@@ -95,6 +97,7 @@
 			modalState = 'paste';
 			parsedLicense = null;
 			parseError = null;
+			parseWarnings = [];
 			importResult = null;
 			parentMatch = null;
 			inheritedFields = new Set();
@@ -136,6 +139,7 @@
 				modalState = 'paste';
 				return;
 			}
+			parseWarnings = result.parseWarnings ?? [];
 
 			// For profiles, try to inherit missing fields from an already-imported parent NPK.
 			// No parent found → original license is used unchanged.
@@ -415,6 +419,13 @@
 						</span>
 					</div>
 				{/if}
+
+				{#each parseWarnings as warning (warning)}
+					<div class="action-banner action-warn reveal" style="--reveal-i: 0" role="alert">
+						<span class="action-icon" aria-hidden="true">!</span>
+						<span class="action-text">{warning}</span>
+					</div>
+				{/each}
 
 				<div class="hero hero-sc reveal" style="--reveal-i: 0">
 					<div class="hero-icon" aria-hidden="true">⚙</div>

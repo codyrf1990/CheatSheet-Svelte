@@ -16,6 +16,7 @@ import { companiesStore, DEFAULT_COMPANY_NAME, DEFAULT_PAGE_NAME } from './compa
 import { userPrefsStore } from './userPrefs.svelte';
 import { syncSession } from './syncSession.svelte';
 import { persistence } from './persistence.svelte';
+import { toastStore } from './toast.svelte';
 
 const SYNC_USERNAME_KEY = 'solidcam-sync-username';
 const REMEMBER_ME_KEY = 'solidcam-remember-me';
@@ -35,6 +36,22 @@ let lastConnectedUsername: string | null = null;
 
 // Generation counter for concurrent connect() race guard
 let connectGeneration = 0;
+
+// One toast per failure episode — reset when a save lands so the user
+// gets exactly one "offline" warning and one "back online" confirmation
+let syncErrorNotified = false;
+
+function notifySyncFailure(message: string): void {
+	if (syncErrorNotified) return;
+	syncErrorNotified = true;
+	toastStore.error(message, 8000);
+}
+
+function notifySyncRecovered(): void {
+	if (!syncErrorNotified) return;
+	syncErrorNotified = false;
+	toastStore.success('Back online — your changes are synced');
+}
 
 type LocalData = ReturnType<typeof companiesStore.exportData>;
 type UserPrefsExport = ReturnType<typeof userPrefsStore.exportData>;
@@ -238,10 +255,14 @@ function queueCombinedSave(): void {
 			status = 'connected';
 			syncSession.transition('connected');
 			error = null;
+			notifySyncRecovered();
 		} else if (err) {
 			status = 'error';
 			syncSession.transition('error');
 			error = 'Unable to sync — check your connection';
+			notifySyncFailure(
+				"Sync failed — working offline. Your changes are saved on this device and will sync when you're back online."
+			);
 			console.error('[SyncStore] Auto-sync failed:', err);
 		} else {
 			// Clean cancel (user switched accounts) — not an error
@@ -411,6 +432,9 @@ async function connect(name: string, remember: boolean = true): Promise<boolean>
 		error = 'Unable to reach cloud — working offline';
 		status = 'error';
 		syncSession.transition('local_only');
+		notifySyncFailure(
+			"Couldn't reach the cloud — working offline. Your changes are saved on this device."
+		);
 		// Set username so user enters the app; do NOT start auto-sync writes
 		username = trimmedName;
 		lastConnectedUsername = normalizedName;
@@ -463,9 +487,13 @@ async function sync(): Promise<boolean> {
 				lastSyncTime = Date.now();
 				status = 'connected';
 				error = null;
+				notifySyncRecovered();
 			} else {
 				status = 'error';
 				error = 'Unable to sync — check your connection';
+				notifySyncFailure(
+					"Sync failed — working offline. Your changes are saved on this device and will sync when you're back online."
+				);
 			}
 		});
 		return true;
