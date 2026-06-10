@@ -91,6 +91,11 @@ async function run(): Promise<void> {
 		);
 	});
 
+	if (result.parseWarnings?.length) {
+		console.log(`PARSE WARNINGS:\n  - ${result.parseWarnings.join('\n  - ')}`);
+	} else {
+		console.log('Parse warnings: none');
+	}
 	console.log(`Customer: ${license.customer}`);
 	console.log(`Page name: ${pageName}`);
 	console.log(`Profile: ${license.isProfile ? 'yes' : 'no'}`);

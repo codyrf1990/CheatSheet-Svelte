@@ -47,6 +47,14 @@ export function normalizeWhitespace(text: string): string {
 }
 
 /**
+ * Field names on a Salesforce page start at a field boundary: start of text,
+ * a new line, a tab, or a 2+ space run. Without this anchor, "Modeler" would
+ * match inside "BaseModeler" / "Bently PowerModeler", and "HSM" inside
+ * "Prismatic HSM" \u2014 producing phantom Checked/Not Checked states.
+ */
+const FIELD_BOUNDARY = '(?:^|[\\n\\t]| {2,})';
+
+/**
  * Extract a header field value from Salesforce text
  * Matches "Field Name\tvalue" patterns (tab-separated)
  */
@@ -60,7 +68,10 @@ export function extractField(text: string, fieldName: string): string {
 	// Use a more restrictive pattern to avoid capturing next field names when value is empty
 	// The value capture group allows empty (using *) and stops at a field separator
 	const separator = '(?:\\t|\\s{2,})';
-	const regex = new RegExp(flexibleField + separator + '([^\\n\\t]*?)(?=\\t|\\s{2,}|\\n|$)', 'i');
+	const regex = new RegExp(
+		FIELD_BOUNDARY + flexibleField + separator + '([^\\n\\t]*?)(?=\\t|\\s{2,}|\\n|$)',
+		'i'
+	);
 	const match = normalizedText.match(regex);
 	const value = match?.[1]?.trim() || '';
 
@@ -82,7 +93,7 @@ export function extractChecked(text: string, fieldName: string): boolean {
 	// Make field name flexible - allow any whitespace between words
 	const fieldParts = fieldName.trim().split(/\s+/);
 	const flexibleField = fieldParts.map(escapeRegex).join('\\s+');
-	const regex = new RegExp(flexibleField + '\\s+Checked(?!\\s*Not)', 'i');
+	const regex = new RegExp(FIELD_BOUNDARY + flexibleField + '\\s+Checked(?!\\s*Not)', 'i');
 	return regex.test(normalizedText);
 }
 
@@ -333,7 +344,7 @@ export function parseCheckedFeatures(text: string): string[] {
 		// This handles cases like "Sim 5x" matching "Sim  5x" or "Sim\t5x"
 		const featureParts = feature.trim().split(/\s+/);
 		const flexiblePattern = featureParts.map(escapeRegex).join('\\s+');
-		const regex = new RegExp(flexiblePattern + '\\s+Checked(?!\\s*Not)', 'i');
+		const regex = new RegExp(FIELD_BOUNDARY + flexiblePattern + '\\s+Checked(?!\\s*Not)', 'i');
 
 		if (regex.test(normalizedText)) {
 			// Avoid duplicates (some features have multiple spellings in ALL_KNOWN_FEATURES)
@@ -356,7 +367,7 @@ export function parseNotCheckedFeatures(text: string): string[] {
 	for (const feature of ALL_KNOWN_FEATURES) {
 		const featureParts = feature.trim().split(/\s+/);
 		const flexiblePattern = featureParts.map(escapeRegex).join('\\s+');
-		const regex = new RegExp(flexiblePattern + '\\s+Not\\s+Checked', 'i');
+		const regex = new RegExp(FIELD_BOUNDARY + flexiblePattern + '\\s+Not\\s+Checked', 'i');
 
 		if (regex.test(normalizedText)) {
 			if (!features.includes(feature)) {

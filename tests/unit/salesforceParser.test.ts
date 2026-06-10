@@ -110,6 +110,42 @@ describe('feature extraction', () => {
 		const { parseWarnings } = parseSalesforceText(donglePage({ dongleNo: '77518' }));
 		expect(parseWarnings).toBeUndefined();
 	});
+
+	it('feature names only match at field boundaries — no substring phantoms', () => {
+		// Real-world trap: the CAD section lists "BaseModeler" and
+		// "Bently PowerModeler" as Not Checked. Neither may count as "Modeler",
+		// and "Prismatic HSM" may not count as "HSM".
+		const text = donglePage({
+			dongleNo: '72695',
+			extraLines: [
+				'Modeler\tChecked',
+				'BaseModeler\tNot Checked',
+				'Bently PowerModeler\tNot Checked',
+				'HSM\tChecked',
+				'Prismatic HSM\tNot Checked'
+			]
+		});
+		const { license, parseWarnings } = parseSalesforceText(text);
+		expect(license?.features).toContain('Modeler');
+		expect(license?.features).toContain('HSM');
+		expect(license?.notCheckedFeatures).not.toContain('Modeler');
+		expect(license?.notCheckedFeatures).not.toContain('HSM');
+		expect(parseWarnings).toBeUndefined();
+	});
+
+	it('header fields only match at field boundaries', () => {
+		// "Month of Maintenance End Date" must not satisfy "Maintenance End Date"
+		const text = [
+			'Dongle No.\t72695',
+			'Customer\tAcme',
+			'Net Dongle\tNot Checked',
+			'Month of Maintenance End Date\t7',
+			'Maintenance End Date\t7/31/2026',
+			'SolidCAM Mill 2D\tChecked'
+		].join('\n');
+		const { license } = parseSalesforceText(text);
+		expect(license?.maintenanceEnd).toBe('7/31/2026');
+	});
 });
 
 describe('Sim 5x Level handling', () => {
