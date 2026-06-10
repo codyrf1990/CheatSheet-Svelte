@@ -31,22 +31,18 @@ describe('getPageNameForLicense', () => {
 			'NWD 77518'
 		);
 		expect(
-			getPageNameForLicense(
-				license({ productKey: '711394118544787452', isNetworkLicense: true })
-			)
+			getPageNameForLicense(license({ productKey: '711394118544787452', isNetworkLicense: true }))
 		).toBe('NPK 7452');
 		expect(getPageNameForLicense(license({ productKey: '711394118544787452' }))).toBe('SPK 7452');
 		expect(getPageNameForLicense(license({ isProfile: true, profileNo: '5801' }))).toBe('P5801');
 	});
 
 	it('appends No-Gcode and Editor suffixes from features', () => {
+		expect(getPageNameForLicense(license({ dongleNo: '67854', features: ['NO G-code'] }))).toBe(
+			'HWD 67854 No-Gcode'
+		);
 		expect(
-			getPageNameForLicense(license({ dongleNo: '67854', features: ['NO G-code'] }))
-		).toBe('HWD 67854 No-Gcode');
-		expect(
-			getPageNameForLicense(
-				license({ productKey: '12345678795B', features: ['Editor Mode'] })
-			)
+			getPageNameForLicense(license({ productKey: '12345678795B', features: ['Editor Mode'] }))
 		).toBe('SPK 795B Editor');
 	});
 });

@@ -29,6 +29,16 @@ service cloud.firestore {
                    && request.resource.data.schemaVersion is int
                    && request.resource.data.schemaVersion >= 1
                    && request.resource.data.schemaVersion <= 100;
+
+      // V2 layout: one doc per company so saves only upload what changed.
+      // Purely additive — V1 clients never touch this subcollection and the
+      // legacy pageSystem field on the parent doc keeps working as before.
+      match /companies/{companyId} {
+        allow read, delete: if true;
+        allow create, update: if request.resource.data.id is string
+                              && request.resource.data.id == companyId
+                              && request.resource.data.name is string;
+      }
     }
   }
 }

@@ -145,7 +145,6 @@ test.describe('Interactions', () => {
 		await page.waitForTimeout(2000);
 		await expect(checkmark).not.toBeVisible();
 	});
-
 });
 
 // ---------------------------------------------------------------------------
