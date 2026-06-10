@@ -24,9 +24,9 @@ await page.waitForTimeout(1500);
 
 const trigger = page.getByRole('button', { name: 'User menu' });
 
-// 1. Initials check
-const initials = await page.locator('.user-trigger .avatar-initials').textContent();
-console.log('initials for "cody-fraser":', initials, initials === 'CF' ? 'OK' : 'FAIL');
+// 1. Name renders in the pill
+const pillName = await page.locator('.user-trigger .user-name').textContent();
+console.log('pill name:', pillName, pillName === 'cody-fraser' ? 'OK' : 'FAIL');
 
 // 2. Header crop at rest
 await page.locator('.header').screenshot({ path: `${OUT}/header-rest.png` });

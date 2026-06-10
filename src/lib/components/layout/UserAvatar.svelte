@@ -17,16 +17,6 @@
 	let menuOpen = $state(false);
 	let containerRef: HTMLDivElement | null = $state(null);
 
-	function getInitials(name: string | null): string {
-		if (!name) return '?';
-		const parts = name.split(/[\s._-]+/).filter(Boolean);
-		if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-		if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-		return '?';
-	}
-
-	const initials = $derived(getInitials(username));
-
 	const statusLabel = $derived(
 		{
 			connected: 'Synced',
@@ -86,10 +76,6 @@
 		aria-expanded={menuOpen}
 		aria-label="User menu"
 	>
-		<span class="avatar">
-			<span class="avatar-initials">{initials}</span>
-			<span class="status-dot" aria-hidden="true"></span>
-		</span>
 		<span class="user-name">{username || 'User'}</span>
 		<span class="dropdown-arrow" class:open={menuOpen} aria-hidden="true">
 			<ChevronDown size={12} strokeWidth={2} />
@@ -108,10 +94,6 @@
 			use:menuKeyNav={{ onClose: () => (menuOpen = false) }}
 		>
 			<div class="menu-header">
-				<span class="avatar avatar-lg">
-					<span class="avatar-initials">{initials}</span>
-					<span class="status-dot status-{status}" aria-hidden="true"></span>
-				</span>
 				<div class="menu-header-text">
 					<span class="menu-username">{username || 'User'}</span>
 					<span class="menu-status menu-status-{status}">{statusLabel}</span>
@@ -144,12 +126,20 @@
 		position: relative;
 	}
 
+	/* Animated angle for the syncing comet that runs around the pill edge */
+	@property --user-sync-angle {
+		syntax: '<angle>';
+		initial-value: 0deg;
+		inherits: false;
+	}
+
 	/* Trigger pill — same quiet idle language as the header nav links */
 	.user-trigger {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.25rem 0.55rem 0.25rem 0.3rem;
+		padding: 0.4rem 0.6rem 0.4rem 0.8rem;
 		background: rgba(255, 255, 255, 0.03);
 		border: 1px solid rgba(255, 255, 255, 0.06);
 		border-radius: 999px;
@@ -183,76 +173,46 @@
 		opacity: 0.75;
 	}
 
-	.avatar {
-		position: relative;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 26px;
-		height: 26px;
-		flex-shrink: 0;
-		background: rgba(255, 255, 255, 0.08);
-		border-radius: 50%;
-	}
-
-	.avatar-lg {
-		width: 32px;
-		height: 32px;
-	}
-
-	.avatar-initials {
-		font-size: 0.6875rem;
-		font-weight: 600;
-		letter-spacing: 0.02em;
-		color: rgba(255, 255, 255, 0.85);
-		text-shadow: var(--text-engraved);
-		user-select: none;
-	}
-
-	.avatar-lg .avatar-initials {
-		font-size: 0.8125rem;
-	}
-
-	/* Status dot — flat solid colors, the at-a-glance sync indicator */
-	.status-dot {
+	/* Sync swirl — a gold comet that runs around the pill edge while loading.
+	   Mask keeps only a thin border-width band of the conic gradient visible. */
+	.user-trigger::after {
+		content: '';
 		position: absolute;
-		bottom: -1px;
-		right: -1px;
-		width: 9px;
-		height: 9px;
-		border-radius: 50%;
-		border: 2px solid rgba(20, 20, 25, 1);
-		background: rgba(120, 120, 130, 0.9);
-		transition: background 250ms var(--ease-out-quart);
+		inset: -1px;
+		border-radius: inherit;
+		padding: 1.5px;
+		background: conic-gradient(
+			from var(--user-sync-angle, 0deg),
+			transparent 0deg,
+			transparent 250deg,
+			rgba(212, 175, 55, 0.4) 290deg,
+			rgba(212, 175, 55, 1) 320deg,
+			rgba(212, 175, 55, 0.5) 345deg,
+			transparent 360deg
+		);
+		-webkit-mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 250ms var(--ease-out-quart);
+		filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.45));
 	}
 
-	.status-connected .status-dot,
-	.status-dot.status-connected {
-		background: var(--color-success);
+	.user-trigger.status-syncing::after,
+	.user-trigger.status-connecting::after {
+		opacity: 1;
+		animation: userSyncSweep 1.4s linear infinite;
 	}
 
-	.status-syncing .status-dot,
-	.status-connecting .status-dot,
-	.status-dot.status-syncing,
-	.status-dot.status-connecting {
-		background: var(--color-solidcam-gold);
-		animation: dotPulse 1.4s ease-in-out infinite;
-	}
-
-	.status-error .status-dot,
-	.status-dot.status-error {
-		background: var(--color-error);
-	}
-
-	@keyframes dotPulse {
-		0%,
-		100% {
-			transform: scale(1);
-			opacity: 1;
-		}
-		50% {
-			transform: scale(1.2);
-			opacity: 0.85;
+	@keyframes userSyncSweep {
+		to {
+			--user-sync-angle: 360deg;
 		}
 	}
 
