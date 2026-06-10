@@ -4,6 +4,7 @@
 	import { packagesStore } from '$stores/packages.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
+	import { bitCopyText } from '$lib/data/packages';
 
 	interface Props {
 		bit: string;
@@ -35,7 +36,7 @@
 	}
 
 	async function handleCopy() {
-		const ok = await copyToClipboard(bit, false);
+		const ok = await copyToClipboard(bitCopyText(bit), false);
 		if (ok) {
 			justCopied = true;
 			setTimeout(() => (justCopied = false), 1500);

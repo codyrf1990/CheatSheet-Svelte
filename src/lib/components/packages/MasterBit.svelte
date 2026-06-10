@@ -6,6 +6,7 @@
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
 	import { toastStore } from '$stores/toast.svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
+	import { bitCopyText } from '$lib/data/packages';
 	import { applyOrder } from '$lib/utils/order';
 	import { tooltip } from '$lib/utils/tooltipAction';
 	import SubBit from './SubBit.svelte';
@@ -67,7 +68,7 @@
 	}
 
 	async function handleLabelCopy() {
-		await copyToClipboard(group.label);
+		await copyToClipboard(bitCopyText(group.label));
 	}
 </script>
 

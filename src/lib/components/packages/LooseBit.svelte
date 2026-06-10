@@ -6,6 +6,7 @@
 	import { toastStore } from '$stores/toast.svelte';
 	import { tooltip } from '$lib/utils/tooltipAction';
 	import { copyToClipboard } from '$lib/utils/clipboard';
+	import { bitCopyText } from '$lib/data/packages';
 
 	interface Props {
 		bit: string;
@@ -37,7 +38,7 @@
 	}
 
 	async function handleCopy() {
-		const ok = await copyToClipboard(bit);
+		const ok = await copyToClipboard(bitCopyText(bit));
 		if (ok) {
 			justCopied = true;
 			setTimeout(() => (justCopied = false), 1500);

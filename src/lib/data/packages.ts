@@ -1,6 +1,18 @@
 import type { Package } from '$types';
 
 /**
+ * Bits whose click-to-copy text differs from the short display label.
+ * Display stays compact in the table; the clipboard gets the fuller wording.
+ */
+const BIT_COPY_TEXT: Record<string, string> = {
+	HSS: 'HSS (Full)'
+};
+
+export function bitCopyText(bit: string): string {
+	return BIT_COPY_TEXT[bit] ?? bit;
+}
+
+/**
  * SolidCAM package definitions
  * Migrated from /home/cody/CheatSheet/assets/js/data.js
  */
