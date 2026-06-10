@@ -28,6 +28,19 @@ let pendingCallbacks: Array<(success: boolean, error?: Error) => void> = [];
 // Serializes all writes so a flush can never interleave with an in-flight debounced write
 let writeChain: Promise<unknown> = Promise.resolve();
 
+// Snapshot of what the last SUCCESSFUL write uploaded, per user. Lets us skip
+// re-uploading parts of the payload that haven't changed — a prefs toggle no
+// longer re-sends every company, and a no-op sync skips the network entirely.
+// Serialized-string comparison is deliberate: timestamps can't detect deletions
+// (removing a company can leave the max updatedAt unchanged), JSON equality can.
+let lastWrittenUser: string | null = null;
+let lastWrittenPageSystemJson: string | null = null;
+let lastWrittenPrefsJson: string | null = null;
+
+// Firestore rejects documents over 1 MiB — warn while there's still headroom
+const DOC_SIZE_WARN_BYTES = 800_000;
+let docSizeWarned = false;
+
 /**
  * Normalize username for document ID
  */
@@ -90,25 +103,50 @@ export async function saveUserDataImmediate(
 	const normalizedUsername = normalizeUsername(username);
 	const docRef = doc(db, COLLECTION, normalizedUsername);
 
+	const pageSystemJson = JSON.stringify(payload.pageSystem);
+	const prefsJson = payload.userPrefs ? JSON.stringify(payload.userPrefs) : null;
+	const sameUser = lastWrittenUser === normalizedUsername;
+	const pageSystemChanged = !sameUser || pageSystemJson !== lastWrittenPageSystemJson;
+	const prefsChanged = prefsJson !== null && (!sameUser || prefsJson !== lastWrittenPrefsJson);
+
+	// Nothing actually changed since the last successful upload — skip the write
+	if (!pageSystemChanged && !prefsChanged) {
+		return true;
+	}
+
+	if (pageSystemJson.length > DOC_SIZE_WARN_BYTES && !docSizeWarned) {
+		docSizeWarned = true;
+		console.warn(
+			`[Sync] Page data is ${Math.round(pageSystemJson.length / 1024)} KB — approaching Firestore's 1 MB document limit. Consider deleting old companies/pages.`
+		);
+	}
+
 	try {
 		const data: Record<string, unknown> = {
 			username,
 			normalizedUsername,
 			schemaVersion: SCHEMA_VERSION,
 			updatedAt: serverTimestamp(),
-			pageSystem: payload.pageSystem,
-			pageSystemUpdatedAt: payload.pageSystemUpdatedAt,
 			client: CLIENT_ID
 		};
 
-		if (payload.userPrefs) {
-			data.userPrefs = payload.userPrefs;
+		if (pageSystemChanged) {
+			data.pageSystem = payload.pageSystem;
+			data.pageSystemUpdatedAt = payload.pageSystemUpdatedAt;
 		}
-		if (typeof payload.userPrefsUpdatedAt === 'number') {
-			data.userPrefsUpdatedAt = payload.userPrefsUpdatedAt;
+		if (prefsChanged) {
+			data.userPrefs = payload.userPrefs;
+			if (typeof payload.userPrefsUpdatedAt === 'number') {
+				data.userPrefsUpdatedAt = payload.userPrefsUpdatedAt;
+			}
 		}
 
 		await setDoc(docRef, data, { merge: true });
+
+		// Record what landed so the next write can diff against it
+		lastWrittenUser = normalizedUsername;
+		if (pageSystemChanged) lastWrittenPageSystemJson = pageSystemJson;
+		if (prefsChanged) lastWrittenPrefsJson = prefsJson;
 		return true;
 	} catch (err) {
 		console.error('[Sync] Failed to save user data:', err);
