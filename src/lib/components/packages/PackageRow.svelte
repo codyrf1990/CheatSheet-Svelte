@@ -404,7 +404,7 @@
 	}
 
 	.package-code:hover,
-	.code-btn:focus-visible .package-code {
+	.package-code:focus-visible {
 		color: #e5c55a;
 		text-decoration: underline;
 		text-decoration-color: var(--gold-a45);

@@ -2,6 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
 	testDir: './tests',
+	testMatch: '**/*.spec.ts', // Unit tests (tests/unit/*.test.ts) belong to vitest
 	fullyParallel: false, // State-dependent tests run sequentially
 	retries: 0,
 	reporter: 'list',
