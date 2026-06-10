@@ -46,7 +46,11 @@ pnpm preview      # Preview production build
 pnpm check        # Type check + Svelte validation
 pnpm lint         # ESLint + Prettier
 pnpm format       # Auto-format code
+pnpm test         # Playwright e2e (tests/*.spec.ts) — needs dev server; 26 tests, all green
+pnpm test:unit    # Vitest unit tests (tests/unit/*.test.ts) — parser/mapper/selections
 ```
+
+Suite is fully green (June 2026) — any test failure is a real regression.
 
 ## Svelte 5 Runes
 
@@ -176,6 +180,12 @@ const db = initializeFirestore(app, {
 });
 ```
 
+**Sync layout v2** (`src/lib/firebase/sync.ts`): companies live in a `users/{user}/companies/{id}`
+subcollection (one doc each); the user doc holds prefs + `pageSystemMeta` + `pageSystemV2UpdatedAt`.
+Saves diff against a JSON cache and upload only changed companies. **Never delete the legacy
+`pageSystem` field** — v1 (main) shares this Firebase project and reads it. Reads prefer whichever
+layout is fresher. Verify sync changes with `node scripts/sync-v2-smoke.mjs` (dev server up).
+
 **Environment (.env):**
 
 ```text
@@ -248,6 +258,8 @@ Import from Salesforce dongle page text (Ctrl+A, Ctrl+C). Parser: `src/lib/utils
 | 1      | Blank      | All 5-axis bits + Sim5x-Maint |
 
 > **Salesforce quirk:** Level field sometimes uses hyphens instead of spaces (`"3/4-axis"`, `"3-axis"`). The parser normalises these — no special handling needed.
+
+> **Parse warnings:** an unrecognized Sim 5x Level, or a feature listed as both Checked and Not Checked (conflict → left unselected), produces `parseWarnings` on the result — shown as alert banners in the import preview.
 
 4. **No HSS flag** (profiles only) - When `No HSS` is checked, HSS bit is actively removed and the Sim 5x level logic is blocked from adding it back. Stored as `license.noHss` on `LicenseInfo`.
 
