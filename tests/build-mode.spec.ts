@@ -223,12 +223,12 @@ test.describe('Build Mode', () => {
 	// 8. MS mode disables prerequisite gating
 	// -------------------------------------------------------------------------
 	test('MS mode disables prerequisite gating', async ({ page }) => {
-		// In BDM mode (default), iMach2D is gated (SC-Mill not selected)
+		// In New Sale mode (default), iMach2D is gated (SC-Mill not selected)
 		const iMach2DLi = page.locator('li', { hasText: 'iMach2D' }).first();
 		await expect(iMach2DLi.locator('input[type="checkbox"]')).toBeDisabled();
 
-		// Switch to MS via pill button
-		await page.getByRole('button', { name: /MS/ }).first().click();
+		// Switch to Maintenance via mode pill (formerly labeled "MS")
+		await page.locator('.mode-pill-btn', { hasText: 'Maintenance' }).first().click();
 
 		// iMach2D now enabled despite SC-Mill not selected
 		await expect(iMach2DLi.locator('input[type="checkbox"]')).toBeEnabled();
@@ -244,8 +244,10 @@ test.describe('Build Mode', () => {
 	test('New Sale panel shows correct SKUs and total after SC-Mill selected', async ({ page }) => {
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Mill bits' }).click();
 
-		await expect(page.getByRole('button', { name: 'SC-HSS' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'SC-25M' })).toBeVisible();
+		// Scope to the quote sidebar — the SKU codes also appear inside the table
+		const sidebar = page.getByRole('complementary');
+		await expect(sidebar.getByRole('button', { name: 'SC-HSS' })).toBeVisible();
+		await expect(sidebar.getByRole('button', { name: 'SC-25M' })).toBeVisible();
 		await expect(page.getByText('$3,868').first()).toBeVisible(); // SC-Mill package price
 	});
 
@@ -266,8 +268,8 @@ test.describe('Build Mode', () => {
 		await page.getByRole('checkbox', { name: 'Toggle all SC-Mill bits' }).click();
 		await page.getByRole('button', { name: 'Upgrades' }).click();
 
-		// Modal open
-		await expect(page.getByRole('heading', { name: 'Upgrades — BDM' })).toBeVisible();
+		// Modal open (mode label renamed BDM -> New Sale for the BDM handoff)
+		await expect(page.getByRole('heading', { name: 'Upgrades — New Sale' })).toBeVisible();
 
 		// Correct section headings — packages show as groups when fully unselected
 		const sections = page.locator('h4.group-title');

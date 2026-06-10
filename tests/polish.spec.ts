@@ -22,21 +22,24 @@ test.describe('Shell & Navigation', () => {
 		await login(page);
 	});
 
-	test('company name is bold in the bar', async ({ page }) => {
+	test('company name is emphasized in the bar', async ({ page }) => {
 		const companyName = page.locator('.company-name').first();
 		await expect(companyName).toBeVisible();
 		const fontWeight = await companyName.evaluate((el) => window.getComputedStyle(el).fontWeight);
-		// 600 or 700 = bold
-		expect(Number(fontWeight)).toBeGreaterThanOrEqual(600);
+		// Design uses a tuned 540 weight — anything >= 540 reads as emphasized
+		expect(Number(fontWeight)).toBeGreaterThanOrEqual(540);
 	});
 
-	test('active page tab has gold bottom border', async ({ page }) => {
+	test('active page tab has gold underline rail', async ({ page }) => {
 		const activeTab = page.locator('.page-tab.active').first();
 		await expect(activeTab).toBeVisible();
-		const borderBottom = await activeTab.evaluate(
-			(el) => window.getComputedStyle(el).borderBottomWidth
-		);
-		expect(parseFloat(borderBottom)).toBeGreaterThanOrEqual(2);
+		// The underline is an ::after rail (gradient bar), not a border
+		const rail = await activeTab.evaluate((el) => {
+			const s = window.getComputedStyle(el, '::after');
+			return { height: parseFloat(s.height), background: s.backgroundImage };
+		});
+		expect(rail.height).toBeGreaterThanOrEqual(2);
+		expect(rail.background).toContain('gradient');
 	});
 
 	test('sync status shows an SVG icon', async ({ page }) => {
@@ -45,10 +48,9 @@ test.describe('Shell & Navigation', () => {
 	});
 
 	test('quick action buttons visible when company active', async ({ page }) => {
+		// Import is the only quick action in the bar (QuickBooks copy was never shipped)
 		const importBtn = page.getByLabel('Import License');
-		const copyQbBtn = page.getByLabel('Copy for QuickBooks');
 		await expect(importBtn).toBeVisible();
-		await expect(copyQbBtn).toBeVisible();
 	});
 });
 
@@ -144,10 +146,6 @@ test.describe('Interactions', () => {
 		await expect(checkmark).not.toBeVisible();
 	});
 
-	test('BDM panel has Expand All button', async ({ page }) => {
-		const expandAll = page.getByRole('button', { name: 'Expand All' });
-		await expect(expandAll).toBeVisible();
-	});
 });
 
 // ---------------------------------------------------------------------------

@@ -192,7 +192,8 @@
 		text-align: left;
 	}
 
-	.bit-text:hover {
+	.bit-text:hover,
+	.bit-text:focus-visible {
 		color: var(--chip-text-hover);
 	}
 

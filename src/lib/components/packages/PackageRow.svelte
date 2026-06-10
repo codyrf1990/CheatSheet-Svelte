@@ -368,7 +368,8 @@
 		text-align: left;
 	}
 
-	.bit-text:hover {
+	.bit-text:hover,
+	.bit-text:focus-visible {
 		color: var(--chip-text-hover);
 		text-decoration: underline;
 		text-decoration-color: var(--gold-a45);
@@ -402,7 +403,8 @@
 		transition: color 150ms var(--ease-out-quart);
 	}
 
-	.package-code:hover {
+	.package-code:hover,
+	.code-btn:focus-visible .package-code {
 		color: #e5c55a;
 		text-decoration: underline;
 		text-decoration-color: var(--gold-a45);
