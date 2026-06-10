@@ -11,7 +11,7 @@ export interface MenuKeyNavOptions {
 	onClose?: () => void;
 }
 
-const ITEM_SELECTOR = '[role="menuitem"], [role="option"]';
+const ITEM_SELECTOR = '[role="menuitem"], [role="menuitemcheckbox"], [role="option"]';
 
 export function menuKeyNav(node: HTMLElement, options: MenuKeyNavOptions = {}) {
 	let currentOptions = options;

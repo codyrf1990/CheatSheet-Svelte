@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { LogOut, Settings, User } from 'lucide-svelte';
+	import { tick } from 'svelte';
+	import { ChevronDown, LogOut } from 'lucide-svelte';
 	import type { SyncStatus } from '$types';
 	import { userPrefsStore } from '$stores/userPrefs.svelte';
-	import { tooltip } from '$lib/utils/tooltipAction';
+	import { menuKeyNav } from '$lib/utils/menuKeyNav';
 
 	interface Props {
 		username: string | null;
@@ -13,51 +14,60 @@
 
 	let { username, status, onLogout }: Props = $props();
 
-	// Local state for settings panel
-	let actionsVisible = $state(false);
-	let settingsOpen = $state(false);
-	let isTouch = $state(false);
+	let menuOpen = $state(false);
 	let containerRef: HTMLDivElement | null = $state(null);
 
-	// Detect touch devices
-	$effect(() => {
-		if (browser) {
-			isTouch = window.matchMedia('(hover: none)').matches;
-		}
-	});
+	function getInitials(name: string | null): string {
+		if (!name) return '?';
+		const parts = name.split(/[\s._-]+/).filter(Boolean);
+		if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+		if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+		return '?';
+	}
 
-	// Get video paused state
+	const initials = $derived(getInitials(username));
+
+	const statusLabel = $derived(
+		{
+			connected: 'Synced',
+			syncing: 'Syncing…',
+			connecting: 'Connecting…',
+			error: 'Sync error',
+			disconnected: 'Offline'
+		}[status]
+	);
+
 	const backgroundVideoPaused = $derived(userPrefsStore.isBackgroundVideoPaused());
 
-	function handleContainerClick() {
-		if (isTouch) {
-			actionsVisible = !actionsVisible;
+	function handleLogout() {
+		menuOpen = false;
+		onLogout();
+	}
+
+	// Standard menu-button keyboard behavior while focus is on the trigger:
+	// ArrowDown/ArrowUp open the menu and focus the first/last item; Escape closes.
+	async function handleTriggerKeydown(event: KeyboardEvent) {
+		if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+			event.preventDefault();
+			menuOpen = true;
+			await tick();
+			const items = containerRef?.querySelectorAll<HTMLElement>(
+				'[role="menuitem"], [role="menuitemcheckbox"]'
+			);
+			if (!items?.length) return;
+			(event.key === 'ArrowDown' ? items[0] : items[items.length - 1]).focus();
+		} else if (event.key === 'Escape' && menuOpen) {
+			menuOpen = false;
 		}
 	}
 
-	function toggleSettings(event: MouseEvent) {
-		event.stopPropagation();
-		settingsOpen = !settingsOpen;
-	}
-
-	function toggleBackgroundVideo() {
-		userPrefsStore.toggleBackgroundVideoPaused();
-	}
-
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape' && settingsOpen) {
-			settingsOpen = false;
-		}
-	}
-
-	// Close panel on outside click
+	// Close menu on outside click
 	$effect(() => {
-		if (!browser || !settingsOpen) return;
+		if (!browser || !menuOpen) return;
 
 		function handleOutsideClick(event: PointerEvent) {
 			if (containerRef && event.target instanceof Node && !containerRef.contains(event.target)) {
-				settingsOpen = false;
-				actionsVisible = false;
+				menuOpen = false;
 			}
 		}
 
@@ -66,305 +76,172 @@
 	});
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
-	bind:this={containerRef}
-	class="user-container status-{status}"
-	class:actions-visible={actionsVisible}
-	onclick={handleContainerClick}
-	onkeydown={handleKeydown}
->
-	<div class="user-avatar">
-		<div class="avatar-ring"></div>
-		<div class="avatar-inner">
-			<User size={18} strokeWidth={2} />
-		</div>
-		<span class="avatar-status-dot" aria-hidden="true"></span>
-	</div>
-	<div class="user-details">
-		<span class="user-name" use:tooltip={username || 'User'}>{username || 'User'}</span>
-		<div class="user-actions">
-			<button
-				class="settings-button"
-				onclick={toggleSettings}
-				aria-expanded={settingsOpen}
-				aria-controls="user-settings-panel"
-				aria-label="User settings"
-			>
-				<Settings size={10} strokeWidth={2} />
-				Settings
-			</button>
-			<button class="change-link" onclick={onLogout}>
-				<LogOut size={10} strokeWidth={2} />
-				Sign out
-			</button>
-		</div>
-	</div>
-	<!-- Sync status is now indicated by the container's animated outer edge —
-	     see the .user-container::after rule for the rotating gold comet. -->
+<div class="user-menu" bind:this={containerRef}>
+	<button
+		type="button"
+		class="user-trigger status-{status}"
+		onclick={() => (menuOpen = !menuOpen)}
+		onkeydown={handleTriggerKeydown}
+		aria-haspopup="menu"
+		aria-expanded={menuOpen}
+		aria-label="User menu"
+	>
+		<span class="avatar">
+			<span class="avatar-initials">{initials}</span>
+			<span class="status-dot" aria-hidden="true"></span>
+		</span>
+		<span class="user-name">{username || 'User'}</span>
+		<span class="dropdown-arrow" class:open={menuOpen} aria-hidden="true">
+			<ChevronDown size={12} strokeWidth={2} />
+		</span>
+	</button>
+
 	{#if status === 'syncing'}
-		<span class="sr-only" use:tooltip={'Syncing...'}>Syncing</span>
+		<span class="sr-only" role="status">Syncing</span>
 	{/if}
 
-	{#if settingsOpen}
-		<!-- Non-modal popover: role="group", not dialog — it doesn't trap focus
-		     and the rest of the page stays interactive -->
-		<div id="user-settings-panel" class="settings-panel" role="group" aria-label="User settings">
-			<div class="settings-header">Settings</div>
-			<label class="settings-toggle">
-				<span class="toggle-label">Pause background</span>
-				<button
-					type="button"
-					class="toggle-switch"
-					class:active={backgroundVideoPaused}
-					onclick={toggleBackgroundVideo}
-					aria-pressed={backgroundVideoPaused}
-					aria-label="Toggle background video"
-				>
+	{#if menuOpen}
+		<div
+			class="user-dropdown"
+			role="menu"
+			aria-label="User menu"
+			use:menuKeyNav={{ onClose: () => (menuOpen = false) }}
+		>
+			<div class="menu-header">
+				<span class="avatar avatar-lg">
+					<span class="avatar-initials">{initials}</span>
+					<span class="status-dot status-{status}" aria-hidden="true"></span>
+				</span>
+				<div class="menu-header-text">
+					<span class="menu-username">{username || 'User'}</span>
+					<span class="menu-status menu-status-{status}">{statusLabel}</span>
+				</div>
+			</div>
+			<hr class="menu-divider" />
+			<button
+				type="button"
+				role="menuitemcheckbox"
+				class="menu-row"
+				onclick={() => userPrefsStore.toggleBackgroundVideoPaused()}
+				aria-checked={backgroundVideoPaused}
+			>
+				<span>Pause background video</span>
+				<span class="toggle-switch" class:active={backgroundVideoPaused} aria-hidden="true">
 					<span class="toggle-thumb"></span>
-				</button>
-			</label>
+				</span>
+			</button>
+			<hr class="menu-divider" />
+			<button type="button" role="menuitem" class="menu-row danger" onclick={handleLogout}>
+				<LogOut size={13} strokeWidth={2} />
+				Sign out
+			</button>
 		</div>
 	{/if}
 </div>
 
 <style>
-	/* Animated angle for the syncing comet that runs around the container border */
-	@property --user-sync-angle {
-		syntax: '<angle>';
-		initial-value: 0deg;
-		inherits: false;
+	.user-menu {
+		position: relative;
 	}
 
-	.user-container {
+	/* Trigger pill — same quiet idle language as the header nav links */
+	.user-trigger {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.25rem 0.55rem 0.25rem 0.3rem;
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		border-radius: 999px;
+		cursor: pointer;
+		transition:
+			background 200ms var(--ease-out-quart),
+			border-color 200ms var(--ease-out-quart);
+	}
+
+	.user-trigger:hover {
+		background: rgba(255, 255, 255, 0.08);
+		border-color: rgba(255, 255, 255, 0.16);
+	}
+
+	.user-trigger:focus-visible {
+		outline: 2px solid var(--color-solidcam-gold);
+		outline-offset: 2px;
+	}
+
+	.user-trigger[aria-expanded='true'] {
+		background: var(--gold-a10);
+		border-color: var(--gold-a30);
+	}
+
+	/* Error stays visible without opening the menu; offline reads muted */
+	.user-trigger.status-error {
+		border-color: rgba(239, 68, 68, 0.45);
+	}
+
+	.user-trigger.status-disconnected {
+		opacity: 0.75;
+	}
+
+	.avatar {
 		position: relative;
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.4rem 0.7rem;
-		border-radius: var(--radius-sm);
-		background: var(--menu-bg);
-		box-shadow:
-			0 6px 18px rgba(0, 0, 0, 0.28),
-			inset 0 1px 0 rgba(255, 255, 255, 0.12),
-			inset 0 -1px 0 rgba(0, 0, 0, 0.45);
-		transition:
-			transform 220ms var(--ease-out-quart),
-			box-shadow 280ms var(--ease-out-expo),
-			background 220ms var(--ease-out-quart);
-	}
-
-	/* ::before — static gradient stroke (gold → red), the resting "frame" */
-	.user-container::before {
-		content: '';
-		position: absolute;
-		inset: 0;
-		border-radius: inherit;
-		padding: 1.5px;
-		background: linear-gradient(
-			135deg,
-			rgba(212, 175, 55, 0.55) 0%,
-			rgba(255, 255, 255, 0.08) 35%,
-			rgba(255, 255, 255, 0.02) 65%,
-			rgba(200, 16, 46, 0.4) 100%
-		);
-		-webkit-mask:
-			linear-gradient(#000 0 0) content-box,
-			linear-gradient(#000 0 0);
-		mask:
-			linear-gradient(#000 0 0) content-box,
-			linear-gradient(#000 0 0);
-		-webkit-mask-composite: xor;
-		mask-composite: exclude;
-		pointer-events: none;
-		transition: background 350ms var(--ease-out-expo);
-	}
-
-	/* ::after — the sync "comet": a bright arc that rotates around the perimeter */
-	.user-container::after {
-		content: '';
-		position: absolute;
-		inset: 0;
-		border-radius: inherit;
-		padding: 1.5px;
-		background: conic-gradient(
-			from var(--user-sync-angle, 0deg),
-			transparent 0deg,
-			transparent 250deg,
-			rgba(212, 175, 55, 0.4) 290deg,
-			rgba(212, 175, 55, 1) 320deg,
-			rgba(212, 175, 55, 0.5) 345deg,
-			transparent 360deg
-		);
-		-webkit-mask:
-			linear-gradient(#000 0 0) content-box,
-			linear-gradient(#000 0 0);
-		mask:
-			linear-gradient(#000 0 0) content-box,
-			linear-gradient(#000 0 0);
-		-webkit-mask-composite: xor;
-		mask-composite: exclude;
-		pointer-events: none;
-		opacity: 0;
-		transition: opacity 250ms var(--ease-out-quart);
-		filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.45));
-	}
-
-	.user-container:hover {
-		transform: translateY(-2px);
-		box-shadow:
-			0 12px 28px rgba(0, 0, 0, 0.35),
-			0 0 26px rgba(212, 175, 55, 0.18),
-			inset 0 1px 0 rgba(255, 255, 255, 0.16),
-			inset 0 -1px 0 rgba(0, 0, 0, 0.45);
-	}
-
-	/* ======== Status states ======== */
-
-	/* Syncing — comet sweep around the perimeter, faster avatar ring */
-	.user-container.status-syncing::after {
-		opacity: 1;
-		animation: userSyncSweep 1.4s linear infinite;
-	}
-
-	@keyframes userSyncSweep {
-		to {
-			--user-sync-angle: 360deg;
-		}
-	}
-
-	/* Error — swap the resting border to red and add a soft red halo */
-	.user-container.status-error::before {
-		background: linear-gradient(
-			135deg,
-			rgba(200, 16, 46, 0.55) 0%,
-			rgba(255, 90, 100, 0.15) 35%,
-			rgba(200, 16, 46, 0.55) 100%
-		);
-	}
-
-	.user-container.status-error {
-		box-shadow:
-			0 6px 18px rgba(0, 0, 0, 0.28),
-			0 1px 3px rgba(0, 0, 0, 0.12),
-			0 0 22px rgba(200, 16, 46, 0.18),
-			inset 0 1px 0 rgba(255, 255, 255, 0.05),
-			inset 0 -1px 0 rgba(0, 0, 0, 0.25);
-	}
-
-	/* Disconnected — muted */
-	.user-container.status-disconnected {
-		opacity: 0.65;
-	}
-
-	.user-container.status-disconnected::before {
-		background: linear-gradient(
-			135deg,
-			rgba(255, 255, 255, 0.18) 0%,
-			rgba(255, 255, 255, 0.04) 50%,
-			rgba(255, 255, 255, 0.18) 100%
-		);
-	}
-
-	/* Screen-reader only utility (used for the "Syncing" announcement) */
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		white-space: nowrap;
-		border: 0;
-	}
-
-	.user-avatar {
-		position: relative;
-		width: 34px;
-		height: 34px;
+		justify-content: center;
+		width: 26px;
+		height: 26px;
 		flex-shrink: 0;
-	}
-
-	.avatar-ring {
-		position: absolute;
-		inset: -2px;
+		background: rgba(255, 255, 255, 0.08);
 		border-radius: 50%;
-		background: conic-gradient(from 135deg, #d4af37, #c8102e, #8a6d1f, #d4af37);
-		opacity: 0.55;
-		transition:
-			opacity 300ms var(--ease-out-quart),
-			background 350ms var(--ease-out-expo),
-			animation 300ms var(--ease-out-quart);
 	}
 
-	/* Status-aware ring — animation only kicks in for syncing */
-	.status-connected .avatar-ring {
-		opacity: 0.7;
+	.avatar-lg {
+		width: 32px;
+		height: 32px;
 	}
 
-	.status-syncing .avatar-ring {
-		opacity: 0.95;
-		animation: avatarRingSpin 3s linear infinite;
+	.avatar-initials {
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		color: rgba(255, 255, 255, 0.85);
+		text-shadow: var(--text-engraved);
+		user-select: none;
 	}
 
-	.status-disconnected .avatar-ring {
-		opacity: 0.25;
-		background: conic-gradient(from 135deg, #555, #333, #555);
+	.avatar-lg .avatar-initials {
+		font-size: 0.8125rem;
 	}
 
-	.status-error .avatar-ring {
-		background: conic-gradient(from 135deg, #c8102e, #8b0000, #c8102e);
-		opacity: 0.85;
-	}
-
-	@keyframes avatarRingSpin {
-		to {
-			transform: rotate(360deg);
-		}
-	}
-
-	/* Status dot — small bottom-right indicator on the avatar */
-	.avatar-status-dot {
+	/* Status dot — flat solid colors, the at-a-glance sync indicator */
+	.status-dot {
 		position: absolute;
-		bottom: -2px;
-		right: -2px;
-		width: 10px;
-		height: 10px;
+		bottom: -1px;
+		right: -1px;
+		width: 9px;
+		height: 9px;
 		border-radius: 50%;
 		border: 2px solid rgba(20, 20, 25, 1);
 		background: rgba(120, 120, 130, 0.9);
-		z-index: 2;
-		transition:
-			background 250ms var(--ease-out-quart),
-			box-shadow 300ms var(--ease-out-expo);
+		transition: background 250ms var(--ease-out-quart);
 	}
 
-	/* Status lamps — hot center + glow, like machine panel indicators */
-	.status-connected .avatar-status-dot {
-		background: radial-gradient(circle at 50% 38%, #a7f3c4 0%, #22c55e 55%, #15803d 100%);
-		box-shadow:
-			0 0 8px rgba(34, 197, 94, 0.65),
-			inset 0 1px 1px rgba(255, 255, 255, 0.5);
+	.status-connected .status-dot,
+	.status-dot.status-connected {
+		background: var(--color-success);
 	}
 
-	.status-syncing .avatar-status-dot {
-		background: radial-gradient(circle at 50% 38%, #ffe9a8 0%, #d4af37 55%, #9c7c1a 100%);
-		box-shadow:
-			0 0 10px rgba(212, 175, 55, 0.8),
-			inset 0 1px 1px rgba(255, 255, 255, 0.5);
+	.status-syncing .status-dot,
+	.status-connecting .status-dot,
+	.status-dot.status-syncing,
+	.status-dot.status-connecting {
+		background: var(--color-solidcam-gold);
 		animation: dotPulse 1.4s ease-in-out infinite;
 	}
 
-	.status-error .avatar-status-dot {
-		background: radial-gradient(circle at 50% 38%, #fca5a5 0%, #ef4444 55%, #b91c1c 100%);
-		box-shadow:
-			0 0 10px rgba(239, 68, 68, 0.7),
-			inset 0 1px 1px rgba(255, 255, 255, 0.45);
-	}
-
-	.status-disconnected .avatar-status-dot {
-		background: rgba(120, 120, 130, 0.6);
+	.status-error .status-dot,
+	.status-dot.status-error {
+		background: var(--color-error);
 	}
 
 	@keyframes dotPulse {
@@ -379,57 +256,6 @@
 		}
 	}
 
-	.avatar-inner {
-		position: relative;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(145deg, rgba(30, 30, 35, 1), rgba(20, 20, 25, 1));
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: rgba(255, 255, 255, 0.7);
-		transition:
-			color 200ms ease,
-			transform 200ms ease;
-	}
-
-	.status-connected .avatar-inner {
-		animation: avatarBreathe 4s ease-in-out infinite;
-	}
-
-	.user-container:hover .avatar-inner {
-		color: rgba(212, 175, 55, 0.9);
-		transform: scale(1.02);
-	}
-
-	@keyframes avatarBreathe {
-		0%,
-		100% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(1.03);
-		}
-	}
-
-	.avatar-inner :global(svg) {
-		width: 18px;
-		height: 18px;
-		transition: filter 200ms ease;
-	}
-
-	.user-container:hover .avatar-inner :global(svg) {
-		filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.4));
-	}
-
-	.user-details {
-		display: flex;
-		flex-direction: column;
-		gap: 0;
-		overflow: hidden;
-	}
-
 	.user-name {
 		font-size: 0.8125rem;
 		font-weight: 540;
@@ -442,140 +268,33 @@
 		white-space: nowrap;
 	}
 
-	.change-link {
+	.dropdown-arrow {
 		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-		font-size: 0.65rem;
-		color: rgba(255, 255, 255, 0.4);
-		background: none;
-		border: none;
-		cursor: pointer;
-		padding: 0.125rem 0.25rem;
-		margin: -0.125rem -0.25rem;
-		border-radius: 4px;
-		transition:
-			color 150ms ease,
-			background 150ms ease,
-			max-height 150ms ease,
-			opacity 150ms ease;
-		max-height: 0;
-		opacity: 0;
-		overflow: hidden;
+		opacity: 0.6;
+		transition: transform 250ms var(--ease-out-expo);
 	}
 
-	.user-container:hover .change-link,
-	.user-container:focus-within .change-link {
-		max-height: 1.5rem;
-		opacity: 1;
+	.dropdown-arrow.open {
+		transform: rotate(180deg);
 	}
 
-	.change-link:hover {
-		color: var(--color-solidcam-gold);
-		background: rgba(212, 175, 55, 0.1);
-	}
-
-	.change-link:active {
-		transform: scale(0.95);
-	}
-
-	.change-link :global(svg) {
-		width: 10px;
-		height: 10px;
-		transition: transform 150ms ease;
-	}
-
-	.change-link:hover :global(svg) {
-		transform: translateX(2px);
-	}
-
-	/* User actions container */
-	.user-actions {
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-	}
-
-	/* Settings button - mirrors change-link behavior */
-	.settings-button {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-		font-size: 0.65rem;
-		color: rgba(255, 255, 255, 0.4);
-		background: none;
-		border: none;
-		cursor: pointer;
-		padding: 0.125rem 0.25rem;
-		margin: -0.125rem -0.25rem;
-		border-radius: 4px;
-		transition:
-			color 150ms ease,
-			background 150ms ease,
-			max-height 150ms ease,
-			opacity 150ms ease;
-		max-height: 0;
-		opacity: 0;
-		overflow: hidden;
-	}
-
-	.user-container:hover .settings-button,
-	.user-container:focus-within .settings-button,
-	.user-container.actions-visible .settings-button {
-		max-height: 1.5rem;
-		opacity: 1;
-	}
-
-	.user-container.actions-visible .change-link {
-		max-height: 1.5rem;
-		opacity: 1;
-	}
-
-	.settings-button:hover {
-		color: var(--color-solidcam-gold);
-		background: rgba(212, 175, 55, 0.1);
-	}
-
-	.settings-button:active {
-		transform: scale(0.95);
-	}
-
-	.settings-button :global(svg) {
-		width: 10px;
-		height: 10px;
-		transition: transform 150ms ease;
-	}
-
-	.settings-button:hover :global(svg) {
-		transform: rotate(45deg);
-	}
-
-	/* Settings panel */
-	.settings-panel {
+	/* Dropdown — same recipe as the other app menus */
+	.user-dropdown {
 		position: absolute;
 		top: calc(100% + 0.5rem);
 		right: 0;
-		min-width: 180px;
-		padding: 0.75rem;
+		min-width: 248px;
+		padding: 0.3rem;
 		background: var(--menu-bg);
 		border: var(--menu-border);
 		border-radius: var(--radius-sm);
 		box-shadow: var(--menu-shadow);
 		z-index: 1000;
-		animation: panelSlideIn 150ms ease;
+		overflow: hidden;
+		animation: userMenuFadeIn 150ms var(--ease-out-quart);
 	}
 
-	/* Invisible bridge covers the gap between container and panel so hover isn't lost */
-	.settings-panel::before {
-		content: '';
-		position: absolute;
-		top: -0.5rem;
-		left: 0;
-		right: 0;
-		height: 0.5rem;
-	}
-
-	@keyframes panelSlideIn {
+	@keyframes userMenuFadeIn {
 		from {
 			opacity: 0;
 			transform: translateY(-4px);
@@ -586,46 +305,112 @@
 		}
 	}
 
-	.settings-header {
-		font-size: 0.7rem;
-		font-weight: 600;
-		color: rgba(255, 255, 255, 0.5);
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		margin-bottom: 0.625rem;
+	.menu-header {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		padding: 0.45rem 0.5rem;
 	}
 
-	.settings-toggle {
+	.menu-header-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.1rem;
+		overflow: hidden;
+	}
+
+	.menu-username {
+		font-size: 0.8125rem;
+		font-weight: 560;
+		color: var(--color-text-primary);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.menu-status {
+		font-size: 0.6875rem;
+		color: rgba(255, 255, 255, 0.45);
+	}
+
+	.menu-status-connected {
+		color: var(--color-success);
+	}
+
+	.menu-status-syncing,
+	.menu-status-connecting {
+		color: var(--color-solidcam-gold);
+	}
+
+	.menu-status-error {
+		color: var(--color-error);
+	}
+
+	.menu-divider {
+		margin: 0.25rem 0;
+		border: none;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.menu-row {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 0.75rem;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.45rem 0.5rem;
+		font-size: 0.8125rem;
+		color: rgba(255, 255, 255, 0.85);
+		background: transparent;
+		border: none;
+		border-left: 2px solid transparent;
+		border-radius: 4px;
 		cursor: pointer;
+		text-align: left;
+		transition:
+			background 150ms ease,
+			border-color 150ms ease,
+			color 150ms ease;
 	}
 
-	.toggle-label {
-		font-size: 0.8rem;
-		color: rgba(255, 255, 255, 0.8);
+	.menu-row:hover,
+	.menu-row:focus-visible {
+		background: rgba(255, 255, 255, 0.06);
+		border-left-color: var(--gold-a45);
 	}
 
+	.menu-row:focus-visible {
+		outline: none;
+	}
+
+	.menu-row.danger {
+		justify-content: flex-start;
+	}
+
+	.menu-row.danger:hover,
+	.menu-row.danger:focus-visible {
+		background: rgba(239, 68, 68, 0.12);
+		border-left-color: var(--color-error);
+		color: #fca5a5;
+	}
+
+	/* Toggle switch (reused look from the old settings popover, minus the glow) */
 	.toggle-switch {
 		position: relative;
+		flex-shrink: 0;
 		width: 36px;
 		height: 20px;
 		background: rgba(255, 255, 255, 0.1);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 10px;
-		cursor: pointer;
 		transition:
 			background 150ms ease,
 			border-color 150ms ease;
-		padding: 0;
 	}
 
 	.toggle-switch.active {
 		background: rgba(212, 175, 55, 0.3);
 		border-color: rgba(212, 175, 55, 0.4);
-		box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
 	}
 
 	.toggle-thumb {
@@ -644,24 +429,16 @@
 		background: var(--color-solidcam-gold);
 	}
 
-	.sync-indicator {
-		margin-left: 0.25rem;
-		flex-shrink: 0;
-		opacity: 0;
-		transform: scale(0.8);
-		transition:
-			opacity 200ms ease,
-			transform 200ms ease;
-	}
-
-	.sync-indicator.visible {
-		opacity: 1;
-		transform: scale(1);
-	}
-
-	.sync-indicator :global(.sync-spinner) {
-		color: var(--color-solidcam-gold);
-		filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.35));
-		animation: spin 0.85s linear infinite;
+	/* Screen-reader only utility (used for the "Syncing" announcement) */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 </style>
