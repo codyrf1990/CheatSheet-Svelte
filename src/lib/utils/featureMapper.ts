@@ -95,6 +95,10 @@ export const SKU_MAP: Record<string, string> = {
 	'Port 5x': 'Port-Maint',
 	'5x Edge Trimming': 'EdgeTrim-Maint',
 
+	// Wire EDM — both Salesforce variants map to the single Wire module
+	'SolidCAM WireEDM 2 axes': 'Wire-Maint',
+	'SolidCAM WireEDM 2/4 axes': 'Wire-Maint',
+
 	// Add-ons
 	'Probe - Full': 'Probe-Maint',
 	Vericut: 'Vericut-Maint',
@@ -138,10 +142,6 @@ export const IGNORED_FEATURES: Set<string> = new Set([
 	'Sim 5x Level',
 	'Sim5xLevel',
 	'No HSS',
-
-	// Wire EDM
-	'SolidCAM WireEDM 2 axes',
-	'SolidCAM WireEDM 2/4 axes',
 
 	// Integrations (not tracked)
 	'WinTool',

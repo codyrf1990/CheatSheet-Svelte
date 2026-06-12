@@ -133,6 +133,32 @@ describe('feature extraction', () => {
 		expect(parseWarnings).toBeUndefined();
 	});
 
+	it('WireEDM lines parse independently — "2 axes" never matches inside "2/4 axes"', () => {
+		const text = donglePage({
+			dongleNo: '77518',
+			extraLines: [
+				'SolidCAM WireEDM 2 axes\tNot Checked',
+				'SolidCAM WireEDM 2/4 axes\tChecked'
+			]
+		});
+		const { license, parseWarnings } = parseSalesforceText(text);
+		expect(license?.features).toContain('SolidCAM WireEDM 2/4 axes');
+		expect(license?.features).not.toContain('SolidCAM WireEDM 2 axes');
+		expect(license?.notCheckedFeatures).toContain('SolidCAM WireEDM 2 axes');
+		expect(parseWarnings).toBeUndefined();
+	});
+
+	it('both WireEDM lines Checked are both captured', () => {
+		const text = donglePage({
+			dongleNo: '77518',
+			extraLines: ['SolidCAM WireEDM 2 axes\tChecked', 'SolidCAM WireEDM 2/4 axes\tChecked']
+		});
+		const { license, parseWarnings } = parseSalesforceText(text);
+		expect(license?.features).toContain('SolidCAM WireEDM 2 axes');
+		expect(license?.features).toContain('SolidCAM WireEDM 2/4 axes');
+		expect(parseWarnings).toBeUndefined();
+	});
+
 	it('header fields only match at field boundaries', () => {
 		// "Month of Maintenance End Date" must not satisfy "Maintenance End Date"
 		const text = [

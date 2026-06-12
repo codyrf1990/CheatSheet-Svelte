@@ -35,4 +35,14 @@ describe('groupByPackage / getUniqueSkus', () => {
 		const skus = getUniqueSkus(result.mappedSkus);
 		expect(skus.filter((s) => s === 'SimTurn-Maint')).toHaveLength(1);
 	});
+
+	it('both WireEDM variants map to Wire-Maint and dedupe to a single SKU', () => {
+		expect(SKU_MAP['SolidCAM WireEDM 2 axes']).toBe('Wire-Maint');
+		expect(SKU_MAP['SolidCAM WireEDM 2/4 axes']).toBe('Wire-Maint');
+		const result = mapFeatures(['SolidCAM WireEDM 2 axes', 'SolidCAM WireEDM 2/4 axes']);
+		expect(result.mappedSkus).toHaveLength(2);
+		expect(result.ignoredFeatures).toHaveLength(0);
+		const skus = getUniqueSkus(result.mappedSkus);
+		expect(skus.filter((s) => s === 'Wire-Maint')).toHaveLength(1);
+	});
 });

@@ -114,6 +114,30 @@ describe('profile Sim 5x level logic', () => {
 	});
 });
 
+describe('Wire EDM module selection', () => {
+	it('either or both WireEDM features select Wire-Maint exactly once', () => {
+		const sel = getLicenseSelections(
+			license({
+				dongleNo: '77518',
+				features: ['SolidCAM WireEDM 2 axes', 'SolidCAM WireEDM 2/4 axes']
+			})
+		);
+		expect(sel.skus.filter((s) => s === 'Wire-Maint')).toHaveLength(1);
+	});
+
+	it('Not Checked WireEDM lands in removedSkus', () => {
+		const sel = getLicenseSelections(
+			license({
+				dongleNo: '77518',
+				features: [],
+				notCheckedFeatures: ['SolidCAM WireEDM 2 axes', 'SolidCAM WireEDM 2/4 axes']
+			})
+		);
+		expect(sel.removedSkus).toContain('Wire-Maint');
+		expect(sel.skus).not.toContain('Wire-Maint');
+	});
+});
+
 describe('Not Checked feature removal', () => {
 	it('explicitly Not Checked features land in removedBitsByPackage and removedSkus', () => {
 		const sel = getLicenseSelections(
